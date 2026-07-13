@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="description" content="A private, browser-based AI workspace with public knowledge search and file generation." />
+  <title>Nexus AI Workspace</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div id="fileWarning" style="display:none;background:#fff3cd;color:#664d03;padding:12px 18px;text-align:center;font:14px Inter,sans-serif;border-bottom:1px solid #ffecb5">Open this site through the included local server—not by double-clicking index.html—to enable the AI model.</div>
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="brand"><span class="brand-mark">N</span><div><strong>Nexus AI</strong><small>Private workspace</small></div></div>
+    <button id="newChatBtn" class="new-chat">＋ New workspace</button>
+
+    <nav class="nav-group">
+      <span class="nav-label">Task mode</span>
+      <button class="mode active" data-mode="general">✦ General assistant</button>
+      <button class="mode" data-mode="research">⌕ Deep research</button>
+      <button class="mode" data-mode="document">▤ Structured document</button>
+      <button class="mode" data-mode="presentation">▥ Presentation builder</button>
+      <button class="mode" data-mode="analysis">⌁ Analysis & planning</button>
+    </nav>
+
+    <div class="knowledge-card">
+      <div class="row"><strong>Public knowledge</strong><label class="switch"><input id="knowledgeToggle" type="checkbox" checked><span></span></label></div>
+      <p>Search open sources and ground answers with citations.</p>
+      <div class="source-pills"><span>Wikipedia</span><span>OpenAlex</span><span>Crossref</span><span>World Bank</span></div>
+    </div>
+
+    <div class="sidebar-footer">
+      <span id="privacyDot" class="dot"></span> Local inference
+      <small>No paid API required</small>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div><h1 id="workspaceTitle">General assistant</h1><p id="statusText">Select and load a model to begin.</p></div>
+      <div class="top-actions"><button id="exportBtn" class="ghost-button" disabled>Export ▾</button><button id="settingsBtn" class="icon-button" aria-label="Settings">⚙</button></div>
+    </header>
+
+    <section id="welcome" class="welcome">
+      <div class="eyebrow">PRIVATE • OPEN • LOCAL</div>
+      <h2>Turn ideas into finished work.</h2>
+      <p>Research public sources, solve complex tasks, and generate polished Word, PowerPoint, PDF, Markdown, and text files directly in your browser.</p>
+      <div class="capability-grid">
+        <button class="suggestion" data-prompt="Research the latest credible evidence about renewable energy adoption, compare the findings, and cite sources."><b>Deep research</b><span>Search and synthesize open knowledge</span></button>
+        <button class="suggestion" data-prompt="Create a structured strategic plan with executive summary, objectives, initiatives, KPIs, risks, and a 90-day roadmap."><b>Strategic plan</b><span>Produce an executive-ready document</span></button>
+        <button class="suggestion" data-prompt="Build a 10-slide presentation outline about responsible AI adoption, with a clear narrative and speaker notes."><b>Presentation</b><span>Create a presentation-ready storyline</span></button>
+        <button class="suggestion" data-prompt="Analyze this problem using assumptions, options, trade-offs, risks, and a recommended decision framework."><b>Complex analysis</b><span>Break down difficult decisions</span></button>
+      </div>
+      <div class="load-row"><button id="loadModelBtn" class="primary-button">Load free AI model</button><span>Runs on your device with WebGPU</span></div>
+      <div id="progressWrap" class="progress-wrap hidden"><div class="progress-track"><div id="progressBar" class="progress-bar"></div></div><span id="progressLabel">Preparing…</span></div>
+    </section>
+
+    <section id="messages" class="messages hidden" aria-live="polite"></section>
+
+    <footer class="composer-wrap">
+      <div id="contextBar" class="context-bar hidden"></div>
+      <form id="chatForm" class="composer">
+        <button id="attachBtn" type="button" class="attach" title="Attach text file">＋</button>
+        <textarea id="promptInput" rows="1" placeholder="Ask Nexus AI to research, analyze, write, or build…" disabled></textarea>
+        <button id="sendBtn" class="send" type="submit" aria-label="Send" disabled>➤</button>
+        <input id="fileInput" type="file" accept=".txt,.md,.csv,.json,.html" hidden multiple>
+      </form>
+      <p class="disclaimer">Local models can make mistakes. Verify consequential outputs and cited source material.</p>
+    </footer>
+  </main>
+</div>
+
+<div id="exportMenu" class="export-menu hidden">
+  <button data-export="docx">Word document (.docx)</button>
+  <button data-export="pptx">PowerPoint (.pptx)</button>
+  <button data-export="pdf">PDF document (.pdf)</button>
+  <button data-export="md">Markdown (.md)</button>
+  <button data-export="txt">Plain text (.txt)</button>
+</div>
+
+<dialog id="settingsDialog">
+<form method="dialog" class="settings-panel">
+  <div class="settings-header"><div><h2>Workspace settings</h2><p>Choose performance, behavior, and research options.</p></div><button class="close-button" value="cancel">×</button></div>
+  <label>AI model<select id="modelSelect"></select><small id="modelHint">Larger models are more capable but require more device memory.</small></label>
+  <label>Assistant instructions<textarea id="systemPrompt" rows="6">You are Nexus AI, a rigorous personal research and productivity assistant. Solve complex tasks systematically, distinguish facts from assumptions, use clear headings, and produce polished deliverables. When public source context is provided, cite it using [1], [2], etc. Never invent citations.</textarea></label>
+  <div class="settings-grid"><label>Creativity <span id="temperatureValue">0.5</span><input id="temperature" type="range" min="0" max="1.3" value="0.5" step="0.1"></label><label>Max response tokens<input id="maxTokens" type="number" min="256" max="8192" step="256" value="2048"></label></div>
+  <label>OpenAlex email (optional)<input id="openAlexEmail" type="email" placeholder="Helps identify responsible API use"></label>
+  <div class="settings-actions"><button id="clearDataBtn" type="button" class="danger-button">Clear local data</button><button id="saveSettingsBtn" value="default" class="primary-button">Save settings</button></div>
+</form>
+</dialog>
+
+<script src="https://cdn.jsdelivr.net/npm/pptxgenjs@4.0.1/dist/pptxgen.bundle.js"></script>
+<script>if(location.protocol==="file:")document.getElementById("fileWarning").style.display="block";</script>
+<script defer src="app.js"></script>
+</body>
+</html>

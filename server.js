@@ -57,6 +57,19 @@ async function migrate() {
 
 const app = express();
 app.set("trust proxy", 1);
+
+// Canonical domain: when CANONICAL_HOST is set (e.g. gat.academy), requests arriving on any host listed in
+// REDIRECT_HOSTS (e.g. www.gat.academy, the *.up.railway.app address) get a permanent redirect to it.
+// /healthz is never redirected so Railway's health check keeps working.
+const CANONICAL_HOST = String(process.env.CANONICAL_HOST || "").trim().toLowerCase();
+const REDIRECT_HOSTS = String(process.env.REDIRECT_HOSTS || "").split(",").map(s => s.trim().toLowerCase()).filter(Boolean);
+app.use((req, res, next) => {
+  const host = String(req.headers.host || "").toLowerCase().split(":")[0];
+  if (CANONICAL_HOST && req.path !== "/healthz" && host !== CANONICAL_HOST && REDIRECT_HOSTS.includes(host)) {
+    return res.redirect(301, "https://" + CANONICAL_HOST + req.originalUrl);
+  }
+  next();
+});
 app.disable("x-powered-by");
 app.use(express.json({ limit: "2mb" })); // progress p may be up to 900k chars; JSON escaping inflates it
 
@@ -213,6 +226,15 @@ app.post("/api/admin/users/:id/reset-password", needAdmin, wrap(async (req, res)
   res.json({ email: r.rows[0].email, tempPassword: temp });
 }));
 
+app.get("/robots.txt", (req, res) => {
+  res.type("text/plain").set("Cache-Control", "public, max-age=86400")
+    .send("User-agent: *\nAllow: /\nDisallow: /admin.html\nDisallow: /api/\n" + (CANONICAL_HOST ? `Sitemap: https://${CANONICAL_HOST}/sitemap.xml\n` : ""));
+});
+app.get("/sitemap.xml", (req, res) => {
+  const base = "https://" + (CANONICAL_HOST || String(req.headers.host || ""));
+  res.type("application/xml").set("Cache-Control", "public, max-age=86400")
+    .send(`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>${base}/</loc></url></urlset>\n`);
+});
 app.get("/healthz", (req, res) => { res.set("Cache-Control", "no-store"); res.send("ok"); });
 
 // ---------- static site ----------

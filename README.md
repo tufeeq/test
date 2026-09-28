@@ -117,3 +117,9 @@ package.json    المكتبات: express, pg, bcryptjs
 ```
 
 للتشغيل على جهازك: `npm install`، ثم ضع قيمتي `DATABASE_URL` و`ADMIN_EMAILS`، ثم `npm start`.
+
+## النطاق الخاص (gat.academy)
+
+- النطاقان `gat.academy` و`www.gat.academy` مضافان إلى خدمة الموقع، وسجلاتهما في Namecheap: `ALIAS @ → 51lsmios.up.railway.app` و`CNAME www → igjdm2j1.up.railway.app`.
+- `CANONICAL_HOST=gat.academy` مع `REDIRECT_HOSTS=www.gat.academy,masar100-web-production.up.railway.app` يحوّلان أي زيارة لهذين العنوانين إلى `https://gat.academy` تحويلًا دائمًا (301).
+- `robots.txt` و`sitemap.xml` يُولَّدان تلقائيًا، ولوحة المشرف وواجهات `/api` مستثناة من الفهرسة.

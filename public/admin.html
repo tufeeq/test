@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="robots" content="noindex">
 <title>لوحة تحكم مسار ١٠٠</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<meta name="color-scheme" content="light dark">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Almarai:wght@400;700;800&family=Aref+Ruqaa:wght@400;700&family=Baloo+Bhaijaan+2:wght@500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap">
 <link rel="stylesheet" href="app.css">
@@ -34,6 +36,11 @@ body{padding-bottom:0}
 .steps-a{padding-inline-start:1.2em;display:grid;gap:6px}
 .empty{padding:30px;text-align:center;color:var(--muted)}
 .status{font-size:.86rem;color:var(--muted)}
+.sr{position:absolute;inline-size:1px;block-size:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.ut th:focus-visible{outline-offset:-3px}
+.tbl{position:relative}
+.ut td .row{flex-wrap:nowrap;gap:6px}
+@media (max-width:520px){.adm-top h1{flex-basis:100%;font-size:1.3rem}.drow{grid-template-columns:70px 1fr 36px}}
 </style>
 </head>
 <body>

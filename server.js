@@ -135,12 +135,17 @@ app.post("/api/signup", wrap(async (req, res) => {
 
 app.post("/api/login", wrap(async (req, res) => {
   const email = String(req.body.email || "").trim().toLowerCase(), pw = String(req.body.password || "");
-  // 150 attempts / 15 min per IP (classrooms share one IP); 10 FAILED attempts / 15 min per email
-  if (limited("li:" + req.ip, 150, 900e3) || over("le:" + email, 10, 900e3)) return fail(res, 429, "too-many-requests");
+  // Limits: 150 attempts / 15 min per IP (classrooms share one IP).
+  // Failed attempts are counted per email+IP (10 / 15 min), so someone guessing from their own device
+  // cannot lock the real student out on another device. A high per-email ceiling (100 / 15 min)
+  // still stops distributed guessing against one account.
+  const ek = "le:" + email + "|" + req.ip, eg = "lg:" + email;
+  if (limited("li:" + req.ip, 150, 900e3) || over(ek, 10, 900e3) || over(eg, 100, 900e3)) return fail(res, 429, "too-many-requests");
   const r = await pool.query("SELECT id,email,pass_hash FROM users WHERE email=$1", [email]);
   const u = r.rows[0];
   const ok = u ? await bcrypt.compare(pw, u.pass_hash) : await bcrypt.compare(pw, DUMMY_HASH);
-  if (!u || !ok) { hit("le:" + email); return fail(res, 401, "invalid-credential"); }
+  if (!u || !ok) { hit(ek); hit(eg); return fail(res, 401, "invalid-credential"); }
+  hits.delete(ek);
   await createSession(req, res, u.id);
   res.json({ user: { email: u.email, isAdmin: isAdminEmail(u.email) } });
 }));

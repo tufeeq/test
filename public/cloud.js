@@ -1,4 +1,4 @@
-/* Cloud sync for Masar 100 on Railway: talks to this site's own server (/api). Same interface as the Firebase build. */
+/* Cloud sync for GAT Academy on Railway: talks to this site's own server (/api). Same interface as the Firebase build. */
 (function(){
 const H = { "Content-Type": "application/json", "X-Masar": "1" };
 const OWNER = "masar100_owner"; // email of the account whose progress is in this browser's localStorage

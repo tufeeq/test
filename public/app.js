@@ -1203,7 +1203,7 @@ const T = {
   resetParts:{plan:['الخطة ومهامها','تبدأ الخطة من الأسبوع الأول اليوم'],mistakes:['دفتر الأخطاء','الأسئلة المحفوظة للمراجعة وأسباب الأخطاء'],models:['النماذج الكاملة','درجات النماذج الثلاثين لتعيد حلها من جديد'],cards:['البطاقات والمفردات','تعود كل البطاقات غير محفوظة'],skills:['المستوى والنتائج','خريطة الإتقان، الدرجة التقديرية، سجل المحاولات، والنماذج'],all:['كل التقدم','كل ما سبق؛ يبقى مسارك وهدفك ولغتك']},
   saveTitle:'حفظ بياناتك', saveAuto:'حفظ تلقائي على هذا الجهاز', saveAutoD:'كل إجابة ونتيجة تُحفظ فورًا في متصفحك. تبقى حتى لو أغلقت الصفحة، لكنها تُفقد إذا مسحت بيانات المتصفح أو غيّرت الجهاز.', savedOk:'محفوظ على هذا الجهاز', saveFail:'المتصفح لا يسمح بالحفظ (ربما التصفح الخاص). احفظ ملفًا حتى لا تفقد تقدمك.', lastSaved:'آخر حفظ:', persistOn:'حفظ دائم مفعّل', saveFile:'نسخة احتياطية في ملف', saveFileD:'احفظ ملفًا صغيرًا على جهازك، واسترجعه في أي وقت أو على أي جهاز.', saveFileBtn:'احفظ ملف التقدم', loadFileBtn:'استرجع من ملف', lastExport:'آخر نسخة:', noExport:'لم تحفظ نسخة بعد.', saveCode:'رمز النقل', fileSaved:'تم حفظ الملف', fileFallback:'لم يتوفر الحفظ في ملف هنا؛ انسخ الرمز الظاهر واحتفظ به.', tryAgain:'حاول بعد لحظات', resultSaved:'تم حفظ نتيجتك', nudgeH:'احفظ نسخة من تقدمك', nudgeP:'مضى أسبوع على آخر نسخة احتياطية. ملف صغير يحمي كل ما أنجزته.',
   themeT:'المظهر', modeT:'الوضع', modes:{light:'فاتح',dark:'داكن',auto:'تلقائي'}, accentT:'اللون', accents:{violet:'بنفسجي',pink:'وردي',blue:'أزرق',orange:'برتقالي',ruby:'عنابي',navy:'كحلي'},
-  brand:'مسار ١٠٠', tagline:'التحضير لاختبار القدرات العامة',
+  brand:'أكاديمية القدرات', tagline:'التحضير لاختبار القدرات العامة',
   nav:{today:'اليوم',learn:'الحقيبة',practice:'تدرّب',progress:'تقدّمي',guide:'الدليل'},
   switchLang:'English',
   greet:'هدفك ١٠٠', heroLine:'القدرات عشرة أنماط أسئلة محدودة. أتقن كل نمط بدقة ٩٥٪ وبأقل من دقيقة، وأغلق أخطاءك أولًا بأول، وتقترب من الـ ١٠٠ خطوة بعد خطوة.',
@@ -1254,7 +1254,7 @@ const T = {
   sessionsWeek:(n)=>`جلسة اليوم ٥ مرات هذا الأسبوع (${n}/٥)`,
   guideTitle:'الدليل', sourcesLine:'مصادر المعلومات', verifyNote:'تتغير الصيغ والرسوم وعدد المحاولات أحيانًا. تحقق من موقع هيئة تقويم التعليم والتدريب قبل التسجيل.',
   methodTitle:'كيف تعمل الطريقة', methodIntro:'كل ما في المنصة مبني على مبادئ تعلم ثبتت فعاليتها في أبحاث علم النفس التربوي ويستخدمها المتفوقون في الاختبارات المعيارية.',
-  footer:'مسار ١٠٠ منصة مستقلة غير تابعة لهيئة تقويم التعليم والتدريب. الأسئلة من إعداد المنصة على أنماط أسئلة قياس، وليست أسئلة رسمية.',
+  footer:'أكاديمية القدرات منصة مستقلة غير تابعة لهيئة تقويم التعليم والتدريب. الأسئلة من إعداد المنصة على أنماط أسئلة قياس، وليست أسئلة رسمية.',
   none:'لا يوجد', mistakesEmpty:'لا أخطاء مسجلة بعد.', items:'سؤال',
   kinds:{model:'نموذج',diag:'تشخيصي',verbal:'قسم لفظي',quant:'قسم كمي',mock:'محاكاة كاملة',skill:'مهارة',review:'مراجعة',session:'جلسة اليوم'},
   timeUp:'انتهى الوقت', letters:['أ','ب','ج','د'], back:'رجوع', close:'إغلاق'
@@ -1270,7 +1270,7 @@ const T = {
   resetParts:{plan:['Plan and tasks','The plan restarts from week 1 today'],mistakes:['Mistake log','Saved review questions and mistake causes'],models:['Full model tests','Scores for all 30 tests, so you can retake them fresh'],cards:['Cards and vocabulary','All cards return to unlearned'],skills:['Level and results','Mastery map, estimated score, attempt history and model tests'],all:['All progress','Everything above; your track, target and language stay']},
   saveTitle:'Save your data', saveAuto:'Auto-save on this device', saveAutoD:'Every answer and result is saved instantly in your browser. It stays after you close the page, but is lost if you clear browser data or switch devices.', savedOk:'Saved on this device', saveFail:'This browser is blocking storage (maybe private mode). Save a file so you do not lose progress.', lastSaved:'Last saved:', persistOn:'persistent storage on', saveFile:'Backup file', saveFileD:'Save a small file to your device and restore it anytime, on any device.', saveFileBtn:'Save progress file', loadFileBtn:'Restore from file', lastExport:'Last backup:', noExport:'No backup yet.', saveCode:'Transfer code', fileSaved:'File saved', fileFallback:'File saving is not available here; copy the code shown and keep it.', tryAgain:'Try again in a moment', resultSaved:'Your result is saved', nudgeH:'Back up your progress', nudgeP:'It has been a week since your last backup. A small file protects everything you have done.',
   themeT:'Appearance', modeT:'Mode', modes:{light:'Light',dark:'Dark',auto:'Auto'}, accentT:'Color', accents:{violet:'Violet',pink:'Pink',blue:'Blue',orange:'Orange',ruby:'Ruby',navy:'Navy'},
-  brand:'Masar 100', tagline:'General Aptitude Test prep',
+  brand:'GAT Academy', tagline:'General Aptitude Test prep',
   nav:{today:'Today',learn:'Kit',practice:'Practice',progress:'Progress',guide:'Guide'},
   switchLang:'عربي',
   greet:'Your target: 100', heroLine:'The GAT is ten limited question types. Master each at 95% accuracy in under a minute, close your mistakes as you go, and move closer to 100 step by step.',
@@ -1321,7 +1321,7 @@ const T = {
   sessionsWeek:(n)=>`Today\'s session 5 times this week (${n}/5)`,
   guideTitle:'Guide', sourcesLine:'Sources', verifyNote:'Formats, fees and attempt limits sometimes change. Check the Education & Training Evaluation Commission website before registering.',
   methodTitle:'How the method works', methodIntro:'Everything here is built on learning principles with strong evidence in educational psychology research, used by top scorers on standardized tests.',
-  footer:'Masar 100 is independent and not affiliated with the Education & Training Evaluation Commission. Questions are written by the platform on Qiyas question patterns; they are not official questions.',
+  footer:'GAT Academy is independent and not affiliated with the Education & Training Evaluation Commission. Questions are written by the platform on Qiyas question patterns; they are not official questions.',
   none:'None', mistakesEmpty:'No mistakes logged yet.', items:'questions',
   kinds:{model:'Model test',diag:'Diagnostic',verbal:'Verbal section',quant:'Quant section',mock:'Full simulation',skill:'Skill',review:'Review',session:'Session'},
   timeUp:'Time is up', letters:['A','B','C','D'], back:'Back', close:'Close'
@@ -2026,7 +2026,7 @@ function route(){ const h=(location.hash||'#today').slice(1);
   const m={today:pageToday,practice:pagePractice,progress:pageProgress}; return {p:m[h]?h:'today',v:m[h]||pageToday}; }
 function renderRoute(){
   const r=route(); document.documentElement.lang=S.lang; document.documentElement.dir=S.lang==='ar'?'rtl':'ltr';
-  $('#brand-n').textContent=t('brand'); { const L=S.lang==='ar'; $('#theme-btn').setAttribute('aria-label',L?'المظهر':'Theme'); $('#acct-btn')?.setAttribute('aria-label',L?'الحساب':'Account'); $('#nav').setAttribute('aria-label',L?'التنقل الرئيسي':'Main navigation'); $('#tabbar').setAttribute('aria-label',L?'التنقل السفلي':'Bottom navigation'); $('#lang-btn').setAttribute('lang',L?'en':'ar'); } $('#brand-t').textContent=t('tagline'); $('#lang-btn').textContent=t('switchLang');
+  $('#brand-n').textContent=t('brand'); document.title=S.lang==='ar'?'أكاديمية القدرات | GAT Academy':'GAT Academy | أكاديمية القدرات'; { const L=S.lang==='ar'; $('#theme-btn').setAttribute('aria-label',L?'المظهر':'Theme'); $('#acct-btn')?.setAttribute('aria-label',L?'الحساب':'Account'); $('#nav').setAttribute('aria-label',L?'التنقل الرئيسي':'Main navigation'); $('#tabbar').setAttribute('aria-label',L?'التنقل السفلي':'Bottom navigation'); $('#lang-btn').setAttribute('lang',L?'en':'ar'); } $('#brand-t').textContent=t('tagline'); $('#lang-btn').textContent=t('switchLang');
   const links=NAV.map(k=>`<a href="#${k}" class="${r.p===k?'on':''}" ${r.p===k?'aria-current="page"':''}>${ICON[k]}<span>${t('nav.'+k)}</span></a>`).join('');
   $('#nav').innerHTML=links; $('#tabbar').innerHTML=links;
   const ab=$('#acct-btn'); if(ab){ ab.hidden=!window.CLOUD; ab.classList.toggle('on',!!window.CLOUD?.user); ab.title=window.CLOUD?.user?(window.CLOUD.user.email||''):t('acctJoin'); }
@@ -2224,7 +2224,7 @@ function resetParts(parts){
 /* data save: file export / import */
 function payload(){ return JSON.stringify({app:'masar100',v:1,exportedAt:new Date().toISOString(),data:S}); }
 async function exportFile(){
-  const name=`masar100-${S.lang==='ar'?'تقدمي':'progress'}-${todayStr()}.json`;
+  const name=`gat-academy-${S.lang==='ar'?'تقدمي':'progress'}-${todayStr()}.json`;
   if(dlFn){ try{ await dlFn.save({filename:name,data:payload()}); S.lastExport=todayStr(); save(); toast(t('fileSaved')); renderRoute(); return; }
     catch(e){ if(e&&e.code==='declined') return; if(e&&e.code==='rate_limited'){ toast(t('tryAgain')); return; } } }
   if(!window.claude){ try{ const u=URL.createObjectURL(new Blob([payload()],{type:'application/json'})); const l=document.createElement('a'); l.href=u; l.download=name; document.body.appendChild(l); l.click(); l.remove(); setTimeout(()=>URL.revokeObjectURL(u),2000); S.lastExport=todayStr(); save(); toast(t('fileSaved')); renderRoute(); return; }catch(e){} }

@@ -1,4 +1,4 @@
-/* Masar 100 admin dashboard (Railway build) */
+/* GAT Academy admin dashboard (Railway build) */
 (function(){
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
@@ -12,7 +12,7 @@ async function api(method, url, body) {
 let USERS = [], sortKey = "updated", asc = false, q = "", confirmDel = null, tempPw = null, me = null;
 
 function loginView(err = "") {
-  root.innerHTML = `<form class="card login" id="lf"><h1>لوحة تحكم مسار ١٠٠</h1><p class="muted small">للمشرفين فقط.</p>
+  root.innerHTML = `<form class="card login" id="lf"><h1>لوحة تحكم أكاديمية القدرات</h1><p class="muted small">للمشرفين فقط.</p>
     <label>البريد الإلكتروني<input type="email" id="le" dir="ltr" autocomplete="email" required></label>
     <label>كلمة المرور<input type="password" id="lp" dir="ltr" autocomplete="current-password" required></label>
     <button class="btn primary block" type="submit">دخول</button>
@@ -51,7 +51,7 @@ function render() {
   const bc = buckets.map(([l, f]) => [l, withEst.filter(x => f(x.est)).length]); const mx = Math.max(1, ...bc.map(b => b[1]));
   const sel = confirmDel && USERS.find(x => x.id === confirmDel);
   root.innerHTML = `
-  <div class="adm-top"><h1><span class="hl">لوحة تحكم مسار ١٠٠</span></h1><span class="status" dir="ltr">${esc(me.email)}</span><a class="btn ghost sm" href="/">الموقع</a><button class="btn ghost sm" id="rl">تحديث</button><button class="btn ghost sm" id="so">خروج</button></div>
+  <div class="adm-top"><h1><span class="hl">لوحة تحكم أكاديمية القدرات</span></h1><span class="status" dir="ltr">${esc(me.email)}</span><a class="btn ghost sm" href="/">الموقع</a><button class="btn ghost sm" id="rl">تحديث</button><button class="btn ghost sm" id="so">خروج</button></div>
   <div class="kgrid">${k.map(([l, v]) => `<div class="kpi"><span class="kl">${l}</span><b class="kv num">${typeof v === "number" ? ar(v) : v}</b></div>`).join("")}</div>
   <section class="card"><h2>توزيع الدرجات التقديرية</h2><div class="dist">${bc.map(([l, n]) => `<div class="drow"><span>${l}</span><span class="dbar"><span style="inline-size:${Math.round(100 * n / mx)}%"></span></span><b class="num">${ar(n)}</b></div>`).join("")}</div>
     <p class="small muted">من ${ar(withEst.length)} طالبًا أنهوا اختبارًا تشخيصيًا أو قسمًا أو نموذجًا.</p></section>
@@ -75,7 +75,7 @@ function render() {
     const cell = v => { let t = String(v ?? ""); if (/^[=+\-@\t\r]/.test(t) && !/^-?\d+(\.\d+)?$/.test(t)) t = "'" + t; return `"${t.replace(/"/g, '""')}"`; };
     const rows = [COLS.map(c => c[0]).join(",")].concat(list.map(x => COLS.map(([c]) => cell(x[c])).join(",")));
     const url = URL.createObjectURL(new Blob(["\ufeff" + rows.join("\r\n") + "\r\n"], { type: "text/csv;charset=utf-8" }));
-    const a = document.createElement("a"); a.href = url; a.download = `masar100-users-${new Date().toISOString().slice(0, 10)}.csv`; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 2000);
+    const a = document.createElement("a"); a.href = url; a.download = `gat-academy-users-${new Date().toISOString().slice(0, 10)}.csv`; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 2000);
   };
 }
 async function boot() {

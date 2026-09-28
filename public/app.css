@@ -89,7 +89,7 @@ svg .f{fill:currentColor;stroke:none}
 .top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--paper) 90%,transparent);backdrop-filter:blur(10px);border-bottom:1.5px solid var(--line)}
 .top-in{max-width:1160px;margin:0 auto;padding-inline:var(--gut);display:flex;align-items:center;gap:20px;min-height:64px}
 .brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--ink);flex-shrink:0}
-.logo{inline-size:40px;block-size:40px;border-radius:6px;background:var(--n0);color:var(--note-ink);display:grid;place-items:center;font-family:var(--f-head);font-weight:800;font-size:15px;transform:rotate(-5deg);border:2px solid var(--edge);box-shadow:2px 2px 0 var(--edge)}
+.logo{inline-size:40px;block-size:40px;border-radius:6px;background:var(--n0);color:var(--note-ink);display:grid;place-items:center;font-family:var(--f-head);font-weight:800;font-size:13px;letter-spacing:-.02em;transform:rotate(-5deg);border:2px solid var(--edge);box-shadow:2px 2px 0 var(--edge)}
 .brand b{font-family:var(--f-head);font-size:1.12rem;display:block;line-height:1.2;font-weight:800}
 .brand small{color:var(--muted);font-size:.72rem;display:block;line-height:1.2}
 #nav{display:none;gap:4px;flex:1}
@@ -572,7 +572,7 @@ footer p{max-width:1160px;margin:0 auto}
 .acct-err{background:var(--coral-soft);color:var(--coral-t);border-radius:10px;padding:8px 12px;font-weight:700;font-size:.9rem}
 .acct-info{background:var(--ok-soft);color:var(--ok-t);border-radius:10px;padding:8px 12px;font-weight:700;font-size:.9rem}
 .save-opt.cloud{border-color:var(--pink)} .save-opt.cloud.ok{border-color:var(--ok)}
-@media (max-width:520px){.top-in{gap:6px}.brand{gap:6px}.brand b{font-size:.98rem}.logo{inline-size:34px;block-size:34px;font-size:12px}.top .icon-btn{inline-size:38px;block-size:38px}#lang-btn{padding-inline:9px;min-block-size:38px}.save-dot{display:none}}
+@media (max-width:520px){.top-in{gap:6px}.brand{gap:6px}.brand b{font-size:.98rem}.logo{inline-size:34px;block-size:34px;font-size:11px}.top .icon-btn{inline-size:38px;block-size:38px}#lang-btn{padding-inline:9px;min-block-size:38px}.save-dot{display:none}}
 .restart{grid-template-columns:1fr auto;align-items:center}
 .restart #pl-confirm{grid-column:1 / -1}
 @media (max-width:560px){.restart{grid-template-columns:1fr}}

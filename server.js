@@ -1,4 +1,4 @@
-// Masar 100 — Railway server: static site + email/password accounts + progress sync + admin API (Postgres)
+// GAT Academy (أكاديمية القدرات) — Railway server: static site + email/password accounts + progress sync + admin API (Postgres)
 const express = require("express");
 const path = require("path");
 const fs = require("fs");
@@ -258,7 +258,7 @@ app.use((err, req, res, next) => {
 setInterval(() => pool.query("DELETE FROM sessions WHERE expires_at<now()").catch(() => {}), 3600e3).unref();
 
 migrate().then(() => {
-  const srv = app.listen(PORT, () => console.log(`Masar 100 running on :${PORT}`));
+  const srv = app.listen(PORT, () => console.log(`GAT Academy running on :${PORT}`));
   const bye = () => { srv.close(() => pool.end().finally(() => process.exit(0))); setTimeout(() => process.exit(0), 8000).unref(); };
   process.on("SIGTERM", bye); process.on("SIGINT", bye);
 }).catch(e => { console.error("Migration failed", e); process.exit(1); });

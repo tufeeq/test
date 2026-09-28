@@ -600,3 +600,5 @@ tr.clickable:focus-visible{outline:3px solid var(--butter);outline-offset:-3px}
 }
 /* empty state (no real data yet) — calm, not a warning */
 .demo.empty-state{background:var(--surface);border:2px dashed color-mix(in srgb,var(--pri) 45%,transparent);color:var(--ink)}
+/* sign-up gate before the first test */
+.gate-msg{background:color-mix(in srgb,var(--pri) 10%,var(--surface));border-inline-start:4px solid var(--pri);padding:10px 12px;border-radius:10px;color:var(--ink);line-height:1.7}

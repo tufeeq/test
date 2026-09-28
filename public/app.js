@@ -1472,7 +1472,7 @@ const L=o=>o&&typeof o==='object'&&('ar' in o)?o[S.lang]:o;
 const T2={
   ar:{emptyT:'لا توجد بيانات بعد',emptyD:'هذه الصفحة تعرض أرقامك الحقيقية فقط: الدرجة التقديرية والدقة والزمن ومستوى كل مهارة. ابدأ بالاختبار التشخيصي (٢٠ سؤالًا · ٢٠ دقيقة) لتحديد نقطة البداية.',
     recoStartH:'ابدأ بالاختبار التشخيصي',recoStartP:'يقيس مستواك في المهارات العشر، ثم تُبنى خطتك وجلساتك اليومية عليه.',greetN:n=>'هدفك '+n,
-    finishQ:'إنهاء الاختبار وعرض النتيجة؟',endSecQ:'إنهاء هذا القسم والانتقال إلى التالي؟',curPwWrong:'كلمة المرور الحالية غير صحيحة.',
+    finishQ:'إنهاء الاختبار وعرض النتيجة؟',endSecQ:'إنهاء هذا القسم والانتقال إلى التالي؟',curPwWrong:'كلمة المرور الحالية غير صحيحة.',gateT:'سجّل لتبدأ',gateMsg:'أنشئ حسابك المجاني مرة واحدة قبل أول اختبار، لتُحفظ نتائجك وأخطاؤك وتقدمك في حسابك وتتابعها من أي جهاز. بعدها تبدأ الاختبار مباشرة.',gateLater:'لاحقًا',
     signedOut:'سجّلت الخروج. تقدمك محفوظ في حسابك وأُزيل من هذا الجهاز؛ ادخل من جديد لمتابعته.',
     importQ:'سيحلّ التقدم الموجود في الملف أو الرمز محلّ تقدمك الحالي على هذا الجهاز. متابعة؟',importYes:'نعم، استورد',copyManual:'انسخ الرمز الظاهر في المربع',
     resumeT:'لديك اختبار لم يكتمل',resumeD:(ti,q,n)=>`«${ti}» · توقفت عند السؤال ${q} من ${n}. الوقت متوقف حتى تكمل.`,resumeBtn:'أكمل الاختبار',discardBtn:'تجاهله',resumed:'عدت إلى اختبارك',
@@ -1480,7 +1480,7 @@ const T2={
     authErr:{'sync-first':'تعذّرت مزامنة آخر تقدمك، فلم نسجّل خروجك حتى لا يضيع. تحقق من الاتصال ثم حاول مجددًا.'}},
   en:{emptyT:'No data yet',emptyD:'This page shows only your real numbers: estimated score, accuracy, time and each skill level. Start with the diagnostic (20 questions · 20 minutes) to set your baseline.',
     recoStartH:'Start with the diagnostic',recoStartP:'It measures your level in all ten skills; your plan and daily sessions are built on it.',greetN:n=>'Your target: '+n,
-    finishQ:'Finish the test and see your result?',endSecQ:'End this section and move to the next one?',curPwWrong:'Your current password is incorrect.',
+    finishQ:'Finish the test and see your result?',endSecQ:'End this section and move to the next one?',curPwWrong:'Your current password is incorrect.',gateT:'Sign up to start',gateMsg:'Create your free account once before your first test, so your results, mistakes and progress are saved to your account and follow you on any device. Your test starts right after.',gateLater:'Not now',
     signedOut:'Signed out. Your progress is saved in your account and was removed from this device; sign in again to continue.',
     importQ:'The progress in this file or code will replace your current progress on this device. Continue?',importYes:'Yes, import',copyManual:'Copy the code shown in the box',
     resumeT:'You have an unfinished test',resumeD:(ti,q,n)=>`“${ti}” · you stopped at question ${q} of ${n}. The clock is paused until you continue.`,resumeBtn:'Continue the test',discardBtn:'Discard it',resumed:'Back to your test',
@@ -1583,7 +1583,13 @@ const qKey=q=>q.q+'|'+q.opts[q.ans]+'|'+(q.pkey||'');
 
 /* ============ TEST ENGINE ============ */
 let X=null,timer=null;
+let PEND=null;
+/* accounts build: a student must sign up (or sign in) before starting any test or practice */
+function authGate(kind,o){ const C=window.CLOUD; if(!C||C.user) return false;
+  if(C.ready===false){ setTimeout(()=>startTest(kind,o),300); return true; }
+  PEND={kind,o}; AC.tab='signup'; AC.gate=true; openAcct(); return true; }
 function startTest(kind,o={}){
+  if(authGate(kind,o)) return;
   const lang=S.lang,used=new Set(); let sections=[],title='',mode='exam';
   const sec=(name,qs,min)=>({name,qs,left:Math.round(min*60),ans:Array(qs.length).fill(null),flag:Array(qs.length).fill(false),tsp:Array(qs.length).fill(0),locked:Array(qs.length).fill(false)});
   if(kind==='diag'){ title=t('pDiag'); sections=[sec(title,diagSet(lang),20)]; }
@@ -2073,7 +2079,7 @@ applyTheme();
 function cloudLine(){ const C=window.CLOUD; if(!C||!C.user) return ''; if(C.status==='saving') return t('cloudSaving'); if(C.status==='error') return t('cloudErr'); return C.lastSync?t('cloudSynced')+' '+new Date(C.lastSync).toLocaleTimeString(S.lang==='ar'?'ar-SA':'en-GB',{timeStyle:'short'}):''; }
 let AC={tab:'signup',err:'',busy:false,confirmDel:false,info:''};
 function openAcct(){ AC.err=''; AC.info=''; AC.confirmDel=false; $('#acct').hidden=false; renderAcct(); setTimeout(()=>($('#ac-email')||$('#ac-x')||$('#acct button'))?.focus(),0); }
-function closeAcct(){ $('#acct').hidden=true; $('#acct-btn')?.focus(); }
+function closeAcct(){ PEND=null; AC.gate=false; $('#acct').hidden=true; $('#acct-btn')?.focus(); }
 document.addEventListener('keydown',e=>{ if(e.key!=='Escape') return; const a=$('#acct'), p=$('#theme-pop'); if(a&&!a.hidden){ closeAcct(); return; } if(p&&!p.hidden){ p.hidden=true; $('#theme-btn').setAttribute('aria-expanded','false'); $('#theme-btn').focus(); } });
 const authMsg=c=>c==='cur-pw'?t('curPwWrong'):(t('authErr')[String(c||'').replace('auth/','')]||t('authErr').other);
 function renderAcct(){
@@ -2088,7 +2094,7 @@ function renderAcct(){
       ${C.changePassword?`<details class="acct-priv" ${AC.pwOpen?'open':''}><summary>${t('chPw')}</summary><form id="ac-pwf" class="acct-form" novalidate><label>${t('curPw')}<input type="password" id="ac-cur" autocomplete="current-password" dir="ltr"></label><label>${t('newPw')}<input type="password" id="ac-new" autocomplete="new-password" minlength="8" dir="ltr"></label><button class="btn ghost" type="submit">${t('chPwBtn')}</button></form></details>`:''}
       <details class="acct-priv"><summary>${t('privT')}</summary><p class="small">${t('privD')}</p></details>
       ${AC.confirmDel?`<div class="ex-confirm inline"><p>${t('delConfirm')}</p><div class="row"><button class="btn danger" id="ac-del2">${t('delYes')}</button><button class="btn ghost" id="ac-nodel">${t('cancel')}</button></div></div>`:`<button class="btn danger-ghost sm" id="ac-del">${t('delAcct')}</button>`}
-      `:`<h2 id="acct-h">${t('acctJoinT')}</h2><p class="small muted">${t('acctWhy')}</p>
+      `:`<h2 id="acct-h">${AC.gate?t('gateT'):t('acctJoinT')}</h2><p class="small ${AC.gate?'gate-msg':'muted'}">${AC.gate?t('gateMsg'):t('acctWhy')}</p>
       <div class="seg acct-seg"><button class="${AC.tab==='signup'?'on':''}" data-tab="signup">${t('signUp')}</button><button class="${AC.tab==='signin'?'on':''}" data-tab="signin">${t('signIn')}</button></div>
       <form id="ac-form" class="acct-form" novalidate>
         <label>${t('email')}<input type="email" id="ac-email" autocomplete="email" required dir="ltr"></label>
@@ -2104,7 +2110,8 @@ function renderAcct(){
   const on=(id,f)=>{ const b=el.querySelector(id); if(b) b.onclick=f; };
   on('#ac-x',closeAcct);
   el.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{ AC.tab=b.dataset.tab; AC.err=''; renderAcct(); });
-  const run=async fn=>{ AC.busy=true; AC.err=''; AC.info=''; renderAcct(); try{ await fn(); }catch(e){ AC.err=authMsg(e&&e.code); } AC.busy=false; renderAcct(); renderRoute(); };
+  const run=async fn=>{ AC.busy=true; AC.err=''; AC.info=''; renderAcct(); let ok=false; try{ await fn(); ok=true; }catch(e){ AC.err=authMsg(e&&e.code); } AC.busy=false; renderAcct(); renderRoute();
+    if(ok&&PEND&&C.user){ const p=PEND; closeAcct(); startTest(p.kind,p.o); } };
   const f=el.querySelector('#ac-form'); if(f) f.onsubmit=e=>{ e.preventDefault(); const em=el.querySelector('#ac-email').value.trim(), pw=el.querySelector('#ac-pass').value;
     if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)){ AC.err=t('authErr')['invalid-email']; return renderAcct(); }
     if(pw.length<8){ AC.err=t('authErr')['weak-password']; return renderAcct(); }

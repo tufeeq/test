@@ -56,8 +56,9 @@ async function afterLogin(u) {
   reset(); user = { email: u.email, emailVerified: true, isAdmin: !!u.isAdmin };
   await pull();
 }
+let checked = false; // true once the first /api/me answer (or failure) has arrived
 window.CLOUD = {
-  get user() { return user; }, get status() { return status; }, get lastSync() { return lastSync; }, google: false, resetByAdmin: true,
+  get user() { return user; }, get ready() { return checked; }, get status() { return status; }, get lastSync() { return lastSync; }, google: false, resetByAdmin: true,
   queue() { if (!user) return; clearTimeout(timer); timer = setTimeout(push, 2500); },
   async pushNow() { if (!user) return; retry = 0; await push(); }, // never throws: callers read CLOUD.status ("error" = not synced)
   async signUp(email, password) { const r = await api("POST", "/api/signup", { email, password, consent: true }); await afterLogin(r.user); },
@@ -74,5 +75,5 @@ window.CLOUD = {
 // re-check the session when the tab comes back (e.g. after the password was changed on another device)
 document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible" && user) api("GET", "/api/me").then(r => { if (!r.user) expired(); }).catch(() => {}); });
 window.addEventListener("online", () => { if (user && status === "error") { retry = 0; pulled ? push() : pull(); } });
-api("GET", "/api/me").then(r => { if (r.user) afterLogin(r.user); else A().render(); }).catch(() => A().render());
+api("GET", "/api/me").then(r => { checked = true; if (r.user) afterLogin(r.user); else A().render(); }).catch(() => { checked = true; A().render(); });
 })();

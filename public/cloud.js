@@ -53,7 +53,7 @@ async function afterLogin(u) {
   // progress in this browser belongs to a different account (shared device): don't merge it into this one
   if (owner && owner !== email) { ls.del("masar100_v1"); ls.del("masar100_details"); ls.set(OWNER, email); location.reload(); return new Promise(() => {}); }
   ls.set(OWNER, email);
-  reset(); user = { email: u.email, emailVerified: true, isAdmin: !!u.isAdmin };
+  reset(); user = { email: u.email, name: u.name || "", emailVerified: true, isAdmin: !!u.isAdmin };
   await pull();
 }
 let checked = false; // true once the first /api/me answer (or failure) has arrived
@@ -61,7 +61,8 @@ window.CLOUD = {
   get user() { return user; }, get ready() { return checked; }, get status() { return status; }, get lastSync() { return lastSync; }, google: false, resetByAdmin: true,
   queue() { if (!user) return; clearTimeout(timer); timer = setTimeout(push, 2500); },
   async pushNow() { if (!user) return; retry = 0; await push(); }, // never throws: callers read CLOUD.status ("error" = not synced)
-  async signUp(email, password) { const r = await api("POST", "/api/signup", { email, password, consent: true }); await afterLogin(r.user); },
+  async signUp(email, password, name) { const r = await api("POST", "/api/signup", { email, password, name, consent: true }); await afterLogin(r.user); },
+  async setName(name) { const r = await api("POST", "/api/name", { name }); if (user) user.name = r.user.name; safe(() => A().render()); },
   async signIn(email, password) { const r = await api("POST", "/api/login", { email, password }); await afterLogin(r.user); },
   async signOut() {
     if (user && pulled && status !== "ok") { try { await push(); } catch (e) {} } // flush unsynced changes first

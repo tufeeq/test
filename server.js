@@ -52,6 +52,7 @@ async function migrate() {
       expires_at TIMESTAMPTZ NOT NULL
     );
     CREATE INDEX IF NOT EXISTS sessions_user_idx ON sessions(user_id);
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS name TEXT;
   `);
 }
 
@@ -99,6 +100,10 @@ function setCookie(req, res, token, maxAgeSec) {
 const fail = (res, status, code) => res.status(status).json({ error: code });
 const validEmail = e => typeof e === "string" && e.length <= 254 && /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e);
 const DUMMY_HASH = bcrypt.hashSync("not-a-real-password", 11);
+// student's display name: 2–60 visible characters, control/format characters removed, spaces collapsed
+const cleanName = v => String(v == null ? "" : v).normalize("NFC").replace(/[\u0000-\u001f\u007f-\u009f\u200b-\u200f\u202a-\u202e\u2066-\u2069<>]/g, "").replace(/\s+/g, " ").trim();
+const validName = n => n.length >= 2 && n.length <= 60;
+const pub = u => ({ email: u.email, name: u.name || "", isAdmin: isAdminEmail(u.email) });
 const isAdminEmail = e => ADMIN_EMAILS.includes(String(e || "").toLowerCase());
 
 // simple in-memory rate limit. limited() records a hit and checks; over() only checks (hit() records later, e.g. on failure)
@@ -117,7 +122,7 @@ async function createSession(req, res, userId) {
 async function auth(req, res, next) {
   const tok = parseCookies(req)[COOKIE];
   if (tok) {
-    const r = await pool.query("SELECT u.id,u.email FROM sessions s JOIN users u ON u.id=s.user_id WHERE s.token_hash=$1 AND s.expires_at>now()", [sha(tok)]);
+    const r = await pool.query("SELECT u.id,u.email,u.name FROM sessions s JOIN users u ON u.id=s.user_id WHERE s.token_hash=$1 AND s.expires_at>now()", [sha(tok)]);
     if (r.rows[0]) req.user = r.rows[0];
   }
   next();
@@ -131,19 +136,28 @@ app.use("/api", (req, res, next) => { res.set("Cache-Control", "no-store"); next
 app.use("/api", wrap(auth));
 
 // ---------- account ----------
-app.get("/api/me", (req, res) => res.json({ user: req.user ? { email: req.user.email, isAdmin: isAdminEmail(req.user.email) } : null }));
+app.get("/api/me", (req, res) => res.json({ user: req.user ? pub(req.user) : null }));
+
+app.post("/api/name", needUser, wrap(async (req, res) => {
+  const name = cleanName(req.body.name);
+  if (!validName(name)) return fail(res, 400, "invalid-name");
+  await pool.query("UPDATE users SET name=$1 WHERE id=$2", [name, req.user.id]);
+  res.json({ user: pub({ ...req.user, name }) });
+}));
 
 app.post("/api/signup", wrap(async (req, res) => {
   const email = String(req.body.email || "").trim().toLowerCase(), pw = String(req.body.password || "");
   if (limited("su:" + req.ip, 60, 3600e3)) return fail(res, 429, "too-many-requests"); // generous: a whole class may sign up from one school IP
   if (!validEmail(email)) return fail(res, 400, "invalid-email");
   if (pw.length < 8 || pw.length > 200) return fail(res, 400, "weak-password");
+  const name = cleanName(req.body.name);
+  if (!validName(name)) return fail(res, 400, "invalid-name");
   if (req.body.consent !== true) return fail(res, 400, "consent");
   const id = crypto.randomUUID(), hash = await bcrypt.hash(pw, 11);
-  try { await pool.query("INSERT INTO users(id,email,pass_hash) VALUES($1,$2,$3)", [id, email, hash]); }
+  try { await pool.query("INSERT INTO users(id,email,pass_hash,name) VALUES($1,$2,$3,$4)", [id, email, hash, name]); }
   catch (e) { if (e.code === "23505") return fail(res, 409, "email-already-in-use"); throw e; }
   await createSession(req, res, id);
-  res.json({ user: { email, isAdmin: isAdminEmail(email) } });
+  res.json({ user: pub({ email, name }) });
 }));
 
 app.post("/api/login", wrap(async (req, res) => {
@@ -154,13 +168,13 @@ app.post("/api/login", wrap(async (req, res) => {
   // still stops distributed guessing against one account.
   const ek = "le:" + email + "|" + req.ip, eg = "lg:" + email;
   if (limited("li:" + req.ip, 150, 900e3) || over(ek, 10, 900e3) || over(eg, 100, 900e3)) return fail(res, 429, "too-many-requests");
-  const r = await pool.query("SELECT id,email,pass_hash FROM users WHERE email=$1", [email]);
+  const r = await pool.query("SELECT id,email,name,pass_hash FROM users WHERE email=$1", [email]);
   const u = r.rows[0];
   const ok = u ? await bcrypt.compare(pw, u.pass_hash) : await bcrypt.compare(pw, DUMMY_HASH);
   if (!u || !ok) { hit(ek); hit(eg); return fail(res, 401, "invalid-credential"); }
   hits.delete(ek);
   await createSession(req, res, u.id);
-  res.json({ user: { email: u.email, isAdmin: isAdminEmail(u.email) } });
+  res.json({ user: pub(u) });
 }));
 
 app.post("/api/logout", wrap(async (req, res) => {
@@ -210,7 +224,7 @@ app.put("/api/progress", needUser, wrap(async (req, res) => {
 
 // ---------- admin ----------
 app.get("/api/admin/users", needAdmin, wrap(async (req, res) => {
-  const r = await pool.query(`SELECT u.id,u.email,u.created_at,p.track,p.target,p.exam_date,p.summary,p.updated_at
+  const r = await pool.query(`SELECT u.id,u.email,u.name,u.created_at,p.track,p.target,p.exam_date,p.summary,p.updated_at
     FROM users u LEFT JOIN progress p ON p.user_id=u.id ORDER BY p.updated_at DESC NULLS LAST LIMIT 5000`);
   res.json({ users: r.rows });
 }));

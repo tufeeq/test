@@ -602,3 +602,9 @@ tr.clickable:focus-visible{outline:3px solid var(--butter);outline-offset:-3px}
 .demo.empty-state{background:var(--surface);border:2px dashed color-mix(in srgb,var(--pri) 45%,transparent);color:var(--ink)}
 /* sign-up gate before the first test */
 .gate-msg{background:color-mix(in srgb,var(--pri) 10%,var(--surface));border-inline-start:4px solid var(--pri);padding:10px 12px;border-radius:10px;color:var(--ink);line-height:1.7}
+/* signed-in student's name in the header */
+#acct-btn.has-name{inline-size:auto;padding-inline:8px 12px;gap:6px;display:inline-flex;align-items:center;border-radius:999px}
+#acct-btn .acct-name{max-inline-size:9em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700;font-size:.9rem;color:var(--ink)}
+@media (max-width:520px){#acct-btn.has-name{padding-inline:6px 9px;gap:4px}#acct-btn .acct-name{max-inline-size:5.5em;font-size:.82rem}}
+@media (max-width:370px){#acct-btn .acct-name{max-inline-size:4.2em}}
+#acct-btn.has-name.on::after{bottom:auto;top:-3px;inset-inline-end:auto;inset-inline-start:-3px}

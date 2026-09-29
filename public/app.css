@@ -701,3 +701,4 @@ body.xp-open{overflow:hidden}
 .lc-xp{color:var(--pri);font-weight:800}
 .xp-eyebrow{display:flex;gap:10px;flex-wrap:wrap}
 .xp-dot::before,.xpc .xpm::before{content:"";display:inline-block;inline-size:4px;block-size:4px;border-radius:50%;background:currentColor;vertical-align:middle;margin-inline-end:8px;opacity:.6}
+.xp-stage .t-pink{fill:var(--pink-t)}

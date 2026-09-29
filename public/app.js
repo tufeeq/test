@@ -1220,7 +1220,7 @@ const T = {
   deckAll:'كل البطاقات', cardsIntro:'اقرأ الوجه الأول وحاول التذكّر، ثم اقلب البطاقة. «راجعها» تعيدها إليك اليوم، و«أعرفها» تؤجلها أيامًا.', tapFlip:'اضغط للقلب', example:'مثال', allInDeck:'كل بطاقات القسم', deckDone:'أنهيت بطاقات هذا القسم لليوم. ارجع غدًا أو اختر قسمًا آخر.', techIntro:'تكنيكات يستخدمها المتفوقون لرفع الدقة والسرعة. طبّق واحدًا في كل جلسة حتى يصبح عادة.', patIntro:'أنماط أسئلة تتكرر في التجميعات التي يتداولها الطلاب بعد الاختبار. الأمثلة من إعداد المنصة على النمط نفسه.', how:'كيف يأتي', trick:'مفتاح الحل', practicePattern:'تدرّب على هذا النمط', skillCards:'بطاقات هذه المهارة',
   verbal:'القسم اللفظي', quant:'القسم الكمي',
   concept:'المفهوم', mind:'كيف يفكر واضع السؤال', steps:'خطوات الحل', types:'الأنماط مع أمثلة', rules:'القوانين والحقائق', traps:'الفخاخ', examples:'أمثلة محلولة', speed:'للوصول إلى ١٠٠', more:'للاستزادة', mastery:'مستواك في هذه المهارة', targetTime:'الزمن المستهدف',
-  practice10:'تدرّب (١٠ أسئلة بتصحيح فوري)', xpTitle:'شروحات التأسيس', xpIntro:'شروحات قصيرة متحركة بصوت معلّم، تبني الفكرة من الصفر، فيها وقفة تجرّب فيها بنفسك وتحدٍّ ختامي.', xpDone:'تم', xpShort:'شروحات', answer:'الإجابة', why:'السبب', lessonsOpen:'افتح الدرس',
+  practice10:'تدرّب (١٠ أسئلة بتصحيح فوري)', xpTitle:'شروحات التأسيس', xpIntro:'شروحات قصيرة متحركة بصوت معلّم، تبني الفكرة من الصفر، فيها وقفة تجرّب فيها بنفسك وتحدٍّ ختامي.', xpDone:'تم', xpShort:'شروحات', xpN:'شرح', answer:'الإجابة', why:'السبب', lessonsOpen:'افتح الدرس',
   vocabIntro:'بطاقات لمفردات تتكرر في الاختبار. قل المعنى في ذهنك ثم اقلب البطاقة. البطاقات التي لا تعرفها تعود إليك أكثر.', flip:'اقلب البطاقة', know:'أعرفها', again:'راجعها', vocabDone:'أنهيت بطاقات اليوم', known:'متقنة', left:'متبقية',
   resIntro:'مصادر مختارة لكل مهارة. القاعدة: مصدر شرح واحد تنهيه، ثم التدريب هنا حتى تصل إلى «ثبات».',
   practiceTitle:'تدرّب', practiceIntro:'اختر نوع التدريب. التدريب بالتصحيح الفوري للتعلم، والأقسام والمحاكاة بتوقيت الاختبار الحقيقي.',
@@ -1287,7 +1287,7 @@ const T = {
   deckAll:'All cards', cardsIntro:'Read the front and try to recall, then flip. "Review again" brings it back today; "I know it" pushes it out by days.', tapFlip:'Tap to flip', example:'Example', allInDeck:'All cards in this deck', deckDone:'You have finished this deck for today. Come back tomorrow or pick another deck.', techIntro:'Techniques top scorers use to lift accuracy and speed. Apply one per session until it becomes a habit.', patIntro:'Question patterns that recur in the compilations students share after the test. Examples are written by the platform on the same pattern.', how:'How it appears', trick:'The key', practicePattern:'Practice this pattern', skillCards:'Cards for this skill',
   verbal:'Verbal', quant:'Quantitative',
   concept:'The concept', mind:'How the test writer thinks', steps:'How to solve', types:'Patterns with examples', rules:'Rules and facts', traps:'Traps', examples:'Worked examples', speed:'Getting to 100', more:'Go further', mastery:'Your level in this skill', targetTime:'Target time',
-  practice10:'Practice (10 questions, instant feedback)', xpTitle:'Foundation explainers', xpIntro:'Short animated explainers narrated in Arabic. Each builds the idea from zero, pauses for you to try, and ends with a quick challenge.', xpDone:'Done', xpShort:'explainers', answer:'Answer', why:'Why', lessonsOpen:'Open lesson',
+  practice10:'Practice (10 questions, instant feedback)', xpTitle:'Foundation explainers', xpIntro:'Short animated explainers with a teacher’s voice. Each builds the idea from zero, pauses for you to try, and ends with a quick challenge.', xpDone:'Done', xpShort:'explainers', xpN:'Explainer', answer:'Answer', why:'Why', lessonsOpen:'Open lesson',
   vocabIntro:'Cards for words that recur in the test. Say the meaning in your head, then flip. Cards you miss come back more often.', flip:'Flip card', know:'I know it', again:'Review again', vocabDone:'Today\'s cards are done', known:'known', left:'left',
   resIntro:'Selected resources for each skill. Rule: one explanation source you finish, then practice here until "Locked in".',
   practiceTitle:'Practice', practiceIntro:'Pick a type. Instant-feedback practice is for learning; sections and simulations run on real test timing.',
@@ -1466,7 +1466,12 @@ const GUIDE_SOURCES = [
 const HAS_GSAP=typeof gsap!=='undefined';
 const NS='http://www.w3.org/2000/svg';
 const $x=s=>document.querySelector(s);
-const AD=s=>String(s).replace(/\d/g,d=>'٠١٢٣٤٥٦٧٨٩'[d]).replace(/\./g,'٫');
+let LG='ar';
+const AD=s=>LG==='en'?String(s):String(s).replace(/\d/g,d=>'٠١٢٣٤٥٦٧٨٩'[d]).replace(/\./g,'٫');
+const UI={
+ ar:{close:'إغلاق',of:(a,b)=>`شرح ${a} من ${b}`,start:'ابدأ الشرح',startSub:'شغّل الصوت. يتوقف الشرح عند الوقفات التفاعلية حتى تجرّب بنفسك.',play:'تشغيل',pause:'إيقاف مؤقت',prev:'المشهد السابق',rep:'أعد المشهد',next:'المشهد التالي',speed:'السرعة',voice:'الصوت',cc:'النص المكتوب',scenes:'المشاهد',after:'بعد هذا الشرح',press:'اضغط «ابدأ الشرح».',inter:'تفاعلي',final:'التحدي الختامي',yourTurn:'دورك: جرّب على اللوحة.',clipEnd:'انتهى المقطع',fullQ:'تريد الشرح كاملًا مع التحدي؟',openFull:'افتح الشرح الكامل',again:'أعد المقطع',quizIntro:'التحدي الختامي: أسئلة سريعة على الفكرة نفسها.',qn:(a,b)=>`التحدي ${a} من ${b}`,right:'صحيح.',wrong:'ليس هذا.',nextQ:'التالي',result:'النتيجة',passed:'أتممت الشرح.',failed:'راجع الفكرة ثم أعد التحدي.',nextL:'الشرح التالي: ',done:'تم',retry:'أعد التحدي',rewatch:'أعد الشرح',bravo:'أحسنت!',retryCap:'أعد المحاولة بعد مراجعة المشهد الذي أخطأت فيه.',sp:['٠٫٨٥×','١×','١٫٢٥×']},
+ en:{close:'Close',of:(a,b)=>`Explainer ${a} of ${b}`,start:'Start the explainer',startSub:'Turn your sound on. The explainer pauses at interactive stops so you can try it yourself.',play:'Play',pause:'Pause',prev:'Previous scene',rep:'Replay scene',next:'Next scene',speed:'Speed',voice:'Voice',cc:'Captions',scenes:'Scenes',after:'After this explainer',press:'Press “Start the explainer”.',inter:'Interactive',final:'Final challenge',yourTurn:'Your turn: try it on the board.',clipEnd:'Clip finished',fullQ:'Want the full explainer with the challenge?',openFull:'Open the full explainer',again:'Replay clip',quizIntro:'Final challenge: quick questions on the same idea.',qn:(a,b)=>`Challenge ${a} of ${b}`,right:'Correct.',wrong:'Not quite.',nextQ:'Next',result:'Result',passed:'Explainer complete.',failed:'Review the idea, then retry the challenge.',nextL:'Next explainer: ',done:'Done',retry:'Retry the challenge',rewatch:'Rewatch',bravo:'Well done!',retryCap:'Try again after reviewing the scene you missed.',sp:['0.85×','1×','1.25×']}};
+const u=k=>UI[LG][k];
 const escx=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const RM=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -1545,9 +1550,9 @@ function compileScene(sc){
 function askChoice(stage,A){ return new Promise(res=>{
   const opts=A.opts, n=opts.length, two=n===4&&!A.column, y0=A.y??(two?182:150);
   const gs=opts.map((t,i)=>{ const g=el('g',{class:'hot',tabindex:0,role:'button','aria-label':t},stage);
-    const w=two?250:420, h=two?54:48, cx=two?[470,170][i%2]:320, cy=two?y0+Math.floor(i/2)*70:y0+i*58;
+    const w=two?250:420, h=two?54:48, cx=two?(LG==='en'?[170,470]:[470,170])[i%2]:320, cy=two?y0+Math.floor(i/2)*70:y0+i*58;
     el('rect',{x:cx-w/2+4,y:cy-h/2+4,width:w,height:h,rx:12,class:'f-edge'},g); const r=el('rect',{x:cx-w/2,y:cy-h/2,width:w,height:h,rx:12,class:'f-surface hot-ring',stroke:'var(--edge)','stroke-width':2},g);
-    txt(g,{x:cx,y:cy+7,s:A.s||21,text:t,dir:A.ltr?'ltr':undefined}); return {g,r}; });
+    txt(g,{x:cx,y:cy+7,s:A.s||21,text:t,dir:(A.ltr||LG==='en')?'ltr':undefined}); return {g,r}; });
   gsap.from(gs.map(o=>o.g),{opacity:0,y:18,stagger:.1,duration:.3});
   gs.forEach((o,i)=>{ const pick=()=>{ gs.forEach(x=>x.g.style.pointerEvents='none'); o.r.setAttribute('class',(i===A.a?'f-oksoft':'f-badsoft')+' hot-ring'); if(i!==A.a) gs[A.a].r.setAttribute('class','f-oksoft hot-ring');
       gsap.to(gs.filter((x,j)=>j!==A.a&&j!==i).map(x=>x.g),{opacity:.35,duration:.3}); setTimeout(()=>{ if(A.show&&A.show.length) gsap.to(gs.map(x=>x.g),{opacity:0,duration:.4}); },1400); res(i===A.a); };
@@ -1558,8 +1563,8 @@ function askChoice(stage,A){ return new Promise(res=>{
 const LESSONS={}, ORDER=[];
 let HOOKS={isDone:()=>false,onDone:()=>{},onClose:()=>{}};
 let bid=0;
-function add(L){ if(!L||!L.key||LESSONS[L.key]) return; L.scenes=L.scenes.map(compileScene); L.scenes.forEach((sc,si)=>sc.beats.forEach((b,bi)=>{ b.id=`${L.key}-s${si+1}-b${bi+1}`; })); LESSONS[L.key]=L; ORDER.push(L.key); }
-const forSkill=sk=>ORDER.filter(k=>LESSONS[k].sk===sk).map(k=>LESSONS[k]).sort((a,b)=>(a.ord??50)-(b.ord??50));
+function add(L){ if(!L||!L.key||LESSONS[L.key]) return; L.lang=L.lang||'ar'; L.scenes=L.scenes.map(compileScene); L.scenes.forEach(sc=>{ const f=sc.setup; sc.setup=st=>{ LG=L.lang; return f(st); }; }); L.scenes.forEach((sc,si)=>sc.beats.forEach((b,bi)=>{ b.id=`${L.key}-s${si+1}-b${bi+1}`; })); LESSONS[L.key]=L; ORDER.push(L.key); }
+const forSkill=(sk,lang)=>ORDER.filter(k=>LESSONS[k].sk===sk&&(!lang||LESSONS[k].lang===lang)).map(k=>LESSONS[k]).sort((a,b)=>(a.ord??50)-(b.ord??50));
 
 /* ---------- narration ---------- */
 const TRACKS={};
@@ -1572,7 +1577,7 @@ function captionAt(text,ci){ const before=text.slice(0,ci).trim(); captionIdx(be
 function captionAll(){ const c=$x('#xp-cap'); if(!c) return; c.querySelectorAll('.w').forEach(s=>s.className='w past'); }
 function captionText(t){ const c=$x('#xp-cap'); if(c) c.innerHTML=escx(t); }
 const TTS={ ok:'speechSynthesis' in window, voice:null, on:true, rate:1, cur:null,
-  pick(){ if(!this.ok) return; const vs=speechSynthesis.getVoices()||[]; this.voice=vs.find(v=>/^ar[-_]SA/i.test(v.lang))||vs.find(v=>/^ar/i.test(v.lang))||null; },
+  pick(){ if(!this.ok) return; const vs=speechSynthesis.getVoices()||[]; this.voice=LG==='en'?(vs.find(v=>/^en[-_](US|GB)/i.test(v.lang))||vs.find(v=>/^en/i.test(v.lang))||null):(vs.find(v=>/^ar[-_]SA/i.test(v.lang))||vs.find(v=>/^ar/i.test(v.lang))||null); },
   usable(){ return this.on&&this.ok&&!!this.voice; },
   say(text){ return new Promise(resolve=>{ const job={text,resolve,stopped:false,timers:[]}; this.cur=job; this._run(job); }); },
   _run(job){ const words=job.text.split(/\s+/); captionWords(words);
@@ -1583,7 +1588,7 @@ const TTS={ ok:'speechSynthesis' in window, voice:null, on:true, rate:1, cur:nul
       u.onerror=()=>{ if(this.cur===job&&!job.stopped){ this.cur=null; job.resolve(); } };
       speechSynthesis.speak(u); const est=this._est(job.text); job.timers.push(setTimeout(()=>{ if(!bounded) this._timedWords(job,est); },500)); }
     else { const est=this._est(job.text); this._timedWords(job,est); job.timers.push(setTimeout(()=>{ if(this.cur===job&&!job.stopped){ captionAll(); this.cur=null; job.resolve(); } },est+250)); } },
-  _est(t){ return Math.max(1500,(t.length/13)*1000/this.rate); },
+  _est(t){ return Math.max(1500,(t.length/(LG==='en'?15:13))*1000/this.rate); },
   _timedWords(job,ms){ const n=job.text.split(/\s+/).length; for(let i=0;i<n;i++) job.timers.push(setTimeout(()=>{ if(this.cur===job&&!job.stopped) captionIdx(i); },(ms*i)/n)); },
   pause(){ const j=this.cur; if(!j) return; j.stopped=true; j.timers.forEach(clearTimeout); j.timers=[]; try{ speechSynthesis.cancel(); }catch(e){} },
   resume(){ const j=this.cur; if(!j) return; j.stopped=false; this._run(j); },
@@ -1607,40 +1612,41 @@ function trackFor(key){ const T=TRACKS[key]; return T&&T.segs&&T.segs.length?T:n
 function close(){ stopPlayer(); const o=$x('#xp'); if(o) o.remove(); document.body.classList.remove('xp-open'); document.removeEventListener('keydown',onKey); HOOKS.onClose(); }
 function onKey(e){ if(!P) return; if(e.key==='Escape'){ close(); return; } if(e.key===' '&&!e.target.closest('button,input,textarea')){ e.preventDefault(); $x('#xp-pp').click(); } }
 function open(key,opt={}){
-  if(!HAS_GSAP) return; stopPlayer(); const L=LESSONS[key]; if(!L) return;
+  if(!HAS_GSAP) return; stopPlayer(); const L=LESSONS[key]; if(!L) return; LG=L.lang; TTS.pick();
   const only=opt.only; const scenes=only!=null?[only]:L.scenes.map((_,i)=>i);
   P={L,key,scenes,idx:0,playing:false,started:false,only,tl:null,cc:true,waiting:false};
-  let o=$x('#xp'); if(!o){ o=document.createElement('div'); o.id='xp'; o.className='xp'; o.setAttribute('role','dialog'); o.setAttribute('aria-modal','true'); o.setAttribute('dir','rtl'); o.setAttribute('lang','ar'); document.body.appendChild(o); }
+  let o=$x('#xp'); if(!o){ o=document.createElement('div'); o.id='xp'; o.className='xp'; o.setAttribute('role','dialog'); o.setAttribute('aria-modal','true'); document.body.appendChild(o); }
+  o.setAttribute('dir',LG==='en'?'ltr':'rtl'); o.setAttribute('lang',LG);
   document.body.classList.add('xp-open'); o.setAttribute('aria-label',L.title);
-  const sibs=forSkill(L.sk), ix=sibs.indexOf(L);
+  const sibs=forSkill(L.sk,L.lang), ix=sibs.indexOf(L);
   o.innerHTML=`<div class="xp-in">
-    <div class="xp-top"><button class="xp-ib" id="xp-x" aria-label="إغلاق">${IC.x}</button><div class="xp-tt"><span class="xp-eyebrow"><span>شرح ${AD(ix+1)} من ${AD(sibs.length)}</span>${L.min?`<span class="xp-dot">${L.min}</span>`:''}</span><h2>${escx(opt.title||L.title)}</h2></div></div>
+    <div class="xp-top"><button class="xp-ib" id="xp-x" aria-label="${u('close')}">${IC.x}</button><div class="xp-tt"><span class="xp-eyebrow"><span>${u('of')(AD(ix+1),AD(sibs.length))}</span>${L.min?`<span class="xp-dot">${L.min}</span>`:''}</span><h2>${escx(opt.title||L.title)}</h2></div></div>
     <div class="xp-grid">
       <div>
         <div class="xp-stage-wrap" id="xp-sw">
           <div class="xp-segs" id="xp-segs">${scenes.map(()=>'<i><b></b></i>').join('')}</div>
           <svg id="xp-stage" class="xp-stage" viewBox="0 0 640 360" role="img" aria-label="${escx(L.title)}"></svg>
           <div class="xp-scene-t" id="xp-scene-t"></div>
-          <div class="xp-cover" id="xp-cover"><button class="xp-big" id="xp-start"><span class="c">${IC.play}</span><b>ابدأ الشرح</b><small>شغّل الصوت. يتوقف الشرح عند الوقفات التفاعلية حتى تجرّب بنفسك.</small></button></div>
+          <div class="xp-cover" id="xp-cover"><button class="xp-big" id="xp-start"><span class="c">${IC.play}</span><b>${u('start')}</b><small>${u('startSub')}</small></button></div>
         </div>
         <div class="xp-cap" id="xp-cap" aria-live="polite"></div>
         <div class="xp-ctl">
-          <button class="xp-ib main" id="xp-pp" aria-label="تشغيل">${IC.play}</button>
-          <button class="xp-ib" id="xp-prev" aria-label="المشهد السابق">${IC.prev}</button>
-          <button class="xp-ib" id="xp-rep" aria-label="أعد المشهد">${IC.replay}</button>
-          <button class="xp-ib" id="xp-nxt" aria-label="المشهد التالي">${IC.next}</button>
+          <button class="xp-ib main" id="xp-pp" aria-label="${u('play')}">${IC.play}</button>
+          <button class="xp-ib" id="xp-prev" aria-label="${u('prev')}">${LG==='en'?IC.next:IC.prev}</button>
+          <button class="xp-ib" id="xp-rep" aria-label="${u('rep')}">${IC.replay}</button>
+          <button class="xp-ib" id="xp-nxt" aria-label="${u('next')}">${LG==='en'?IC.prev:IC.next}</button>
           <span class="xp-sp"></span>
-          <div class="xp-speed" role="group" aria-label="السرعة">${[0.85,1,1.25].map(r=>`<button data-rate="${r}" class="${TTS.rate===r?'on':''}">${r===1?'١×':r<1?'٠٫٨٥×':'١٫٢٥×'}</button>`).join('')}</div>
-          <button class="xp-ib" id="xp-vo" aria-pressed="${TTS.on}" aria-label="الصوت">${IC.vol}</button>
-          <button class="xp-ib" id="xp-ccb" aria-pressed="true" aria-label="النص المكتوب">${IC.cc}</button>
+          <div class="xp-speed" role="group" aria-label="${u('speed')}">${[0.85,1,1.25].map((r,i)=>`<button data-rate="${r}" class="${TTS.rate===r?'on':''}">${u('sp')[i]}</button>`).join('')}</div>
+          <button class="xp-ib" id="xp-vo" aria-pressed="${TTS.on}" aria-label="${u('voice')}">${IC.vol}</button>
+          <button class="xp-ib" id="xp-ccb" aria-pressed="true" aria-label="${u('cc')}">${IC.cc}</button>
         </div>
       </div>
       <aside class="xp-side">
-        <div class="xp-panel"><h3>المشاهد</h3><ol class="xp-chap" id="xp-chap"></ol></div>
-        ${only==null&&L.goals?`<div class="xp-panel"><h3>بعد هذا الشرح</h3><ul class="xp-goals">${L.goals.map(g=>`<li>${escx(g)}</li>`).join('')}</ul></div>`:''}
+        <div class="xp-panel"><h3>${u('scenes')}</h3><ol class="xp-chap" id="xp-chap"></ol></div>
+        ${only==null&&L.goals?`<div class="xp-panel"><h3>${u('after')}</h3><ul class="xp-goals">${L.goals.map(g=>`<li>${escx(g)}</li>`).join('')}</ul></div>`:''}
       </aside>
     </div></div>`;
-  captionText(`اضغط «ابدأ الشرح».`);
+  captionText(u('press'));
   renderChapters(); setSceneTitle(); document.addEventListener('keydown',onKey);
   $x('#xp-x').onclick=close;
   $x('#xp-start').onclick=()=>{ $x('#xp-cover').hidden=true; P.started=true; playScene(0); };
@@ -1652,10 +1658,10 @@ function open(key,opt={}){
   gsap.globalTimeline.timeScale((RM?2.5:1)*TTS.rate);
   setTimeout(()=>$x('#xp-start')?.focus(),0);
 }
-function renderChapters(){ const L=P.L; $x('#xp-chap').innerHTML=P.scenes.map((si,i)=>{ const sc=L.scenes[si]; const st=i<P.idx?'done':i===P.idx?'cur':''; return `<li class="${st}"><button data-go="${i}"><span class="n">${AD(i+1)}</span><span>${escx(sc.t)}</span>${sc.interactive?'<span class="k">تفاعلي</span>':''}</button></li>`; }).join('')+(P.only==null&&L.quiz?`<li class="${P.idx>=P.scenes.length?'cur':''}"><button data-go="quiz"><span class="n">${IC.check}</span><span>التحدي الختامي</span></button></li>`:'');
+function renderChapters(){ const L=P.L; $x('#xp-chap').innerHTML=P.scenes.map((si,i)=>{ const sc=L.scenes[si]; const st=i<P.idx?'done':i===P.idx?'cur':''; return `<li class="${st}"><button data-go="${i}"><span class="n">${AD(i+1)}</span><span>${escx(sc.t)}</span>${sc.interactive?`<span class="k">${u('inter')}</span>`:''}</button></li>`; }).join('')+(P.only==null&&L.quiz?`<li class="${P.idx>=P.scenes.length?'cur':''}"><button data-go="quiz"><span class="n">${IC.check}</span><span>${u('final')}</span></button></li>`:'');
   document.querySelectorAll('#xp-chap [data-go]').forEach(b=>b.onclick=()=>{ if(!P.started){ $x('#xp-cover').hidden=true; P.started=true; } b.dataset.go==='quiz'?showQuiz():go(+b.dataset.go); }); }
 function setSceneTitle(){ const sc=P.L.scenes[P.scenes[P.idx]]; $x('#xp-scene-t').textContent=sc?sc.t:''; }
-function setPlaying(v){ P.playing=v; const b=$x('#xp-pp'); if(b){ b.innerHTML=v?IC.pause:IC.play; b.setAttribute('aria-label',v?'إيقاف مؤقت':'تشغيل'); } }
+function setPlaying(v){ P.playing=v; const b=$x('#xp-pp'); if(b){ b.innerHTML=v?IC.pause:IC.play; b.setAttribute('aria-label',v?u('pause'):u('play')); } }
 function pause(){ if(!P) return; setPlaying(false); if(P.trk&&P.trk.audio){ P.trk.audio.pause(); gsap.globalTimeline.pause(); return; } TTS.pause(); if(P.tl) P.tl.pause(); }
 function resume(){ if(!P) return; setPlaying(true); if(P.trk&&P.trk.audio){ gsap.globalTimeline.resume(); if(!P.waiting) P.trk.audio.play().catch(()=>{}); return; } if(P.tl) P.tl.resume(); TTS.resume(); }
 function go(i){ if(!P) return; if(i<0) i=0; if(i>=P.scenes.length){ P.only!=null?finishQuick():showQuiz(); return; } playScene(i); }
@@ -1671,7 +1677,7 @@ async function playScene(i){
     if(my!==RUN) return; const beat=sc.beats[b]; segProgress(i,b/n);
     const t=beat.run?beat.run(ctx):null; P.tl=t;
     await Promise.all([TTS.say(beat.say),tlDone(t)]); if(my!==RUN) return;
-    if(beat.wait){ P.waiting=true; setPlaying(false); captionText('دورك: جرّب على اللوحة.'); const ok=await beat.wait(ctx); P.waiting=false; if(my!==RUN) return; setPlaying(true);
+    if(beat.wait){ P.waiting=true; setPlaying(false); captionText(u('yourTurn')); const ok=await beat.wait(ctx); P.waiting=false; if(my!==RUN) return; setPlaying(true);
       const t2=beat.after?beat.after(ctx,ok):null; P.tl=t2; await Promise.all([TTS.say(ok?beat.right:beat.wrong),tlDone(t2)]); if(my!==RUN) return; }
     await sleep(450); if(my!==RUN) return;
     while(P&&!P.playing&&my===RUN) await sleep(120);
@@ -1710,7 +1716,7 @@ async function playTrack(pi){
       while(next<seg.beats.length){ fire(seg.beats[next]); next++; }
       if(only) break;
       const last=cur&&cur.loc;
-      if(last&&last.beat.wait){ P.waiting=true; setPlaying(false); captionText('دورك: جرّب على اللوحة.');
+      if(last&&last.beat.wait){ P.waiting=true; setPlaying(false); captionText(u('yourTurn'));
         const ok=await last.beat.wait(P.ctx); P.waiting=false; if(my!==RUN) return; setPlaying(true);
         P.tl=last.beat.after?last.beat.after(P.ctx,ok):null; const fb=T.fb&&T.fb[last.beat.id], text=ok?last.beat.right:last.beat.wrong;
         if(fb&&fb[ok?'ok':'no']){ captionWords(text.split(/\s+/)); await playClip(fb[ok?'ok':'no'],t=>{ const a=P.trk.audio; if(a.duration) capBeat(text,t/a.duration); }); }
@@ -1723,22 +1729,22 @@ async function playTrack(pi){
   if(my!==RUN) return; P.trk=null; segProgress(P.scenes.length,0);
   only?finishQuick():showQuiz();
 }
-function finishQuick(){ RUN++; TTS.stop(); stopTrack(); setPlaying(false); segProgress(P.scenes.length,0); captionText('انتهى المقطع.');
+function finishQuick(){ RUN++; TTS.stop(); stopTrack(); setPlaying(false); segProgress(P.scenes.length,0); captionText(u('clipEnd'));
   const d=document.createElement('div'); d.className='xp-quiz'; d.id='xp-quiz';
-  d.innerHTML=`<p class="xp-qn">انتهى المقطع</p><h3>تريد الشرح كاملًا مع التحدي؟</h3><div class="xp-row"><button class="xp-btn pri" id="xp-full">افتح الشرح الكامل</button><button class="xp-btn" id="xp-again">أعد المقطع</button><button class="xp-btn" id="xp-bk">إغلاق</button></div>`;
+  d.innerHTML=`<p class="xp-qn">${u('clipEnd')}</p><h3>${u('fullQ')}</h3><div class="xp-row"><button class="xp-btn pri" id="xp-full">${u('openFull')}</button><button class="xp-btn" id="xp-again">${u('again')}</button><button class="xp-btn" id="xp-bk">${u('close')}</button></div>`;
   $x('#xp-sw').appendChild(d); $x('#xp-full').onclick=()=>open(P.key); $x('#xp-again').onclick=()=>playScene(0); $x('#xp-bk').onclick=close; }
 function showQuiz(){
   RUN++; TTS.stop(); stopTrack(); if(P.tl) P.tl.kill(); setPlaying(false); P.idx=P.scenes.length; renderChapters(); segProgress(P.scenes.length,0); $x('#xp-scene-t').textContent='';
   const Q=P.L.quiz||[]; if(!Q.length){ close(); return; } let k=0, score=0; let d=$x('#xp-quiz'); if(!d){ d=document.createElement('div'); d.className='xp-quiz'; d.id='xp-quiz'; $x('#xp-sw').appendChild(d); }
-  captionText('التحدي الختامي: أسئلة سريعة على الفكرة نفسها.');
-  const show=()=>{ const it=Q[k]; d.innerHTML=`<p class="xp-qn">التحدي ${AD(k+1)} من ${AD(Q.length)}</p><h3 ${it.ltr?'dir="ltr"':''}>${escx(it.q)}</h3><div class="xp-opts">${it.o.map((o,i)=>`<button class="xp-opt" data-i="${i}">${escx(o)}</button>`).join('')}</div><div id="xp-fb"></div>`;
+  captionText(u('quizIntro'));
+  const show=()=>{ const it=Q[k]; d.innerHTML=`<p class="xp-qn">${u('qn')(AD(k+1),AD(Q.length))}</p><h3 ${it.ltr||LG==='en'?'dir="ltr"':''}>${escx(it.q)}</h3><div class="xp-opts">${it.o.map((o,i)=>`<button class="xp-opt" data-i="${i}">${escx(o)}</button>`).join('')}</div><div id="xp-fb"></div>`;
     d.querySelectorAll('.xp-opt').forEach(b=>b.onclick=()=>{ const i=+b.dataset.i, ok=i===it.a; if(ok) score++; d.querySelectorAll('.xp-opt').forEach((x,j)=>{ x.disabled=true; if(j===it.a) x.classList.add('right'); else if(j===i) x.classList.add('wrong'); });
-      $x('#xp-fb').innerHTML=`<p class="xp-why"><b>${ok?'صحيح.':'ليس هذا.'}</b> ${escx(it.e)}</p><div class="xp-row"><button class="xp-btn pri" id="xp-qn">${k<Q.length-1?'التالي':'النتيجة'}</button></div>`; $x('#xp-qn').focus(); $x('#xp-qn').onclick=()=>{ k++; k<Q.length?show():end(); }; }); };
+      $x('#xp-fb').innerHTML=`<p class="xp-why"><b>${ok?u('right'):u('wrong')}</b> ${escx(it.e)}</p><div class="xp-row"><button class="xp-btn pri" id="xp-qn">${k<Q.length-1?u('nextQ'):u('result')}</button></div>`; $x('#xp-qn').focus(); $x('#xp-qn').onclick=()=>{ k++; k<Q.length?show():end(); }; }); };
   const end=()=>{ const need=Math.ceil(Q.length*2/3), pass=score>=need; if(pass) HOOKS.onDone(P.key,score,Q.length);
-    const sibs=forSkill(P.L.sk), nx=sibs[sibs.indexOf(P.L)+1];
-    d.innerHTML=`<p class="xp-qn">النتيجة</p><div class="xp-score">${AD(score)} / ${AD(Q.length)}</div><h3>${pass?'أتممت الشرح.':'راجع الفكرة ثم أعد التحدي.'}</h3>
-      <div class="xp-row">${pass?(nx?`<button class="xp-btn pri" id="xp-nx">الشرح التالي: ${escx(nx.title)}</button>`:`<button class="xp-btn pri" id="xp-done">تم</button>`):`<button class="xp-btn pri" id="xp-retry">أعد التحدي</button>`}<button class="xp-btn" id="xp-rw">أعد الشرح</button><button class="xp-btn" id="xp-bk">إغلاق</button></div>`;
-    captionText(pass?'أحسنت!':'أعد المحاولة بعد مراجعة المشهد الذي أخطأت فيه.');
+    const sibs=forSkill(P.L.sk,P.L.lang), nx=sibs[sibs.indexOf(P.L)+1];
+    d.innerHTML=`<p class="xp-qn">${u('result')}</p><div class="xp-score">${AD(score)} / ${AD(Q.length)}</div><h3>${pass?u('passed'):u('failed')}</h3>
+      <div class="xp-row">${pass?(nx?`<button class="xp-btn pri" id="xp-nx">${u('nextL')}${escx(nx.title)}</button>`:`<button class="xp-btn pri" id="xp-done">${u('done')}</button>`):`<button class="xp-btn pri" id="xp-retry">${u('retry')}</button>`}<button class="xp-btn" id="xp-rw">${u('rewatch')}</button><button class="xp-btn" id="xp-bk">${u('close')}</button></div>`;
+    captionText(pass?u('bravo'):u('retryCap'));
     const on=(id,f)=>{ const b=$x(id); if(b) b.onclick=f; }; on('#xp-nx',()=>open(nx.key)); on('#xp-done',close); on('#xp-retry',showQuiz); on('#xp-rw',()=>playScene(0)); on('#xp-bk',close); };
   show();
 }
@@ -1951,6 +1957,2334 @@ analogy:{ key:'analogy', sk:'analogy', ord:10, area:'v', title:'التناظر �
 };
 
 ['percent','balance','analogy'].forEach(k=>XP.add(LESSONS[k]));
+})();
+/* English explainers: algebra */
+(function(){ if(!window.XP||!XP.ready) return;
+/* keep text readable in dark mode: light fills get note ink, dark fills get stage ink */
+const LIGHT=['n0','n1','n2','n3','butter','sky'], DARKF=['surface','surface2','prisoft','pinksoft'];
+const ADD=L=>{ L.scenes.forEach(sc=>{ for(const k in (sc.items||{})){ const it=sc.items[k]; if((it.type==='box'||it.type==='circle')&&LIGHT.includes(it.c)&&!it.cls) it.cls='t-note'; if(it.type==='note'&&DARKF.includes(it.c)&&!it.cls) it.cls='t-ink'; } }); XP.add(L); };
+/* 4-option asks: the engine places option 0 in the right-hand column, so swap each pair to read left to right */
+const L4=(opts,a)=>({ opts, a });
+
+/* ---------- 0. the equation is a balance (re-created in the DSL) ---------- */
+/* scale: pivot at (320,130), pans hang at x=155 (left) and x=485 (right), pan tops at y=208 */
+const SCALE=(on)=>{ const s=on?{show0:true}:{}; return {
+  base:{type:'poly',points:'270,334 370,334 338,314 302,314',c:'ink',...s},
+  post:{type:'box',x:315,y:130,w:10,h:186,rx:4,c:'ink',stroke:false,...s},
+  lsA:{type:'line',x1:155,y1:130,x2:93,y2:208,...s}, lsB:{type:'line',x1:155,y1:130,x2:217,y2:208,...s},
+  lpan:{type:'poly',points:'81,208 229,208 207,228 103,228',c:'surface',...s},
+  rsA:{type:'line',x1:485,y1:130,x2:423,y2:208,...s}, rsB:{type:'line',x1:485,y1:130,x2:547,y2:208,...s},
+  rpan:{type:'poly',points:'411,208 559,208 537,228 433,228',c:'surface',...s},
+  beam:{type:'box',x:150,y:124,w:340,h:12,rx:6,c:'ink',stroke:false,...s},
+  beamT:{type:'box',x:150,y:124,w:340,h:12,rx:6,c:'ink',stroke:false,rot:10},
+  piv:{type:'circle',cx:320,cy:130,r:10,c:'butter',...s},
+}; };
+const XB=(x,on)=>({type:'box',x,y:169,w:38,h:38,rx:6,c:'pri',text:'x',s:22,cls:'t-inv',...(on?{show0:true}:{})});
+const WT=(x,y,on)=>({type:'box',x,y,w:22,h:22,rx:5,c:'butter',...(on?{show0:true}:{})});
+const LEFT=['lsA','lsB','lpan'], RIGHT=['rsA','rsB','rpan'];
+const mv=(keys,dy)=>Object.fromEntries(keys.map(k=>[k,[0,dy]]));
+
+ADD({ key:'en-balance', lang:'en', sk:'algebra', ord:10, title:'An equation is a balance', min:'4 min',
+  goals:['See an equation as a balanced scale','Apply the rule: whatever you do to one side, do to the other','Solve a two-step equation','Check a solution by substituting'],
+  scenes:[
+  { t:'An equation is a balance',
+    items:Object.assign(SCALE(false),{
+      xb:XB(98), lw1:WT(142,185), lw2:WT(166,185), lw3:WT(190,185),
+      rw1:WT(438,185), rw2:WT(462,185), rw3:WT(486,185), rw4:WT(510,185), rw5:WT(450,161), rw6:WT(474,161), rw7:WT(498,161),
+      ll:{type:'text',x:155,y:264,s:20,hand:true,text:'left side'},
+      rl:{type:'text',x:485,y:264,s:20,hand:true,text:'right side'},
+      eq:{type:'eq',x:320,y:74,s:34,text:'x + 3 = 7'},
+    }),
+    beats:[
+      {say:'An equation is like a balance scale. Both sides always weigh exactly the same.', show:['base','post','beam','piv','lsA','lsB','lpan','rsA','rsB','rpan'], gap:.08},
+      {say:'On the left pan sits a mystery box we call x, along with three small weights.', show:['xb','lw1','lw2','lw3','ll'], gap:.2},
+      {say:'On the right pan sit seven weights. So x plus three equals seven.', show:['rw1','rw2','rw3','rw4','rw5','rw6','rw7','rl','eq'], gap:.12},
+    ]},
+  { t:'Same on both sides',
+    items:Object.assign(SCALE(true),{
+      xb:XB(98,true), lw1:WT(142,185,true), lw2:WT(166,185,true), lw3:WT(190,185,true),
+      rw1:WT(438,185,true), rw2:WT(462,185,true), rw3:WT(486,185,true), rw4:WT(510,185,true), rw5:WT(450,161,true), rw6:WT(474,161,true), rw7:WT(498,161,true),
+      eq:{type:'eq',x:320,y:74,s:34,text:'x + 3 = 7',show0:true},
+      bad:{type:'text',x:155,y:245,s:24,cls:'t-bad',text:'Out of balance!'},
+      res:{type:'note',x:320,y:70,w:160,h:56,c:'n0',text:'x = 4',size:32,rot:-3},
+      rule:{type:'note',x:135,y:305,w:230,h:56,c:'n2',text:'Same on both sides',size:18,rot:-2},
+    }),
+    beats:[
+      {say:'We want the box on its own, so let’s lift the three weights off the left pan.', hide:['lw1','lw2','lw3','beam'], show:['beamT'], move:Object.assign(mv([...LEFT,'xb'],-29),mv([...RIGHT,'rw1','rw2','rw3','rw4','rw5','rw6','rw7'],29))},
+      {say:'The scale tips! We changed only one side, so it’s no longer equal.', show:['bad'], hl:['beamT']},
+      {say:'Now lift three weights off the right pan too. The balance comes back, and x equals four.', hide:['rw5','rw6','rw7','beamT','bad','eq'], show:['beam','res','rule'], move:Object.assign(mv([...LEFT,'xb'],29),mv([...RIGHT,'rw1','rw2','rw3','rw4'],-29)), gap:.4},
+    ]},
+  { t:'Divide both sides',
+    items:Object.assign(SCALE(true),{
+      xb1:XB(114), xb2:XB(158),
+      rw1:WT(426,185), rw2:WT(450,185), rw3:WT(474,185), rw4:WT(498,185), rw5:WT(522,185),
+      rw6:WT(426,161), rw7:WT(450,161), rw8:WT(474,161), rw9:WT(498,161), rw10:WT(522,161),
+      eq:{type:'eq',x:320,y:74,s:34,text:'2x = 10'},
+      d1:{type:'text',x:155,y:266,s:24,hand:true,text:'÷ 2'},
+      d2:{type:'text',x:485,y:266,s:24,hand:true,text:'÷ 2'},
+      res:{type:'note',x:320,y:70,w:160,h:56,c:'n2',text:'x = 5',size:32,rot:3},
+    }),
+    beats:[
+      {say:'Here, two identical boxes balance ten weights.', show:['eq','xb1','xb2','rw1','rw2','rw3','rw4','rw5','rw6','rw7','rw8','rw9','rw10'], gap:.08},
+      {say:'Let’s divide both sides by two.', show:['d1','d2'], gap:.3},
+      {say:'One box stays on the left, and half the weights, five, stay on the right. So x equals five.', hide:['xb2','rw6','rw7','rw8','rw9','rw10','eq'], move:{xb1:[22,0]}, show:['res']},
+    ]},
+  { t:'Your turn: first step',
+    items:{
+      eq:{type:'eq',x:320,y:84,s:38,text:'3x + 2 = 14'},
+      q:{type:'text',x:320,y:114,s:20,cls:'t-ink2',text:'What is the correct first step?'},
+      s1:{type:'eq',x:320,y:180,s:34,text:'3x = 12'},
+      s2:{type:'note',x:320,y:255,w:160,h:60,c:'n0',text:'x = 4',size:32,rot:-3},
+    },
+    beats:[
+      {say:'Your turn. Here is three x plus two equals fourteen.', show:['eq']},
+      {say:'What is the correct first step?', show:['q']},
+    ],
+    ask:{ opts:['Subtract 2 from both sides','Divide only the left side by 3','Subtract 2 from the left side only'], a:0, column:true, s:20,
+      right:'Correct. Subtract two from both sides to get three x equals twelve. Then divide by three: x equals four.',
+      wrong:'That changes only one side and breaks the balance. Subtract two from both sides, then divide by three. x equals four.',
+      show:['s1','s2'] }},
+  { t:'Check by substituting',
+    items:{
+      a:{type:'eq',x:320,y:110,s:40,text:'3 × 4 + 2'},
+      b:{type:'eq',x:320,y:180,s:40,cls:'t-pri',text:'= 14'},
+      ck:{type:'check',x:410,y:168,s:1.1},
+      tip:{type:'note',x:320,y:275,w:510,h:62,c:'n3',text:'Multiple choice? Try plugging in the options',size:18,rot:-1.5},
+    },
+    beats:[
+      {say:'Always check your answer. Put four back in: three times four plus two.', show:['a']},
+      {say:'That makes fourteen. Both sides match, so the solution is right.', show:['b','ck'], gap:.4},
+      {say:'On multiple choice, plugging in the options can be even faster than solving.', show:['tip']},
+    ]},
+  ],
+  quiz:[
+    {q:'If x − 5 = 9, then x =', o:['4','14','45','−4'], a:1, e:'Add 5 to both sides: x = 9 + 5 = 14.'},
+    {q:'If 4x = 28, then x =', o:['24','32','7','112'], a:2, e:'Divide both sides by 4: x = 7.'},
+    {q:'If 2x + 6 = 20, then x =', o:['7','13','10','4'], a:0, e:'Subtract 6: 2x = 14, then divide by 2: x = 7.'},
+  ]});
+
+/* ---------- 1. variables and expressions ---------- */
+ADD({ key:'en-al-vars', lang:'en', sk:'algebra', ord:5, title:'Variables and expressions', min:'3 min',
+  goals:['Know what a variable like x means','Combine like terms','Simplify an algebraic expression','Substitute a value for the variable'],
+  scenes:[
+  { t:'What is a variable?',
+    items:{
+      bx:{type:'box',x:270,y:90,w:100,h:100,c:'prisoft',text:'x',s:56,cls:'t-pri'},
+      lbl:{type:'text',x:320,y:225,s:22,cls:'t-ink2',text:'A closed box holding a number we don’t know yet'},
+      n1:{type:'note',x:140,y:110,w:80,h:60,c:'n0',text:'3',size:30,rot:-5},
+      n2:{type:'note',x:130,y:190,w:80,h:60,c:'n1',text:'7',size:30,rot:4},
+      n3:{type:'note',x:500,y:150,w:80,h:60,c:'n3',text:'10',size:30,rot:-3},
+      eq:{type:'eq',x:320,y:262,s:32,text:'3x = 3 × x'},
+      m1:{type:'box',x:240,y:290,w:44,h:44,c:'prisoft',text:'x',s:22,cls:'t-pri'},
+      m2:{type:'box',x:298,y:290,w:44,h:44,c:'prisoft',text:'x',s:22,cls:'t-pri'},
+      m3:{type:'box',x:356,y:290,w:44,h:44,c:'prisoft',text:'x',s:22,cls:'t-pri'},
+    },
+    beats:[
+      {say:'A variable is a letter holding the place of a number we don’t know yet, usually x.', show:['bx','lbl']},
+      {say:'Think of it as a closed box. Inside could be three, seven or ten, depending on the problem.', show:['n1','n2','n3'], gap:.3},
+      {say:'When we write three x, we mean three times x: three identical boxes.', hide:['n1','n2','n3','lbl'], show:['eq','m1','m2','m3'], gap:.25},
+    ]},
+  { t:'Like terms',
+    items:{
+      q:{type:'eq',x:320,y:105,s:40,text:'2x + 3x'},
+      a1:{type:'box',x:134,y:140,w:52,h:52,c:'pinksoft',text:'x',s:24},
+      a2:{type:'box',x:194,y:140,w:52,h:52,c:'pinksoft',text:'x',s:24},
+      pl:{type:'text',x:287,y:178,s:34,text:'+'},
+      b1:{type:'box',x:328,y:140,w:52,h:52,c:'sky',text:'x',s:24},
+      b2:{type:'box',x:388,y:140,w:52,h:52,c:'sky',text:'x',s:24},
+      b3:{type:'box',x:448,y:140,w:52,h:52,c:'sky',text:'x',s:24},
+      res:{type:'note',x:320,y:245,w:170,h:62,c:'n0',text:'5x',size:36,rot:-2},
+      e2:{type:'eq',x:220,y:335,s:28,text:'2x + 3y'},
+      cr:{type:'cross',x:320,y:325,s:.8},
+      e2t:{type:'text',x:440,y:335,s:22,hand:true,text:'can’t combine'},
+    },
+    beats:[
+      {say:'Like terms share the same variable, such as two x and three x.', show:['q']},
+      {say:'Two boxes and three boxes of the same kind...', show:['a1','a2','pl','b1','b2','b3'], gap:.2},
+      {say:'make five boxes. So two x plus three x equals five x. Add the numbers in front and keep the x.', hide:['pl'], move:{a1:[37,0],a2:[37,0],b1:[-37,0],b2:[-37,0],b3:[-37,0]}, show:['res']},
+      {say:'But x and y are different, so two x plus three y can’t be combined into one term.', show:['e2','cr','e2t']},
+    ]},
+  { t:'Simplifying',
+    items:{
+      ex:{type:'eq',x:320,y:105,s:40,text:'4x + 5 − x + 2'},
+      l1:{type:'eq',x:320,y:175,s:30,cls:'t-pri',text:'4x − x = 3x'},
+      l2:{type:'eq',x:320,y:225,s:30,cls:'t-ink2',text:'5 + 2 = 7'},
+      res:{type:'note',x:320,y:292,w:200,h:62,c:'n3',text:'3x + 7',size:32,rot:2},
+    },
+    beats:[
+      {say:'To simplify, group each kind: x terms together, and plain numbers together.', show:['ex']},
+      {say:'Four x minus x is three x. A lone x just means one x.', show:['l1']},
+      {say:'Five plus two is seven. So the simplified expression is three x plus seven.', show:['l2','res']},
+    ]},
+  { t:'Substitution',
+    items:{
+      g1:{type:'text',x:268,y:82,s:24,cls:'t-ink2',text:'If'},
+      g2:{type:'eq',x:340,y:82,s:32,cls:'t-pri',text:'x = 4'},
+      q:{type:'eq',x:320,y:126,s:34,text:'3x + 2 = ?'},
+      w1:{type:'eq',x:320,y:215,s:36,text:'3 × 4 + 2 = 14'},
+      tip:{type:'note',x:320,y:288,w:440,h:56,c:'n1',text:'The number in front multiplies x',size:20,rot:-1.5},
+    },
+    beats:[
+      {say:'Substituting means opening the box and putting the number in place of x.', show:['g1','g2']},
+      {say:'Your turn. If x equals four, what is three x plus two?', show:['q']},
+    ],
+    ask:{ ...L4(['34','14','12','9'],1),
+      right:'Well done. Three times four is twelve, plus two makes fourteen.',
+      wrong:'Three x means three times x, not a three beside a four. Three times four is twelve, plus two makes fourteen.',
+      show:['w1','tip'] }},
+  { t:'Simplify, then substitute',
+    items:{
+      e1:{type:'eq',x:320,y:110,s:38,text:'2x + 3x − 4x'},
+      e2:{type:'eq',x:320,y:170,s:38,cls:'t-pri',text:'= x'},
+      e3:{type:'box',x:180,y:205,w:280,h:54,c:'butter',text:'x = 10 → answer 10',s:22},
+      tip:{type:'note',x:320,y:305,w:420,h:56,c:'n2',text:'Simplify first, then substitute',size:21,rot:-2},
+    },
+    beats:[
+      {say:'On the test, simplify before you substitute. It saves a lot of work.', show:['e1','tip']},
+      {say:'Two x plus three x minus four x is just x. So if x is ten, the answer is simply ten.', show:['e2','e3']},
+    ]},
+  ],
+  quiz:[
+    {q:'Simplify: 5x + 2 − 2x + 4', o:['3x + 6','7x + 6','3x + 2','9x'], a:0, e:'5x − 2x = 3x, and 2 + 4 = 6.'},
+    {q:'If x = 3, what is 4x − 5?', o:['39','7','12','17'], a:1, e:'4 × 3 = 12, then 12 − 5 = 7.'},
+    {q:'If x = 2 and y = 5, what is 3x + y?', o:['11','37','10','21'], a:0, e:'3 × 2 + 5 = 6 + 5 = 11.'},
+  ]});
+
+/* ---------- 2. exponents and roots ---------- */
+ADD({ key:'en-al-exp', lang:'en', sk:'algebra', ord:20, title:'Exponents and roots', min:'4 min',
+  goals:['See an exponent as repeated multiplication','Apply the product and power-of-a-power rules','Know that a zero exponent gives one','Find roots of perfect squares'],
+  scenes:[
+  { t:'Repeated multiplication',
+    items:{
+      pw:{type:'eq',x:150,y:160,s:76,cls:'t-pri',text:'2⁵'},
+      ex:{type:'eq',x:410,y:135,s:32,text:'2 × 2 × 2 × 2 × 2'},
+      res:{type:'eq',x:410,y:190,s:36,cls:'t-pri',text:'= 32'},
+      nb:{type:'note',x:170,y:268,w:170,h:56,c:'n3',text:'Base: 2',size:22,rot:-2},
+      ne:{type:'note',x:420,y:268,w:250,h:56,c:'n1',text:'Exponent: 5 times',size:22,rot:1.5},
+    },
+    beats:[
+      {say:'An exponent means repeated multiplication. Two to the fifth is five twos multiplied together.', show:['pw','ex']},
+      {say:'The big number is the base. The small raised exponent says how many times.', show:['nb','ne']},
+      {say:'Step by step: two, four, eight, sixteen, thirty-two.', show:['res']},
+    ]},
+  { t:'Multiplying powers',
+    items:{
+      q:{type:'eq',x:320,y:100,s:42,text:'2³ × 2⁴'},
+      x1:{type:'eq',x:320,y:165,s:28,text:'(2 × 2 × 2) × (2 × 2 × 2 × 2)'},
+      r:{type:'eq',x:320,y:225,s:42,cls:'t-pri',text:'= 2⁷'},
+      rule:{type:'note',x:320,y:298,w:420,h:58,c:'n0',text:'Same base → add the exponents',size:21,rot:-1.5},
+    },
+    beats:[
+      {say:'What happens when we multiply powers of the same base, like two cubed times two to the fourth?', show:['q']},
+      {say:'Unpack them: three twos, then four twos. Seven twos in all.', show:['x1']},
+      {say:'So it’s two to the seventh. Same base: add the exponents.', show:['r','rule']},
+    ]},
+  { t:'Power of a power; zero',
+    items:{
+      pp:{type:'eq',x:170,y:110,s:40,text:'(3²)³'},
+      pp2:{type:'eq',x:170,y:165,s:26,text:'3² × 3² × 3²'},
+      pp3:{type:'eq',x:170,y:220,s:40,cls:'t-pri',text:'= 3⁶'},
+      r2:{type:'note',x:160,y:292,w:280,h:56,c:'n2',text:'Multiply the exponents',size:19,rot:2},
+      dv:{type:'line',x1:320,y1:85,x2:320,y2:325,cls:'s-line'},
+      z1:{type:'eq',x:470,y:105,s:28,text:'2³ = 8'},
+      z2:{type:'eq',x:470,y:147,s:28,text:'2² = 4'},
+      z3:{type:'eq',x:470,y:189,s:28,text:'2¹ = 2'},
+      z4:{type:'eq',x:470,y:237,s:38,cls:'t-pri',text:'2⁰ = 1'},
+      zh:{type:'text',x:580,y:150,s:20,hand:true,text:'÷ 2'},
+      r3:{type:'note',x:470,y:292,w:230,h:56,c:'n3',text:'Exponent 0 → 1',size:22,rot:-2},
+    },
+    beats:[
+      {say:'Next, three squared, all cubed: that’s three squared, three times over.', show:['dv','pp','pp2']},
+      {say:'Two plus two plus two is six, giving three to the sixth. So multiply the exponents.', show:['pp3','r2']},
+      {say:'For a zero exponent, see the pattern: each step down halves the result.', show:['z1','z2','z3','zh'], gap:.35},
+      {say:'Eight, four, two, then one. So two to the zero is one, as is any nonzero number to the zero.', show:['z4','r3']},
+    ]},
+  { t:'Square roots',
+    items:{
+      g:{type:'grid',x:90,y:90,rows:5,cols:5,cell:30,gap:3,fill:25,c:'prisoft'},
+      gl:{type:'eq',x:172,y:292,s:26,text:'5 × 5 = 25'},
+      q1:{type:'text',x:440,y:130,s:22,text:'What times itself gives 25?'},
+      sq:{type:'eq',x:440,y:205,s:44,cls:'t-pri',text:'√25 = 5'},
+      q2:{type:'eq',x:320,y:118,s:44,text:'√64 = ?'},
+      a1:{type:'eq',x:320,y:215,s:40,cls:'t-pri',text:'8 × 8 = 64'},
+      tip:{type:'note',x:320,y:290,w:320,h:56,c:'n0',text:'A root is not a half!',size:24,rot:-2},
+    },
+    beats:[
+      {say:'A square root undoes squaring: which number, times itself, gives this one?', show:['q1']},
+      {say:'Twenty-five cells make a square five on each side, so the square root of twenty-five is five.', show:['g','gl','sq']},
+      {say:'Your turn. What is the square root of sixty-four?', hide:['g','gl','q1','sq'], show:['q2']},
+    ],
+    ask:{ ...L4(['32','8','16','6'],1),
+      right:'Right. Eight times eight is sixty-four.',
+      wrong:'Thirty-two is half of sixty-four, not its root. Eight times eight is sixty-four, so the root is eight.',
+      show:['a1','tip'] }},
+  { t:'Learn the squares',
+    items:Object.assign({
+      t1:{type:'eq',x:320,y:264,s:32,text:'2³ = 2 × 2 × 2 = 8'},
+      t2:{type:'note',x:320,y:320,w:300,h:48,c:'n1',text:'not 2 × 3 = 6',size:22,rot:-1.5},
+    }, (function(){ const o={};
+      for(let i=1;i<=12;i++){ const r=Math.floor((i-1)/4), k=(i-1)%4; o['s'+i]={type:'box',x:62+k*132,y:72+r*50,w:120,h:40,c:r%2?'surface2':'prisoft',text:i+'² = '+(i*i),s:18,ltr:true}; }
+      return o; })()),
+    beats:[
+      {say:'Learn the squares from one to twelve. They make roots quick on the test.', show:['s1','s2','s3','s4','s5','s6','s7','s8','s9','s10','s11','s12'], gap:.1},
+      {say:'And watch the trap: two cubed is eight, not six.', show:['t1','t2']},
+    ]},
+  ],
+  quiz:[
+    {q:'3² × 3³ = ?', o:['3⁵','3⁶','9⁵','6⁵'], a:0, e:'Same base, so add the exponents: 2 + 3 = 5.'},
+    {q:'(2³)² = ?', o:['2⁵','2⁶','2⁹','4³'], a:1, e:'Power of a power: multiply the exponents, 3 × 2 = 6, which is 64.'},
+    {q:'√144 + 7⁰ = ?', o:['12','13','19','8'], a:1, e:'√144 = 12 and 7⁰ = 1, so the sum is 13.'},
+  ]});
+
+/* ---------- 3. sequences ---------- */
+const row=(pre,xs,y,texts,cs,w=86,h=66,size=28)=>{ const o={}; xs.forEach((x,i)=>{ o[pre+(i+1)]={type:'note',x,y,w,h,c:cs[i]||'n0',text:texts[i],size,rot:[-3,2,-2,3,-1][i%5]}; }); return o; };
+const X5=[110,220,330,440,550];
+const arr=(pre,y,labels,last)=>{ const o={}; for(let i=0;i<4;i++) o[pre+(i+1)]={type:'arrow',x1:X5[i]+25,y1:y,x2:X5[i+1]-25,y2:y,bend:-30,text:labels,...(i===3&&last?{cls:'s-pink'}:{})}; return o; };
+ADD({ key:'en-al-seq', lang:'en', sk:'algebra', ord:30, title:'Sequences and patterns', min:'4 min',
+  goals:['Find a sequence’s rule from the step between terms','Tell arithmetic (constant difference) from geometric (constant ratio)','Find the next term and a missing term'],
+  scenes:[
+  { t:'Arithmetic sequences',
+    items:Object.assign(row('t',X5,190,['3','7','11','15','?'],['n3','n3','n3','n3','n1']), arr('a',150,'+4',true), {
+      nt:{type:'note',x:320,y:295,w:400,h:56,c:'n0',text:'Same difference → arithmetic',size:21,rot:-1.5},
+    }),
+    beats:[
+      {say:'A sequence is a list of numbers that follows a fixed rule. Each number is called a term.', show:['t1','t2','t3','t4','t5'], gap:.2},
+      {say:'Look at the step between terms, not each number alone. From three to seven, we add four.', show:['a1','a2','a3'], gap:.3},
+      {say:'A constant difference makes it arithmetic. The next term is fifteen plus four: nineteen.', show:['a4','nt'], set:{t5:'19'}},
+    ]},
+  { t:'Negative differences',
+    items:Object.assign(row('t',X5,190,['20','17','14','11','?'],['n2','n2','n2','n2','n1']), arr('a',150,'−3',true), {
+      nt:{type:'note',x:320,y:295,w:380,h:56,c:'n0',text:'Negative, but still fixed',size:22,rot:1.5},
+    }),
+    beats:[
+      {say:'The difference can be negative: twenty, seventeen, fourteen, eleven.', show:['t1','t2','t3','t4','t5'], gap:.2},
+      {say:'We subtract three each time, so the next term is eight. The step just has to stay the same.', show:['a1','a2','a3','a4','nt'], gap:.25, set:{t5:'8'}},
+    ]},
+  { t:'Geometric sequences',
+    items:Object.assign(row('g',X5,180,['2','6','18','54','?'],['n0','n0','n0','n0','n1']), arr('m',140,'×3',true), {
+      d1:{type:'eq',x:165,y:255,s:22,cls:'t-bad',text:'+4'},
+      d2:{type:'eq',x:275,y:255,s:22,cls:'t-bad',text:'+12'},
+      d3:{type:'eq',x:385,y:255,s:22,cls:'t-bad',text:'+36'},
+      nt:{type:'note',x:320,y:312,w:320,h:52,c:'n2',text:'Same ratio → geometric',size:22,rot:1.5},
+    }),
+    beats:[
+      {say:'Here the differences change: four, twelve, thirty-six.', show:['g1','g2','g3','g4','g5','d1','d2','d3'], gap:.15},
+      {say:'But each term is three times the one before. That’s geometric, with a ratio of three.', strike:['d1','d2','d3'], show:['m1','m2','m3','nt'], gap:.3},
+      {say:'So the next term is fifty-four times three, one hundred and sixty-two.', show:['m4'], set:{g5:'162'}},
+    ]},
+  { t:'The missing term',
+    items:Object.assign(row('k',[110,215,320,425,530],100,['5','11','?','23','29'],['n3','n3','n1','n3','n3'],80,60,28),{
+      p1:{type:'arrow',x1:130,y1:138,x2:195,y2:138,bend:36,cls:'s-pink'},
+      p2:{type:'arrow',x1:445,y1:138,x2:510,y2:138,bend:36,cls:'s-pink'},
+      p1t:{type:'eq',x:162,y:182,s:22,cls:'t-hand',text:'+6'},
+      p2t:{type:'eq',x:478,y:182,s:22,cls:'t-hand',text:'+6'},
+      ans:{type:'eq',x:320,y:225,s:36,cls:'t-pri',text:'11 + 6 = 17'},
+      chk:{type:'eq',x:320,y:285,s:28,cls:'t-ink2',text:'17 + 6 = 23'},
+      ck:{type:'check',x:440,y:276,s:.8},
+    }),
+    beats:[
+      {say:'When a middle term is missing, find the rule from its known neighbours.', show:['k1','k2','k3','k4','k5'], gap:.2},
+      {say:'Five to eleven adds six, and twenty-three to twenty-nine adds six too.', show:['p1','p1t','p2','p2t'], gap:.3},
+      {say:'Your turn. What is the missing term?', hide:['p1','p1t','p2','p2t']},
+    ],
+    ask:{ ...L4(['16','17','18','20'],1),
+      right:'Well done. Eleven plus six is seventeen, and seventeen plus six is twenty-three.',
+      wrong:'The step is six. Eleven plus six is seventeen, and seventeen plus six gives twenty-three.',
+      show:['ans','chk','ck'] }},
+  { t:'Your test plan',
+    items:{
+      r1:{type:'box',x:70,y:72,w:500,h:50,c:'n3',text:'Constant differences? → arithmetic',s:20},
+      r2:{type:'box',x:70,y:136,w:500,h:50,c:'pinksoft',text:'Constant ratio? → geometric',s:20},
+      r3:{type:'box',x:70,y:200,w:500,h:50,c:'prisoft',text:'Neither? → differences of differences',s:20},
+      ex:{type:'eq',x:320,y:295,s:28,text:'3, 5, 9, 17, ...'},
+      exd:{type:'text',x:320,y:333,s:22,hand:true,text:'steps: 2, 4, 8 (doubling)'},
+    },
+    beats:[
+      {say:'Your plan: find the differences first. If they are constant, it’s arithmetic.', show:['r1']},
+      {say:'If not, try dividing. A constant ratio means it’s geometric.', show:['r2']},
+      {say:'Otherwise, look at the differences of the differences. In three, five, nine, seventeen, the steps double.', show:['r3','ex','exd']},
+    ]},
+  ],
+  quiz:[
+    {q:'What comes next: 4, 9, 14, 19, ...?', o:['23','24','25','29'], a:1, e:'Arithmetic with a difference of 5: 19 + 5 = 24.'},
+    {q:'What comes next: 3, 6, 12, 24, ...?', o:['30','36','48','42'], a:2, e:'Geometric with a ratio of 2: 24 × 2 = 48.'},
+    {q:'Find the missing term: 81, 27, ?, 3, 1', o:['9','12','18','6'], a:0, e:'Each term is a third of the one before: 27 ÷ 3 = 9.'},
+  ]});
+
+/* ---------- 4. word problems ---------- */
+const dict=(i,en,m,y)=>({ ['p'+i]:{type:'box',x:60,y,w:290,h:40,c:'surface2',text:en,s:18}, ['r'+i]:{type:'text',x:380,y:y+28,s:24,cls:'t-pri',text:'→'}, ['e'+i]:{type:'eq',x:480,y:y+29,s:26,text:m} });
+ADD({ key:'en-al-word', lang:'en', sk:'algebra', ord:40, title:'From word problem to equation', min:'4 min',
+  goals:['Translate phrases like “twice a number”, “more than” and “the sum of”','Name the unknown and write the equation','Solve an age or price problem','Go back to what was asked before choosing'],
+  scenes:[
+  { t:'Translation dictionary',
+    items:Object.assign({},
+      dict(1,'twice a number','2x',70), dict(2,'half a number','x ÷ 2',118), dict(3,'5 more than a number','x + 5',166),
+      dict(4,'5 less than a number','x − 5',214), dict(5,'the sum of two numbers','x + y',262), dict(6,'is / becomes','=',310)),
+    beats:[
+      {say:'A word problem hides an equation. Call the unknown x; then twice a number is two x.', show:['p1','r1','e1'], gap:.3},
+      {say:'Half a number is x divided by two.', show:['p2','r2','e2'], gap:.3},
+      {say:'Five more than a number means plus five; five less means minus five.', show:['p3','r3','e3','p4','r4','e4'], gap:.25},
+      {say:'The sum of two numbers is x plus y, and is or becomes means equals.', show:['p5','r5','e5','p6','r6','e6'], gap:.25},
+    ]},
+  { t:'Example: ages',
+    items:{
+      pr1:{type:'text',x:320,y:90,s:21,text:'Ahmed is twice as old as his brother,'},
+      pr1b:{type:'text',x:320,y:120,s:21,text:'and their ages add up to 30.'},
+      pr2:{type:'text',x:320,y:150,s:22,cls:'t-pri',text:'How old is the brother?'},
+      na:{type:'note',x:190,y:202,w:210,h:56,c:'n3',text:'Brother: x',size:23,rot:-2},
+      nb:{type:'note',x:450,y:202,w:210,h:56,c:'n1',text:'Ahmed: 2x',size:23,rot:2},
+      eq1:{type:'eq',x:320,y:275,s:32,text:'x + 2x = 3x = 30'},
+      eq2:{type:'eq',x:320,y:325,s:32,cls:'t-pri',text:'x = 30 ÷ 3 = 10'},
+    },
+    beats:[
+      {say:'Ahmed is twice as old as his brother, and their ages add up to thirty. How old is the brother?', show:['pr1','pr1b','pr2'], gap:.3},
+      {say:'Call the younger one x. The brother is x, and Ahmed is two x.', show:['na','nb'], gap:.4},
+      {say:'Together they make thirty: x plus two x is three x, and that equals thirty.', show:['eq1']},
+      {say:'Divide by three, and x is ten. The brother is ten, and Ahmed is twenty.', show:['eq2']},
+    ]},
+  { t:'Go back to the question',
+    items:{
+      t1:{type:'text',x:320,y:105,s:26,text:'What if it asked for Ahmed’s age?'},
+      c10:{type:'note',x:220,y:195,w:120,h:72,c:'n1',text:'10',size:36,rot:-3},
+      cr:{type:'cross',x:220,y:282},
+      c20:{type:'note',x:420,y:195,w:120,h:72,c:'n3',text:'20',size:36,rot:2},
+      ck:{type:'check',x:420,y:282},
+    },
+    beats:[
+      {say:'After solving, reread the question. Does it ask for x, or something else?', show:['t1']},
+      {say:'If it asks for Ahmed’s age, the answer is twenty, not ten. Ten often sits among the choices as a trap.', show:['c10','cr','c20','ck'], gap:.35},
+    ]},
+  { t:'Your turn: prices',
+    items:{
+      pr1:{type:'text',x:320,y:76,s:20,text:'A pen costs 4 riyals more than a notebook,'},
+      pr1b:{type:'text',x:320,y:104,s:20,text:'and together they cost 20 riyals.'},
+      pr2:{type:'text',x:320,y:134,s:20,cls:'t-pri',text:'Let the notebook cost x.'},
+      w1:{type:'eq',x:320,y:222,s:32,text:'2x + 4 = 20'},
+      w2:{type:'box',x:170,y:250,w:300,h:54,c:'butter',text:'Notebook 8, pen 12',s:22},
+    },
+    beats:[
+      {say:'Your turn. A pen costs four riyals more than a notebook, and together they cost twenty riyals.', show:['pr1','pr1b'], gap:.3},
+      {say:'If the notebook costs x, which equation is correct?', show:['pr2']},
+    ],
+    ask:{ ...L4(['x + 4 = 20','x + (x + 4) = 20','4x = 20','x − 4 = 20'],1), s:20,
+      right:'Correct. The notebook is x and the pen x plus four, together twenty. So the notebook costs eight and the pen twelve.',
+      wrong:'The total includes both prices: x for the notebook plus x plus four for the pen, making twenty. So the notebook is eight, the pen twelve.',
+      show:['w1','w2'] }},
+  { t:'The four steps',
+    items:{
+      n1:{type:'note',x:170,y:120,w:285,h:64,c:'n0',text:'1. Name the unknown',size:18,rot:-2},
+      n2:{type:'note',x:470,y:120,w:285,h:64,c:'n3',text:'2. Translate the phrases',size:18,rot:2},
+      n3:{type:'note',x:170,y:210,w:285,h:64,c:'n2',text:'3. Solve the equation',size:18,rot:1.5},
+      n4:{type:'note',x:470,y:210,w:285,h:64,c:'n1',text:'4. Reread the question',size:18,rot:-1.5},
+      tip:{type:'text',x:320,y:300,s:24,hand:true,text:'Step four protects you from the trap'},
+    },
+    beats:[
+      {say:'Remember the four steps: name the unknown, translate, solve, then reread the question.', show:['n1','n2','n3','n4','tip'], gap:.5},
+    ]},
+  ],
+  quiz:[
+    {q:'When 6 is added to twice a number, the result is 20. What is the number?', o:['7','13','14','8'], a:0, e:'2x + 6 = 20, so 2x = 14 and x = 7.'},
+    {q:'Two numbers add up to 30, and one is 6 more than the other. What is the larger number?', o:['12','18','24','15'], a:1, e:'x + (x + 6) = 30, so x = 12 and the larger is 18.'},
+    {q:'Khalid is three times as old as his son, and their ages add up to 48. How old is Khalid?', o:['12','36','24','32'], a:1, e:'x + 3x = 48, so x = 12 (the son) and Khalid is 36. Careful: the question asks for Khalid.'},
+  ]});
+})();
+/* English explainers: analogy */
+(function(){ if(!window.XP||!XP.ready) return;
+
+/* a word pair: two notes (first word on the LEFT) with a colon between them */
+const pair=(items,id,y,a,b,c,{xa=120,xb=270,w=120,h=60,size=26}={})=>{
+  items[id+'a']={type:'note',x:xa,y,w,h,c,text:a,size,rot:-1.5};
+  items[id+'c']={type:'text',x:(xa+xb)/2,y:y+10,s:30,text:':'};
+  items[id+'b']={type:'note',x:xb,y,w,h,c,text:b,size,rot:1.5};
+  return [id+'a',id+'c',id+'b']; };
+
+/* ================= Lesson: build the bridge (re-created from the hand-built Arabic lesson) ================= */
+const B1={ a:{type:'note',x:200,y:180,w:150,h:90,c:'n0',text:'pen',size:40,rot:-4},
+  col:{type:'text',x:320,y:196,s:48,text:':'},
+  b:{type:'note',x:440,y:180,w:150,h:90,c:'n3',text:'write',size:36,rot:3},
+  ar:{type:'arrow',x1:235,y1:125,x2:405,y2:125,cls:'s-pink',bend:-60,text:'What links them?',s:24} };
+
+const BW=[['A pen',91,'t-pri'],['is a tool',227,'t-ink'],['used for',387,'t-ink'],['writing',531,'t-pri']];
+const B2={}; BW.forEach(([t,x,cls],i)=>{ B2['w'+i]={type:'text',x,y:150,s:30,cls,text:t}; });
+Object.assign(B2,{ ul:{type:'path',d:'M50 172 Q320 192 590 172',cls:'s-pink'},
+  chip:{type:'note',x:320,y:255,w:250,h:62,c:'n2',text:'tool → its use',size:26,rot:-2} });
+
+const BO=[['knife : cut',130,'n0'],['book : library',320,'n1'],['tree : leaf',510,'n3']];
+const B3={ tpl:{type:'text',x:320,y:78,s:22,cls:'t-ink2',text:'A ____ is a tool used for ____'},
+  test:{type:'text',x:320,y:150,s:26,hand:true,text:'A knife is a tool used for cutting.'} };
+BO.forEach(([t,x,c],i)=>{ B3['o'+i]={type:'box',x:x-88,y:205,w:176,h:56,c:'surface2',text:t,s:21}; });
+Object.assign(B3,{ v0:{type:'check',x:130,y:305,s:.75}, x1:{type:'cross',x:320,y:305,s:.75}, x2:{type:'cross',x:510,y:305,s:.75} });
+
+const B4={}; pair(B4,'p',76,'doctor','hospital','n0',{xa:230,xb:410,w:140,h:54,size:24});
+Object.assign(B4,{ hint:{type:'text',x:320,y:132,s:22,hand:true,text:'Bridge: a doctor works in a hospital'},
+  ans:{type:'note',x:320,y:222,w:450,h:66,c:'n0',text:'A teacher works in a school',size:24,rot:-1} });
+
+const B5={}; const p1=pair(B5,'p',110,'egg','hen','n2',{xa:240,xb:400});
+Object.assign(B5,{ ea:{type:'note',x:240,y:250,w:120,h:60,c:'n1',text:'egg',size:26,rot:2},
+  ec:{type:'text',x:320,y:260,s:30,text:':'},
+  eb:{type:'note',x:400,y:250,w:120,h:60,c:'n1',text:'hen',size:26,rot:-2},
+  lab:{type:'text',x:320,y:62,s:24,hand:true,text:'An egg comes from a hen'},
+  x:{type:'cross',x:545,y:250},
+  ar:{type:'arrow',x1:170,y1:196,x2:470,y2:196,cls:'s-pri',bend:-10,text:'first word → second word',s:20} });
+
+XP.add({ key:'en-analogy', lang:'en', sk:'analogy', ord:10, title:'Analogies: build the bridge', min:'4 min',
+  goals:['See that an analogy asks about the relationship, not the words','Build a short bridge sentence','Test every option with the same bridge','Keep the direction of the relationship'],
+  scenes:[
+  { t:'What is an analogy?', items:B1, beats:[
+    { say:'In an analogy question, you get two words with a link between them. Your job is to find another pair with the same link.', show:['a','col','b'], gap:.3 },
+    { say:'The secret: don\'t look at the words themselves. Look at the relationship between them.', show:['ar'] } ]},
+  { t:'Build the bridge', items:B2, beats:[
+    { say:'Turn that relationship into a short, clear sentence. We call it the bridge.', show:['w0','w1','w2','w3'], gap:.35 },
+    { say:'A pen is a tool used for writing. So the relationship is a tool and its use.', show:['ul','chip'] } ]},
+  { t:'Test the options', items:B3, beats:[
+    { say:'Now put each option into the same bridge, one at a time.', show:['tpl','o0','o1','o2'], gap:.2 },
+    { say:'Knife and cut. A knife is a tool used for cutting. It fits.', show:['test','v0'], hl:['o0'] },
+    { say:'Book and library. Is a book a tool used for library? That makes no sense.', set:{test:'A book is a tool used for… library?'}, show:['x1'], strike:['o1'] },
+    { say:'Tree and leaf. That is a whole and its part, not a tool and its use. Cross it out.', set:{test:'A tree is a tool used for… leaf?'}, show:['x2'], strike:['o2'] } ]},
+  { t:'Your turn', items:B4, beats:[
+    { say:'Your turn. Doctor and hospital. Build the bridge in your head: a doctor works in a hospital.', show:['pa','pc','pb'] },
+    { say:'Which pair matches the same bridge?', show:['hint'] } ],
+    ask:{ opts:['teacher : school','book : reader','water : thirst','pen : ink'], a:0, show:['ans'],
+      right:'Well done. A teacher works in a school. Same relationship: a person and their workplace.',
+      wrong:'Test the bridge: does a book work in a reader? No. The only pair that fits is teacher and school.' } },
+  { t:'The direction trap', items:B5, beats:[
+    { say:'Watch the order of the words. Egg and hen: an egg comes from a hen.', show:[...p1,'lab'] },
+    { say:'If an option says hen and egg, the relationship is reversed. That is a very common trap.', show:['ea','ec','eb','x'], move:{ea:[160,0],eb:[-160,0]} },
+    { say:'So always read the bridge in the same order: first word, then second word.', show:['ar'] } ]},
+  ],
+  quiz:[
+    {q:'SCALPEL : SURGEON', o:['book : library','brush : painter','car : road','sea : fish'], a:1, e:'Bridge: a scalpel is a tool a surgeon uses, and a brush is a tool a painter uses.'},
+    {q:'THIRST : WATER', o:['fire : smoke','rain : cloud','hunger : food','sleep : bed'], a:2, e:'Bridge: thirst is relieved by water, and hunger is relieved by food.'},
+    {q:'BRANCH : TREE', o:['hand : finger','finger : hand','pen : notebook','door : key'], a:1, e:'A branch is part of a tree, and a finger is part of a hand. "hand : finger" is the same link reversed.'},
+  ] });
+
+/* ================= Lesson: relation types ================= */
+const T1={}; pair(T1,'p',135,'page','book','n0'); pair(T1,'q',262,'scissors','cut','n3',{size:23});
+delete T1.pc; delete T1.qc;
+Object.assign(T1,{ ar1:{type:'arrow',x1:130,y1:99,x2:260,y2:99,cls:'s-pink',bend:-22,text:'part of'},
+  tag1:{type:'note',x:470,y:135,w:210,h:62,c:'n2',text:'part → whole',size:25,rot:-2},
+  ar2:{type:'arrow',x1:130,y1:226,x2:260,y2:226,cls:'s-pink',bend:-22,text:'used to'},
+  tag2:{type:'note',x:470,y:262,w:210,h:62,c:'n2',text:'tool → use',size:25,rot:1.5} });
+
+const T2={}; pair(T2,'p',125,'drought','famine','n1',{size:23}); pair(T2,'q',232,'judge','court','n3');
+delete T2.pc; delete T2.qc;
+Object.assign(T2,{ ar1:{type:'arrow',x1:130,y1:89,x2:260,y2:89,cls:'s-pink',bend:-22,text:'leads to'},
+  tag1:{type:'note',x:470,y:125,w:210,h:62,c:'n2',text:'cause → effect',size:24,rot:-2},
+  ar2:{type:'arrow',x1:130,y1:196,x2:260,y2:196,cls:'s-pink',bend:-22,text:'works in'},
+  tag2:{type:'note',x:470,y:232,w:210,h:62,c:'n2',text:'place',size:26,rot:1.5},
+  ex:{type:'box',x:350,y:292,w:240,h:46,c:'surface2',text:'Also: bee : hive',s:21} });
+
+const T3={}; const o3={xa:105,xb:270,w:130,h:54,size:23};
+const r1=pair(T3,'a',92,'brave','bold','n0',o3), r2=pair(T3,'b',164,'generous','stingy','n1',{...o3,size:21}), r3=pair(T3,'c',236,'warm','hot','n3',o3);
+Object.assign(T3,{ t1:{type:'box',x:380,y:70,w:180,h:44,c:'prisoft',text:'Synonyms',s:22}, t2:{type:'box',x:380,y:142,w:180,h:44,c:'prisoft',text:'Antonyms',s:22},
+  t3:{type:'box',x:380,y:214,w:180,h:44,c:'pinksoft',text:'Degree',s:22},
+  l1:{type:'box',x:107,y:292,w:110,h:44,c:'sky',text:'cold',s:21}, l2:{type:'box',x:232,y:292,w:110,h:44,c:'butter',text:'cool',s:21},
+  l3:{type:'box',x:357,y:292,w:110,h:44,c:'pinksoft',text:'warm',s:21}, l4:{type:'box',x:482,y:292,w:110,h:44,c:'pink',text:'hot',s:21} });
+
+const T4={}; const t4=pair(T4,'p',95,'apple','fruit','n0',{xa:130,xb:280});
+Object.assign(T4,{ tag:{type:'note',x:480,y:95,w:220,h:62,c:'n2',text:'type → category',size:23,rot:-2},
+  q:{type:'text',x:320,y:100,s:25,text:'Which pair shows a difference of degree?'},
+  ans:{type:'note',x:320,y:222,w:480,h:66,c:'n0',text:'A downpour is heavier than a drizzle',size:21,rot:-1} });
+
+const TY=[['Part–whole','n0'],['Tool–use','n1'],['Cause–effect','n2'],['Synonyms','n3'],['Antonyms','n1'],['Degree','n0'],['Place','n3'],['Type–category','n2']];
+const T5={}; TY.forEach(([t,c],i)=>{ T5['k'+i]={type:'note',x:[95,245,395,545][i%4],y:i<4?135:228,w:142,h:70,c,text:t,size:t.length>11?16:18,rot:i%2?.8:-.8}; });
+T5.foot={type:'text',x:320,y:318,s:28,hand:true,text:'Name the type first, then build the bridge'};
+
+XP.add({ key:'en-an-types', lang:'en', sk:'analogy', ord:20, title:'Types of analogy relationships', min:'4 min',
+  goals:['Know the most common relationship types in analogies','Name the type of a pair quickly','Tell synonyms apart from degree','Build the right bridge for each type'],
+  scenes:[
+  { t:'Parts and tools', items:T1, beats:[
+    { say:'Analogy links come in a few common types. Know them, and the bridge comes fast. First: part and whole.', show:['pa','pb'] },
+    { say:'Page and book. A page is part of a book.', show:['ar1','tag1'] },
+    { say:'Second: a tool and its use. Scissors and cut. Scissors are a tool used to cut.', show:['qa','qb','ar2','tag2'] } ]},
+  { t:'Cause and place', items:T2, beats:[
+    { say:'Third: cause and effect. Drought and famine. A drought leads to famine.', show:['pa','pb','ar1','tag1'] },
+    { say:'Fourth: place. Judge and court. A judge works in a court.', show:['qa','qb','ar2','tag2'] },
+    { say:'Place also covers where a creature lives, like bee and hive.', show:['ex'] } ]},
+  { t:'Same, opposite, stronger', items:T3, beats:[
+    { say:'Synonyms are two words with the same meaning, like brave and bold.', show:[...r1,'t1'] },
+    { say:'Antonyms are opposites, like generous and stingy.', show:[...r2,'t2'] },
+    { say:'But warm and hot are not synonyms. They show degree: hot is stronger than warm.', show:[...r3,'t3'], hl:['t3'] },
+    { say:'Picture a ladder: cold, cool, warm, hot. Each step is stronger than the one before.', show:['l1','l2','l3','l4'], gap:.3 } ]},
+  { t:'Type and category', items:T4, beats:[
+    { say:'Finally, type and category. Apple and fruit. An apple is a type of fruit.', show:[...t4,'tag'] },
+    { say:'Your turn. Which of these pairs shows a difference of degree?', hide:[...t4,'tag'], show:['q'] } ],
+    ask:{ opts:['tall : short','branch : tree','drizzle : downpour','needle : sew'], a:2, show:['ans'],
+      right:'Well done. A downpour is much heavier rain than a drizzle, so it is a higher degree of the same thing.',
+      wrong:'Not this one. Tall and short are opposites, and the other two are part and whole, and a tool. Degree is drizzle and downpour.' } },
+  { t:'The types board', items:T5, beats:[
+    { say:'Here are the common types, all on one board.', show:TY.map((_,i)=>'k'+i), gap:.15 },
+    { say:'When you see a pair, name the type first. Then build the bridge and test the options with it.', show:['foot'] } ]},
+  ],
+  quiz:[
+    {q:'What is the relationship in DROUGHT : FAMINE?', o:['Synonyms','Cause and effect','Part and whole','Degree'], a:1, e:'A drought leads to famine: cause, then effect.'},
+    {q:'BEE : HIVE', o:['pen : ink','bird : nest','lion : cub','tree : branch'], a:1, e:'Place: a hive is where a bee lives, and a nest is where a bird lives.'},
+    {q:'WARM : HOT', o:['breeze : gale','night : day','mountain : rock','water : river'], a:0, e:'Degree: hot is stronger than warm, and a gale is a much stronger wind than a breeze.'},
+  ] });
+
+/* ================= Lesson: tricky analogies ================= */
+const K1={}; const k1=pair(K1,'s',95,'rain','flood','n3',{xa:245,xb:395});
+Object.assign(K1,{ br:{type:'text',x:320,y:162,s:26,hand:true,text:'Heavy rain causes floods'},
+  oA:{type:'box',x:75,y:196,w:220,h:56,c:'surface2',text:'success : effort',s:22}, oB:{type:'box',x:345,y:196,w:220,h:56,c:'surface2',text:'spark : fire',s:22},
+  cA:{type:'text',x:185,y:280,s:20,cls:'t-ink2',text:'effect → cause'}, cB:{type:'text',x:455,y:280,s:20,cls:'t-ink2',text:'cause → effect'},
+  xA:{type:'cross',x:185,y:318,s:.7}, vB:{type:'check',x:455,y:318,s:.7} });
+
+const K2={}; const k2=pair(K2,'s',92,'water','thirst','n3',{xa:245,xb:395});
+Object.assign(K2,{ br:{type:'text',x:320,y:160,s:26,hand:true,text:'Water relieves thirst'},
+  oA:{type:'box',x:60,y:190,w:250,h:56,c:'surface2',text:'medicine : illness',s:21}, oB:{type:'box',x:330,y:190,w:250,h:56,c:'surface2',text:'food : hunger',s:21},
+  vA:{type:'check',x:185,y:290,s:.7}, vB:{type:'check',x:455,y:290,s:.7}, xA:{type:'cross',x:185,y:290,s:.7} });
+
+const K3={}; const k3=pair(K3,'s',80,'cub','lion','n0',{xa:240,xb:400,h:52});
+Object.assign(K3,{ br:{type:'text',x:320,y:134,s:24,hand:true,text:'A cub is a young lion'},
+  ans:{type:'note',x:320,y:222,w:380,h:64,c:'n0',text:'A foal is a young horse',size:24,rot:-1.5} });
+
+const K4={ q1:{type:'note',x:120,y:150,w:186,h:96,c:'n0',text:'Same order?',size:21,rot:-2},
+  q2:{type:'note',x:320,y:150,w:186,h:96,c:'n1',text:'Sharper bridge?',size:18,rot:1.5},
+  q3:{type:'note',x:520,y:150,w:186,h:96,c:'n3',text:'Exact match?',size:21,rot:-1.5},
+  foot:{type:'text',x:320,y:290,s:28,hand:true,text:'Three checks before you choose'} };
+
+XP.add({ key:'en-an-tricky', lang:'en', sk:'analogy', ord:30, title:'Tricky analogies', min:'3 min',
+  goals:['Spot an option whose order is reversed','Sharpen the bridge when two options fit','Rule out an option that is close but not exact'],
+  scenes:[
+  { t:'The reversed-order trap', items:K1, beats:[
+    { say:'Rain and flood. The bridge: heavy rain causes floods. That is cause, then effect.', show:[...k1,'br'] },
+    { say:'Success and effort looks close, but success is the effect and effort is the cause. The order is reversed.', show:['oA','cA','xA'] },
+    { say:'Spark and fire puts the cause first and the effect second, exactly like the original.', show:['oB','cB','vB'] } ]},
+  { t:'Two options fit?', items:K2, beats:[
+    { say:'Sometimes two options pass the same bridge. Water and thirst: water relieves thirst.', show:[...k2,'br'] },
+    { say:'Medicine relieves illness, and food relieves hunger. Both fit, so the bridge is too general.', show:['oA','vA','oB','vB'] },
+    { say:'Make it sharper: thirst is a natural need that water satisfies.', set:{br:'Thirst is a natural need that water satisfies'}, hl:['br'] },
+    { say:'Hunger is a need that food satisfies, but illness is not a need. Cross out medicine and illness.', hide:['vA'], show:['xA'], strike:['oA'] } ]},
+  { t:'Close or exact?', items:K3, beats:[
+    { say:'The most dangerous option is close, but not exact. Cub and lion: a cub is a young lion.', show:[...k3,'br'] },
+    { say:'Which pair matches this bridge exactly?', hl:['br'] } ],
+    ask:{ opts:['kitten : tiger','foal : horse','egg : hen','lion : jungle'], a:1, show:['ans'],
+      right:'Well done. A foal is a young horse. A kitten is not a young tiger, and an egg is not a young hen.',
+      wrong:'Careful. A kitten is related to a tiger but is not its young, and an egg is not a young hen. The exact match is foal and horse.' } },
+  { t:'Before you choose', items:K4, beats:[
+    { say:'Before you choose, ask three questions. First: is the order the same?', show:['q1'] },
+    { say:'Second: does only one option pass? If two pass, sharpen your bridge.', show:['q2'] },
+    { say:'Third: is the match exact, not just close? Only then, choose.', show:['q3','foot'] } ]},
+  ],
+  quiz:[
+    {q:'FIRE : SMOKE', o:['smoke : fire','earthquake : destruction','water : river','sun : moon'], a:1, e:'Cause, then effect. "smoke : fire" has the same link but in reverse order.'},
+    {q:'JUDGE : COURTROOM', o:['doctor : hospital','student : school','traveler : airport','fish : water'], a:0, e:'All are places, but the exact bridge is "works in": a doctor works in a hospital; a student and a traveler do not work in theirs.'},
+    {q:'ROOM : HOUSE', o:['roof : rain','player : stadium','classroom : school','window : light'], a:2, e:'A room is part of a house, and a classroom is part of a school. "player : stadium" is a close place link, not part and whole.'},
+  ] });
+})();
+/* English explainers: arith */
+(function(){ if(!window.XP||!XP.ready) return;
+/* a strip of n equal boxes, left to right; returns items keyed p0..p(n-1) */
+function strip(p,{x,y,w,h,n,colors,texts,s=20,cls}){ const o={}, sw=w/n;
+  for(let i=0;i<n;i++) o[p+i]={type:'box',x:x+i*sw,y,w:sw,h,rx:4,c:Array.isArray(colors)?colors[i]:(colors||'surface'),text:texts?texts[i]:undefined,s,cls};
+  return o; }
+const ks=(p,n)=>Array.from({length:n},(_,i)=>p+i);
+/* a table row, left to right: fraction · decimal · percent */
+function trow(p,y,a,b,c,{hdr=false}={}){ const cls=hdr?'t-pri':'t-ink';
+  return { [p+'b']:{type:'box',x:100,y:y-24,w:470,h:36,rx:8,c:hdr?'prisoft':'surface2',stroke:false},
+    [p+'a']:{type:'text',x:180,y:y,s:hdr?20:24,text:a,cls}, [p+'d']:{type:'text',x:335,y:y,s:hdr?20:24,text:b,cls}, [p+'p']:{type:'text',x:490,y:y,s:hdr?20:24,text:c,cls} }; }
+const rk=p=>[p+'b',p+'a',p+'d',p+'p'];
+const CMP=['A: the first is greater','B: the second is greater','C: they are equal','D: cannot be determined'];
+
+/* ================= 1. order of operations ================= */
+XP.add({ key:'en-ar-order', lang:'en', sk:'arith', ord:10, title:'Order of operations', min:'3 min',
+  goals:['See why everyone needs one fixed order','Apply the four steps: brackets, powers, × and ÷, + and −','Avoid the “multiply first” trap','Work out a mixed expression mentally'],
+  scenes:[
+  { t:'Why an order?',
+    items:{ q:{type:'eq',x:320,y:130,s:54,text:'2 + 3 × 4'},
+      wbox:{type:'box',x:60,y:180,w:230,h:62,c:'badsoft',text:'5 × 4 = 20',s:28,ltr:true}, wx:{type:'cross',x:175,y:290},
+      rbox:{type:'box',x:350,y:180,w:230,h:62,c:'oksoft',text:'2 + 12 = 14',s:28,ltr:true}, rx:{type:'check',x:465,y:290} },
+    beats:[
+      { say:'A simple question to start: two plus three times four. What do you get?', show:['q'] },
+      { say:'Working straight through gives five times four, which is twenty. That’s wrong.', show:['wbox','wx'] },
+      { say:'Multiplying comes first: three times four is twelve, plus two is fourteen.', show:['rbox','rx'] },
+      { say:'So we all follow one fixed order, or two people would get two answers.', hl:['rbox'] },
+    ]},
+  { t:'The four-step ladder',
+    items:{ c1:{type:'circle',cx:100,cy:95,r:24,c:'pri',text:'1',s:24,cls:'t-inv'}, b1:{type:'box',x:140,y:72,w:370,h:46,c:'n3',text:'Brackets  ( )',s:24,cls:'t-note'},
+      c2:{type:'circle',cx:100,cy:157,r:24,c:'pri',text:'2',s:24,cls:'t-inv'}, b2:{type:'box',x:140,y:134,w:370,h:46,c:'n2',text:'Powers: x², x³',s:24,cls:'t-note'},
+      c3:{type:'circle',cx:100,cy:219,r:24,c:'pri',text:'3',s:24,cls:'t-inv'}, b3:{type:'box',x:140,y:196,w:370,h:46,c:'n1',text:'Multiply and divide',s:24,cls:'t-note'},
+      c4:{type:'circle',cx:100,cy:281,r:24,c:'pri',text:'4',s:24,cls:'t-inv'}, b4:{type:'box',x:140,y:258,w:370,h:46,c:'n0',text:'Add and subtract',s:24,cls:'t-note'},
+      h3:{type:'text',x:572,y:226,s:18,text:'left to right',hand:true}, h4:{type:'text',x:572,y:288,s:18,text:'left to right',hand:true} },
+    beats:[
+      { say:'Picture a ladder with four steps. Step one: brackets.', show:['c1','b1'] },
+      { say:'Step two: powers, like squares and cubes.', show:['c2','b2'] },
+      { say:'Step three: multiplying and dividing share one step. Work left to right.', show:['c3','b3','h3'] },
+      { say:'Step four: adding and subtracting, again one step, left to right.', show:['c4','b4','h4'] },
+    ]},
+  { t:'The multiply-first trap',
+    items:{ q:{type:'eq',x:320,y:115,s:50,text:'24 ÷ 4 × 2'},
+      wbox:{type:'box',x:60,y:160,w:230,h:62,c:'badsoft',text:'24 ÷ 8 = 3',s:34,ltr:true}, wx:{type:'cross',x:175,y:262},
+      rbox:{type:'box',x:350,y:160,w:230,h:62,c:'oksoft',text:'6 × 2 = 12',s:34,ltr:true}, rx:{type:'check',x:465,y:262},
+      tip:{type:'note',x:320,y:318,w:380,h:52,c:'n0',text:'Same step? Left to right',size:22,rot:-1} },
+    beats:[
+      { say:'Now a very common trap: twenty-four divided by four times two.', show:['q'] },
+      { say:'Many multiply first and get twenty-four divided by eight, which is three.', show:['wbox','wx'] },
+      { say:'But they share a step, so go left to right: twenty-four divided by four is six, times two is twelve.', show:['rbox','rx'] },
+      { say:'Same with adding and subtracting: ten minus three plus two is nine, not five.', show:['tip'] },
+    ]},
+  { t:'Your turn: climb the ladder',
+    items:{ q:{type:'eq',x:320,y:100,s:46,text:'20 − 3 × (5 − 3)²'},
+      s1:{type:'eq',x:320,y:200,s:26,text:'(5 − 3) = 2,  2² = 4',cls:'t-ink2'}, s2:{type:'eq',x:320,y:250,s:28,text:'3 × 4 = 12',cls:'t-ink2'},
+      s3:{type:'box',x:220,y:275,w:200,h:52,c:'n0',text:'20 − 12 = 8',s:28,cls:'t-note',ltr:true} },
+    beats:[
+      { say:'Your turn. Climb the ladder one step at a time.', show:['q'] },
+      { say:'Twenty minus three times the square of five minus three. What is the result?', hl:['q'] },
+    ],
+    ask:{ opts:['68','8','14','4'], a:1,
+      right:'Well done! The bracket is two, squared is four, times three is twelve, so the answer is eight.',
+      wrong:'Bracket first: two. Squared: four. Three times four is twelve, and twenty minus twelve is eight.',
+      show:['s1','s2','s3'] } },
+  ],
+  quiz:[
+    {q:'6 + 18 ÷ 3 × 2 = ?', o:['8','18','7','16'], a:1, e:'Divide first because it comes first: 18 ÷ 3 = 6, then 6 × 2 = 12, then 6 + 12 = 18.'},
+    {q:'(4 + 2)² − 4 × 5 = ?', o:['16','10','80','20'], a:0, e:'The bracket is 6 and 6² = 36; then 4 × 5 = 20, so 36 − 20 = 16.'},
+    {q:'Compare. First: 12 − 4 + 2.  Second: 12 − (4 + 2).', o:CMP, a:0, e:'First, left to right: 12 − 4 = 8, then 8 + 2 = 10. Second: 12 − 6 = 6. So the first is greater.'},
+  ] });
+
+/* ================= 2. fractions ================= */
+XP.add({ key:'en-ar-frac', lang:'en', sk:'arith', ord:20, title:'Fractions from zero', min:'4 min',
+  goals:['Picture a fraction: numerator and denominator','Build equivalent fractions and simplify them','Add two fractions after matching denominators','Compare two fractions by cross-multiplying'],
+  scenes:[
+  { t:'What is a fraction?',
+    items:{ pie0:{type:'pie',cx:180,cy:200,r:105,parts:4,fill:0}, pie3:{type:'pie',cx:180,cy:200,r:105,parts:4,fill:3,c:'pink'},
+      num:{type:'text',x:345,y:165,s:64,text:'3',cls:'t-pri'}, bar:{type:'line',x1:310,y1:185,x2:380,y2:185,cls:'s-ink'}, den:{type:'text',x:345,y:252,s:64,text:'4',cls:'t-pri'},
+      ln:{type:'text',x:400,y:150,s:20,text:'numerator: parts taken',hand:true,anchor:'start'}, ld:{type:'text',x:400,y:238,s:20,text:'denominator: equal parts',hand:true,anchor:'start'} },
+    beats:[
+      { say:'A fraction is part of a whole. Cut this circle into four equal pieces.', show:['pie0'] },
+      { say:'Shade three of them, and you have three quarters.', hide:['pie0'], show:['pie3','num','bar','den'] },
+      { say:'The bottom number, the denominator, says how many equal pieces make the whole.', show:['ld'], hl:['den'] },
+      { say:'The top number, the numerator, says how many pieces you took.', show:['ln'], hl:['num'] },
+    ]},
+  { t:'Equivalent fractions',
+    items:Object.assign({},
+      strip('a',{x:120,y:72,w:360,h:44,n:2,colors:['pink','surface2']}),
+      strip('b',{x:120,y:142,w:360,h:44,n:4,colors:['pink','pink','surface2','surface2']}),
+      strip('c',{x:120,y:212,w:360,h:44,n:8,colors:['pink','pink','pink','pink','surface2','surface2','surface2','surface2']}),
+      { la:{type:'eq',x:550,y:103,s:28,text:'1/2'}, lb:{type:'eq',x:550,y:173,s:28,text:'2/4'}, lc:{type:'eq',x:550,y:243,s:28,text:'4/8'},
+        rule:{type:'note',x:320,y:312,w:470,h:54,c:'n0',text:'Top and bottom × the same number',size:22,rot:-1} }),
+    beats:[
+      { say:'Half of this strip is shaded. That’s one half.', show:[...ks('a',2),'la'], gap:.15 },
+      { say:'Cut each piece in two: now it’s two quarters, and the shaded area is the same.', show:[...ks('b',4),'lb'], gap:.12 },
+      { say:'Again: four eighths. Three fractions, one value: equivalent fractions.', show:[...ks('c',8),'lc'], gap:.08 },
+      { say:'The rule: multiply top and bottom by the same number, or divide both to simplify.', show:['rule'] },
+    ]},
+  { t:'Adding fractions',
+    items:Object.assign({},
+      { e1:{type:'eq',x:320,y:95,s:34,text:'1/5 + 2/5 = 3/5'} },
+      strip('s',{x:170,y:118,w:300,h:40,n:5,colors:['pink','pri','pri','surface2','surface2']}),
+      { w1:{type:'eq',x:320,y:215,s:30,text:'1/5 + 2/5 = 3/10',cls:'t-bad'},
+        e3:{type:'box',x:95,y:255,w:450,h:58,c:'n3',text:'1/2 + 1/4 = 2/4 + 1/4 = 3/4',s:28,cls:'t-note',ltr:true} }),
+    beats:[
+      { say:'Same denominators? Add the numerators and keep the denominator.', show:['e1'] },
+      { say:'One fifth plus two fifths is three fifths. Same-size pieces, so just count them.', show:ks('s',5), gap:.12 },
+      { say:'The trap: never add the denominators. Three tenths is wrong.', show:['w1'], strike:['w1'] },
+      { say:'Different denominators? Match them first: a half is two quarters, so the sum is three quarters.', show:['e3'] },
+    ]},
+  { t:'Which is bigger?',
+    items:{ v1:{type:'box',x:95,y:62,w:210,h:56,c:'n1',text:'First:  2/3',s:26,cls:'t-note',ltr:true}, v2:{type:'box',x:335,y:62,w:210,h:56,c:'n3',text:'Second:  3/4',s:26,cls:'t-note',ltr:true},
+      r1:{type:'eq',x:200,y:205,s:32,text:'2 × 4 = 8'}, r2:{type:'eq',x:440,y:205,s:32,text:'3 × 3 = 9'}, ck:{type:'check',x:440,y:265},
+      gt:{type:'eq',x:320,y:320,s:24,text:'9 > 8, so the second is greater',cls:'t-pri'} },
+    beats:[
+      { say:'Now compare two thirds with three quarters.', show:['v1','v2'] },
+      { say:'The trick: cross-multiply each numerator by the other denominator, then compare.', hl:['v1','v2'] },
+      { say:'Try it. Which choice is correct?', hl:['v2'] },
+    ],
+    ask:{ opts:CMP, a:1, column:true, y:156, s:20,
+      right:'Correct! Two times four is eight, three times three is nine, so the second is greater.',
+      wrong:'Cross-multiply: two times four is eight, three times three is nine. So three quarters is greater.',
+      show:['r1','r2','ck','gt'] } },
+  ],
+  quiz:[
+    {q:'Which fraction is equivalent to 3/4?', o:['6/9','9/12','4/5','6/10'], a:1, e:'Multiply top and bottom by 3: 3/4 = 9/12.'},
+    {q:'1/3 + 1/6 = ?', o:['2/9','1/2','1/9','2/3'], a:1, e:'Match denominators: 2/6 + 1/6 = 3/6 = 1/2.'},
+    {q:'Which fraction is the largest?', o:['3/5','5/8','2/3','4/7'], a:2, e:'As decimals: 0.6, 0.625, about 0.67 and about 0.57, so 2/3 is largest.'},
+  ] });
+
+/* ================= 3. decimals & conversion ================= */
+XP.add({ key:'en-ar-dec', lang:'en', sk:'arith', ord:30, title:'Decimals and conversions', min:'4 min',
+  goals:['Understand the places after the decimal point','Convert between fractions, decimals and percents','Memorize the conversions the test loves','Avoid the missing-place trap'],
+  scenes:[
+  { t:'What is a decimal?',
+    items:{ g0:{type:'grid',x:60,y:82,rows:10,cols:10,cell:20,gap:2,fill:0}, g30:{type:'grid',x:60,y:82,rows:10,cols:10,cell:20,gap:2,fill:30,c:'pri'},
+      g25:{type:'grid',x:60,y:82,rows:10,cols:10,cell:20,gap:2,fill:25,c:'pink'},
+      e1:{type:'eq',x:460,y:130,s:36,text:'3/10 = 0.3'}, e2:{type:'eq',x:460,y:195,s:36,text:'25/100 = 0.25',cls:'t-pri'},
+      n1:{type:'note',x:375,y:278,w:130,h:58,c:'n3',text:'2 tenths',size:21,rot:-2}, n2:{type:'note',x:545,y:278,w:170,h:58,c:'n1',text:'5 hundredths',size:19,rot:2} },
+    beats:[
+      { say:'A decimal is a fraction over ten, a hundred or a thousand, written with a point.', show:['g0'] },
+      { say:'Three rows out of ten is three tenths, written zero point three.', hide:['g0'], show:['g30','e1'] },
+      { say:'Twenty-five squares out of a hundred is zero point two five.', hide:['g30'], show:['g25','e2'] },
+      { say:'The first place is tenths, the second hundredths: two tenths and five hundredths.', show:['n1','n2'] },
+    ]},
+  { t:'Three names, one value',
+    items:{ nF:{type:'note',x:320,y:100,w:120,h:66,c:'n2',text:'1/2',size:34}, lF:{type:'text',x:320,y:160,s:18,text:'fraction',cls:'t-ink2'},
+      nD:{type:'note',x:140,y:255,w:120,h:66,c:'n3',text:'0.5',size:34}, lD:{type:'text',x:140,y:315,s:18,text:'decimal',cls:'t-ink2'},
+      nP:{type:'note',x:500,y:255,w:120,h:66,c:'n1',text:'50%',size:34}, lP:{type:'text',x:500,y:315,s:18,text:'percent',cls:'t-ink2'},
+      a1:{type:'arrow',x1:250,y1:112,x2:160,y2:210,bend:0,cls:'s-pri'}, t1:{type:'text',x:120,y:150,s:20,text:'top ÷ bottom',hand:true},
+      a2:{type:'arrow',x1:215,y1:255,x2:425,y2:255,bend:-40,cls:'s-pri'}, t2:{type:'eq',x:320,y:222,s:22,text:'× 100',cls:'t-pri'},
+      a3:{type:'arrow',x1:480,y1:210,x2:390,y2:112,bend:0,cls:'s-pink'}, t3:{type:'text',x:530,y:150,s:20,text:'÷ 100, simplify',hand:true} },
+    beats:[
+      { say:'Fraction, decimal and percent are three names for one value. Take one half.', show:['nF','lF'] },
+      { say:'Fraction to decimal: divide top by bottom. One divided by two is zero point five.', show:['a1','t1','nD','lD'] },
+      { say:'Decimal to percent: multiply by a hundred, moving the point two places. Fifty percent.', show:['a2','t2','nP','lP'] },
+      { say:'Back to a fraction: divide by a hundred and simplify. Fifty over a hundred is a half.', show:['a3','t3'] },
+    ]},
+  { t:'Conversions to know',
+    items:Object.assign({}, trow('h',80,'Fraction','Decimal','Percent',{hdr:true}), trow('r1',120,'1/2','0.5','50%'), trow('r2',160,'1/4','0.25','25%'),
+      trow('r3',200,'3/4','0.75','75%'), trow('r4',240,'1/5','0.2','20%'), trow('r5',280,'1/8','0.125','12.5%'),
+      { trap:{type:'note',x:320,y:326,w:300,h:44,c:'n1',text:'0.05 = 5%, not 50%',size:22,rot:-1} }),
+    beats:[
+      { say:'Some conversions come up again and again, so learn them. A half is fifty percent.', show:[...rk('h'),...rk('r1')], gap:.15 },
+      { say:'A quarter is twenty-five percent; three quarters, seventy-five percent.', show:[...rk('r2'),...rk('r3')], gap:.12 },
+      { say:'A fifth is twenty percent; an eighth, twelve and a half percent.', show:[...rk('r4'),...rk('r5')], gap:.12 },
+      { say:'Watch the places: zero point zero five is only five percent, not fifty.', show:['trap'] },
+    ]},
+  { t:'Your turn: convert',
+    items:{ q:{type:'eq',x:320,y:92,s:44,text:'3/8 = ?%'}, hint:{type:'text',x:320,y:135,s:22,text:'Remember: 1/8 = 12.5%',hand:true},
+      res:{type:'box',x:150,y:190,w:340,h:62,c:'n0',text:'3 × 12.5 = 37.5%',s:30,cls:'t-note',ltr:true}, ck:{type:'check',x:320,y:295} },
+    beats:[
+      { say:'Your turn. Write three eighths as a percent.', show:['q'] },
+      { say:'One eighth is twelve and a half percent. So what are three eighths?', show:['hint'] },
+    ],
+    ask:{ opts:['38%','37.5%','3.75%','0.375%'], a:1,
+      right:'Well done! Three times twelve and a half is thirty-seven and a half percent.',
+      wrong:'One eighth is twelve and a half percent, so three eighths is three times that: thirty-seven and a half.',
+      show:['res','ck'] } },
+  ],
+  quiz:[
+    {q:'0.6 is equal to:', o:['6/100','3/5','6%','2/3'], a:1, e:'0.6 = 6/10 = 3/5 after dividing top and bottom by 2.'},
+    {q:'Which number is the largest?', o:['0.09','8%','1/10','0.099'], a:2, e:'1/10 = 0.1, which is bigger than 0.099, 0.09 and 0.08.'},
+    {q:'45% as a fraction in simplest form:', o:['45/10','9/20','9/2','4/5'], a:1, e:'45/100, then divide top and bottom by 5 to get 9/20.'},
+  ] });
+
+/* ================= 4. percent (rebuilt from the hand-built Arabic lesson) ================= */
+XP.add({ key:'en-percent', lang:'en', sk:'arith', ord:40, title:'Percentages from zero', min:'4 min',
+  goals:['See what a percent means on a hundred-square','Turn a percent into a familiar fraction','Find 10%, 5% and 20% in your head','Avoid the “up then down” trap'],
+  scenes:[
+  { t:'Out of every hundred',
+    items:{ g0:{type:'grid',x:40,y:66,rows:10,cols:10,cell:22,gap:2,fill:0}, g25:{type:'grid',x:40,y:66,rows:10,cols:10,cell:22,gap:2,fill:25,c:'pri'},
+      title:{type:'text',x:470,y:120,s:30,text:'Percent'}, sub:{type:'text',x:470,y:160,s:22,text:'= how many out of 100?',hand:true},
+      cnt:{type:'eq',x:470,y:212,s:26,text:'25 out of 100',cls:'t-ink2'},
+      big:{type:'note',x:470,y:285,w:160,h:76,c:'n0',text:'25%',size:44,rot:-4} },
+    beats:[
+      { say:'A percent answers just one question: how many out of every hundred?', show:['g0','title','sub'], gap:.3 },
+      { say:'Here are one hundred squares. Let’s shade twenty-five of them.', hide:['g0'], show:['g25','cnt'] },
+      { say:'Twenty-five out of a hundred is written twenty-five percent.', show:['big'] },
+    ]},
+  { t:'A fraction in disguise',
+    items:{ eq:{type:'eq',x:320,y:92,s:34,text:'25% = 25 ÷ 100 = 1/4'},
+      pie:{type:'pie',cx:320,cy:220,r:85,parts:4,fill:1,c:'pink'},
+      n1:{type:'note',x:130,y:220,w:170,h:84,c:'n1',text:'50% = 1/2',size:26,rot:-4},
+      n2:{type:'note',x:320,y:220,w:170,h:84,c:'n0',text:'25% = 1/4',size:26,rot:3},
+      n3:{type:'note',x:510,y:220,w:170,h:84,c:'n3',text:'10% = 1/10',size:26,rot:-2} },
+    beats:[
+      { say:'Every percent is a fraction with a denominator of one hundred.', show:['eq'] },
+      { say:'And twenty-five out of a hundred is exactly one quarter.', show:['pie'] },
+      { say:'Learn these three: fifty percent is a half, twenty-five a quarter, and ten a tenth.', hide:['pie'], show:['n1','n2','n3'], gap:.5 },
+    ]},
+  { t:'The ten-percent trick',
+    items:{ q:{type:'eq',x:320,y:84,s:30,text:'10% of 240 = ?'},
+      d2:{type:'text',x:135,y:185,s:72,text:'2'}, d4:{type:'text',x:190,y:185,s:72,text:'4'}, d0:{type:'text',x:245,y:185,s:72,text:'0'},
+      ar:{type:'arrow',x1:290,y1:160,x2:400,y2:160,cls:'s-pri',bend:-30,text:'÷ 10'},
+      res:{type:'note',x:475,y:160,w:130,h:80,c:'n0',text:'24',size:46,rot:-3},
+      ch1:{type:'note',x:190,y:290,w:250,h:60,c:'n2',text:'20% = 2 × 24 = 48',size:22,rot:-2},
+      ch2:{type:'note',x:450,y:290,w:250,h:60,c:'n1',text:'5% = 24 ÷ 2 = 12',size:22,rot:2} },
+    beats:[
+      { say:'To find ten percent of any number, divide it by ten.', show:['q','d2','d4','d0'], gap:.15 },
+      { say:'In other words, drop one zero: two hundred and forty becomes twenty-four.', move:{d0:[0,50]}, hide:['d0'], show:['ar','res'] },
+      { say:'Build from there: twenty percent is double, forty-eight. Five percent is half, twelve.', show:['ch1','ch2'], gap:1.2 },
+    ]},
+  { t:'Your turn: shade 40%',
+    items:{ g0:{type:'grid',x:200,y:62,rows:10,cols:10,cell:22,gap:2,fill:0},
+      q:{type:'text',x:320,y:92,s:24,text:'Each column holds 10 squares.'},
+      g40:{type:'grid',x:50,y:124,rows:10,cols:10,cell:20,gap:2,fill:40,c:'pink'},
+      p:{type:'note',x:470,y:190,w:160,h:76,c:'n0',text:'40%',size:44,rot:-3},
+      e:{type:'eq',x:470,y:270,s:24,text:'40 out of 100',cls:'t-ink2'}, ck:{type:'check',x:470,y:315} },
+    beats:[
+      { say:'Your turn. This grid has ten columns of ten squares.', show:['g0'] },
+      { say:'How many whole columns do you shade to show forty percent?', hide:['g0'], show:['q'] },
+    ],
+    ask:{ opts:['4 columns','6 columns','40 columns'], a:0,
+      right:'Excellent! Four columns of ten make forty squares out of a hundred.',
+      wrong:'Close! Forty percent is forty squares out of a hundred: four full columns of ten.',
+      show:['g40','p','e','ck'] } },
+  { t:'Discounts and a classic trap',
+    items:{ bar:{type:'box',x:100,y:80,w:400,h:46,c:'n3',text:'200 riyals',s:24,cls:'t-note'},
+      seg:{type:'box',x:400,y:80,w:100,h:46,c:'pink',text:'−50',s:22,cls:'t-note',ltr:true},
+      tag:{type:'note',x:568,y:70,w:110,h:48,c:'n1',text:'25% off',size:20,rot:10},
+      after:{type:'eq',x:300,y:162,s:24,text:'After the discount: 150 riyals',cls:'t-pri'},
+      v1:{type:'note',x:140,y:275,w:110,h:64,c:'n0',text:'100',size:32}, v2:{type:'note',x:320,y:275,w:110,h:64,c:'n0',text:'120',size:32}, v3:{type:'note',x:500,y:275,w:110,h:64,c:'n1',text:'96',size:32},
+      a1:{type:'arrow',x1:200,y1:246,x2:262,y2:246,cls:'s-pri',bend:-26}, l1:{type:'eq',x:231,y:212,s:18,text:'+20%',cls:'t-pri'},
+      a2:{type:'arrow',x1:380,y1:246,x2:442,y2:246,cls:'s-pink',bend:-26}, l2:{type:'text',x:411,y:212,s:18,text:'−20% of 120',hand:true} },
+    beats:[
+      { say:'A shirt costs two hundred riyals, with twenty-five percent off.', show:['bar','tag'] },
+      { say:'A quarter of two hundred is fifty, so you pay one hundred and fifty.', show:['seg','after'] },
+      { say:'A famous trap: up twenty percent, then down twenty percent, does not bring you back.', show:['v1','a1','l1','v2','a2','l2','v3'], gap:.35 },
+      { say:'The drop is taken from one hundred and twenty, not one hundred, so you end at ninety-six.', hl:['v3'] },
+    ]},
+  ],
+  quiz:[
+    {q:'What is 15% of 400?', o:['40','60','75','15'], a:1, e:'10% of 400 = 40, and 5% is half of that = 20. Total: 60.'},
+    {q:'A price of 80 riyals after a 25% discount is:', o:['55 riyals','60 riyals','20 riyals','65 riyals'], a:1, e:'A quarter of 80 = 20, and 80 − 20 = 60.'},
+    {q:'A number rises 10%, then falls 10%. Compared with the start, it is:', o:['the same','1% more','1% less','10% less'], a:2, e:'100 → 110 → 99, so 1% less, because the drop is taken from 110.'},
+  ] });
+
+/* ================= 5. ratio & proportion ================= */
+const S1c=['pink','pink','sky','sky','sky'];
+XP.add({ key:'en-ar-ratio', lang:'en', sk:'arith', ord:50, title:'Ratio and proportion', min:'4 min',
+  goals:['See a ratio as a comparison of two amounts','Share an amount in a given ratio using parts','Solve a proportion by cross-multiplying','Answer part-of-a-whole questions quickly'],
+  scenes:[
+  { t:'What is a ratio?',
+    items:Object.assign({ d1:{type:'circle',cx:140,cy:110,r:20,c:'pink'}, d2:{type:'circle',cx:190,cy:110,r:20,c:'pink'},
+      d3:{type:'circle',cx:400,cy:110,r:20,c:'sky'}, d4:{type:'circle',cx:450,cy:110,r:20,c:'sky'}, d5:{type:'circle',cx:500,cy:110,r:20,c:'sky'},
+      l1:{type:'text',x:165,y:160,s:18,text:'pink',cls:'t-ink2'}, l2:{type:'text',x:450,y:160,s:18,text:'blue',cls:'t-ink2'},
+      r:{type:'eq',x:295,y:125,s:46,text:'2 : 3',cls:'t-pri'} },
+      strip('p',{x:120,y:200,w:400,h:48,n:5,colors:S1c}),
+      { f1:{type:'eq',x:200,y:285,s:26,text:'2/5'}, f2:{type:'eq',x:400,y:285,s:26,text:'3/5'},
+        dbl:{type:'eq',x:320,y:332,s:22,text:'4 : 6 is the same as 2 : 3',cls:'t-hand'} }),
+    beats:[
+      { say:'A ratio compares two amounts. This bag holds two pink balls and three blue.', show:['d1','d2','d3','d4','d5','l1','l2'], gap:.12 },
+      { say:'We say the ratio of pink to blue is two to three.', show:['r'] },
+      { say:'The whole is five parts: pink is two fifths, blue is three fifths.', show:[...ks('p',5),'f1','f2'], gap:.12 },
+      { say:'Doubling both amounts keeps the ratio: four to six is still two to three.', show:['dbl'] },
+    ]},
+  { t:'Sharing in a ratio',
+    items:Object.assign({ q:{type:'eq',x:320,y:92,s:24,text:'Share 45 riyals: Khalid : Saad = 2 : 3'} },
+      strip('p',{x:120,y:125,w:400,h:56,n:5,colors:S1c,texts:['','','','',''],s:26,cls:'t-note'}),
+      { e:{type:'eq',x:320,y:238,s:36,text:'45 ÷ 5 = 9'},
+        k:{type:'note',x:200,y:300,w:160,h:54,c:'n1',text:'Khalid: 18',size:24,rot:-2}, s:{type:'note',x:440,y:300,w:160,h:54,c:'n3',text:'Saad: 27',size:24,rot:2} }),
+    beats:[
+      { say:'Share forty-five riyals between Khalid and Saad in the ratio two to three.', show:['q'] },
+      { say:'Add the parts: two plus three makes five equal parts.', show:ks('p',5), gap:.12 },
+      { say:'One part is forty-five divided by five: nine.', show:['e'], set:{p0:'9',p1:'9',p2:'9',p3:'9',p4:'9'} },
+      { say:'Khalid gets two parts, eighteen riyals. Saad gets three, twenty-seven riyals.', show:['k','s'] },
+    ]},
+  { t:'Proportions and cross-multiplying',
+    items:{ q:{type:'eq',x:320,y:88,s:22,text:'3 pens cost 12 riyals. How much do 7 pens cost?'},
+      n1:{type:'text',x:230,y:150,s:40,text:'3'}, b1:{type:'line',x1:200,y1:163,x2:260,y2:163}, d1:{type:'text',x:230,y:205,s:40,text:'12'},
+      n2:{type:'text',x:410,y:150,s:40,text:'7'}, b2:{type:'line',x1:380,y1:163,x2:440,y2:163}, d2:{type:'text',x:410,y:205,s:40,text:'x',cls:'t-pri'},
+      x1:{type:'line',x1:255,y1:130,x2:385,y2:200,cls:'s-pink'}, x2:{type:'line',x1:255,y1:200,x2:385,y2:130,cls:'s-pink'},
+      eqs:{type:'box',x:303,y:150,w:34,h:26,rx:6,c:'surface',stroke:false,text:'=',s:40},
+      e:{type:'eq',x:320,y:258,s:28,text:'3 × x = 12 × 7 = 84'},
+      ans:{type:'box',x:230,y:282,w:180,h:52,c:'n0',text:'x = 28',s:28,cls:'t-note',ltr:true} },
+    beats:[
+      { say:'A proportion is two equal ratios. Three pens cost twelve riyals. What do seven cost?', show:['q'] },
+      { say:'Write two equal fractions: three over twelve equals seven over x.', show:['n1','b1','d1','eqs','n2','b2','d2'], gap:.1 },
+      { say:'Cross-multiply: three times x equals twelve times seven, eighty-four.', show:['x1','x2','e'] },
+      { say:'Divide by three: x equals twenty-eight riyals.', show:['ans'] },
+    ]},
+  { t:'Your turn: parts of a whole',
+    items:Object.assign({ q1:{type:'text',x:320,y:84,s:22,text:'A box holds 35 pens.'}, q2:{type:'eq',x:320,y:122,s:22,text:'Blue : red = 3 : 4. How many pens are red?'} },
+      strip('p',{x:110,y:180,w:420,h:52,n:7,colors:['sky','sky','sky','bad','bad','bad','bad'],texts:['5','5','5','5','5','5','5'],s:24,cls:'t-note'}),
+      { e:{type:'box',x:210,y:262,w:220,h:54,c:'n0',text:'4 × 5 = 20',s:28,cls:'t-note',ltr:true} }),
+    beats:[
+      { say:'Your turn. A box holds thirty-five pens, and the ratio of blue to red is three to four.', show:['q1','q2'] },
+      { say:'Add the parts, find one part, then answer: how many are red?', hl:['q2'] },
+    ],
+    ask:{ opts:['15','20','28','25'], a:1,
+      right:'Excellent! Seven parts, each worth five pens, and red is four parts: twenty pens.',
+      wrong:'Three plus four is seven parts; one part is thirty-five divided by seven, five. Red is four times five: twenty.',
+      show:[...ks('p',7),'e'] } },
+  ],
+  quiz:[
+    {q:'60 riyals are shared in the ratio 1 : 4. How much is the larger share?', o:['15','48','40','12'], a:1, e:'5 parts, one part = 60 ÷ 5 = 12, so the larger share = 4 × 12 = 48.'},
+    {q:'If x/5 = 12/20, what is x?', o:['3','4','6','2'], a:0, e:'Cross-multiply: 20 × x = 60, so x = 3.'},
+    {q:'A car travels 120 km on 8 liters. How many liters does it need for 210 km?', o:['12','16','14','15'], a:2, e:'120/8 = 210/x, so x = 210 × 8 ÷ 120 = 14.'},
+  ] });
+})();
+/* English explainers: comparison */
+(function(){ if(!window.XP||!XP.ready) return;
+/* keep text readable in dark mode: light fills get note ink, dark fills get stage ink */
+const LIGHT=['n0','n1','n2','n3','butter','sky'], DARKF=['surface','surface2','prisoft','pinksoft'];
+const ADD=L=>{ L.scenes.forEach(sc=>{ for(const k in (sc.items||{})){ const it=sc.items[k]; if((it.type==='box'||it.type==='circle')&&LIGHT.includes(it.c)&&!it.cls) it.cls='t-note'; if(it.type==='note'&&DARKF.includes(it.c)&&!it.cls) it.cls='t-ink'; } }); XP.add(L); };
+const E=(x,y,s,text,cls)=>({type:'eq',x,y,s,text,cls});
+const CH=['A: First is greater','B: Second is greater','C: They are equal','D: Can’t be determined'];
+/* 4-option asks: the engine puts option 0 in the right-hand column, so swap each pair to read A B / C D left to right */
+const L4=(opts,a)=>({ opts, a, s:17 });
+/* two quantity boxes: first on the left, second on the right */
+const QB=(y,a,b,h=56,s=24)=>({
+  qa:{type:'box',x:65,y,w:230,h,c:'prisoft',text:a,s},
+  qb:{type:'box',x:345,y,w:230,h,c:'surface2',text:b,s},
+});
+
+/* ---------- 1. the four choices ---------- */
+ADD({ key:'en-cm-choices', lang:'en', sk:'comparison', ord:10, title:'The four comparison choices', min:'3 min',
+  goals:['Recognise the comparison format and its fixed choices','Know what each choice means','Know when the answer is “cannot be determined”','Rule out D when there is no unknown'],
+  scenes:[
+  { t:'The question format',
+    items:{
+      la:{type:'text',x:177,y:92,s:20,cls:'t-ink2',text:'Quantity 1'},
+      lb:{type:'text',x:462,y:92,s:20,cls:'t-ink2',text:'Quantity 2'},
+      qa:{type:'box',x:75,y:105,w:205,h:90,c:'prisoft',text:'?',s:44,cls:'t-pri'},
+      qb:{type:'box',x:360,y:105,w:205,h:90,c:'surface2',text:'?',s:44,cls:'t-pri'},
+      vs:{type:'text',x:320,y:160,s:22,hand:true,text:'versus'},
+      c1:{type:'note',x:180,y:245,w:270,h:50,c:'n0',text:'A: First is greater',size:18,rot:-1.5},
+      c2:{type:'note',x:460,y:245,w:270,h:50,c:'n1',text:'B: Second is greater',size:18,rot:1.5},
+      c3:{type:'note',x:180,y:312,w:270,h:50,c:'n3',text:'C: They are equal',size:18,rot:1},
+      c4:{type:'note',x:460,y:312,w:270,h:50,c:'n2',text:'D: Cannot be determined',size:18,rot:-1},
+    },
+    beats:[
+      {say:'A comparison question gives you two quantities. Your job is to decide how they relate.', show:['la','qa','vs','lb','qb'], gap:.3},
+      {say:'The four choices are the same in every question, so learn them once and save time.', show:['c1','c2','c3','c4'], gap:.35},
+    ]},
+  { t:'What each choice means',
+    items:(function(){ const o={}, rows=[['A','First is always greater','12  vs  9','n0'],['B','Second is always greater','3 × 4  vs  15','n1'],['C','Always equal','½  vs  0.5','n3'],['D','Not enough information','x  vs  5','n2']];
+      rows.forEach((r,i)=>{ const y=100+i*64; o['k'+i]={type:'circle',cx:80,cy:y,r:22,c:r[3],text:r[0],s:22};
+        o['m'+i]={type:'text',x:116,y:y+7,s:18,anchor:'start',text:r[1]};
+        o['e'+i]={type:'box',x:400,y:y-24,w:190,h:48,c:'surface2',text:r[2],s:21}; }); return o; })(),
+    beats:[
+      {say:'Choice A: the first quantity is always greater, like twelve versus nine.', show:['k0','m0','e0'], gap:.3},
+      {say:'Choice B: the second is always greater, like three times four versus fifteen.', show:['k1','m1','e1'], gap:.3},
+      {say:'Choice C: they are always equal, like one half versus zero point five.', show:['k2','m2','e2'], gap:.3},
+      {say:'Choice D: it cannot be determined, because no single relationship holds.', show:['k3','m3','e3'], gap:.3},
+      {say:'Notice the word always. The relationship must hold in every case, not just one.', hl:['m0','m1','m2']},
+    ]},
+  { t:'When is it D?',
+    items:{
+      top:E(320,100,32,'x  vs  5'),
+      t1:{type:'box',x:45,y:125,w:265,h:52,c:'n3',text:'x = 8 → first is greater',s:17},
+      t2:{type:'box',x:330,y:125,w:265,h:52,c:'n1',text:'x = 2 → second is greater',s:17},
+      cn:{type:'note',x:320,y:232,w:340,h:58,c:'n2',text:'The relation changed → D',size:22,rot:-1.5},
+      n2:{type:'note',x:320,y:312,w:440,h:50,c:'n0',text:'No unknown? Then it is not D',size:21,rot:1},
+    },
+    beats:[
+      {say:'Pick D when the relationship changes with the unknown. Take x versus five, with no condition.', show:['top']},
+      {say:'If x is eight, the first is greater. If x is two, the second is. It changes, so the answer is D.', show:['t1','t2','cn'], gap:.5},
+      {say:'But if both quantities are plain numbers with no unknown, the answer can never be D.', show:['n2']},
+    ]},
+  { t:'Your turn',
+    items:Object.assign(QB(72,'25% of 40','40% of 25',56,24),{
+      s1:E(320,222,32,'10 = 10','t-pri'),
+      tip:{type:'note',x:320,y:290,w:360,h:56,c:'n0',text:'a% of b = b% of a',size:23,rot:-1.5},
+    }),
+    beats:[
+      {say:'Your turn. Quantity one is twenty-five percent of forty. Quantity two is forty percent of twenty-five.', show:['qa','qb'], gap:.4},
+      {say:'Which of the four choices is correct?'},
+    ],
+    ask:{ ...L4(CH,2),
+      right:'Well done. Both equal ten, so the answer is C.',
+      wrong:'A quarter of forty is ten, and forty percent of twenty-five is also ten. They are equal, so it’s C. D is out, as there is no unknown.',
+      show:['s1','tip'] }},
+  ],
+  quiz:[
+    {q:'Quantity 1: 3 × 8 — Quantity 2: 25', o:CH, a:1, e:'3 × 8 = 24, and 24 is less than 25.'},
+    {q:'Quantity 1: 0.75 — Quantity 2: ¾', o:CH, a:2, e:'¾ = 0.75, so they are equal.'},
+    {q:'x is a real number. Quantity 1: x — Quantity 2: 3', o:CH, a:3, e:'At x = 5 the first is greater; at x = 1 the second is greater.'},
+  ]});
+
+/* ---------- 2. testing values ---------- */
+ADD({ key:'en-cm-test', lang:'en', sk:'comparison', ord:20, title:'Testing values', min:'4 min',
+  goals:['See why one test is not enough','Test zero, negatives, fractions and large numbers','Choose D as soon as the relationship flips','Read the condition and test only inside it'],
+  scenes:[
+  { t:'One test isn’t enough',
+    items:Object.assign(QB(75,'First: x²','Second: x',58,24),{
+      t2:E(320,190,24,'x = 2 → 4 is greater than 2'),
+      wc:{type:'note',x:320,y:268,w:340,h:58,c:'n1',text:'First always greater?',size:23,rot:-1.5},
+    }),
+    beats:[
+      {say:'When an unknown appears, like x squared versus x, don’t stop at the first number you think of.', show:['qa','qb'], gap:.4},
+      {say:'Most people try two: four is greater than two, so the first seems always greater.', show:['t2','wc'], gap:.5},
+      {say:'But that’s too quick. Other numbers might surprise you.', strike:['wc']},
+    ]},
+  { t:'The golden list',
+    items:(function(){ const o={}, xs=[125,255,385,515], v=['0','−1','½','100'], k=['zero','negative','fraction','large'], h=['wipes out','flips sign','shrinks','grows fast'], c=['n0','n1','n3','n2'];
+      xs.forEach((x,i)=>{ o['n'+i]={type:'note',x,y:140,w:110,h:84,c:c[i],text:v[i],size:36,rot:[-3,2,-2,3][i]}; o['k'+i]={type:'text',x,y:218,s:21,cls:'t-ink2',text:k[i]}; o['h'+i]={type:'text',x,y:266,s:19,hand:true,text:h[i]}; }); return o; })(),
+    beats:[
+      {say:'Always test zero, a negative, a fraction between zero and one, and a large number.', show:['n0','k0','n1','k1','n2','k2','n3','k3'], gap:.3},
+      {say:'Zero wipes out products, negatives flip signs, fractions shrink when squared, and large numbers show which grows faster.', show:['h0','h1','h2','h3'], gap:.4},
+    ]},
+  { t:'Test with me',
+    items:{
+      hA:{type:'eq',x:190,y:92,s:24,cls:'t-pri',text:'First: x²'},
+      hB:{type:'eq',x:450,y:92,s:24,cls:'t-pri',text:'Second: x'},
+      r1:{type:'box',x:70,y:122,w:500,h:52,c:'n3',text:'x = 2:  4 vs 2 → first is greater',s:20},
+      r2:{type:'box',x:70,y:190,w:500,h:52,c:'n1',text:'x = ½:  ¼ vs ½ → second is greater',s:20},
+      rn:{type:'note',x:320,y:298,w:360,h:58,c:'n2',text:'The relation flipped → D',size:23,rot:-1.5},
+    },
+    beats:[
+      {say:'Back to x squared versus x. At x equals two, it’s four versus two: the first is greater.', show:['hA','hB','r1'], gap:.3},
+      {say:'With x equal to one half, it’s one quarter versus one half. Now the second is greater!', show:['r2']},
+      {say:'The relationship flipped, so the answer is D right away. No more tests needed.', show:['rn']},
+    ]},
+  { t:'Read the condition first',
+    items:{
+      cond:{type:'box',x:180,y:72,w:280,h:52,c:'butter',text:'Condition: x > 1',s:24},
+      e1:{type:'note',x:200,y:170,w:80,h:54,c:'surface2',text:'0',size:28,rot:-2},
+      e2:{type:'note',x:320,y:170,w:80,h:54,c:'surface2',text:'−1',size:28,rot:2},
+      e3:{type:'note',x:440,y:170,w:80,h:54,c:'surface2',text:'½',size:28,rot:-1},
+      a1:E(320,245,24,'x = 2:  4 > 2'),
+      a2:E(320,285,24,'x = 10:  100 > 10'),
+      ans:{type:'text',x:320,y:333,s:24,hand:true,text:'first is always greater → A'},
+    },
+    beats:[
+      {say:'Read the condition first. Here x is greater than one, so zero, negatives and fractions are out.', show:['cond','e1','e2','e3'], strike:['e1','e2','e3'], gap:.3},
+      {say:'Try two and ten: the first wins both times, and stays ahead for any x above one. The answer is A.', show:['a1','a2','ans'], gap:.5},
+    ]},
+  { t:'Your turn',
+    items:Object.assign(QB(70,'First: 2x','Second: x',48,23),{
+      cond:{type:'text',x:320,y:138,s:18,cls:'t-ink2',text:'No condition on x'},
+      w1:E(320,200,22,'x = 1:  2 vs 1 → A'),
+      w2:E(320,245,22,'x = −1:  −2 vs −1 → B'),
+      w3:{type:'note',x:320,y:305,w:340,h:52,c:'n2',text:'The relation changes → D',size:21,rot:-1.5},
+    }),
+    beats:[
+      {say:'Your turn. Quantity one is two x, and quantity two is x. There is no condition on x.', show:['qa','qb','cond'], gap:.35},
+      {say:'Test zero, a negative and a positive, then choose.'},
+    ],
+    ask:{ ...L4(CH,3),
+      right:'Correct. At one, the first is greater. At negative one, the second is greater. It changes, so the answer is D.',
+      wrong:'Try negative one: negative two versus negative one, so the second is greater. At one, the first is greater. So it’s D.',
+      show:['w1','w2','w3'] }},
+  ],
+  quiz:[
+    {q:'x is negative. Quantity 1: x² — Quantity 2: x', o:CH, a:0, e:'The square of a negative is positive, and a positive is always greater than a negative.'},
+    {q:'No condition on x. Quantity 1: x² — Quantity 2: 0', o:CH, a:3, e:'At x = 0 they are equal; at x = 1 the first is greater.'},
+    {q:'0 < x < 1. Quantity 1: x³ — Quantity 2: x', o:CH, a:1, e:'A fraction shrinks when raised to a higher power: at x = ½, x³ = ⅛.'},
+  ]});
+
+/* ---------- 3. simplify before computing ---------- */
+/* one side of a comparison, read left to right: t1  op  t2 */
+const SIDE=(pre,x,y,t1,t2,op='+')=>({ [pre+'1']:E(x-62,y,32,t1), [pre+'p']:E(x,y,30,op), [pre+'2']:E(x+52,y,32,t2) });
+ADD({ key:'en-cm-simplify', lang:'en', sk:'comparison', ord:30, title:'Simplify before you calculate', min:'3 min',
+  goals:['Cross out terms that appear on both sides','Know what you may do to both sides without changing the relationship','Compare by estimating instead of full calculation'],
+  scenes:[
+  { t:'Cross out what’s shared',
+    items:Object.assign({
+      la:{type:'text',x:180,y:88,s:20,cls:'t-ink2',text:'Quantity 1'},
+      lb:{type:'text',x:460,y:88,s:20,cls:'t-ink2',text:'Quantity 2'},
+      ba:{type:'box',x:65,y:100,w:230,h:64,c:'prisoft'},
+      bb:{type:'box',x:345,y:100,w:230,h:64,c:'surface2'},
+    }, SIDE('a',180,144,'487','39'), SIDE('b',460,144,'487','41'), {
+      rem:{type:'text',x:320,y:222,s:24,text:'What’s left: 39 vs 41'},
+      v:{type:'note',x:320,y:290,w:320,h:58,c:'n0',text:'Second is greater → B',size:23,rot:-1.5},
+    }),
+    beats:[
+      {say:'In comparison, you don’t need exact answers, just which side is bigger.', show:['la','ba','a1','ap','a2','lb','bb','b1','bp','b2'], gap:.12},
+      {say:'Four hundred and eighty-seven appears on both sides, so cross it out.', strike:['a1','b1']},
+      {say:'That leaves thirty-nine versus forty-one, so the second is greater.', show:['rem','v'], gap:.5},
+    ]},
+  { t:'What you may do',
+    items:{
+      r1:{type:'box',x:110,y:78,w:500,h:56,c:'n3',text:'Add or subtract the same number',s:18},
+      k1:{type:'check',x:70,y:106},
+      r2:{type:'box',x:110,y:156,w:500,h:56,c:'n3',text:'Multiply/divide by the same positive number',s:18},
+      k2:{type:'check',x:70,y:184},
+      r3:{type:'box',x:110,y:234,w:500,h:56,c:'n1',text:'Don’t multiply by a negative or an unknown',s:18},
+      k3:{type:'cross',x:70,y:262},
+    },
+    beats:[
+      {say:'You may add or subtract the same number on both sides; the relationship stays the same.', show:['r1','k1'], gap:.3},
+      {say:'You may also multiply or divide both sides by the same positive number.', show:['r2','k2'], gap:.3},
+      {say:'But multiplying by a negative, or by an unknown that might be negative, can flip it.', show:['r3','k3'], gap:.3},
+    ]},
+  { t:'Unknown on both sides',
+    items:Object.assign({
+      ba:{type:'box',x:65,y:90,w:230,h:64,c:'prisoft'},
+      bb:{type:'box',x:345,y:90,w:230,h:64,c:'surface2'},
+    }, SIDE('a',180,134,'x','7'), SIDE('b',460,134,'x','9'), {
+      rem:{type:'text',x:320,y:212,s:24,text:'What’s left: 7 vs 9'},
+      v:{type:'note',x:320,y:282,w:420,h:58,c:'n0',text:'Second always greater → B, not D',size:21,rot:1.5},
+    }),
+    beats:[
+      {say:'The unknown can appear on both sides, like x plus seven versus x plus nine.', show:['ba','a1','ap','a2','bb','b1','bp','b2'], gap:.12},
+      {say:'Subtract x from both sides: seven versus nine. The second is always greater, so it’s B, not D.', strike:['a1','b1'], show:['rem','v'], gap:.5},
+    ]},
+  { t:'Estimate, don’t calculate',
+    items:Object.assign(QB(78,'198 × 5','1000',58,28),{
+      s1:{type:'text',x:320,y:190,s:24,text:'198 is less than 200'},
+      s2:E(320,238,28,'200 × 5 = 1000'),
+      v:{type:'note',x:320,y:302,w:320,h:56,c:'n0',text:'Second is greater → B',size:23,rot:-1.5},
+    }),
+    beats:[
+      {say:'When the arithmetic is heavy, estimate: one hundred and ninety-eight times five versus one thousand.', show:['qa','qb'], gap:.4},
+      {say:'One hundred and ninety-eight is less than two hundred, and two hundred times five is one thousand.', show:['s1','s2'], gap:.5},
+      {say:'So the first is under one thousand: the second is greater. Note which way you rounded.', show:['v']},
+    ]},
+  { t:'Your turn',
+    items:Object.assign(QB(66,'','',72,34),{
+      h1:E(460,93,26,'1'), hl:{type:'line',x1:440,y1:101,x2:480,y2:101,cls:'s-ink'}, h2:E(460,128,26,'2'),
+      f1:E(180,93,26,'7'), fl:{type:'line',x1:160,y1:101,x2:200,y2:101,cls:'s-ink'}, f2:E(180,128,26,'15'),
+      w1:{type:'text',x:320,y:215,s:26,text:'Half of 15 is 7.5'},
+      w2:{type:'text',x:320,y:260,s:26,text:'and 7 is less than 7.5'},
+      v:{type:'note',x:320,y:318,w:320,h:52,c:'n0',text:'Second is greater → B',size:22,rot:-1.5},
+    }),
+    beats:[
+      {say:'Your turn. Quantity one is seven fifteenths, and quantity two is one half.', show:['qa','f1','fl','f2','qb','h1','hl','h2'], gap:.15},
+      {say:'Compare them without long division. What’s the answer?'},
+    ],
+    ask:{ ...L4(CH,1),
+      right:'Well done. Seven is less than half of fifteen, so the fraction is under one half. It’s B.',
+      wrong:'Half of fifteen is seven and a half, but the top is only seven, so the fraction is under one half. The answer is B.',
+      show:['w1','w2','v'] }},
+  ],
+  quiz:[
+    {q:'Quantity 1: 365 + 89 — Quantity 2: 365 + 98', o:CH, a:1, e:'Cross out 365 on both sides: 89 is less than 98.'},
+    {q:'Quantity 1: 102 × 10 — Quantity 2: 1000', o:CH, a:0, e:'102 is more than 100, and 100 × 10 = 1000, so the first is greater.'},
+    {q:'Quantity 1: 4 × 25 × 7 — Quantity 2: 7 × 100', o:CH, a:2, e:'4 × 25 = 100, so both sides are 100 × 7.'},
+  ]});
+})();
+/* English explainers: completion */
+(function(){ if(!window.XP||!XP.ready) return;
+
+const blank=(x,y,w=110,h=44,s=22)=>({type:'box',x,y,w,h,c:'surface2',text:'......',s,cls:'t-pri'});
+const fitSize=t=>t.length>=9?18:t.length>=7?19:t.length>=6?22:27;
+
+/* ================= Lesson: signal words ================= */
+const S1={ s:{type:'text',x:120,y:148,s:24,text:'It was raining,'},
+  sig:{type:'note',x:292,y:140,w:110,h:60,c:'n1',text:'so',size:28,rot:-1.5},
+  b:blank(355,115,265,50,21),
+  hint:{type:'text',x:292,y:212,s:26,hand:true,text:'keeps going →'},
+  foot:{type:'note',x:320,y:292,w:440,h:62,c:'n0',text:'The signal sets the direction',size:23,rot:-1} };
+
+const LW=[['but',100,150],['although',230,150],['whereas',100,235],['however',230,235]], RW=[['because',410,150],['so',540,150],['therefore',410,235],['and',540,235]];
+const S2={ hL:{type:'box',x:35,y:70,w:260,h:46,c:'pinksoft',text:'Flip the meaning',s:22}, hR:{type:'box',x:345,y:70,w:260,h:46,c:'oksoft',text:'Keep the meaning',s:22} };
+LW.forEach(([t,x,y],i)=>{ S2['r'+i]={type:'note',x,y,w:126,h:62,c:'n1',text:t,size:fitSize(t),rot:i%2?1.5:-1.5}; });
+RW.forEach(([t,x,y],i)=>{ S2['l'+i]={type:'note',x,y,w:126,h:62,c:'n3',text:t,size:fitSize(t),rot:i%2?1.5:-1.5}; });
+S2.foot={type:'text',x:320,y:320,s:30,hand:true,text:'Flip or keep?'};
+
+const OP=[['abundant',110],['limited',250],['vast',390],['varied',530]];
+const S3={ w1:{type:'text',x:163,y:95,s:26,text:'Despite'}, b:blank(232,68,130,40,22), w2:{type:'text',x:451,y:95,s:26,text:'resources,'},
+  w3:{type:'text',x:320,y:150,s:24,text:'the team achieved impressive results.'},
+  pred:{type:'note',x:320,y:210,w:260,h:54,c:'n0',text:'Your guess: few',size:24,rot:-1.5} };
+OP.forEach(([t,x],i)=>{ S3['o'+i]={type:'box',x:x-62,y:256,w:124,h:46,c:'surface',text:t,s:21}; });
+S3.v={type:'check',x:250,y:330,s:.6};
+
+const S4={ l1:{type:'text',x:320,y:80,s:25,text:'Sam trained hard for months,'},
+  b:blank(125,104,120,44,24), l2:{type:'text',x:377,y:134,s:25,text:'he lost the race.'},
+  ans:{type:'note',x:185,y:126,w:120,h:50,c:'n0',text:'yet',size:26,rot:-1.5},
+  why:{type:'text',x:320,y:235,s:26,hand:true,text:'Hard work, then a loss: the meaning flips'} };
+
+const S5={ a:{type:'note',x:120,y:160,w:186,h:96,c:'n0',text:'1 Signal word',size:20,rot:-2},
+  b:{type:'note',x:320,y:160,w:186,h:96,c:'n1',text:'2 Predict',size:22,rot:1.5},
+  c:{type:'note',x:520,y:160,w:186,h:96,c:'n3',text:'3 Then options',size:19,rot:-1.5},
+  foot:{type:'text',x:320,y:292,s:26,hand:true,text:'Options come after your guess, not before'} };
+
+XP.add({ key:'en-co-signals', lang:'en', sk:'completion', ord:10, title:'Signal words in sentence completion', min:'4 min',
+  goals:['See how the signal word sets the direction of the missing word','Tell contrast words apart from cause and addition words','Predict the missing word before reading the options'],
+  scenes:[
+  { t:'Sentences have a direction', items:S1, beats:[
+    { say:'In sentence completion, the signal word is your compass. It shows which way the missing part goes.', show:['s','sig','b'] },
+    { say:'It was raining, so we took umbrellas. So keeps the meaning going the same way.', set:{b:'we took umbrellas'}, show:['hint'] },
+    { say:'Switch to but, and it flips: it was raining, but the trip went ahead.', set:{sig:'but',b:'the trip went ahead',hint:'flips ↩'}, show:['foot'] } ]},
+  { t:'Flip words and keep words', items:S2, beats:[
+    { say:'Contrast words flip the meaning: but, although, whereas, however.', show:['hL','r0','r1','r2','r3'], gap:.3 },
+    { say:'Cause and addition words keep it going: because, so, therefore, and.', show:['hR','l0','l1','l2','l3'], gap:.3 },
+    { say:'So ask first: does the signal flip the meaning, or keep it?', show:['foot'], hl:['hL','hR'] } ]},
+  { t:'Predict before the options', items:S3, beats:[
+    { say:'Cover the options first. The team did impressively despite its resources.', show:['w1','b','w2','w3'], gap:.2 },
+    { say:'Despite flips the meaning, and the result is impressive. So the resources must have been few.', hl:['w1'], show:['pred'] },
+    { say:'Now read the options. Limited matches your guess.', show:['o0','o1','o2','o3','v'], gap:.15, set:{b:'limited'} },
+    { say:'Abundant and vast agree with the result instead of flipping it, so cross them out.', strike:['o0','o2'] } ]},
+  { t:'Your turn: which word?', items:S4, beats:[
+    { say:'Your turn. Does the second half keep the first, or flip it?', show:['l1','b','l2'], gap:.25 },
+    { say:'Sam trained hard for months, then lost the race. Which word fits the blank?', hl:['b'] } ],
+    ask:{ opts:['so','because','yet','therefore'], a:2, show:['ans','why'],
+      right:'Well done. Hard training leads you to expect a win, so a loss needs a flip word: yet.',
+      wrong:'Careful. Hard training suggests a win, but he lost, so the meaning flips. The answer is yet.' } },
+  { t:'Your steps', items:S5, beats:[
+    { say:'Your steps: find the signal, predict your word, then read the options.', show:['a','b','c'], gap:.4 },
+    { say:'Predicting first protects you from an attractive option that points the wrong way.', show:['foot'] } ]},
+  ],
+  quiz:[
+    {q:'Despite the ______ weather, the children went out to play in the park.', o:['mild','freezing','lovely','clear'], a:1, e:'"Despite" flips the meaning: they went out even though the weather was bad, so "freezing".'},
+    {q:'She went to bed early; ______, she woke up full of energy.', o:['however','although','as a result','whereas'], a:2, e:'Waking up energetic is a result of sleeping early, so we need a result word: "as a result".'},
+    {q:'My brother loves sports, ______ my sister prefers reading.', o:['because','whereas','therefore','so'], a:1, e:'Two different preferences are contrasted, so "whereas" fits.'},
+  ] });
+
+/* ================= Lesson: two blanks & meaning agreement ================= */
+const OPT=[['strengthens / whereas',165,202],['weakens / but',475,202],['strengthens / so',165,264],['damages / and',475,264]];
+const T1={ a1:{type:'text',x:171,y:92,s:26,text:'Enough sleep'}, b1:blank(278,66,160,40,21), a2:{type:'text',x:515,y:92,s:26,text:'memory,'},
+  b2:blank(58,120,120,40,21), a3:{type:'text',x:374,y:146,s:24,text:'staying up late weakens it.'} };
+OPT.forEach(([t,x,y],i)=>{ T1['o'+i]={type:'box',x:x-135,y:y-24,w:270,h:48,c:'surface',text:t,s:20}; });
+T1.v={type:'check',x:320,y:202,s:.55};
+
+const T2={ a1:{type:'text',x:238,y:110,s:26,text:'The lecture was so'}, b1:blank(392,84,150,44,22),
+  a2:{type:'text',x:188,y:180,s:26,text:'that most students'}, b2:blank(342,154,190,44,21), a3:{type:'text',x:569,y:180,s:26,text:'it.'},
+  x:{type:'cross',x:320,y:258,s:.8}, v:{type:'check',x:320,y:258,s:.8},
+  tag:{type:'text',x:320,y:322,s:26,hand:true,text:'Check the whole sentence, not each blank'} };
+
+const CL=[['pay','attention',170,125],['make','a decision',470,125],['take','a risk',170,225],['give','a speech',470,225]];
+const T3={}; CL.forEach(([v,n,x,y],i)=>{ T3['v'+i]={type:'note',x:x-68,y,w:128,h:62,c:'n2',text:v,size:26,rot:-1.5}; T3['n'+i]={type:'note',x:x+68,y,w:128,h:62,c:'n0',text:n,size:n.length>=10?18:n.length>=8?20:24,rot:1.5}; });
+T3.foot={type:'text',x:320,y:315,s:28,hand:true,text:'A verb calls for its usual partner'};
+
+const T4={ l1:{type:'text',x:157,y:80,s:22,text:'The state pays close'}, b1:blank(301,57,130,36,20), w2:{type:'text',x:529,y:80,s:22,text:'to education,'},
+  b2:blank(79,103,100,36,20), l2:{type:'text',x:376,y:126,s:22,text:'it funds schools generously.'},
+  ans:{type:'note',x:320,y:225,w:300,h:64,c:'n0',text:'attention + so',size:27,rot:-1.5} };
+
+const T5={ a:{type:'note',x:120,y:160,w:186,h:96,c:'n0',text:'1 Clearer blank',size:18,rot:-2},
+  b:{type:'note',x:320,y:160,w:186,h:96,c:'n1',text:'2 Eliminate',size:22,rot:1.5},
+  c:{type:'note',x:520,y:160,w:186,h:96,c:'n3',text:'3 Read it all',size:21,rot:-1.5},
+  foot:{type:'text',x:320,y:292,s:26,hand:true,text:'And watch for words that go together'} };
+
+XP.add({ key:'en-co-twoblank', lang:'en', sk:'completion', ord:20, title:'Two blanks and meaning agreement', min:'4 min',
+  goals:['Start with the clearer blank and use it to eliminate options','Check that the whole sentence makes sense','Recognize collocations such as "pay attention"'],
+  scenes:[
+  { t:'Start with the clearer blank', items:T1, beats:[
+    { say:'With two blanks, don\'t solve both at once. Start with the clearer one.', show:['a1','b1','a2','b2','a3','o0','o1','o2','o3'], gap:.12 },
+    { say:'Enough sleep strengthens memory; it doesn\'t weaken or damage it. Two options are out.', set:{b1:'strengthens'}, strike:['o1','o3'] },
+    { say:'Two are left. Sleep and staying up late are contrasted, so we need whereas.', set:{b2:'whereas'}, strike:['o2'], show:['v'] } ]},
+  { t:'Read the whole sentence', items:T2, beats:[
+    { say:'After choosing, reread the whole sentence. Each blank can fit alone while the meaning still clashes.', show:['a1','b1','a2','b2','a3'], gap:.15 },
+    { say:'So clear that most students misunderstood it? Each word fits alone, but together they contradict.', set:{b1:'clear',b2:'misunderstood'}, show:['x'] },
+    { say:'Now: so confusing that most students misunderstood it. The whole sentence agrees.', set:{b1:'confusing'}, hide:['x'], show:['v','tag'] } ]},
+  { t:'Words that go together', items:T3, beats:[
+    { say:'Some words naturally go together. We call them collocations, like pay attention.', show:['v0','n0'] },
+    { say:'We also say make a decision, take a risk, and give a speech.', show:['v1','n1','v2','n2','v3','n3'], gap:.25 },
+    { say:'So when one of these verbs comes before a blank, look for its usual partner.', show:['foot'], hl:['v0','n0'] } ]},
+  { t:'Your turn: two blanks', items:T4, beats:[
+    { say:'Your turn. Start with the blank after pays close, then check the whole meaning.', show:['l1','b1','w2','b2','l2'], gap:.2 },
+    { say:'Which option fills both blanks?', hl:['b1','b2'] } ],
+    ask:{ opts:['attention / so','neglect / so','attention / but','disregard / and'], a:0, show:['ans'],
+      right:'Well done. Pays close calls for attention, and generous funding results from it, so the link is so.',
+      wrong:'Pays close calls for attention, and funding follows from it. So the answer is attention with so.' } },
+  { t:'Two-blank steps', items:T5, beats:[
+    { say:'Your steps: start with the clearer blank, eliminate with it, then read the whole sentence.', show:['a','b','c'], gap:.4 },
+    { say:'And watch for collocations. They can settle a blank in seconds.', show:['foot'] } ]},
+  ],
+  quiz:[
+    {q:'The runner was ______ at the start of the race, ______ he managed to win in the end.', o:['ahead / but','behind / but','behind / so','tired / because'], a:1, e:'Winning after falling behind is a surprise, so the second blank needs a contrast word: "but".'},
+    {q:'The father pays close ______ to his children\'s upbringing.', o:['attention','thought','decision','opinion'], a:0, e:'"Pay close attention" is a fixed collocation.'},
+    {q:'The manager made a firm ______, ______ the problem was solved quickly.', o:['decision / so','opinion / but','decision / although','stance / whereas'], a:0, e:'"Make a decision" is a collocation, and the quick fix is a result of it, so "so".'},
+  ] });
+})();
+/* English explainers: context */
+(function(){ if(!window.XP||!XP.ready) return;
+
+/* Lays out an English sentence word by word (left to right, centered on x=320).
+   Words starting with '*' are underlined with a line item.
+   Adds to `items`: highlight boxes <id>g<k> (oksoft) and <id>r<k> (badsoft) behind each underlined word,
+   words <id>w<l>_<i>, underlines <id>u<k>. Returns {words:[keys], lines:[keys], pos:[{x,y,w}]} per underlined word. */
+/* approximate bold advance widths (em) for a wide sans; narrower web fonts only widen the gaps */
+const CW={a:.68,b:.72,c:.59,d:.72,e:.68,f:.44,g:.72,h:.71,i:.34,j:.34,k:.67,l:.34,m:1.04,n:.71,o:.69,p:.72,q:.72,r:.49,s:.6,t:.48,u:.71,v:.65,w:.92,x:.65,y:.65,z:.58,I:.37,T:.68,',':.38,'.':.38,'-':.42,"'":.33,':':.4};
+function sentence(items,id,lines,{y0=110,lh=66,s=24,gap}={}){
+  const G=gap??s*.4, est=w=>Math.max(1,[...w].reduce((a,ch)=>a+(CW[ch]??(/[A-Z]/.test(ch)?.77:.66)),0))*s;
+  const out={words:[],lines:[],pos:[]}, words=[], k={n:0};
+  lines.forEach((ln,li)=>{ const y=y0+li*lh; const ws=ln.map(w=>{ const u=w[0]==='*', t=u?w.slice(1):w; return {t,u,w:est(t)}; });
+    const W=ws.reduce((a,b)=>a+b.w,0)+G*(ws.length-1); let x=320-W/2;
+    ws.forEach((o,i)=>{ const cx=x+o.w/2; x+=o.w+G; words.push({key:`${id}w${li}_${i}`,t:o.t,cx,y});
+      if(o.u){ const n=k.n++; const hw=o.w/2+4; out.pos.push({x:cx,y,w:o.w});
+        items[`${id}g${n}`]={type:'box',x:cx-hw,y:y-s*1.02,w:hw*2,h:s*1.45,c:'oksoft',stroke:false,rx:8};
+        items[`${id}r${n}`]={type:'box',x:cx-hw,y:y-s*1.02,w:hw*2,h:s*1.45,c:'badsoft',stroke:false,rx:8}; } }); });
+  words.forEach(w=>{ items[w.key]={type:'text',x:w.cx,y:w.y,s,text:w.t}; out.words.push(w.key); });
+  out.pos.forEach((p,n)=>{ const key=`${id}u${n}`; items[key]={type:'line',x1:p.x-p.w*.45,y1:p.y+9,x2:p.x+p.w*.45,y2:p.y+9,cls:'s-pri'}; out.lines.push(key); });
+  return out;
+}
+const mark=(items,key,type,p,dy=40,s=.62)=>{ items[key]={type,x:p.x,y:p.y+dy,s}; };
+
+/* ================= Lesson 1: what a contextual error is ================= */
+const PLAYER=[['The','player','*trained','*hard','all','week,'],['so','his','form','*slipped','and','he','*starred.']];
+const A1={}, a1=sentence(A1,'a',PLAYER,{y0:115,lh:74});
+A1.tag={type:'note',x:320,y:292,w:480,h:62,c:'n1',text:'An error of meaning, not grammar',size:21,rot:-1};
+
+const A2={}, a2=sentence(A2,'b',PLAYER,{y0:115,lh:74});
+Object.assign(A2,{ idea:{type:'note',x:190,y:290,w:260,h:62,c:'n3',text:'The idea: hard work',size:21,rot:-1.5},
+  ar:{type:'arrow',x1:326,y1:280,x2:400,y2:280,cls:'s-pink',bend:-26},
+  idea2:{type:'note',x:480,y:290,w:140,h:62,c:'n3',text:'success',size:23,rot:1.5} });
+
+const A3={}, a3=sentence(A3,'c',PLAYER,{y0:100,lh:92});
+a3.pos.forEach((p,i)=>mark(A3,'m'+i,i===2?'cross':'check',p,42));
+A3.fix={type:'note',x:320,y:318,w:290,h:54,c:'n0',text:'slipped → improved',size:23,rot:-1.5};
+
+const A4={}, a4=sentence(A4,'d',[['Ice','*melts','when','the','temperature','*falls,'],['*turning','it','into','liquid','*water.']],{y0:74,lh:52,s:22});
+A4.ans={type:'note',x:320,y:230,w:260,h:64,c:'n0',text:'falls → rises',size:26,rot:-1.5};
+
+const A5={ s1:{type:'note',x:130,y:170,w:176,h:90,c:'n0',text:'1 The idea',size:23,rot:-2},
+  s2:{type:'note',x:320,y:170,w:176,h:90,c:'n1',text:'2 Anchors',size:23,rot:1.5},
+  s3:{type:'note',x:510,y:170,w:176,h:90,c:'n3',text:'3 Test each',size:22,rot:-1.5},
+  foot:{type:'text',x:320,y:292,s:26,hand:true,text:'Try the opposite: if it fits, you found it'} };
+
+XP.add({ key:'en-cx-what', lang:'en', sk:'context', ord:10, title:'What is a contextual error?', min:'3 min',
+  goals:['Know that a contextual error is one word that breaks the meaning','Find the main idea before looking at single words','Test each underlined word against the idea','Confirm the error by trying its opposite'],
+  scenes:[
+  { t:'One word breaks it', items:A1, beats:[
+    { say:'A contextual error question gives you a sentence with correct grammar and four underlined words.', show:a1.words, gap:.08 },
+    { say:'Only one of those four words breaks the meaning. That is your answer.', show:a1.lines, gap:.3 },
+    { say:'So the error is not in grammar or spelling. It is in the meaning.', show:['tag'] } ]},
+  { t:'Start with the idea', items:A2, beats:[
+    { say:'Don\'t start word by word. Read the whole sentence and ask: what is its main idea?', show:a2.words, gap:.05 },
+    { say:'A player trained hard all week, and then starred. That is the idea.', show:['bg1','bg3','idea','ar','idea2'] },
+    { say:'Hard work and starring are the anchors of the meaning, and they point the same way.', show:a2.lines, hl:['idea','idea2'] } ]},
+  { t:'Test each word', items:A3, beats:[
+    { say:'Now test each underlined word against the idea. Trained fits. Hard fits.', show:[...a3.words,...a3.lines,'cg0','cg1','m0','m1'], gap:.03 },
+    { say:'His form slipped? Someone who trains hard doesn\'t slip and then star. This word contradicts the idea.', show:['cr2','m2'] },
+    { say:'Starred fits. Now try the opposite: his form improved. The sentence makes sense.', show:['cg3','m3','fix'] } ]},
+  { t:'Your turn: ice', items:A4, beats:[
+    { say:'Your turn. Find the idea of the sentence first, then test the four words.', show:[...a4.words,...a4.lines], gap:.06 },
+    { say:'Ice melts when the temperature falls, turning it into liquid water. Which word breaks the meaning?', hl:a4.lines } ],
+    ask:{ opts:['melts','falls','turning','water'], a:1, show:['ans'],
+      right:'Well done. Ice melts when the temperature rises, not when it falls. The error is falls.',
+      wrong:'Check the science. Ice melts when the temperature rises, so the error is falls.' } },
+  { t:'Your steps', items:A5, beats:[
+    { say:'So your steps: find the idea, spot the anchors, then test each word.', show:['s1','s2','s3'], gap:.45 },
+    { say:'Suspect a word? Try its opposite. If the meaning works, you have found the error.', show:['foot'] } ]},
+  ],
+  quiz:[
+    {q:'Find the contextual error: "The traveler was so thirsty that he drank water until he was hungry."', o:['thirsty','drank','water','hungry'], a:3, e:'Drinking water ends thirst, not hunger; the right word would be "satisfied".'},
+    {q:'Find the contextual error: "The sun rises in the west every morning, filling the land with light."', o:['rises','west','morning','light'], a:1, e:'The sun rises in the east, so "west" breaks the meaning.'},
+    {q:'What is the first step in a contextual error question?', o:['Pick the hardest word','Find the main idea of the sentence','Read only the options','Look for a grammar mistake'], a:1, e:'The main idea is the measure you test every underlined word against.'},
+  ] });
+
+/* ================= Lesson 2: strategies and traps ================= */
+const B1={}, b1=sentence(B1,'a',[['The','*wise','leader','makes','his','decisions'],['*recklessly,','after','*careful','*study.']],{y0:105,lh:70});
+Object.assign(B1,{ x:{type:'cross',x:b1.pos[1].x,y:b1.pos[1].y+42,s:.62},
+  fix:{type:'note',x:320,y:292,w:380,h:62,c:'n0',text:'recklessly → thoughtfully',size:22,rot:-1.5} });
+
+const B2={}, b2=sentence(B2,'b',[['She','woke','up','*early','and','*caught','the','bus,'],['*but','she','reached','school','*before','everyone.']],{y0:95,lh:62});
+Object.assign(B2,{ c1:{type:'box',x:45,y:230,w:220,h:52,c:'surface2',text:'woke up early',s:21},
+  ar:{type:'arrow',x1:270,y1:246,x2:370,y2:246,cls:'s-pink',bend:-30,text:'result'},
+  c2:{type:'box',x:375,y:230,w:220,h:52,c:'surface2',text:'arrived first',s:21},
+  x:{type:'cross',x:b2.pos[2].x,y:b2.pos[2].y+40,s:.6},
+  fix:{type:'note',x:320,y:318,w:220,h:50,c:'n0',text:'but → so',size:25,rot:-1.5} });
+
+const B3={}, b3=sentence(B3,'c',[['The','*diligent','scientist','spent','*years'],['*ignoring','his','tests','before','his','*discovery.']],{y0:96,lh:92});
+Object.assign(B3,{ ok:{type:'check',x:b3.pos[0].x,y:b3.pos[0].y+40,s:.6}, x:{type:'cross',x:b3.pos[2].x,y:b3.pos[2].y+40,s:.6},
+  n1:{type:'note',x:170,y:292,w:300,h:58,c:'n3',text:'diligent = hard-working',size:20,rot:-1.5},
+  n2:{type:'note',x:480,y:292,w:280,h:58,c:'n1',text:'ignoring → repeating',size:21,rot:1.5} });
+
+const B4={}, b4=sentence(B4,'d',[['The','weather','was','*cold,','so','the','children','*wore'],['*light','clothes','before','*going','out.']],{y0:74,lh:52,s:22});
+B4.ans={type:'note',x:320,y:230,w:250,h:64,c:'n0',text:'light → warm',size:26,rot:-1.5};
+
+const B5={ r1:{type:'note',x:130,y:160,w:170,h:90,c:'n0',text:'Opposite',size:27,rot:-1.5},
+  r2:{type:'note',x:320,y:160,w:170,h:90,c:'n3',text:'Link',size:30,rot:1.5},
+  r3:{type:'note',x:510,y:160,w:170,h:90,c:'n1',text:'Difficulty',size:24,rot:-1.5},
+  k1:{type:'text',x:130,y:245,s:24,hand:true,text:'try it'}, k2:{type:'text',x:320,y:245,s:24,hand:true,text:'check it'}, k3:{type:'text',x:510,y:245,s:24,hand:true,text:'don\'t judge by it'},
+  foot:{type:'text',x:320,y:312,s:26,text:'The error clashes with the idea'} };
+
+XP.add({ key:'en-cx-traps', lang:'en', sk:'context', ord:20, title:'Contextual errors: strategies and traps', min:'4 min',
+  goals:['Expose the error by trying the opposite word','Check the link between the two halves: result or contrast','Never judge a word by how hard it is','Apply the steps to a full question'],
+  scenes:[
+  { t:'The error is the opposite', items:B1, beats:[
+    { say:'In most questions, the wrong word is the exact opposite of the right one.', show:[...b1.words,...b1.lines], gap:.05 },
+    { say:'A wise leader makes his decisions recklessly? Wisdom and recklessness don\'t go together.', show:['ar1','x'] },
+    { say:'Try the opposite: thoughtfully. Now the meaning works, so that is the error.', show:['ag0','ag2','ag3','fix'] } ]},
+  { t:'Check the linking word', items:B2, beats:[
+    { say:'Check the link between the two halves. Is the second a result of the first, or its opposite?', show:[...b2.words,...b2.lines], gap:.05 },
+    { say:'She woke up early and caught the bus, so arriving first is the natural result.', show:['c1','ar','c2'] },
+    { say:'So the contrast word but doesn\'t fit here. The right word is so.', show:['br2','x','fix'] } ]},
+  { t:'Don\'t judge by difficulty', items:B3, beats:[
+    { say:'A hard word is not always the error. It may be there just to distract you.', show:[...b3.words,...b3.lines], gap:.05 },
+    { say:'Diligent means hard-working, and it fits with years of research.', show:['cg0','ok','n1'] },
+    { say:'Ignoring is easy, but it breaks the meaning. A diligent scientist repeats his tests.', show:['cr2','x','n2'] } ]},
+  { t:'Your turn: cold weather', items:B4, beats:[
+    { say:'Your turn. Find the idea, check the link, then try the opposite.', show:[...b4.words,...b4.lines], gap:.06 },
+    { say:'The weather was cold, so the children wore light clothes before going out. Where is the error?', hl:b4.lines } ],
+    ask:{ opts:['cold','wore','light','going'], a:2, show:['ans'],
+      right:'Well done. So links a cause to its result, and cold weather calls for warm clothes.',
+      wrong:'Look at so: it links cause and result. Cold weather calls for warm clothes, so the error is light.' } },
+  { t:'Three rules', items:B5, beats:[
+    { say:'Remember three rules: try the opposite, check the link, and don\'t let a hard word fool you.', show:['r1','k1','r2','k2','r3','k3'], gap:.3 },
+    { say:'A contextual error clashes with the sentence\'s idea, not with how hard the word is.', show:['foot'] } ]},
+  ],
+  quiz:[
+    {q:'Find the contextual error: "Omar studied hard, but he passed the exam with top marks."', o:['studied','hard','but','top'], a:2, e:'Passing is a result of studying hard, so the link should be "so", not the contrast word "but".'},
+    {q:'Find the contextual error: "The speaker was known for his eloquence, so his words were clumsy and easy for everyone to follow."', o:['known','eloquence','clumsy','follow'], a:2, e:'"Clumsy" is the opposite of eloquent; the right word would be "graceful" or "clear".'},
+    {q:'In a contextual error sentence, the hardest, least common word:', o:['is always the error','is not necessarily the error','is always a linking word','always comes first'], a:1, e:'You judge a word by whether it fits the idea, not by how hard it is.'},
+  ] });
+})();
+/* English explainers: geometry */
+(function(){ if(!window.XP||!XP.ready) return;
+/* ---- small geometry helpers (angles in visual degrees, counter-clockwise, 0 = pointing right) ---- */
+const R1=v=>Math.round(v*10)/10;
+const P=(c,r,a)=>[R1(c[0]+r*Math.cos(a*Math.PI/180)),R1(c[1]-r*Math.sin(a*Math.PI/180))];
+const arcD=(c,r,a0,a1)=>{ const p=P(c,r,a0), q=P(c,r,a1); return `M${p[0]} ${p[1]} A${r} ${r} 0 ${a1-a0>180?1:0} 0 ${q[0]} ${q[1]}`; };
+const ang=(c,r,a0,a1,cls='s-pri')=>({type:'path',d:arcD(c,r,a0,a1),cls});
+const lab=(c,r,a,text,cls='t-ink',s=20)=>{ const p=P(c,r,a); return {type:'eq',x:p[0],y:R1(p[1]+s*0.36),s,text,cls}; };
+const seg=(p,q,cls='s-ink')=>({type:'line',x1:p[0],y1:p[1],x2:q[0],y2:q[1],cls});
+const pts=a=>a.map(p=>p.join(',')).join(' ');
+const rmark=(c,a0,k=14)=>{ const u=P(c,k,a0), w=P(c,k,a0+90), m=[R1(u[0]+w[0]-c[0]),R1(u[1]+w[1]-c[1])]; return {type:'path',d:`M${u[0]} ${u[1]} L${m[0]} ${m[1]} L${w[0]} ${w[1]}`,cls:'s-ink'}; };
+const tick=(p,q)=>{ const mx=(p[0]+q[0])/2, my=(p[1]+q[1])/2, L=Math.hypot(q[0]-p[0],q[1]-p[1]), nx=-(q[1]-p[1])/L*9, ny=(q[0]-p[0])/L*9;
+  return {type:'path',d:`M${R1(mx-nx)} ${R1(my-ny)} L${R1(mx+nx)} ${R1(my+ny)}`,cls:'s-pri'}; };
+/* apex of a triangle on base b-c with base angles ab (at b) and ac (at c) */
+const apex=(b,c,ab,ac)=>{ const w=c[0]-b[0], tb=Math.tan(ab*Math.PI/180), tc=Math.tan(ac*Math.PI/180), x=w*tc/(tb+tc); return [R1(b[0]+x),R1(b[1]-x*tb)]; };
+const circD=(c,r)=>`M${c[0]+r} ${c[1]} A${r} ${r} 0 1 0 ${c[0]-r} ${c[1]} A${r} ${r} 0 1 0 ${c[0]+r} ${c[1]}`;
+
+/* =================== 1. Angles =================== */
+{
+const O=[220,230], O2=[220,210];
+const X=[220,205];
+const T1=[250,130], T2=[R1(250-100/Math.tan(Math.PI/3)),230];
+const Q1=[340,100], Q2=[R1(340-65/Math.tan(Math.PI/3)),165];
+XP.add({ key:'en-ge-angles', lang:'en', sk:'geometry', ord:10, title:'Angles and parallel lines', min:'3 min',
+  goals:['Know that a straight angle is 180° and a full turn is 360°','Use the fact that vertical angles are equal','Spot corresponding and alternate angles on parallel lines','Find a missing angle in a GAT-style figure'],
+  scenes:[
+  { t:'A line and a full turn', items:{
+      ln:seg([70,230],[370,230]), o:{type:'dot',x:O[0],y:O[1],r:5,c:'ink'},
+      a180:ang(O,45,0,180,'s-pri'), l180:lab(O,72,90,'180°','t-pri',22),
+      ray:seg(O,P(O,150,50)),
+      a50:ang(O,40,0,50,'s-pink'), l50:lab(O,68,22,'?','t-hand',24),
+      a130:ang(O,30,50,180,'s-ok'), l130:lab(O,58,118,'130°','t-ok'),
+      eq1:{type:'eq',x:220,y:292,s:26,text:'180 − 130 = 50',cls:'t-ink'},
+      n1:{type:'note',x:505,y:135,h:62,c:'n0',w:230,text:'Straight = 180°',size:22,rot:-3},
+      r1:seg(O2,P(O2,115,90)), r2:seg(O2,P(O2,115,200)), r3:seg(O2,P(O2,115,320)), o2:{type:'dot',x:O2[0],y:O2[1],r:5,c:'ink'},
+      b1:ang(O2,30,90,200,'s-pink'), b2:ang(O2,30,200,320,'s-ok'), b3:ang(O2,30,320,450,'s-pri'),
+      k1:lab(O2,60,145,'110°','t-ink'), k2:lab(O2,60,260,'120°','t-ink'), k3:lab(O2,62,25,'130°','t-ink'),
+      n2:{type:'note',x:505,y:255,w:236,h:62,c:'n3',text:'Full turn = 360°',size:22,rot:2} },
+    beats:[
+      { say:'A straight angle is half a turn: one hundred and eighty degrees.', show:['ln','o','a180','l180','n1'] },
+      { say:'A ray splits it into two angles that always total one hundred and eighty.', hide:['a180','l180'], show:['ray','a130','l130','a50','l50'] },
+      { say:'If one is one hundred and thirty, the other is one hundred and eighty minus that, which is fifty.', set:{l50:'50°'}, show:['eq1'] },
+      { say:'A full turn is three hundred and sixty degrees, so angles around a point add up to that.', hide:['ln','o','ray','a50','l50','a130','l130','eq1'], show:['r1','r2','r3','o2','b1','k1','b2','k2','b3','k3','n2'], gap:.12 },
+    ]},
+  { t:'Vertical angles', items:{
+      m1:seg(P(X,150,30),P(X,150,210)), m2:seg(P(X,150,150),P(X,150,330)),
+      aR:ang(X,36,-30,30,'s-pink'), aL:ang(X,36,150,210,'s-pink'), aT:ang(X,28,30,150,'s-ok'), aB:ang(X,28,210,330,'s-ok'),
+      lR:lab(X,66,0,'60°','t-ink'), lL:lab(X,66,180,'60°','t-ink'), lT:lab(X,52,90,'120°','t-ink'), lB:lab(X,52,270,'120°','t-ink'),
+      n1:{type:'note',x:505,y:140,w:240,h:62,c:'n1',text:'Vertical: equal',size:22,rot:-2},
+      n2:{type:'note',x:505,y:255,w:240,h:62,c:'n0',text:'Neighbors: 180°',size:22,rot:2} },
+    beats:[
+      { say:'Two crossing lines make four angles.', show:['m1','m2'] },
+      { say:'Vertical angles face each other and are equal. If this one is sixty, its opposite is sixty too.', show:['aR','lR','aL','lL','n1'] },
+      { say:'Neighbors on a line add up to one hundred and eighty, so the other two are each one hundred and twenty.', show:['aT','lT','aB','lB','n2'] },
+    ]},
+  { t:'Parallel lines and a transversal', items:{
+      p1:seg([50,T1[1]],[370,T1[1]]), p2:seg([50,T2[1]],[370,T2[1]]), tr:seg(P(T1,55,60),P(T2,55,240)),
+      F:{type:'path',d:`M${P(T1,55,60).join(' ')} L${T2.join(' ')} L${T2[0]+90} ${T2[1]} M${T1.join(' ')} L${T1[0]+90} ${T1[1]}`,cls:'s-pri'},
+      Z:{type:'path',d:`M${T1[0]-90} ${T1[1]} L${T1.join(' ')} L${T2.join(' ')} L${T2[0]+90} ${T2[1]}`,cls:'s-pri'},
+      c1:ang(T1,26,0,60,'s-pink'), lc1:lab(T1,50,30,'60°','t-ink'),
+      c2:ang(T2,26,0,60,'s-pink'), lc2:lab(T2,50,30,'60°','t-ink'),
+      al:ang(T1,26,180,240,'s-ok'), lal:lab(T1,50,210,'60°','t-ink'),
+      n1:{type:'note',x:505,y:140,w:250,h:60,c:'n1',text:'Corresponding: equal',size:18,rot:-2},
+      n2:{type:'note',x:505,y:235,w:250,h:60,c:'n3',text:'Alternate: equal',size:19,rot:2},
+      warn:{type:'text',x:225,y:318,s:22,text:'Only if the lines are parallel!',hand:true} },
+    beats:[
+      { say:'Parallel lines never meet. A transversal cuts across both.', show:['p1','p2','tr'] },
+      { say:'Corresponding angles sit in the same spot at each crossing, and they are equal.', show:['F','c1','lc1','c2','lc2','n1'] },
+      { say:'Alternate interior angles lie between the lines, on opposite sides of the transversal. Also equal.', hide:['F','c1','lc1'], show:['Z','al','lal','n2'], hl:['c2'] },
+      { say:'Careful: these rules only work when the lines are parallel.', show:['warn'] },
+    ]},
+  { t:'Your turn: find x', items:{
+      p1:seg([150,Q1[1]],[520,Q1[1]]), p2:seg([150,Q2[1]],[520,Q2[1]]), tr:seg(P(Q1,32,60),P(Q2,32,240)),
+      a60:ang(Q1,22,0,60,'s-pink'), l60:lab(Q1,52,18,'60°','t-ink'),
+      as:ang(Q2,22,240,360,'s-ok'), ls:lab(Q2,40,300,'x','t-ok',22),
+      c2:ang(Q2,22,0,60,'s-pink'), lc2:lab(Q2,52,18,'60°','t-hand',22),
+      eq:{type:'eq',x:320,y:290,s:30,text:'180 − 60 = 120°',cls:'t-pri'} },
+    beats:[
+      { say:'Two parallel lines, cut by a transversal. The top angle is sixty degrees.', show:['p1','p2','tr','a60','l60'] },
+      { say:'What is angle x at the bottom crossing?', show:['as','ls'] },
+    ],
+    ask:{ opts:['60°','120°','30°','240°'], a:1, y:246,
+      right:'Correct. The corresponding angle below is sixty, and it shares a line with x, so x is one hundred and twenty.',
+      wrong:'It is one hundred and twenty. The angle matching sixty sits next to x on a line, so x is one hundred and eighty minus sixty.',
+      show:['c2','lc2','eq'] } },
+  ],
+  quiz:[
+    {q:'Two adjacent angles lie on a straight line. One is 110°. What is the other?', o:['70°','110°','80°','250°'], a:0, e:'They add up to 180°, so 180 − 110 = 70°.'},
+    {q:'Two lines intersect, and one of the angles is 45°. What is the angle vertically opposite it?', o:['135°','45°','90°','315°'], a:1, e:'Vertical angles are equal. 135° is the neighboring angle.'},
+    {q:'Three angles around a point are 120°, 150° and x. What is x?', o:['60°','100°','90°','210°'], a:2, e:'Angles around a point add up to 360°, so x = 360 − 270 = 90°.'},
+  ] });
+}
+
+/* =================== 2. Triangles =================== */
+{
+const B=[60,275], C=[330,275], A=apex(B,C,60,50);
+const I1=[80,280], I2=[250,280], IA=apex(I1,I2,65,65);
+const E1=[360,280], E2=[560,280], EA=apex(E1,E2,60,60);
+const S1=[268,200], S2=[372,200], SA=apex(S1,S2,70,70);
+const letters=[[A[0],A[1]-12,'A',22],[B[0]-12,B[1]+24,'B',22],[C[0]+12,C[1]+24,'C',22]];
+XP.add({ key:'en-ge-triangles', lang:'en', sk:'geometry', ord:20, title:'Triangles and their angles', min:'3 min',
+  goals:['See why the angles of a triangle add up to 180°','Find an exterior angle from the two far interior angles','Use the properties of isosceles and equilateral triangles'],
+  scenes:[
+  { t:'The angle sum', items:{
+      tri:{type:'poly',points:pts([A,B,C]),c:'prisoft',labels:letters},
+      aB:ang(B,34,0,60,'s-pink'), lB:lab(B,60,28,'60°'),
+      aC:ang(C,34,130,180,'s-ok'), lC:lab(C,60,156,'50°'),
+      aA:ang(A,30,240,310,'s-pri'), lA:lab(A,58,275,'70°'),
+      par:seg([A[0]-110,A[1]],[A[0]+110,A[1]]),
+      cL:ang(A,30,180,240,'s-pink'), lcL:lab(A,54,208,'60°'),
+      cR:ang(A,30,310,360,'s-ok'), lcR:lab(A,54,332,'50°'),
+      n1:{type:'note',x:510,y:135,w:200,h:62,c:'n0',text:'Sum = 180°',size:24,rot:-3},
+      bx:{type:'box',x:384,y:215,w:246,h:56,c:'surface',text:'60 + 70 + 50 = 180',s:20,ltr:true} },
+    beats:[
+      { say:'This is triangle A B C. It has three angles.', show:['tri'] },
+      { say:'Angle B is sixty, angle C is fifty, and angle A is seventy.', show:['aB','lB','aC','lC','aA','lA'], gap:.3 },
+      { say:'Draw a line through A parallel to the base. The new angles match the base angles, because they are alternate.', show:['par','cL','lcL','cR','lcR'] },
+      { say:'The three angles at A form a straight line, so any triangle’s angles add up to one hundred and eighty degrees.', show:['n1','bx'], hl:['aA'] },
+    ]},
+  { t:'The exterior angle', items:{
+      tri:{type:'poly',points:pts([A,B,C]),c:'prisoft',labels:letters},
+      aB:ang(B,34,0,60,'s-pink'), lB:lab(B,60,28,'60°'),
+      aA:ang(A,30,240,310,'s-pri'), lA:lab(A,58,275,'70°'),
+      ext:seg(C,[420,C[1]]),
+      aX:ang(C,26,0,130,'s-pink'), lX:lab(C,52,62,'?','t-hand',24),
+      aC:ang(C,40,130,180,'s-ok'), lC:lab(C,64,156,'50°','t-ok'),
+      bx:{type:'box',x:415,y:100,w:195,h:56,c:'surface',text:'60 + 70 = 130',s:22,ltr:true},
+      n1:{type:'note',x:510,y:205,w:236,h:66,c:'n1',text:'Exterior = A + B',size:22,rot:2} },
+    beats:[
+      { say:'In the same triangle, angle B is sixty and angle A is seventy.', show:['tri','aB','lB','aA','lA'] },
+      { say:'Extend the base past C to make an exterior angle. How big is it?', show:['ext','aX','lX'] },
+      { say:'It equals the two far interior angles added: sixty plus seventy equals one hundred and thirty.', set:{lX:'130°'}, show:['bx','n1'] },
+      { say:'Check: with its neighbor, fifty, it makes one hundred and eighty.', show:['aC','lC'] },
+    ]},
+  { t:'Isosceles and equilateral', items:{
+      iso:{type:'poly',points:pts([IA,I1,I2]),c:'pinksoft'}, t1:tick(I1,IA), t2:tick(I2,IA),
+      i1:ang(I1,28,0,65,'s-pink'), li1:lab(I1,52,30,'65°'), i2:ang(I2,28,115,180,'s-pink'), li2:lab(I2,52,150,'65°'),
+      i3:ang(IA,26,245,295,'s-pri'), li3:lab(IA,50,270,'50°','t-pri'),
+      cap1:{type:'text',x:165,y:322,s:20,text:'Isosceles',cls:'t-ink2'},
+      equ:{type:'poly',points:pts([EA,E1,E2]),c:'oksoft'}, u1:tick(E1,EA), u2:tick(E2,EA), u3:tick(E1,E2),
+      e1:lab(E1,42,30,'60°'), e2:lab(E2,42,150,'60°'), e3:lab(EA,44,270,'60°'),
+      cap2:{type:'text',x:460,y:322,s:20,text:'Equilateral',cls:'t-ink2'} },
+    beats:[
+      { say:'An isosceles triangle has two equal sides, marked with ticks.', show:['iso','t1','t2','cap1'] },
+      { say:'Its base angles are equal too. If one is sixty-five, so is the other.', show:['i1','li1','i2','li2'] },
+      { say:'The third angle is one hundred and eighty minus one hundred and thirty, which is fifty.', show:['i3','li3'] },
+      { say:'An equilateral triangle has three equal sides, and every angle is sixty degrees.', show:['equ','u1','u2','u3','e1','e2','e3','cap2'], gap:.2 },
+    ]},
+  { t:'Your turn: the base angle', items:{
+      tri:{type:'poly',points:pts([SA,S1,S2]),c:'pinksoft'}, t1:tick(S1,SA), t2:tick(S2,SA),
+      aA:ang(SA,24,250,290,'s-pri'), lA:lab(SA,52,270,'40°','t-pri',18),
+      b1:ang(S1,22,0,70,'s-pink'), lb:lab(S1,42,35,'x','t-hand',24), b2:ang(S2,22,110,180,'s-pink'),
+      cap:{type:'text',x:500,y:136,s:24,text:'Isosceles',hand:true},
+      eq:{type:'eq',x:320,y:290,s:30,text:'(180 − 40) ÷ 2 = 70°',cls:'t-pri'} },
+    beats:[
+      { say:'An isosceles triangle has a top angle of forty degrees.', show:['tri','t1','t2','aA','lA','cap'] },
+      { say:'What is each base angle, x?', show:['b1','b2','lb'] },
+    ],
+    ask:{ opts:['40°','70°','140°','50°'], a:1, y:246,
+      right:'Well done. That leaves one hundred and forty, shared by two equal angles, so each is seventy.',
+      wrong:'It is seventy. One hundred and eighty minus forty is one hundred and forty, split equally between the two base angles.',
+      show:['eq'] } },
+  ],
+  quiz:[
+    {q:'Two angles of a triangle are 45° and 75°. What is the third angle?', o:['60°','50°','70°','120°'], a:0, e:'180 − (45 + 75) = 60°.'},
+    {q:'An exterior angle of a triangle is 110°. One of the two far interior angles is 40°. What is the other?', o:['30°','70°','150°','50°'], a:1, e:'The exterior angle equals the two far angles added, so 110 − 40 = 70°.'},
+    {q:'An equilateral triangle. First quantity: one of its angles. Second quantity: 60°', o:['A: The first is greater','B: The second is greater','C: The two are equal','D: Cannot be determined'], a:2, e:'Each angle of an equilateral triangle is 180 ÷ 3 = 60°.'},
+  ] });
+}
+
+/* =================== 3. Perimeter and area =================== */
+{
+const rect=[[90,100],[330,100],[330,260],[90,260]];
+const L=[[300,70],[400,70],[400,190],[240,190],[240,130],[300,130]];
+XP.add({ key:'en-ge-area', lang:'en', sk:'geometry', ord:30, title:'Perimeter and area', min:'4 min',
+  goals:['Tell perimeter and area apart','Find the area of a rectangle and a square','Find a triangle’s area as half the base times the height','Split a composite shape into simple shapes'],
+  scenes:[
+  { t:'Perimeter: the fence', items:{
+      r:{type:'poly',points:pts(rect),c:'prisoft'},
+      lt:{type:'text',x:210,y:88,s:22,text:'6 cm'}, lb:{type:'text',x:210,y:290,s:22,text:'6 cm'},
+      ll:{type:'text',x:58,y:188,s:22,text:'4 cm'}, lr:{type:'text',x:362,y:188,s:22,text:'4 cm'},
+      trace:{type:'path',d:'M90 100 H330 V260 H90 Z',cls:'s-pink'},
+      eq1:{type:'eq',x:495,y:150,s:24,text:'6 + 4 + 6 + 4 = 20',cls:'t-ink'},
+      n1:{type:'note',x:505,y:250,w:264,h:66,c:'n0',text:'2 × (length + width)',size:20,rot:-2} },
+    beats:[
+      { say:'Perimeter is the distance around a shape, like walking once along its fence.', show:['r','lt','lr','lb','ll'], gap:.25 },
+      { say:'Add all four sides: six plus four plus six plus four equals twenty centimeters.', show:['trace','eq1'] },
+      { say:'In short: two times the length plus the width.', show:['n1'] },
+    ]},
+  { t:'Area: count the squares', items:{
+      g:{type:'grid',x:90,y:100,rows:4,cols:6,cell:38,gap:2,fill:24,c:'n2'},
+      lt:{type:'text',x:209,y:88,s:22,text:'6 cm'}, ll:{type:'text',x:58,y:188,s:22,text:'4 cm'},
+      eq1:{type:'eq',x:505,y:150,s:26,text:'6 × 4 = 24 cm²',cls:'t-pri'},
+      sq:{type:'grid',x:460,y:225,rows:5,cols:5,cell:16,gap:2,fill:25,c:'n1'},
+      eq2:{type:'eq',x:505,y:345,s:22,text:'5 × 5 = 25',cls:'t-ink'},
+      n1:{type:'text',x:505,y:212,s:22,text:'Square',cls:'t-ink2'} },
+    beats:[
+      { say:'Area is the number of small squares that cover a shape.', show:['g'] },
+      { say:'Four rows of six squares: six times four is twenty-four square centimeters.', show:['lt','ll','eq1'] },
+      { say:'A square’s area is its side times itself. Side five gives area twenty-five.', show:['sq','n1','eq2'] },
+    ]},
+  { t:'Area of a triangle', items:{
+      box:{type:'path',d:'M70 110 H286 V254 H70 Z',cls:'s-ink'},
+      oL:{type:'poly',points:'70,110 170,110 70,254',c:'surface2'}, oR:{type:'poly',points:'170,110 286,110 286,254',c:'surface2'},
+      tri:{type:'poly',points:'70,254 286,254 170,110',c:'pinksoft'},
+      h:seg([170,110],[170,254],'s-pri'), rm:{type:'path',d:'M170 242 H182 V254',cls:'s-ink'},
+      lbase:{type:'text',x:178,y:284,s:22,text:'base 6'},
+      hb:seg([300,110],[300,254],'s-pri'), lh:{type:'text',x:366,y:190,s:22,text:'height 4',cls:'t-pri'},
+      eq1:{type:'eq',x:515,y:150,s:26,text:'½ × 6 × 4 = 12',cls:'t-pri'},
+      n1:{type:'note',x:510,y:255,w:236,h:66,c:'n0',text:'½ × base × height',size:20,rot:-2} },
+    beats:[
+      { say:'Draw the triangle inside a rectangle with the same base and height.', show:['box','tri','lbase'] },
+      { say:'The height splits the rectangle in two, and the triangle fills exactly half of each part.', show:['h','rm','oL','oR'] },
+      { say:'So the triangle is half the rectangle: one half times six times four equals twelve.', show:['hb','lh','eq1'] },
+      { say:'Remember: half the base times the height. The height meets the base at a right angle; it is not the slanted side.', show:['n1'], hl:['h'] },
+    ]},
+  { t:'Your turn: a composite shape', items:{
+      sh:{type:'poly',points:pts(L),c:'prisoft'},
+      l5:lab([350,55],0,0,'5'), l6:lab([416,130],0,0,'6'), l8:lab([320,208],0,0,'8'), l3:lab([226,160],0,0,'3'),
+      l3a:lab([270,120],0,0,'3','t-ink2',18), l3b:lab([288,100],0,0,'3','t-ink2',18),
+      cut:seg([300,130],[400,130],'s-pink'),
+      iA:lab([320,160],0,0,'24','t-pri',22), iB:lab([350,100],0,0,'15','t-pri',22),
+      eq:{type:'eq',x:320,y:290,s:30,text:'24 + 15 = 39',cls:'t-pri'} },
+    beats:[
+      { say:'This composite shape has no single formula.', show:['sh','l5','l6','l8','l3','l3a','l3b'], gap:.15 },
+      { say:'Cut it into two rectangles and add their areas. What is the total area?', show:['cut'] },
+    ],
+    ask:{ opts:['48','39','28','45'], a:1, y:248,
+      right:'Correct. The bottom rectangle is eight times three, twenty-four. The top is five times three, fifteen. Total, thirty-nine.',
+      wrong:'It is thirty-nine: twenty-four for the bottom rectangle and fifteen for the top. Careful, twenty-eight is the perimeter, not the area.',
+      show:['iA','iB','eq'] } },
+  ],
+  quiz:[
+    {q:'A rectangle is 9 cm long and 4 cm wide. What is its area?', o:['26 cm²','36 cm²','13 cm²','45 cm²'], a:1, e:'9 × 4 = 36 cm². 26 is the perimeter.'},
+    {q:'A triangle has a base of 10 and a height of 6. What is its area?', o:['60','16','30','32'], a:2, e:'½ × 10 × 6 = 30.'},
+    {q:'A square has a perimeter of 20 cm. What is its area?', o:['25 cm²','20 cm²','100 cm²','40 cm²'], a:0, e:'The side is 20 ÷ 4 = 5, so the area is 5 × 5 = 25 cm².'},
+  ] });
+}
+
+/* =================== 4. Pythagoras =================== */
+{
+const C1=[110,270], A1=[110,138], B1=[286,270];
+const C=[220,232], A=[220,160], B=[316,232];
+const Q=[270,190], QA=[270,118], QB=[366,190];
+XP.add({ key:'en-ge-pyth', lang:'en', sk:'geometry', ord:40, title:'The Pythagorean theorem', min:'3 min',
+  goals:['Identify the hypotenuse of a right triangle','Understand the Pythagorean theorem with squares','Memorize the triples 3-4-5, 6-8-10 and 5-12-13','Find a missing side quickly'],
+  scenes:[
+  { t:'The right triangle', items:{
+      tri:{type:'poly',points:pts([A1,B1,C1]),c:'prisoft'}, rm:rmark(C1,0,16),
+      g1:{type:'text',x:84,y:212,s:20,text:'leg',cls:'t-ink2'}, g2:{type:'text',x:198,y:296,s:20,text:'leg',cls:'t-ink2'},
+      hyp:seg(A1,B1,'s-pink'), lh:{type:'text',x:262,y:180,s:24,text:'hypotenuse',hand:true},
+      n1:{type:'note',x:500,y:140,w:220,h:62,c:'n1',text:'The longest side',size:22,rot:-2},
+      n2:{type:'note',x:500,y:250,w:270,h:62,c:'n3',text:'Faces the right angle',size:19,rot:2} },
+    beats:[
+      { say:'A right triangle has one angle of ninety degrees. We mark it with a small square.', show:['tri','rm'] },
+      { say:'The two sides that form the right angle are called the legs.', show:['g1','g2'] },
+      { say:'The side facing the right angle is the hypotenuse, always the longest side.', show:['hyp','lh','n1','n2'] },
+    ]},
+  { t:'The rule with squares', items:{
+      q3:{type:'grid',x:148,y:160,rows:3,cols:3,cell:22,gap:2,fill:9,c:'n1'},
+      q4:{type:'grid',x:220,y:232,rows:4,cols:4,cell:22,gap:2,fill:16,c:'n3'},
+      q5:{type:'grid',x:245,y:89,rows:5,cols:5,cell:22,gap:2,fill:25,c:'n2',rot:36.87},
+      tri:{type:'poly',points:pts([A,B,C]),c:'prisoft'}, rm:rmark(C,0,12),
+      s3:lab([204,203],0,0,'3'), s4:lab([268,254],0,0,'4'), s5:lab([280,182],0,0,'5'),
+      t9:lab([184,196],0,0,'9','t-note',28), t16:lab([268,282],0,0,'16','t-note',28), t25:lab([304,150],0,0,'25','t-note',30),
+      bx:{type:'box',x:425,y:120,w:185,h:56,c:'surface',text:'9 + 16 = 25',s:24,ltr:true},
+      n1:{type:'note',x:517,y:240,w:200,h:66,c:'n0',text:'a² + b² = c²',size:28,rot:-2},
+      cap:{type:'text',x:517,y:310,s:20,text:'c is the hypotenuse',hand:true} },
+    beats:[
+      { say:'In this right triangle, the legs are three and four, and the hypotenuse is five.', show:['tri','rm','s3','s4','s5'] },
+      { say:'Draw a square on each leg: areas nine and sixteen.', hide:['s3','s4','s5'], show:['q3','t9','q4','t16'] },
+      { say:'The square on the hypotenuse has area twenty-five, exactly nine plus sixteen.', show:['q5','t25','bx'] },
+      { say:'That is the Pythagorean theorem: a squared plus b squared equals c squared, where c is the hypotenuse.', show:['n1','cap'] },
+    ]},
+  { t:'Triples to memorize', items:{
+      n1:{type:'note',x:150,y:145,w:180,h:76,c:'n0',text:'3, 4, 5',size:32,rot:-3},
+      e1:{type:'eq',x:150,y:218,s:20,text:'9 + 16 = 25',cls:'t-ink2'},
+      ar:{type:'arrow',x1:250,y1:128,x2:378,y2:128,bend:-40,text:'× 2'},
+      n2:{type:'note',x:480,y:145,w:180,h:76,c:'n3',text:'6, 8, 10',size:32,rot:2},
+      e2:{type:'eq',x:480,y:218,s:20,text:'36 + 64 = 100',cls:'t-ink2'},
+      n3:{type:'note',x:315,y:275,w:210,h:76,c:'n1',text:'5, 12, 13',size:32,rot:-1},
+      e3:{type:'eq',x:315,y:340,s:20,text:'25 + 144 = 169',cls:'t-ink2'} },
+    beats:[
+      { say:'Memorize a few famous side sets to save time. The best known is three, four, five.', show:['n1','e1'] },
+      { say:'Multiples work too. Double it and you get six, eight, ten.', show:['ar','n2','e2'] },
+      { say:'Another one is five, twelve, thirteen. Look for these before you calculate.', show:['n3','e3'] },
+    ]},
+  { t:'Your turn: the missing side', items:{
+      tri:{type:'poly',points:pts([QA,QB,Q]),c:'prisoft'}, rm:rmark(Q,0,12),
+      l6:lab([254,160],0,0,'6'), l10:lab([332,142],0,0,'10'), ls:lab([318,205],0,0,'x','t-hand',24),
+      n1:{type:'note',x:500,y:150,w:200,h:62,c:'n2',text:'x² = 10² − 6²',size:24,rot:-3},
+      eq:{type:'eq',x:320,y:290,s:28,text:'x² = 100 − 36 = 64  →  x = 8',cls:'t-pri'} },
+    beats:[
+      { say:'In this right triangle, we know the hypotenuse, ten, and one leg, six.', show:['tri','rm','l6','l10','ls'] },
+      { say:'To find a missing leg, subtract: the hypotenuse squared minus the known leg squared.', show:['n1'] },
+      { say:'How long is side x?', hl:['ls'] },
+    ],
+    ask:{ opts:['4','8','16','12'], a:1, y:248,
+      right:'Well done. One hundred minus thirty-six is sixty-four, and its square root is eight: three, four, five doubled.',
+      wrong:'It is eight. One hundred minus thirty-six is sixty-four, whose square root is eight. Notice: three, four, five doubled.',
+      show:['eq'] } },
+  ],
+  quiz:[
+    {q:'A right triangle has legs of 5 and 12. How long is the hypotenuse?', o:['17','13','15','14'], a:1, e:'The (5, 12, 13) triple: 25 + 144 = 169 = 13².'},
+    {q:'A right triangle has a hypotenuse of 20 and one leg of 12. How long is the other leg?', o:['8','16','14','10'], a:1, e:'(3, 4, 5) × 4 gives 12, 16, 20.'},
+    {q:'Which set could be the side lengths of a right triangle?', o:['4, 5, 6','5, 6, 7','9, 12, 15','2, 3, 4'], a:2, e:'9, 12, 15 is (3, 4, 5) × 3, and 81 + 144 = 225 = 15².'},
+  ] });
+}
+
+/* =================== 5. Circles =================== */
+{
+const K=[190,210], K2=[190,205];
+const cl=[170,200], cr=[460,200], d=R1(85/Math.SQRT2);
+XP.add({ key:'en-ge-circle', lang:'en', sk:'geometry', ord:50, title:'The circle', min:'3 min',
+  goals:['Know the radius, the diameter and how they relate','Find the circumference 2πr and the area πr²','Link a circle to a square drawn inside it or around it'],
+  scenes:[
+  { t:'Radius and diameter', items:{
+      c:{type:'circle',cx:K[0],cy:K[1],r:110,c:'surface2'},
+      r1:seg(K,P(K,110,45),'s-line'), r2:seg(K,P(K,110,205),'s-line'), r3:seg(K,P(K,110,255),'s-line'),
+      cen:{type:'dot',x:K[0],y:K[1],r:5,c:'ink',text:'O',dx:12,dy:28},
+      rad:seg(K,P(K,110,0),'s-pri'), lr:{type:'eq',x:250,y:198,s:22,text:'r',cls:'t-pri'},
+      dia:seg(P(K,110,150),P(K,110,330),'s-pink'), ld:{type:'text',x:340,y:294,s:22,text:'diameter',hand:true},
+      n1:{type:'note',x:505,y:140,w:230,h:62,c:'n1',text:'diameter = 2r',size:24,rot:-2},
+      n2:{type:'note',x:505,y:255,w:230,h:62,c:'n3',text:'r = diameter ÷ 2',size:22,rot:2} },
+    beats:[
+      { say:'Every point on a circle is the same distance from one point, the center.', show:['c','cen','r1','r2','r3'] },
+      { say:'That distance is called the radius.', show:['rad','lr'] },
+      { say:'The diameter runs through the center, edge to edge, so it is twice the radius.', show:['dia','ld','n1'] },
+      { say:'Careful: if you are given the diameter, halve it before you use a formula.', show:['n2'] },
+    ]},
+  { t:'Circumference and area', items:{
+      fill:{type:'circle',cx:K2[0],cy:K2[1],r:100,c:'prisoft'},
+      edge:{type:'circle',cx:K2[0],cy:K2[1],r:100,c:'surface2'},
+      trace:{type:'path',d:circD(K2,100),cls:'s-pink'},
+      rad:seg(K2,P(K2,100,0),'s-ink'), lr:{type:'eq',x:240,y:196,s:22,text:'r = 3',cls:'t-ink'},
+      n1:{type:'note',x:495,y:115,w:272,h:58,c:'n1',text:'Circumference = 2πr',size:20,rot:-2},
+      n2:{type:'note',x:495,y:200,w:272,h:58,c:'n2',text:'Area = πr²',size:22,rot:2},
+      x1:{type:'eq',x:490,y:275,s:22,text:'Circumference = 6π',cls:'t-ink'},
+      x2:{type:'eq',x:490,y:310,s:22,text:'Area = 9π',cls:'t-pri'},
+      pi:{type:'eq',x:190,y:342,s:22,text:'π ≈ 3.14',cls:'t-ink2'} },
+    beats:[
+      { say:'The circumference is the distance around: two times pi times the radius.', show:['edge','trace','n1'] },
+      { say:'The area is the space inside: pi times the radius squared.', hide:['edge'], show:['fill','n2'] },
+      { say:'For a circle with radius three, the circumference is six pi and the area is nine pi.', show:['rad','lr','x1','x2'] },
+      { say:'Pi is about three point one four. Answers are usually left in terms of pi.', show:['pi'] },
+    ]},
+  { t:'Circles and squares', items:{
+      sqO:{type:'poly',points:pts([[cl[0]-70,cl[1]-70],[cl[0]+70,cl[1]-70],[cl[0]+70,cl[1]+70],[cl[0]-70,cl[1]+70]]),c:'oksoft'},
+      cL:{type:'circle',cx:cl[0],cy:cl[1],r:70,c:'prisoft'},
+      dL:seg([cl[0]-70,cl[1]],[cl[0]+70,cl[1]],'s-pri'),
+      capL:{type:'text',x:cl[0],y:302,s:20,text:'side = diameter'},
+      cR:{type:'circle',cx:cr[0],cy:cr[1],r:85,c:'oksoft'},
+      sqI:{type:'poly',points:pts([[cr[0]-d,cr[1]-d],[cr[0]+d,cr[1]-d],[cr[0]+d,cr[1]+d],[cr[0]-d,cr[1]+d]]),c:'prisoft'},
+      dR:seg([cr[0]-d,cr[1]+d],[cr[0]+d,cr[1]-d],'s-pink'),
+      capR:{type:'text',x:cr[0],y:318,s:20,text:'diagonal = diameter'},
+      tip:{type:'text',x:320,y:348,s:22,text:'Always draw the diameter',hand:true} },
+    beats:[
+      { say:'When a circle fits inside a square, the square’s side equals the circle’s diameter.', show:['sqO','cL','dL','capL'] },
+      { say:'When a square sits inside a circle, the square’s diagonal is the circle’s diameter.', show:['cR','sqI','dR','capR'] },
+      { say:'Both cases come up often in the GAT. Draw the diameter first, and the answer follows.', show:['tip'], hl:['dL','dR'] },
+    ]},
+  { t:'Your turn: circle in a square', items:{
+      sq:{type:'poly',points:'260,72 380,72 380,192 260,192',c:'oksoft'},
+      c:{type:'circle',cx:320,cy:132,r:60,c:'prisoft'},
+      l10:lab([234,139],0,0,'10','t-ink',22),
+      dia:seg([260,132],[380,132],'s-pri'),
+      eq:{type:'eq',x:320,y:290,s:30,text:'r = 5  →  area = 25π',cls:'t-pri'} },
+    beats:[
+      { say:'A square with side ten has a circle inside it that touches all four sides.', show:['sq','c','l10'] },
+      { say:'Remember, the square’s side is the circle’s diameter. What is the area of the circle?', show:['dia'] },
+    ],
+    ask:{ opts:['100π','25π','10π','20π'], a:1, y:248,
+      right:'Excellent. The diameter is ten, so the radius is five, and the area is pi times twenty-five.',
+      wrong:'It is twenty-five pi. The diameter is ten, so the radius is five, and five squared is twenty-five. Forgetting to halve gives one hundred pi.',
+      show:['eq'] } },
+  ],
+  quiz:[
+    {q:'A circle has a radius of 4 cm. What is its circumference?', o:['16π','8π','4π','64π'], a:1, e:'C = 2 × π × 4 = 8π. 16π is the area.'},
+    {q:'A circle has a diameter of 10. What is its area?', o:['100π','10π','25π','50π'], a:2, e:'r = 5, so the area is π × 5² = 25π.'},
+    {q:'A square is drawn inside a circle of radius 5. How long is the square’s diagonal?', o:['5','10','25','5√2'], a:1, e:'The square’s diagonal is the circle’s diameter: 2 × 5 = 10.'},
+  ] });
+}
+})();
+/* English explainers: odd (odd one out) */
+(function(){ if(!window.XP||!XP.ready) return;
+
+/* four word notes in a row (LTR: first word on the left) */
+const W4=(words,y,cols,size=26)=>{ const xs=[135,265,395,525], o={}; words.forEach((w,i)=>{ o['w'+(i+1)]={type:'note',x:xs[i],y,w:116,h:76,c:cols[i],text:w,size,rot:[-3,2,-2,3][i]}; }); return o; };
+
+XP.add({ key:'en-od-link', lang:'en', sk:'odd', ord:10, title:'Odd one out: find the link', min:'3 min',
+  goals:['Recognize the odd-one-out question','Find the link between three words before choosing','Spot the kinds of link: meaning, category, part, degree','Pick the word that breaks the link'],
+  scenes:[
+  { t:'Three belong, one doesn’t',
+    items:{
+      frame:{type:'path',d:'M79 128 H451 Q465 128 465 142 V218 Q465 232 451 232 H79 Q65 232 65 218 V142 Q65 128 79 128 Z',cls:'s-pri'},
+      q:{type:'text',x:340,y:88,s:22,cls:'t-ink2',text:'Which word does not belong?'},
+      ...W4(['hawk','pigeon','eagle','wolf'],180,['n0','n3','n2','n1']),
+      lab:{type:'text',x:265,y:280,s:32,hand:true,text:'all birds'},
+      x:{type:'cross',x:525,y:272},
+    },
+    beats:[
+      { say:'In an odd-one-out question you get four words. Three share one link, and the fourth does not.', show:['q','w1','w2','w3','w4'], gap:.3 },
+      { say:'Don’t hunt for the odd word. Find the link first: hawk, pigeon and eagle are all birds.', show:['frame','lab'] },
+      { say:'A wolf is not a bird, so it breaks the link. The wolf is the odd one out.', show:['x'], hl:['w4'] },
+    ]},
+  { t:'Kinds of link',
+    items:(()=>{ const o={}; const rows=[['Meaning','happy · glad · joyful','sad'],['Category','apple · banana · grape','carrot'],['Parts','wheel · brake · engine','sail'],['Degree','drizzle · rain · downpour','thunder']];
+      rows.forEach(([tag,ws,odd],i)=>{ const y=100+i*66; o['t'+i]={type:'box',x:30,y:y-22,w:130,h:44,c:'prisoft',text:tag,s:19,cls:'t-pri'}; o['r'+i]={type:'text',x:330,y:y+7,s:20,text:ws}; o['o'+i]={type:'box',x:495,y:y-21,w:115,h:42,c:'pinksoft',text:odd,s:20}; });
+      return o; })(),
+    beats:[
+      { say:'It can be meaning: happy, glad and joyful are synonyms, and sad is their opposite.', show:['t0','r0','o0'] },
+      { say:'A category: apple, banana and grape are fruits, but a carrot is a vegetable.', show:['t1','r1','o1'] },
+      { say:'Parts of one thing: a wheel, a brake and an engine belong to a car, but a sail belongs to a boat.', show:['t2','r2','o2'] },
+      { say:'Or degrees: drizzle, rain, then a downpour. Thunder is not a kind of rain.', show:['t3','r3','o3'] },
+    ]},
+  { t:'Three steps',
+    items:{
+      s1:{type:'note',x:135,y:170,w:170,h:72,c:'n0',text:'Read all four',size:18,rot:-2},
+      s2:{type:'note',x:320,y:170,w:170,h:72,c:'n3',text:'Name the link',size:18,rot:2},
+      s3:{type:'note',x:505,y:170,w:170,h:72,c:'n2',text:'Test the fourth',size:18,rot:-2},
+      n1:{type:'text',x:135,y:112,s:24,cls:'t-pri',text:'1'},
+      n2:{type:'text',x:320,y:112,s:24,cls:'t-pri',text:'2'},
+      n3:{type:'text',x:505,y:112,s:24,cls:'t-pri',text:'3'},
+      a1:{type:'arrow',x1:212,y1:216,x2:242,y2:216,bend:22,cls:'s-pink'},
+      a2:{type:'arrow',x1:397,y1:216,x2:427,y2:216,bend:22,cls:'s-pink'},
+      tip:{type:'text',x:320,y:294,s:30,hand:true,text:'No link? Try meaning, category, parts, degree'},
+    },
+    beats:[
+      { say:'Step one: read all four words before you judge any of them.', show:['n1','s1'] },
+      { say:'Step two: name the link between three of them, such as birds or fruits.', show:['a1','n2','s2'] },
+      { say:'Step three: test the fourth word against that link. If it breaks it, it is the odd one.', show:['a2','n3','s3'] },
+      { say:'No link yet? Try another kind: meaning, category, parts, then degree.', show:['tip'] },
+    ]},
+  { t:'Your turn',
+    items:{
+      q:{type:'text',x:320,y:92,s:32,cls:'t-pri',text:'page · cover · index · shelf'},
+      sub:{type:'text',x:320,y:130,s:19,cls:'t-ink2',text:'Find the link first, then pick the odd word'},
+      ans:{type:'note',x:320,y:220,w:420,h:70,c:'n0',text:'All parts of a book except shelf',size:23,rot:-1},
+    },
+    beats:[
+      { say:'Your turn: page, cover, index, shelf. Find the link, then choose the odd one out.', show:['q','sub'] },
+    ],
+    ask:{ opts:['page','cover','index','shelf'], a:3,
+      right:'Well done. A page, a cover and an index are parts of a book. A shelf holds books, but it is not part of one.',
+      wrong:'A page, a cover and an index are all parts of a book. A shelf is not, so it is the odd one out.',
+      show:['ans'] } },
+  ],
+  quiz:[
+    {q:'Choose the word that does not belong:', o:['bee','butterfly','sparrow','fly'], a:2, e:'A bee, a butterfly and a fly are insects; a sparrow is a bird.'},
+    {q:'Choose the word that does not belong:', o:['brave','cowardly','bold','fearless'], a:1, e:'Brave, bold and fearless are synonyms; cowardly is their opposite.'},
+    {q:'Choose the word that does not belong:', o:['trunk','branch','vase','leaf'], a:2, e:'A trunk, a branch and a leaf are parts of a tree; a vase is not.'},
+  ]});
+
+XP.add({ key:'en-od-deep', lang:'en', sk:'odd', ord:20, title:'Finer links and the look-alike trap', min:'4 min',
+  goals:['Look for a finer link when a broad one fits all four words','Spot links such as tools of one trade and synonyms','Ignore words that only look or sound alike','Check your answer with: all are … except …'],
+  scenes:[
+  { t:'A finer link',
+    items:{
+      ...W4(['sickle','plow','scalpel','hoe'],140,['n0','n0','n0','n0']),
+      g:{type:'text',x:320,y:250,s:30,hand:true,text:'All tools? Too broad'},
+      t1:{type:'box',x:85,y:205,w:100,h:40,c:'prisoft',text:'farmer',s:19,cls:'t-pri'},
+      t2:{type:'box',x:215,y:205,w:100,h:40,c:'prisoft',text:'farmer',s:19,cls:'t-pri'},
+      t3:{type:'box',x:345,y:205,w:100,h:40,c:'pinksoft',text:'surgeon',s:19},
+      t4:{type:'box',x:475,y:205,w:100,h:40,c:'prisoft',text:'farmer',s:19,cls:'t-pri'},
+      rule:{type:'text',x:320,y:300,s:23,cls:'t-pri',text:'The finer link: tools of one trade'},
+    },
+    beats:[
+      { say:'Sickle, plow, scalpel, hoe. At first glance they are all tools.', show:['w1','w2','w3','w4'], gap:.3 },
+      { say:'That link is too broad: it fits all four, so it can’t separate them. We need a finer one.', show:['g'] },
+      { say:'A sickle, a plow and a hoe are a farmer’s tools; a scalpel is a surgeon’s. So the scalpel is odd.', hide:['g'], show:['t1','t2','t4','t3','rule'], gap:.3, hl:['w3'] },
+    ]},
+  { t:'Different words, same thing',
+    items:{
+      ...W4(['sofa','chair','couch','settee'],140,['n3','n1','n3','n3']),
+      x:{type:'cross',x:265,y:222},
+      xl:{type:'text',x:250,y:278,s:28,hand:true,text:'another seat'},
+      nt:{type:'note',x:490,y:262,w:210,h:62,c:'n0',text:'Names for a sofa',size:20,rot:-2},
+    },
+    beats:[
+      { say:'Sofa, chair, couch, settee. You can sit on all four, so where is the link?', show:['w1','w2','w3','w4'], gap:.3 },
+      { say:'Look at meaning: couch and settee are other names for a sofa. Those three are synonyms.', show:['nt'], hl:['w1','w3','w4'] },
+      { say:'A chair is a different seat, not another name for a sofa. So the chair is the odd one out.', show:['x','xl'] },
+    ]},
+  { t:'The look-alike trap',
+    items:{
+      ...W4(['bay','sea','ocean','tea'],140,['n3','n3','n3','n1']),
+      trap:{type:'text',x:320,y:238,s:30,hand:true,text:'bay · sea · tea: three short words'},
+      m1:{type:'box',x:85,y:205,w:100,h:40,c:'n3',text:'water',s:19,cls:'t-note'},
+      m2:{type:'box',x:215,y:205,w:100,h:40,c:'n3',text:'water',s:19,cls:'t-note'},
+      m3:{type:'box',x:345,y:205,w:100,h:40,c:'n3',text:'water',s:19,cls:'t-note'},
+      x:{type:'cross',x:525,y:225},
+      rule:{type:'text',x:320,y:300,s:23,cls:'t-pri',text:'Meaning is the link, not spelling'},
+    },
+    beats:[
+      { say:'Bay, sea, ocean, tea. Bay, sea and tea are short words, and sea and tea rhyme.', show:['w1','w2','w3','w4'], gap:.3 },
+      { say:'So some pick ocean because it looks different. That is a trap: looking alike is not a link.', show:['trap'], strike:['trap'] },
+      { say:'The real link is meaning: a bay, a sea and an ocean are bodies of water. The odd one is tea.', hide:['trap'], show:['m1','m2','m3','x','rule'], gap:.3 },
+    ]},
+  { t:'Check with a sentence',
+    items:{
+      fr:{type:'note',x:360,y:78,w:260,h:50,c:'n2',text:'All are … except …',size:21,rot:-1},
+      ex:{type:'box',x:80,y:190,w:480,h:56,c:'surface2',text:'All are bodies of water except tea',s:21},
+      ok:{type:'text',x:320,y:298,s:30,hand:true,text:'A true sentence = a sure answer'},
+      q:{type:'text',x:320,y:140,s:25,cls:'t-pri',text:'purple · maroon · simple · orange'},
+      ans:{type:'note',x:320,y:222,w:400,h:66,c:'n3',text:'All are colors except simple',size:22,rot:-1},
+    },
+    beats:[
+      { say:'Before you lock in an answer, check it with a sentence: all are something, except one.', show:['fr'] },
+      { say:'For example: all are bodies of water except tea. If the sentence is true, your answer is right.', show:['ex','ok'] },
+      { say:'Try it: purple, maroon, simple, orange. Which is the odd one? Use your check sentence.', hide:['ex','ok'], show:['q'] },
+    ],
+    ask:{ opts:['purple','maroon','simple','orange'], a:2,
+      right:'Well done. All are colors except simple, and the look-alike ending did not fool you.',
+      wrong:'Simple looks like purple, but looks are not a link. All are colors except simple.',
+      show:['ans'] } },
+  ],
+  quiz:[
+    {q:'Choose the word that does not belong:', o:['scissors','comb','hairdryer','oar'], a:3, e:'Scissors, a comb and a hairdryer are a hairdresser’s tools; an oar is used for rowing.'},
+    {q:'Choose the word that does not belong:', o:['doctor','physician','nurse','medic'], a:2, e:'Doctor, physician and medic name the same job; a nurse is a different job.'},
+    {q:'Choose the word that does not belong:', o:['star','sun','moon','spoon'], a:3, e:'A star, the sun and the moon are in the sky. Moon and spoon rhyme, but rhyming is not a link.'},
+  ]});
+})();
+/* English explainers: reading (reading comprehension) */
+(function(){ if(!window.XP||!XP.ready) return;
+
+/* passage card: a box plus one left-aligned text item per line (keys pbox, l1, l2, …) */
+const PASS=(lines,y,{lh=38,s=19,h}={})=>{ const o={pbox:{type:'box',x:30,y,w:580,h:h||(lines.length*lh+26),c:'surface2'}};
+  lines.forEach((t,i)=>{ o['l'+(i+1)]={type:'text',x:54,y:y+13+lh*(i+0.5)+s*0.36,s,anchor:'start',text:t}; }); return o; };
+
+/* ---------- 1. main idea vs details ---------- */
+const BAMBOO=['Bamboo is one of the most useful plants.','Its young shoots are cooked as food, its tall','stems build houses, and its fibers make paper.'];
+XP.add({ key:'en-re-main', lang:'en', sk:'reading', ord:10, title:'Main idea and details', min:'3 min',
+  goals:['Tell the main idea from the details','Find the topic sentence in a passage','Choose a title that covers the whole passage','Rule out titles that are too narrow or too broad'],
+  scenes:[
+  { t:'A short passage',
+    items:{
+      ...PASS(BAMBOO,76,{lh:40,s:20}),
+      ul:{type:'line',x1:52,y1:125,x2:520,y2:125,cls:'s-pink'},
+      tag:{type:'note',x:320,y:262,w:230,h:58,c:'n2',text:'Topic sentence',size:24,rot:-2},
+      tip:{type:'text',x:320,y:330,s:30,hand:true,text:'Usually the first or last sentence'},
+    },
+    beats:[
+      { say:'Read this short passage about bamboo. Each part of it has a job.', show:['pbox','l1','l2','l3'], gap:.5 },
+      { say:'The first sentence says bamboo is one of the most useful plants. That is the topic sentence.', show:['ul','tag'] },
+      { say:'It usually comes at the start or the end of a passage. The other sentences give details.', show:['tip'] },
+    ]},
+  { t:'The umbrella and the details',
+    items:{
+      idea:{type:'note',x:320,y:104,w:440,h:62,c:'n0',text:'Main idea: bamboo is very useful',size:21,rot:-1},
+      k1:{type:'line',x1:320,y1:138,x2:125,y2:208,cls:'s-pri'},
+      k2:{type:'line',x1:320,y1:138,x2:320,y2:208,cls:'s-pri'},
+      k3:{type:'line',x1:320,y1:138,x2:515,y2:208,cls:'s-pri'},
+      d1:{type:'box',x:40,y:208,w:170,h:48,c:'prisoft',text:'shoots: food',s:18,cls:'t-pri'},
+      d2:{type:'box',x:235,y:208,w:170,h:48,c:'prisoft',text:'stems: houses',s:18,cls:'t-pri'},
+      d3:{type:'box',x:430,y:208,w:170,h:48,c:'prisoft',text:'fibers: paper',s:18,cls:'t-pri'},
+      bot:{type:'text',x:320,y:314,s:30,hand:true,text:'A detail is part of the picture, not all of it'},
+    },
+    beats:[
+      { say:'The main idea is what the whole passage is about: bamboo is very useful.', show:['idea'] },
+      { say:'The details support it: shoots are food, stems build houses, and fibers make paper.', show:['k1','d1','k2','d2','k3','d3'], gap:.25 },
+      { say:'Each detail is true, but covers only one part, so it can’t be the main idea.', show:['bot'], hl:['d3'] },
+    ]},
+  { t:'Your turn: pick a title',
+    items:{
+      q:{type:'text',x:320,y:90,s:28,cls:'t-pri',text:'What is the best title?'},
+      sub:{type:'text',x:320,y:128,s:18,cls:'t-ink2',text:'Remember: bamboo is one of the most useful plants'},
+      ans:{type:'note',x:320,y:222,w:340,h:64,c:'n3',text:'Title = main idea',size:25,rot:-1},
+    },
+    beats:[
+      { say:'A title question is a main idea question in a few words.', show:['q'] },
+      { say:'Bamboo is one of the most useful plants. Which title fits best?', show:['sub'] },
+    ],
+    ask:{ opts:['Bamboo in building','The uses of bamboo','The history of Asia','How paper is made'], a:1, s:19,
+      right:'Well done. The uses of bamboo covers the whole passage: shoots, stems and fibers.',
+      wrong:'The best title is the uses of bamboo; it covers shoots, stems and fibers. The others are too narrow or too broad.',
+      show:['ans'] } },
+  { t:'Narrow, broad, just right',
+    items:(()=>{ const o={}; [['Bamboo in building','Too narrow','n1'],['The history of Asia','Too broad','n1'],['The uses of bamboo','Just right','n3']].forEach(([tt,tag,c],i)=>{ const y=100+i*70;
+      o['r'+i]={type:'box',x:50,y:y-25,w:330,h:50,c:'surface2',text:tt,s:22}; o['t'+i]={type:'note',x:490,y,w:180,h:50,c,text:tag,size:22,rot:i%2?2:-2}; });
+      o.tip={type:'text',x:320,y:322,s:30,hand:true,text:'Does it cover the start and the end?'}; return o; })(),
+    beats:[
+      { say:'Bamboo in building is too narrow: it covers only the stems. That is the detail trap.', show:['r0','t0'] },
+      { say:'The history of Asia is too broad. The passage never mentions history.', show:['r1','t1'] },
+      { say:'The uses of bamboo is just right. It covers the whole passage and nothing more.', show:['r2','t2'] },
+      { say:'Before you choose, ask: does it cover both the start and the end?', show:['tip'] },
+    ]},
+  ],
+  quiz:[
+    {q:'"Sleep is essential to good health. Without it, the body heals slowly, the mind struggles to focus, and moods become harder to control." The best title is:', o:['Healing wounds','Why sleep matters for health','Dreams at night','How to focus'], a:1, e:'The first sentence is the topic sentence; the rest are examples of it.'},
+    {q:'In the passage above, "the mind struggles to focus" is:', o:['the main idea','a detail that supports the main idea','the writer’s opposing view','the title of the passage'], a:1, e:'It is one example of why sleep matters, so it is a detail.'},
+    {q:'A title that covers only one sentence of a passage is:', o:['just right','too narrow','too broad','complete'], a:1, e:'A good title covers the whole passage; one that covers only part of it is too narrow.'},
+  ]});
+
+/* ---------- 2. stated, inferred, not mentioned ---------- */
+const WHALE=['Each autumn, humpback whales leave the cold','polar seas and swim thousands of kilometers','to warm waters, where their calves are born.'];
+XP.add({ key:'en-re-stated', lang:'en', sk:'reading', ord:20, title:'Stated, inferred, or not mentioned?', min:'4 min',
+  goals:['Tell a stated fact from an inferred one','Find the evidence in the passage for every answer','Answer from the passage, not from general knowledge','Solve "all of the following EXCEPT" questions'],
+  scenes:[
+  { t:'Three kinds',
+    items:{
+      ...PASS(WHALE,74,{lh:40,s:20}),
+      a:{type:'note',x:125,y:272,w:170,h:60,c:'n3',text:'Stated',size:22,rot:-2},
+      b:{type:'note',x:320,y:272,w:170,h:60,c:'n2',text:'Inferred',size:22,rot:2},
+      c:{type:'note',x:515,y:272,w:190,h:60,c:'n1',text:'Not mentioned',size:19,rot:-2},
+    },
+    beats:[
+      { say:'Here is a short passage about humpback whales. Every answer choice is one of three kinds.', show:['pbox','l1','l2','l3'], gap:.5 },
+      { say:'It may be stated, or inferred, which means the passage points to it without saying it in those words.', show:['a','b'] },
+      { say:'Or it may not be mentioned at all, even if it is true.', show:['c'] },
+    ]},
+  { t:'Stated or inferred?',
+    items:{
+      qa:{type:'box',x:30,y:66,w:580,h:44,c:'surface2',text:'"Each autumn, humpback whales leave the cold…"',s:17,cls:'t-ink2'},
+      sa:{type:'box',x:30,y:124,w:430,h:48,c:'surface',text:'Humpbacks leave polar seas in autumn',s:17},
+      ta:{type:'note',x:540,y:148,w:125,h:50,c:'n3',text:'Stated',size:20,rot:-2},
+      qb:{type:'box',x:30,y:200,w:580,h:44,c:'surface2',text:'"…to warm waters, where their calves are born."',s:17,cls:'t-ink2'},
+      sb:{type:'box',x:30,y:258,w:430,h:48,c:'surface',text:'The calves are not born in polar seas',s:17},
+      tb:{type:'note',x:540,y:282,w:125,h:50,c:'n2',text:'Inferred',size:20,rot:2},
+    },
+    beats:[
+      { say:'Compare each choice with the passage. Humpbacks leave polar seas in autumn: the first line says almost exactly that.', show:['qa','sa'] },
+      { say:'So it is stated, with clear evidence.', show:['ta'] },
+      { say:'Now: the calves are not born in polar seas. No line says that in those words.', show:['qb','sb'] },
+      { say:'But the calves are born in warm waters, far from the cold seas. So it is inferred, and the evidence is still there.', show:['tb'] },
+    ]},
+  { t:'The general knowledge trap',
+    items:{
+      st:{type:'box',x:50,y:78,w:540,h:56,c:'surface2',text:'Humpback whales eat krill and small fish',s:20},
+      ck:{type:'check',x:185,y:180},
+      ckt:{type:'text',x:220,y:188,s:21,anchor:'start',text:'True in real life'},
+      cr:{type:'cross',x:185,y:238},
+      crt:{type:'text',x:220,y:246,s:21,anchor:'start',cls:'t-bad',text:'Not in the passage'},
+      rule:{type:'note',x:320,y:310,w:400,h:58,c:'n0',text:'Answer from the passage only',size:20,rot:-2},
+    },
+    beats:[
+      { say:'You may see a choice like this: humpback whales eat krill and small fish.', show:['st'] },
+      { say:'You may even know it is true.', show:['ck','ckt'] },
+      { say:'But the passage never says it, and the question is about the passage, not your knowledge. So it is not mentioned.', show:['cr','crt','rule'], gap:.35 },
+    ]},
+  { t:'Your turn: EXCEPT',
+    items:{
+      q:{type:'text',x:320,y:80,s:22,cls:'t-pri',text:'All of these are mentioned EXCEPT:'},
+      sub:{type:'text',x:320,y:112,s:16,cls:'t-ink2',text:'Three choices have evidence; find the one that doesn’t'},
+      ans:{type:'note',x:320,y:222,w:420,h:64,c:'n3',text:'Groups are never mentioned',size:22,rot:-1},
+    },
+    beats:[
+      { say:'In an except question the task flips: three choices are in the passage, and you want the one that is not.', show:['q'] },
+      { say:'Match each choice to its evidence. Which one does the passage not mention?', show:['sub'] },
+    ],
+    ask:{ opts:['They leave in autumn','They swim a long way','Calves are born in warm water','They travel in large groups'], a:3, column:true, y:156, s:18,
+      right:'Well done. Autumn, the long swim and the calves are all in the passage. Groups are never mentioned.',
+      wrong:'Autumn is in the first line, the long swim in the second, and the calves in the third. Groups are never mentioned.',
+      show:['ans'] } },
+  ],
+  quiz:[
+    {q:'"The museum closed early because of heavy snow, so the class went home before finishing their sketches." Why did the museum close, according to the passage?', o:['A public holiday','Heavy snow','Repair work','Too few visitors'], a:1, e:'It is stated: "because of heavy snow."'},
+    {q:'From the passage above, we can infer that the class:', o:['finished their sketches early','was sketching at the museum','did not enjoy art','was afraid of snow'], a:1, e:'Not said in those words, but they left the closing museum "before finishing their sketches."'},
+    {q:'The passage above mentions all of the following EXCEPT:', o:['The museum closed early','It snowed heavily','The class went home','The power went out'], a:3, e:'A power cut can happen in a storm, but the passage never mentions one.'},
+  ]});
+
+/* ---------- 3. efficient reading strategy ---------- */
+const ROOF=['Sam grew tomatoes on his roof. His neighbors','mocked the idea at first, but they warmed to','it after the harvest and asked him for tips.'];
+XP.add({ key:'en-re-strategy', lang:'en', sk:'reading', ord:30, title:'Read smart and fast', min:'4 min',
+  goals:['Start with the questions or a quick skim','Spot the key word and go back to where it appears','Work out a word’s meaning from context','Find what a pronoun refers to'],
+  scenes:[
+  { t:'Start with the question',
+    items:{
+      qa:{type:'box',x:35,y:76,w:275,h:48,c:'prisoft',text:'What does "mocked" mean?',s:17,cls:'t-pri'},
+      qb:{type:'box',x:330,y:76,w:275,h:48,c:'prisoft',text:'What does "it" refer to?',s:17,cls:'t-pri'},
+      tip:{type:'text',x:320,y:164,s:30,hand:true,text:'The question tells you what to look for'},
+      ...PASS(ROOF,190,{lh:40}),
+    },
+    beats:[
+      { say:'Don’t start by reading word by word. Glance at the questions first, so you know what to look for.', show:['qa','qb'] },
+      { say:'Here we need the meaning of a word, and what a pronoun refers to.', show:['tip'] },
+      { say:'Then skim the passage for its topic: Sam grew tomatoes on his roof.', show:['pbox','l1','l2','l3'], gap:.4 },
+    ]},
+  { t:'The key word',
+    items:{
+      ...PASS(ROOF,64,{lh:38}),
+      chip:{type:'note',x:130,y:250,w:160,h:58,c:'n1',text:'mocked',size:26,rot:-3},
+      sent:{type:'box',x:245,y:224,w:350,h:52,c:'butter',text:'mocked the idea at first',s:20,cls:'t-note'},
+      hint:{type:'text',x:320,y:326,s:30,hand:true,text:'Read around it, not the whole passage'},
+    },
+    beats:[
+      { say:'Find the key word in the question. Here it is mocked.', show:['pbox','l1','l2','l3','chip'], gap:.25 },
+      { say:'Scan for it, then read the sentence around it.', show:['sent'] },
+      { say:'You don’t reread the whole passage for every question, so you save time.', show:['hint'] },
+    ]},
+  { t:'Meaning from context',
+    items:{
+      s1:{type:'box',x:35,y:74,w:275,h:50,c:'surface2',text:'mocked the idea at first',s:18},
+      s2:{type:'box',x:330,y:74,w:275,h:50,c:'surface2',text:'but they warmed to it',s:18},
+      gn:{type:'note',x:320,y:170,w:420,h:56,c:'n2',text:'but → the opposite comes next',size:20,rot:-1},
+      mean:{type:'eq',x:320,y:238,s:26,cls:'t-pri',text:'mocked = made fun of'},
+      test:{type:'box',x:150,y:262,w:450,h:52,c:'oksoft',text:'His neighbors made fun of the idea',s:19},
+      ck:{type:'check',x:112,y:288,s:.9},
+    },
+    beats:[
+      { say:'What does mocked mean? No dictionary needed. Look at what comes next: but they warmed to it.', show:['s1','s2'] },
+      { say:'But signals a contrast. Warming to an idea is the opposite of laughing at it, so mocked means made fun of.', show:['gn','mean'] },
+      { say:'Check by swapping it in: his neighbors made fun of the idea. It makes sense.', show:['test','ck'] },
+    ]},
+  { t:'Your turn: pronouns',
+    items:{
+      rule:{type:'note',x:320,y:94,w:520,h:58,c:'n0',text:'A pronoun points back to a matching noun',size:19,rot:-1},
+      d1:{type:'box',x:150,y:160,w:340,h:52,c:'surface2',text:'and asked him for tips',s:22},
+      dn:{type:'note',x:320,y:262,w:200,h:56,c:'n3',text:'him → Sam',size:24,rot:2},
+      q:{type:'text',x:320,y:88,s:28,cls:'t-pri',text:'but they warmed to it'},
+      sub:{type:'text',x:320,y:128,s:19,cls:'t-ink2',text:'What does "it" refer to?'},
+      ans:{type:'note',x:320,y:222,w:260,h:64,c:'n3',text:'it → the idea',size:26,rot:-1},
+    },
+    beats:[
+      { say:'A pronoun points back to an earlier noun that matches it: one or many, person or thing.', show:['rule'] },
+      { say:'In the phrase asked him for tips, him means Sam, who grew the tomatoes.', show:['d1','dn'] },
+      { say:'Now: but they warmed to it. What does it refer to?', hide:['rule','d1','dn'], show:['q','sub'] },
+    ],
+    ask:{ opts:['the idea','the tomatoes','the neighbors','Sam'], a:0,
+      right:'Well done. It means one thing, not a person. Only the idea fits: they mocked it, then warmed to it.',
+      wrong:'It means one thing. The tomatoes and neighbors are many, and Sam would be him. It refers to the idea.',
+      show:['ans'] } },
+  ],
+  quiz:[
+    {q:'"The doctor was so adept that she could diagnose an illness at a glance, and patients traveled from distant towns to see her." The word "adept" means:', o:['skilled','angry','generous','tired'], a:0, e:'The next part explains it: she could diagnose an illness at a glance.'},
+    {q:'In the passage above, "her" in "to see her" refers to:', o:['the illness','the doctor','the patients','the towns'], a:1, e:'Patients traveled to see the doctor; "her" is one female person, which matches "the doctor."'},
+    {q:'The best first step to save time in reading comprehension is:', o:['Memorize the passage before the questions','Read the questions or skim the passage quickly','Read every choice three times','Start with the longest question'], a:1, e:'Knowing what you need first lets you go straight to the evidence.'},
+  ]});
+})();
+/* English explainers: stats */
+(function(){ if(!window.XP||!XP.ready) return;
+
+/* ================= 1. mean, median, mode ================= */
+const card=(x,v,c)=>({type:'note',x,y:130,w:64,h:64,c,text:v,size:30});
+XP.add({ key:'en-st-mean', lang:'en', sk:'stats', ord:10, title:'Mean, median and mode', min:'4 min',
+  goals:['Find the mean and see it as a balance point','Use the sum trick to find a missing value','Find the median after sorting, and the mode by frequency','Avoid taking the middle before sorting'],
+  scenes:[
+  { t:'The mean: evening out',
+    items:{ bars:{type:'bars',x:70,y:90,w:300,h:200,values:[2,8,6,4],labels:['Khalid','Noura','Sara','Ali'],max:10,c:'pri'},
+      ml:{type:'line',x1:62,y1:190,x2:378,y2:190,cls:'s-pink'},
+      e1:{type:'eq',x:500,y:130,s:22,text:'2 + 8 + 6 + 4 = 20'}, e2:{type:'eq',x:500,y:192,s:34,text:'20 ÷ 4 = 5',cls:'t-pri'},
+      n:{type:'note',x:500,y:268,w:180,h:58,c:'n0',text:'Mean = 5',size:26,rot:-2} },
+    beats:[
+      { say:'The mean asks: if we shared the total equally, how much would each get?', show:['bars'] },
+      { say:'Add the values: two plus eight plus six plus four is twenty.', show:['e1'] },
+      { say:'Divide by how many there are: twenty divided by four is five.', show:['e2','ml'] },
+      { say:'It’s a balance point: what sits above the line exactly fills the gaps below it.', show:['n'], hl:['ml'] },
+    ]},
+  { t:'The sum trick',
+    items:{ rule:{type:'note',x:320,y:98,w:400,h:62,c:'n2',text:'Sum = mean × count',size:28,rot:-1},
+      q:{type:'eq',x:320,y:168,s:20,text:'Mean of 5 numbers = 12; four of them sum to 45',cls:'t-ink2'},
+      e1:{type:'eq',x:320,y:218,s:30,text:'Sum: 12 × 5 = 60'}, e2:{type:'eq',x:320,y:266,s:30,text:'60 − 45 = 15',cls:'t-pri'},
+      ans:{type:'box',x:165,y:290,w:310,h:50,c:'n0',text:'Missing number: 15',s:23,cls:'t-note'} },
+    beats:[
+      { say:'Flip it for the best trick here: sum equals mean times count.', show:['rule'] },
+      { say:'Five numbers with a mean of twelve add up to twelve times five: sixty.', show:['q','e1'] },
+      { say:'If four of them make forty-five, the fifth is sixty minus forty-five.', show:['e2'] },
+      { say:'That’s fifteen. When a value is missing, start with the sum.', show:['ans'] },
+    ]},
+  { t:'Median and mode',
+    items:{ c7:card(160,'7','n3'), c3a:card(240,'3','n1'), c9:card(320,'9','n3'), c3b:card(400,'3','n1'), c5:card(480,'5','n0'),
+      lm:{type:'text',x:320,y:200,s:24,text:'median',hand:true}, lo:{type:'text',x:200,y:200,s:24,text:'mode',hand:true},
+      ev:{type:'eq',x:320,y:252,s:22,text:'Even count: 2, 4, 6, 8 → (4 + 6) ÷ 2 = 5',cls:'t-ink2'},
+      trap:{type:'note',x:320,y:312,w:440,h:52,c:'n1',text:'Sort first, then take the middle',size:21,rot:-1} },
+    beats:[
+      { say:'The median is the middle number. Take these five values.', show:['c7','c3a','c9','c3b','c5'], gap:.12 },
+      { say:'First, sort them from smallest to largest.', move:{c7:[240,0],c3a:[-80,0],c9:[160,0],c3b:[-160,0],c5:[-160,0]} },
+      { say:'Five is in the middle, so the median is five.', show:['lm'], hl:['c5'] },
+      { say:'With an even count, average the two middle numbers.', show:['ev'] },
+      { say:'The mode is the most frequent value. Three appears twice, so the mode is three.', show:['lo'], hl:['c3a','c3b'] },
+      { say:'The trap: take the middle before sorting and you’d say nine. Wrong.', show:['trap'] },
+    ]},
+  { t:'Your turn: the missing score',
+    items:{ q1:{type:'eq',x:320,y:82,s:24,text:'The mean score of 4 students = 80'}, q2:{type:'eq',x:320,y:122,s:20,text:'A 5th student joins; new mean = 82. His score?'},
+      t1:{type:'eq',x:320,y:198,s:26,text:'Before: 4 × 80 = 320',cls:'t-ink2'}, t2:{type:'eq',x:320,y:244,s:26,text:'After: 5 × 82 = 410',cls:'t-ink2'},
+      r:{type:'box',x:180,y:270,w:280,h:54,c:'n0',text:'410 − 320 = 90',s:28,cls:'t-note',ltr:true} },
+    beats:[
+      { say:'Your turn. Four students average eighty. A fifth joins, and the mean becomes eighty-two.', show:['q1','q2'] },
+      { say:'Use the sum trick. What did the new student score?', hl:['q2'] },
+    ],
+    ask:{ opts:['82','90','86','100'], a:1,
+      right:'Correct! The sum grew from three hundred and twenty to four hundred and ten: ninety more.',
+      wrong:'Sum before: three hundred and twenty. Sum after: five times eighty-two, four hundred and ten. The difference is ninety.',
+      show:['t1','t2','r'] } },
+  ],
+  quiz:[
+    {q:'What is the median of 8, 2, 6, 4, 10, 5?', o:['5','6','5.5','7'], a:2, e:'Sorted: 2, 4, 5, 6, 8, 10. The two middle numbers are 5 and 6, and their mean is 5.5.'},
+    {q:'The mean of 6 numbers is 15. One number is removed and the mean of the rest is 14. Which number was removed?', o:['20','15','1','19'], a:0, e:'Sum before: 6 × 15 = 90. Sum after: 5 × 14 = 70. The removed number is 20.'},
+    {q:'What is the mode of 4, 7, 4, 9, 7, 4, 2?', o:['7','4','5','9'], a:1, e:'4 appears three times, more than any other value.'},
+  ] });
+
+/* ================= 2. probability ================= */
+const balls={}; const bcol=['bad','bad','bad','bad','butter','butter','butter','butter','butter','butter','sky','sky'];
+bcol.forEach((c,i)=>{ balls['b'+i]={type:'circle',cx:177+26*i,cy:102,r:10,c}; });
+XP.add({ key:'en-st-prob', lang:'en', sk:'stats', ord:20, title:'Probability from zero', min:'3 min',
+  goals:['Find a probability: favorable over total','Know that a probability lies between 0 and 1','Use the complement to shorten your work','Rule out impossible choices at once'],
+  scenes:[
+  { t:'What is probability?',
+    items:{ g:{type:'grid',x:70,y:110,rows:2,cols:5,cell:40,gap:8,fill:3,c:'pink'}, cap:{type:'eq',x:166,y:236,s:18,text:'10 cubes: 3 pink, 7 white',cls:'t-ink2'},
+      qq:{type:'text',x:166,y:300,s:26,text:'Random pick: pink?',hand:true},
+      top:{type:'text',x:470,y:128,s:20,text:'favorable outcomes'}, bar:{type:'line',x1:365,y1:144,x2:575,y2:144}, bot:{type:'text',x:470,y:174,s:20,text:'all possible outcomes'},
+      res:{type:'box',x:390,y:220,w:160,h:60,c:'n2',text:'3/10',s:34,cls:'t-note',ltr:true} },
+    beats:[
+      { say:'Probability measures how likely something is. Here are ten cubes: three pink, seven white.', show:['g','cap'] },
+      { say:'Pick one without looking. What’s the probability it’s pink?', show:['qq'] },
+      { say:'The rule: favorable outcomes over all possible outcomes.', show:['top','bar','bot'] },
+      { say:'Three out of ten, so the probability is three tenths.', show:['res'], hl:['g'] },
+    ]},
+  { t:'From zero to one',
+    items:{ nl:{type:'nline',x1:110,x2:530,y:175,from:0,to:1,step:.25},
+      d0:{type:'dot',x:110,y:175,r:9,c:'bad',text:'impossible',dy:-24,s:20}, d1:{type:'dot',x:530,y:175,r:9,c:'pri',text:'certain',dy:-24,s:20},
+      dh:{type:'dot',x:320,y:175,r:9,c:'pink',text:'half',dy:-24,s:20},
+      n:{type:'note',x:320,y:275,w:400,h:54,c:'n0',text:'Never below 0, never above 1',size:22,rot:-1} },
+    beats:[
+      { say:'Every probability is a number from zero to one.', show:['nl'] },
+      { say:'Zero means impossible, like drawing a yellow cube from a bag with none.', show:['d0'] },
+      { say:'One means certain, like when every cube in the bag is pink.', show:['d1'] },
+      { say:'In the middle is one half, like tossing a coin: one side out of two.', show:['dh'] },
+      { say:'So cross out any choice that is negative or greater than one.', show:['n'] },
+    ]},
+  { t:'The complement',
+    items:{ rule:{type:'note',x:320,y:92,w:360,h:58,c:'n2',text:'P(not A) = 1 − P(A)',size:26,rot:-1},
+      g:{type:'grid',x:70,y:150,rows:2,cols:5,cell:40,gap:8,fill:3,c:'pink'},
+      e:{type:'eq',x:470,y:195,s:30,text:'1 − 3/10 = 7/10'}, h:{type:'text',x:465,y:262,s:22,text:'Count the opposite if it’s easier',hand:true} },
+    beats:[
+      { say:'The probability that something does not happen is one minus the probability that it does.', show:['rule'] },
+      { say:'In our example, pink is three tenths, so not pink is seven tenths.', show:['g','e'] },
+      { say:'Use it when the opposite is quicker to count.', show:['h'] },
+    ]},
+  { t:'Your turn: not red',
+    items:Object.assign({ t1:{type:'eq',x:320,y:72,s:22,text:'A box holds 4 red, 6 yellow and 2 blue balls'},
+      t2:{type:'eq',x:320,y:138,s:20,text:'P(the ball drawn is NOT red) = ?',cls:'t-ink2'},
+      r1:{type:'box',x:220,y:190,w:200,h:60,c:'n0',text:'8/12 = 2/3',s:32,cls:'t-note',ltr:true}, r2:{type:'eq',x:320,y:292,s:24,text:'or: 1 − 4/12 = 2/3',cls:'t-ink2'} }, balls),
+    beats:[
+      { say:'Your turn. A box holds four red balls, six yellow balls and two blue balls.', show:['t1',...Object.keys(balls)], gap:.05 },
+      { say:'We draw one ball at random. What is the probability that it is not red?', show:['t2'] },
+    ],
+    ask:{ opts:['1/3','2/3','8/10','4/8'], a:1,
+      right:'Well done! Eight of the twelve balls are not red, which is two thirds.',
+      wrong:'There are twelve balls, and eight are not red. That’s eight twelfths, which simplifies to two thirds.',
+      show:['r1','r2'] } },
+  ],
+  quiz:[
+    {q:'A die is rolled once. What is the probability of an even number greater than 2?', o:['1/2','1/3','1/6','2/3'], a:1, e:'Only 4 and 6 work: 2 out of 6 = 1/3.'},
+    {q:'If a plan has a 0.65 probability of success, what is the probability it fails?', o:['0.65','0.45','0.35','1.65'], a:2, e:'The complement: 1 − 0.65 = 0.35.'},
+    {q:'Which value cannot be a probability?', o:['0','0.99','5/4','1'], a:2, e:'5/4 is greater than 1, and a probability is never more than 1.'},
+  ] });
+
+/* ================= 3. charts & tables ================= */
+const DAYS=['Sat','Sun','Mon','Tue'], SALES=[20,30,15,40];
+const tb={}; const TH=['Day','Sat','Sun','Mon','Tue'], TV=['Sales','20','30','15','40'];
+TH.forEach((h,i)=>{ const x=70+100*i; tb['h'+i]={type:'box',x,y:64,w:100,h:36,rx:6,c:'prisoft',text:h,s:18,cls:'t-pri'}; tb['v'+i]={type:'box',x,y:100,w:100,h:36,rx:6,c:'surface',text:TV[i],s:i?22:18}; });
+const tk=[].concat(...TH.map((_,i)=>['h'+i,'v'+i]));
+XP.add({ key:'en-st-charts', lang:'en', sk:'stats', ord:30, title:'Reading charts and tables', min:'4 min',
+  goals:['Read the title, axes and units before calculating','Find a percent change from the old value','Turn a pie slice into a percent, an amount and an angle','Pull what you need from a table quickly'],
+  scenes:[
+  { t:'Bar charts: read first',
+    items:{ bars:{type:'bars',x:60,y:90,w:320,h:200,values:SALES,labels:DAYS,max:40,c:'pri'},
+      unit:{type:'text',x:495,y:100,s:18,text:'Sales (thousands)',cls:'t-ink2'},
+      hi:{type:'note',x:495,y:165,w:180,h:54,c:'n3',text:'Highest: 40',size:24,rot:-2}, lo:{type:'note',x:495,y:235,w:180,h:54,c:'n1',text:'Lowest: 15',size:24,rot:2},
+      d:{type:'eq',x:495,y:312,s:26,text:'40 − 15 = 25',cls:'t-pri'} },
+    beats:[
+      { say:'Before calculating, read the title, axes and units. What does each bar stand for?', show:['bars','unit'] },
+      { say:'A shop’s sales in thousands over four days. The tallest bar is Tuesday: forty thousand.', show:['hi'] },
+      { say:'The shortest is Monday: fifteen thousand.', show:['lo'] },
+      { say:'The difference: forty minus fifteen, twenty-five thousand.', show:['d'] },
+    ]},
+  { t:'Percent change',
+    items:{ bars:{type:'bars',x:30,y:100,w:280,h:190,values:SALES,labels:DAYS,max:40,c:['pink','pink','surface2','surface2']},
+      e1:{type:'eq',x:475,y:108,s:22,text:'Change: 30 − 20 = 10'}, e2:{type:'eq',x:475,y:170,s:30,text:'10 ÷ 20 = 50%',cls:'t-pri'},
+      w:{type:'eq',x:475,y:236,s:30,text:'10 ÷ 30 ≈ 33%',cls:'t-bad'},
+      rule:{type:'note',x:475,y:308,w:290,h:52,c:'n0',text:'Divide by the old value',size:21,rot:-1} },
+    beats:[
+      { say:'A frequent question: what is the percent increase from Saturday to Sunday?', show:['bars'] },
+      { say:'First the change: thirty minus twenty is ten.', show:['e1'] },
+      { say:'Divide the change by the old value: ten divided by twenty is a half, fifty percent.', show:['e2'] },
+      { say:'The trap: dividing by the new value gives about thirty-three percent. Wrong.', show:['w','rule'], strike:['w'] },
+    ]},
+  { t:'Pie charts: a share of the whole',
+    items:{ p0:{type:'pie',cx:180,cy:205,r:112,parts:10,fill:0}, p3:{type:'pie',cx:180,cy:205,r:112,parts:10,fill:3,c:'pink'},
+      l:{type:'eq',x:470,y:115,s:28,text:'Food = 30%'},
+      e1:{type:'eq',x:465,y:185,s:26,text:'30% of 8000 = 2400',cls:'t-pri'},
+      e2:{type:'eq',x:470,y:255,s:28,text:'3 × 36° = 108°'}, n:{type:'text',x:470,y:300,s:20,text:'the whole circle is 360°',hand:true} },
+    beats:[
+      { say:'A pie chart shows parts of a whole; the full circle is one hundred percent. This one has ten slices.', show:['p0'] },
+      { say:'In this family budget, food takes three slices of ten: thirty percent.', hide:['p0'], show:['p3','l'] },
+      { say:'If the budget is eight thousand riyals, food gets two thousand four hundred.', show:['e1'] },
+      { say:'A circle is three hundred and sixty degrees, so each slice is thirty-six, and food is one hundred and eight.', show:['e2','n'] },
+    ]},
+  { t:'Your turn: from the table',
+    items:Object.assign({}, tb, { r:{type:'box',x:100,y:186,w:440,h:64,c:'n0',text:'(30 − 15) ÷ 30 = 50%',s:30,cls:'t-note',ltr:true}, ck:{type:'check',x:320,y:292} }),
+    beats:[
+      { say:'Your turn. This table shows the same sales, in thousands.', show:tk, gap:.06 },
+      { say:'What is the percent decrease from Sunday to Monday?', hl:['v2','v3'] },
+    ],
+    ask:{ opts:['50%','15%','100%','33%'], a:0,
+      right:'Correct! The drop is fifteen. Divide by the old value, thirty, to get one half: fifty percent.',
+      wrong:'The drop is thirty minus fifteen, fifteen. Divide by the old value, thirty: one half, fifty percent.',
+      show:['r','ck'] } },
+  ],
+  quiz:[
+    {q:'A pie chart shows 600 students. The math slice has an angle of 90°. How many students prefer math?', o:['90','150','200','240'], a:1, e:'90° is a quarter of the circle, and a quarter of 600 = 150.'},
+    {q:'Sales rose from 40 thousand to 50 thousand. What is the percent increase?', o:['20%','10%','25%','50%'], a:2, e:'The change is 10; divide by the old value 40: 10 out of 40 = 25%.'},
+    {q:'Table: class A has 18 students, B has 22, C has 20. About what percent of all students are in class B?', o:['22%','33%','37%','44%'], a:2, e:'The total is 60, and 22 out of 60 ≈ 36.7%, about 37%.'},
+  ] });
 })();
 /* Explainers: algebra */
 (function(){ if(!window.XP||!XP.ready) return;
@@ -4537,11 +6871,11 @@ function resCard(it){ const url=it.u||(it.yt?yt(L(it.yt)):''); const tag={video:
   return url?`<a class="rcard" href="${url}" target="_blank" rel="noopener">${inner}</a>`:`<div class="rcard">${inner}</div>`; }
 /* foundation explainers (animated, narrated; Arabic) */
 const XPOK=()=>!!(window.XP&&XP.ready);
-const xpList=s=>XPOK()?XP.forSkill(s):[];
+const xpList=s=>XPOK()?XP.forSkill(s,S.lang):[];
 function xpSection(s){ const xs=xpList(s); if(!xs.length) return ''; const done=S.xp||{}, n=xs.filter(x=>done[x.key]).length;
   const play='<svg viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z" fill="currentColor" stroke="none"/></svg>';
   return `<section class="card xp-sec" id="xp-${s}"><div class="xp-sec-h"><h2>${t('xpTitle')}</h2><span class="chip num">${numL(n)} / ${numL(xs.length)}</span></div><p class="muted small">${t('xpIntro')}</p>
-    <div class="xpl" dir="rtl" lang="ar">${xs.map((x,i)=>`<button class="xpc" data-xp="${x.key}"><span class="xpn"><span class="pl">${play}</span><span>شرح ${'١٢٣٤٥٦٧٨٩'[i]||i+1}</span><span class="xpm">${esc(x.min||'')}</span>${done[x.key]?`<span class="dn">✓ ${t('xpDone')}</span>`:''}</span><b>${esc(x.title)}</b>${x.goals&&x.goals[0]?`<small>${esc(x.goals[0])}</small>`:''}</button>`).join('')}</div></section>`; }
+    <div class="xpl">${xs.map((x,i)=>`<button class="xpc" data-xp="${x.key}"><span class="xpn"><span class="pl">${play}</span><span>${t('xpN')} ${numL(i+1)}</span><span class="xpm">${esc(x.min||'')}</span>${done[x.key]?`<span class="dn">✓ ${t('xpDone')}</span>`:''}</span><b>${esc(x.title)}</b>${x.goals&&x.goals[0]?`<small>${esc(x.goals[0])}</small>`:''}</button>`).join('')}</div></section>`; }
 function pageLesson(s){
   const l=LESSONS[s]?.[S.lang]; if(!l) return pageLearn(); const i=skillInfo(s), ar=S.lang==='ar';
   const res=l.res.map(r=>r[0]==='yt'?{k:'video',t:{ar:'يوتيوب: '+r[1],en:'YouTube: '+r[1]},d:{ar:'بحث جاهز لشروحات هذه المهارة.',en:'A ready search for lessons on this skill.'},u:yt(r[1])}:{k:'link',t:{ar:r[1],en:r[1]},d:{ar:'مرجع خارجي للتعمق.',en:'External reference for deeper practice.'},u:r[2]});

@@ -255,24 +255,20 @@ app.get("/sitemap.xml", (req, res) => {
   res.type("application/xml").set("Cache-Control", "public, max-age=86400")
     .send(`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>${base}/</loc></url></urlset>\n`);
 });
-// ---------- explainer lessons (admin-only preview while in review) ----------
-// Narration clips live in Postgres (table narration). data/clip_urls.json, when present, lists freshly
-// generated clips ({id,url}) that are imported once at startup; clips already stored are skipped.
-const PREVIEW = path.join(__dirname, "preview");
-const adminPage = [wrap(auth), (req, res, next) => (req.user && isAdminEmail(req.user.email)) ? next()
-  : res.status(404).type("html").sendFile(path.join(PUB, "404.html"), e => { if (e) res.end("Not found"); })];
-app.get("/preview/explainers", ...adminPage, (req, res) => { res.set({ "Cache-Control": "no-store", "X-Robots-Tag": "noindex" }); res.sendFile(path.join(PREVIEW, "explainers.html")); });
-app.get("/preview/explainers.js", ...adminPage, (req, res) => { res.set("Cache-Control", "no-store"); res.type("application/javascript").sendFile(path.join(PREVIEW, "explainers.js")); });
-app.get("/audio/tracks.json", ...adminPage, (req, res) => { res.set("Cache-Control", "no-store"); res.type("application/json").sendFile(path.join(PREVIEW, "tracks.json")); });
-app.get("/audio/index.json", ...adminPage, wrap(async (req, res) => {
+// ---------- explainer narration (public) ----------
+// Narration clips live in Postgres (table narration); data/tracks.json maps each explainer to its clips + beat timings.
+// data/clip_urls.json, when present, lists freshly generated clips ({id,url}) that are imported once at startup.
+const TRACKS_FILE = path.join(__dirname, "data", "tracks.json");
+app.get("/audio/tracks.json", (req, res) => { res.set("Cache-Control", "no-cache"); if (!fs.existsSync(TRACKS_FILE)) return res.json({}); res.type("application/json").sendFile(TRACKS_FILE); });
+app.get("/audio/index.json", wrap(async (req, res) => {
   const r = await pool.query("SELECT id FROM narration ORDER BY id");
-  res.set("Cache-Control", "no-store").json(r.rows.map(x => x.id));
+  res.set("Cache-Control", "no-cache").json(r.rows.map(x => x.id));
 }));
-app.get("/audio/:id.mp3", ...adminPage, wrap(async (req, res) => {
+app.get("/audio/:id.mp3", wrap(async (req, res) => {
   const r = await pool.query("SELECT mime, data, updated_at FROM narration WHERE id=$1", [req.params.id]);
   const row = r.rows[0]; if (!row) return res.status(404).end();
   const buf = row.data, total = buf.length;
-  res.set({ "Content-Type": row.mime, "Accept-Ranges": "bytes", "Cache-Control": "private, max-age=3600", "Last-Modified": new Date(row.updated_at).toUTCString() });
+  res.set({ "Content-Type": row.mime, "Accept-Ranges": "bytes", "Cache-Control": "public, max-age=604800, immutable", "Last-Modified": new Date(row.updated_at).toUTCString() });
   const m = /^bytes=(\d*)-(\d*)$/.exec(req.get("Range") || "");   // Safari/iOS need range requests for audio
   if (m) {
     let start = m[1] === "" ? total - Number(m[2]) : Number(m[1]);

@@ -1200,7 +1200,7 @@ const T = {
   reviewBtn:'مراجعة', reviewOf:'مراجعة اختبار', retake:'أعد الحل', reviewHint:'اضغط على أي اختبار مكتمل لمراجعة إجاباتك وأخطائك. تُحفظ تفاصيل آخر ٢٠ اختبارًا وآخر محاولة لكل نموذج على هذا الجهاز.', noDetail:'تفاصيل هذا الاختبار غير متاحة؛ ربما أُجري قبل هذا التحديث أو على جهاز آخر.',
   restartT:'ابدأ الخطة من جديد', restartD:'تعود الخطة إلى الأسبوع الأول ابتداءً من اليوم وتُلغى علامات إنجاز المهام. يبقى مستواك ونتائجك ودفتر أخطائك كما هي.', restartBtn:'ابدأ الخطة من جديد', restartConfirm:'ستبدأ الخطة من الأسبوع الأول اليوم. هل تريد المتابعة؟', restartDone:'بدأت خطتك من جديد',
   resetPick:'اختر ما تريد مسحه:', resetWarn:'لا يمكن التراجع عن المسح. احفظ ملف التقدم أولًا إن أردت نسخة.', resetDone:'تم المسح',
-  resetParts:{plan:['الخطة ومهامها','تبدأ الخطة من الأسبوع الأول اليوم'],mistakes:['دفتر الأخطاء','الأسئلة المحفوظة للمراجعة وأسباب الأخطاء'],models:['النماذج الكاملة','درجات النماذج الثلاثين لتعيد حلها من جديد'],cards:['البطاقات والمفردات','تعود كل البطاقات غير محفوظة'],skills:['المستوى والنتائج','خريطة الإتقان، الدرجة التقديرية، سجل المحاولات، والنماذج'],all:['كل التقدم','كل ما سبق؛ يبقى مسارك وهدفك ولغتك']},
+  resetParts:{plan:['الخطة ومهامها','تبدأ الخطة من الأسبوع الأول اليوم'],mistakes:['دفتر الأخطاء','الأسئلة المحفوظة للمراجعة وأسباب الأخطاء'],models:['النماذج الكاملة','درجات النماذج الثلاثين لتعيد حلها من جديد'],cards:['البطاقات والمفردات والشروحات','تعود كل البطاقات غير محفوظة وتُمسح علامات إتمام الشروحات'],skills:['المستوى والنتائج','خريطة الإتقان، الدرجة التقديرية، سجل المحاولات، والنماذج'],all:['كل التقدم','كل ما سبق؛ يبقى مسارك وهدفك ولغتك']},
   saveTitle:'حفظ بياناتك', saveAuto:'حفظ تلقائي على هذا الجهاز', saveAutoD:'كل إجابة ونتيجة تُحفظ فورًا في متصفحك. تبقى حتى لو أغلقت الصفحة، لكنها تُفقد إذا مسحت بيانات المتصفح أو غيّرت الجهاز.', savedOk:'محفوظ على هذا الجهاز', saveFail:'المتصفح لا يسمح بالحفظ (ربما التصفح الخاص). احفظ ملفًا حتى لا تفقد تقدمك.', lastSaved:'آخر حفظ:', persistOn:'حفظ دائم مفعّل', saveFile:'نسخة احتياطية في ملف', saveFileD:'احفظ ملفًا صغيرًا على جهازك، واسترجعه في أي وقت أو على أي جهاز.', saveFileBtn:'احفظ ملف التقدم', loadFileBtn:'استرجع من ملف', lastExport:'آخر نسخة:', noExport:'لم تحفظ نسخة بعد.', saveCode:'رمز النقل', fileSaved:'تم حفظ الملف', fileFallback:'لم يتوفر الحفظ في ملف هنا؛ انسخ الرمز الظاهر واحتفظ به.', tryAgain:'حاول بعد لحظات', resultSaved:'تم حفظ نتيجتك', nudgeH:'احفظ نسخة من تقدمك', nudgeP:'مضى أسبوع على آخر نسخة احتياطية. ملف صغير يحمي كل ما أنجزته.',
   themeT:'المظهر', modeT:'الوضع', modes:{light:'فاتح',dark:'داكن',auto:'تلقائي'}, accentT:'اللون', accents:{violet:'بنفسجي',pink:'وردي',blue:'أزرق',orange:'برتقالي',ruby:'عنابي',navy:'كحلي'},
   brand:'أكاديمية القدرات', tagline:'التحضير لاختبار القدرات العامة',
@@ -1220,7 +1220,7 @@ const T = {
   deckAll:'كل البطاقات', cardsIntro:'اقرأ الوجه الأول وحاول التذكّر، ثم اقلب البطاقة. «راجعها» تعيدها إليك اليوم، و«أعرفها» تؤجلها أيامًا.', tapFlip:'اضغط للقلب', example:'مثال', allInDeck:'كل بطاقات القسم', deckDone:'أنهيت بطاقات هذا القسم لليوم. ارجع غدًا أو اختر قسمًا آخر.', techIntro:'تكنيكات يستخدمها المتفوقون لرفع الدقة والسرعة. طبّق واحدًا في كل جلسة حتى يصبح عادة.', patIntro:'أنماط أسئلة تتكرر في التجميعات التي يتداولها الطلاب بعد الاختبار. الأمثلة من إعداد المنصة على النمط نفسه.', how:'كيف يأتي', trick:'مفتاح الحل', practicePattern:'تدرّب على هذا النمط', skillCards:'بطاقات هذه المهارة',
   verbal:'القسم اللفظي', quant:'القسم الكمي',
   concept:'المفهوم', mind:'كيف يفكر واضع السؤال', steps:'خطوات الحل', types:'الأنماط مع أمثلة', rules:'القوانين والحقائق', traps:'الفخاخ', examples:'أمثلة محلولة', speed:'للوصول إلى ١٠٠', more:'للاستزادة', mastery:'مستواك في هذه المهارة', targetTime:'الزمن المستهدف',
-  practice10:'تدرّب (١٠ أسئلة بتصحيح فوري)', answer:'الإجابة', why:'السبب', lessonsOpen:'افتح الدرس',
+  practice10:'تدرّب (١٠ أسئلة بتصحيح فوري)', xpTitle:'شروحات التأسيس', xpIntro:'شروحات قصيرة متحركة بصوت معلّم، تبني الفكرة من الصفر، فيها وقفة تجرّب فيها بنفسك وتحدٍّ ختامي.', xpDone:'تم', xpShort:'شروحات', answer:'الإجابة', why:'السبب', lessonsOpen:'افتح الدرس',
   vocabIntro:'بطاقات لمفردات تتكرر في الاختبار. قل المعنى في ذهنك ثم اقلب البطاقة. البطاقات التي لا تعرفها تعود إليك أكثر.', flip:'اقلب البطاقة', know:'أعرفها', again:'راجعها', vocabDone:'أنهيت بطاقات اليوم', known:'متقنة', left:'متبقية',
   resIntro:'مصادر مختارة لكل مهارة. القاعدة: مصدر شرح واحد تنهيه، ثم التدريب هنا حتى تصل إلى «ثبات».',
   practiceTitle:'تدرّب', practiceIntro:'اختر نوع التدريب. التدريب بالتصحيح الفوري للتعلم، والأقسام والمحاكاة بتوقيت الاختبار الحقيقي.',
@@ -1267,7 +1267,7 @@ const T = {
   reviewBtn:'Review', reviewOf:'Review of test', retake:'Retake', reviewHint:'Tap any completed test to review your answers and mistakes. Details of the last 20 tests and the latest attempt of each model are kept on this device.', noDetail:'Details for this test are not available; it may predate this update or come from another device.',
   restartT:'Restart the plan', restartD:'The plan goes back to week 1 starting today and task checkmarks are cleared. Your level, results and mistake log stay as they are.', restartBtn:'Restart the plan', restartConfirm:'Your plan will restart from week 1 today. Continue?', restartDone:'Your plan has restarted',
   resetPick:'Choose what to erase:', resetWarn:'Erasing cannot be undone. Save a progress file first if you want a copy.', resetDone:'Erased',
-  resetParts:{plan:['Plan and tasks','The plan restarts from week 1 today'],mistakes:['Mistake log','Saved review questions and mistake causes'],models:['Full model tests','Scores for all 30 tests, so you can retake them fresh'],cards:['Cards and vocabulary','All cards return to unlearned'],skills:['Level and results','Mastery map, estimated score, attempt history and model tests'],all:['All progress','Everything above; your track, target and language stay']},
+  resetParts:{plan:['Plan and tasks','The plan restarts from week 1 today'],mistakes:['Mistake log','Saved review questions and mistake causes'],models:['Full model tests','Scores for all 30 tests, so you can retake them fresh'],cards:['Cards, vocabulary and explainers','All cards return to unlearned and explainer ticks are cleared'],skills:['Level and results','Mastery map, estimated score, attempt history and model tests'],all:['All progress','Everything above; your track, target and language stay']},
   saveTitle:'Save your data', saveAuto:'Auto-save on this device', saveAutoD:'Every answer and result is saved instantly in your browser. It stays after you close the page, but is lost if you clear browser data or switch devices.', savedOk:'Saved on this device', saveFail:'This browser is blocking storage (maybe private mode). Save a file so you do not lose progress.', lastSaved:'Last saved:', persistOn:'persistent storage on', saveFile:'Backup file', saveFileD:'Save a small file to your device and restore it anytime, on any device.', saveFileBtn:'Save progress file', loadFileBtn:'Restore from file', lastExport:'Last backup:', noExport:'No backup yet.', saveCode:'Transfer code', fileSaved:'File saved', fileFallback:'File saving is not available here; copy the code shown and keep it.', tryAgain:'Try again in a moment', resultSaved:'Your result is saved', nudgeH:'Back up your progress', nudgeP:'It has been a week since your last backup. A small file protects everything you have done.',
   themeT:'Appearance', modeT:'Mode', modes:{light:'Light',dark:'Dark',auto:'Auto'}, accentT:'Color', accents:{violet:'Violet',pink:'Pink',blue:'Blue',orange:'Orange',ruby:'Ruby',navy:'Navy'},
   brand:'GAT Academy', tagline:'General Aptitude Test prep',
@@ -1287,7 +1287,7 @@ const T = {
   deckAll:'All cards', cardsIntro:'Read the front and try to recall, then flip. "Review again" brings it back today; "I know it" pushes it out by days.', tapFlip:'Tap to flip', example:'Example', allInDeck:'All cards in this deck', deckDone:'You have finished this deck for today. Come back tomorrow or pick another deck.', techIntro:'Techniques top scorers use to lift accuracy and speed. Apply one per session until it becomes a habit.', patIntro:'Question patterns that recur in the compilations students share after the test. Examples are written by the platform on the same pattern.', how:'How it appears', trick:'The key', practicePattern:'Practice this pattern', skillCards:'Cards for this skill',
   verbal:'Verbal', quant:'Quantitative',
   concept:'The concept', mind:'How the test writer thinks', steps:'How to solve', types:'Patterns with examples', rules:'Rules and facts', traps:'Traps', examples:'Worked examples', speed:'Getting to 100', more:'Go further', mastery:'Your level in this skill', targetTime:'Target time',
-  practice10:'Practice (10 questions, instant feedback)', answer:'Answer', why:'Why', lessonsOpen:'Open lesson',
+  practice10:'Practice (10 questions, instant feedback)', xpTitle:'Foundation explainers', xpIntro:'Short animated explainers narrated in Arabic. Each builds the idea from zero, pauses for you to try, and ends with a quick challenge.', xpDone:'Done', xpShort:'explainers', answer:'Answer', why:'Why', lessonsOpen:'Open lesson',
   vocabIntro:'Cards for words that recur in the test. Say the meaning in your head, then flip. Cards you miss come back more often.', flip:'Flip card', know:'I know it', again:'Review again', vocabDone:'Today\'s cards are done', known:'known', left:'left',
   resIntro:'Selected resources for each skill. Rule: one explanation source you finish, then practice here until "Locked in".',
   practiceTitle:'Practice', practiceIntro:'Pick a type. Instant-feedback practice is for learning; sections and simulations run on real test timing.',
@@ -1456,11 +1456,2656 @@ const GUIDE_SOURCES = [
   ['Keystone Tutors: GAT Guide','Keystone Tutors: GAT Guide','https://www.keystonetutors.com/news/general-aptitude-test-guide']
 ];
 
+/* ============ EXPLAINERS (الشروحات): animated, narrated foundation lessons ============
+   window.XP: add(lesson) · forSkill(sk) · all() · open(key) · setHooks({isDone,onDone,onClose})
+   A lesson: {key, sk, title, min, goals[], scenes[], quiz[]}
+   A scene is either hand-built {t, setup(stage)->ctx, beats:[{say, run(ctx)->timeline, wait?, right?, wrong?, after?}]}
+   or declarative {t, items:{k:spec}, beats:[{say, show?, hide?, hl?, strike?, set?, move?}], ask?:{opts,a,right,wrong,show?,y?}}
+   Narration: a recorded continuous track per lesson (TRACKS, from /audio/tracks.json); browser Arabic voice as fallback. */
+(function(){
+const HAS_GSAP=typeof gsap!=='undefined';
+const NS='http://www.w3.org/2000/svg';
+const $x=s=>document.querySelector(s);
+const AD=s=>String(s).replace(/\d/g,d=>'٠١٢٣٤٥٦٧٨٩'[d]).replace(/\./g,'٫');
+const escx=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const RM=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+function el(tag,attrs={},parent){ const e=document.createElementNS(NS,tag); for(const k in attrs){ if(k==='text') e.textContent=attrs[k]; else e.setAttribute(k,attrs[k]); } if(parent) parent.appendChild(e); return e; }
+const tl=()=>gsap.timeline();
+function note(p,{x,y,w=120,h=70,c='n0',text='',size=28,rot=0,cls='t-note'}){
+  const g=el('g',{},p); el('rect',{x:x-w/2+4,y:y-h/2+4,width:w,height:h,rx:6,class:'f-edge'},g); el('rect',{x:x-w/2,y:y-h/2,width:w,height:h,rx:6,class:'f-'+c,stroke:'var(--edge)','stroke-width':2},g);
+  const t=el('text',{x,y:y+size*0.36,'text-anchor':'middle','font-size':size,'font-weight':800,class:cls,text},g);
+  gsap.set(g,{rotation:rot,transformOrigin:'50% 50%'}); g._t=t; return g; }
+function txt(p,{x,y,s=24,cls='t-ink',text='',w=800,anchor='middle',font,dir}){ const a={x,y,'font-size':s,'font-weight':w,'text-anchor':anchor,class:cls,text}; if(font) a['font-family']=font; if(dir) a.direction=dir; return el('text',a,p); }
+function drawIn(path,d=0.8){ const L=path.getTotalLength?path.getTotalLength():300; gsap.set(path,{strokeDasharray:L,strokeDashoffset:L,opacity:1}); return gsap.to(path,{strokeDashoffset:0,duration:d,ease:'power2.inOut'}); }
+function checkMark(p,x,y,s=1){ const g=el('g',{},p); el('circle',{cx:x,cy:y,r:22*s,class:'f-oksoft'},g); const pa=el('path',{d:`M${x-10*s} ${y} l${7*s} ${8*s} l${14*s} -${16*s}`,class:'s-ok'},g); return {g,pa}; }
+function crossMark(p,x,y,s=1){ const g=el('g',{},p); el('circle',{cx:x,cy:y,r:22*s,class:'f-badsoft'},g); const a=el('path',{d:`M${x-9*s} ${y-9*s} L${x+9*s} ${y+9*s} M${x+9*s} ${y-9*s} L${x-9*s} ${y+9*s}`,class:'s-bad'},g); return {g,pa:a}; }
+function arrow(p,x1,y1,x2,y2,cls='s-pri',bend=-40){ const mx=(x1+x2)/2, my=Math.min(y1,y2)+bend; const d=`M${x1} ${y1} Q${mx} ${my} ${x2} ${y2}`; const pa=el('path',{d,class:cls},p);
+  const ang=Math.atan2(y2-my,x2-mx), h=12; const hp=el('path',{d:`M${x2-h*Math.cos(ang-0.5)} ${y2-h*Math.sin(ang-0.5)} L${x2} ${y2} L${x2-h*Math.cos(ang+0.5)} ${y2-h*Math.sin(ang+0.5)}`,class:cls},p); return {pa,hp}; }
+function tlDone(t){ return new Promise(r=>{ if(!t||t.totalProgress()>=1){ r(); return; } t.eventCallback('onComplete',r); }); }
+
+/* ---------- declarative items ---------- */
+const POP=new Set(['note','box','circle','check','cross','poly','pie','dot']);
+function draw(stage,spec){
+  const T=spec.type, g=el('g',{},stage); let o={g,type:T,spec};
+  if(T==='note'){ const n=note(g,spec); o.label=n._t; }
+  else if(T==='text'||T==='eq'){ o.label=txt(g,{x:spec.x,y:spec.y,s:spec.s||26,cls:spec.cls||(T==='eq'?'t-ink':'t-ink'),text:spec.text,w:spec.w||800,anchor:spec.anchor||'middle',dir:T==='eq'?'ltr':(spec.dir||undefined),font:spec.hand?'var(--f-hand)':undefined}); if(spec.hand) o.label.setAttribute('class','t-hand'); }
+  else if(T==='box'){ el('rect',{x:spec.x,y:spec.y,width:spec.w,height:spec.h,rx:spec.rx??10,class:'f-'+(spec.c||'surface'),stroke:spec.stroke===false?'none':'var(--edge)','stroke-width':spec.sw||2},g); if(spec.text!=null) o.label=txt(g,{x:spec.x+spec.w/2,y:spec.y+spec.h/2+(spec.s||22)*0.36,s:spec.s||22,cls:spec.cls||'t-ink',text:spec.text,dir:spec.ltr?'ltr':undefined}); }
+  else if(T==='circle'){ el('circle',{cx:spec.cx,cy:spec.cy,r:spec.r,class:spec.c?'f-'+spec.c:'',fill:spec.c?undefined:'none',stroke:spec.stroke===false?'none':'var(--edge)','stroke-width':spec.sw||2.5},g); if(spec.text!=null) o.label=txt(g,{x:spec.cx,y:spec.cy+(spec.s||20)*0.36,s:spec.s||20,cls:spec.cls||'t-ink',text:spec.text}); }
+  else if(T==='dot'){ el('circle',{cx:spec.x,cy:spec.y,r:spec.r||6,class:'f-'+(spec.c||'pri')},g); if(spec.text!=null) o.label=txt(g,{x:spec.x+(spec.dx??0),y:spec.y+(spec.dy??-14),s:spec.s||18,cls:spec.cls||'t-ink',text:spec.text}); }
+  else if(T==='line'){ o.path=el('line',{x1:spec.x1,y1:spec.y1,x2:spec.x2,y2:spec.y2,class:spec.cls||'s-ink'},g); }
+  else if(T==='path'){ o.path=el('path',{d:spec.d,class:spec.cls||'s-ink',fill:spec.fill?undefined:'none'},g); if(spec.fill) o.path.setAttribute('class',(spec.cls||'')+' f-'+spec.fill); }
+  else if(T==='poly'){ el('polygon',{points:spec.points,class:'f-'+(spec.c||'prisoft'),stroke:'var(--edge)','stroke-width':spec.sw||2.5,'stroke-linejoin':'round'},g); (spec.labels||[]).forEach(l=>txt(g,{x:l[0],y:l[1],s:l[3]||20,cls:l[4]||'t-ink',text:l[2]})); }
+  else if(T==='arrow'){ const a=arrow(g,spec.x1,spec.y1,spec.x2,spec.y2,spec.cls||'s-pri',spec.bend??-40); o.path=a.pa; o.head=a.hp; if(spec.text) o.label=txt(g,{x:(spec.x1+spec.x2)/2,y:Math.min(spec.y1,spec.y2)+(spec.bend??-40)/2-8,s:spec.s||18,cls:'t-hand',text:spec.text}); }
+  else if(T==='check'){ const m=checkMark(g,spec.x,spec.y,spec.s||1); o.path=m.pa; }
+  else if(T==='cross'){ const m=crossMark(g,spec.x,spec.y,spec.s||1); o.path=m.pa; }
+  else if(T==='bars'){ const {x,y,w,h,values,labels=[],max=Math.max(...values),c='pri',vals=true}=spec; const n=values.length, gap=w/n, bw=gap*0.58;
+    el('line',{x1:x-6,y1:y+h,x2:x+w+6,y2:y+h,class:'s-ink'},g); o.bars=[];
+    values.forEach((v,i)=>{ const bh=h*v/max, bx=x+i*gap+(gap-bw)/2; const r=el('rect',{x:bx,y:y+h-bh,width:bw,height:bh,rx:4,class:'f-'+(Array.isArray(c)?c[i]:c),stroke:'var(--edge)','stroke-width':1.5},g); r._h=bh; r._y=y+h-bh; o.bars.push(r);
+      if(labels[i]!=null) txt(g,{x:bx+bw/2,y:y+h+22,s:16,cls:'t-ink2',text:labels[i],w:700}); if(vals) txt(g,{x:bx+bw/2,y:y+h-bh-8,s:16,cls:'t-ink',text:AD(v)}); }); }
+  else if(T==='nline'){ const {x1,x2,y,from,to,step=1,marks=true}=spec; el('line',{x1:x1-12,y1:y,x2:x2+12,y2:y,class:'s-ink'},g); const n=(to-from)/step;
+    for(let i=0;i<=n;i++){ const v=from+i*step, x=x1+(x2-x1)*i/n; el('line',{x1:x,y1:y-8,x2:x,y2:y+8,class:'s-ink'},g); if(marks) txt(g,{x,y:y+30,s:17,cls:'t-ink2',text:(v<0?'−':'')+AD(Math.abs(v)),w:700,dir:'ltr'}); } o.xAt=v=>x1+(x2-x1)*(v-from)/(to-from); }
+  else if(T==='pie'){ const {cx,cy,r,parts,fill=0,c='pink'}=spec; el('circle',{cx,cy,r,class:'f-surface2',stroke:'var(--edge)','stroke-width':2.5},g);
+    for(let i=0;i<parts;i++){ const a0=-Math.PI/2+i*2*Math.PI/parts, a1=a0+2*Math.PI/parts; const p=el('path',{d:`M${cx} ${cy} L${cx+r*Math.cos(a0)} ${cy+r*Math.sin(a0)} A${r} ${r} 0 ${parts===1?1:0} 1 ${cx+r*Math.cos(a1)} ${cy+r*Math.sin(a1)} Z`,class:i<fill?'f-'+c:'f-surface2',stroke:'var(--edge)','stroke-width':1.5},g); }
+  }
+  else if(T==='grid'){ const {x,y,rows,cols,cell=22,gap=2,fill=0,c='pri'}=spec; o.cells=[]; for(let r=0;r<rows;r++) for(let k=0;k<cols;k++){ const i=r*cols+k; o.cells.push(el('rect',{x:x+k*(cell+gap),y:y+r*(cell+gap),width:cell,height:cell,rx:3,class:i<fill?'f-'+c:'f-surface2',stroke:'var(--line)','stroke-width':1},g)); } }
+  gsap.set(g,{transformOrigin:'50% 50%'}); if(spec.rot&&T!=='note') gsap.set(g,{rotation:spec.rot});
+  return o;
+}
+function revealTl(o,t,at){
+  const T=o.type;
+  if(T==='line'||T==='path'||T==='arrow'||T==='check'||T==='cross'){ t.set(o.g,{opacity:1},at); if(T==='check'||T==='cross') t.fromTo(o.g,{scale:0},{scale:1,transformOrigin:'50% 50%',duration:.35,ease:'back.out(2)'},at);
+    if(o.path) t.add(drawIn(o.path,.6),at); if(o.head) t.fromTo(o.head,{opacity:0},{opacity:1,duration:.15}); if(o.label) t.fromTo(o.label,{opacity:0},{opacity:1,duration:.3}); return; }
+  if(T==='bars'){ t.set(o.g,{opacity:1},at); o.bars.forEach((r,i)=>t.fromTo(r,{attr:{height:0,y:r._y+r._h}},{attr:{height:r._h,y:r._y},duration:.5,ease:'power2.out'},i?'<.12':at)); return; }
+  if(T==='grid'){ t.set(o.g,{opacity:1},at); t.from(o.cells,{scale:0,transformOrigin:'50% 50%',duration:.25,stagger:.01},at); return; }
+  if(POP.has(T)) t.fromTo(o.g,{opacity:0,scale:.3},{opacity:1,scale:1,transformOrigin:'50% 50%',duration:.5,ease:'back.out(1.8)'},at);
+  else t.fromTo(o.g,{opacity:0,y:14},{opacity:1,y:0,duration:.45,ease:'power2.out'},at);
+}
+function compileScene(sc){
+  if(sc.setup){ sc.interactive=sc.interactive||sc.beats.some(b=>b.wait); return sc; }
+  const items=sc.items||{};
+  const out={t:sc.t,interactive:!!sc.ask};
+  out.setup=stage=>{ const ctx={}; for(const k in items){ ctx[k]=draw(stage,items[k]); if(!items[k].show0) gsap.set(ctx[k].g,{opacity:0}); } return ctx; };
+  out.beats=(sc.beats||[]).map((b,bi,arr)=>{ const beat={say:b.say};
+    beat.run=ctx=>{ const t=tl(); let at=0;
+      (b.hide||[]).forEach(k=>ctx[k]&&t.to(ctx[k].g,{opacity:0,duration:.3},0));
+      (b.set?Object.entries(b.set):[]).forEach(([k,v])=>{ const o=ctx[k]; if(!o||!o.label) return; t.to(o.label,{opacity:0,duration:.2},at).call(()=>{ o.label.textContent=v; },null,at+.2).to(o.label,{opacity:1,duration:.25},at+.2); });
+      (b.move?Object.entries(b.move):[]).forEach(([k,[dx,dy]])=>ctx[k]&&t.to(ctx[k].g,{x:`+=${dx}`,y:`+=${dy}`,duration:.7,ease:'power2.inOut'},at));
+      (b.show||[]).forEach((k,i)=>{ const o=ctx[k]; if(!o) return; revealTl(o,t,at+i*(b.gap??.45)); });
+      (b.hl||[]).forEach(k=>ctx[k]&&t.to(ctx[k].g,{scale:1.1,transformOrigin:'50% 50%',duration:.22,yoyo:true,repeat:1},'>'));
+      (b.strike||[]).forEach(k=>{ const o=ctx[k]; if(!o) return; t.call(()=>{ const bb=o.g.getBBox(); const ln=el('line',{x1:bb.x-6,y1:bb.y+bb.height/2,x2:bb.x+bb.width+6,y2:bb.y+bb.height/2,class:'s-bad'},o.g); drawIn(ln,.4); },null,'>'); });
+      return t; };
+    if(sc.ask&&bi===arr.length-1){ const A=sc.ask; beat.right=A.right; beat.wrong=A.wrong;
+      beat.wait=ctx=>askChoice(ctx._stage,A);
+      beat.after=(ctx,ok)=>{ const t=tl(); (A.show||[]).forEach((k,i)=>ctx[k]&&revealTl(ctx[k],t,.3+i*.4)); return t; }; }
+    return beat; });
+  return out;
+}
+/* option buttons drawn on the stage; resolves with true/false */
+function askChoice(stage,A){ return new Promise(res=>{
+  const opts=A.opts, n=opts.length, two=n===4&&!A.column, y0=A.y??(two?182:150);
+  const gs=opts.map((t,i)=>{ const g=el('g',{class:'hot',tabindex:0,role:'button','aria-label':t},stage);
+    const w=two?250:420, h=two?54:48, cx=two?[470,170][i%2]:320, cy=two?y0+Math.floor(i/2)*70:y0+i*58;
+    el('rect',{x:cx-w/2+4,y:cy-h/2+4,width:w,height:h,rx:12,class:'f-edge'},g); const r=el('rect',{x:cx-w/2,y:cy-h/2,width:w,height:h,rx:12,class:'f-surface hot-ring',stroke:'var(--edge)','stroke-width':2},g);
+    txt(g,{x:cx,y:cy+7,s:A.s||21,text:t,dir:A.ltr?'ltr':undefined}); return {g,r}; });
+  gsap.from(gs.map(o=>o.g),{opacity:0,y:18,stagger:.1,duration:.3});
+  gs.forEach((o,i)=>{ const pick=()=>{ gs.forEach(x=>x.g.style.pointerEvents='none'); o.r.setAttribute('class',(i===A.a?'f-oksoft':'f-badsoft')+' hot-ring'); if(i!==A.a) gs[A.a].r.setAttribute('class','f-oksoft hot-ring');
+      gsap.to(gs.filter((x,j)=>j!==A.a&&j!==i).map(x=>x.g),{opacity:.35,duration:.3}); setTimeout(()=>{ if(A.show&&A.show.length) gsap.to(gs.map(x=>x.g),{opacity:0,duration:.4}); },1400); res(i===A.a); };
+    o.g.addEventListener('click',pick); o.g.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); pick(); } }); });
+}); }
+
+/* ---------- registry ---------- */
+const LESSONS={}, ORDER=[];
+let HOOKS={isDone:()=>false,onDone:()=>{},onClose:()=>{}};
+let bid=0;
+function add(L){ if(!L||!L.key||LESSONS[L.key]) return; L.scenes=L.scenes.map(compileScene); L.scenes.forEach((sc,si)=>sc.beats.forEach((b,bi)=>{ b.id=`${L.key}-s${si+1}-b${bi+1}`; })); LESSONS[L.key]=L; ORDER.push(L.key); }
+const forSkill=sk=>ORDER.filter(k=>LESSONS[k].sk===sk).map(k=>LESSONS[k]).sort((a,b)=>(a.ord??50)-(b.ord??50));
+
+/* ---------- narration ---------- */
+const TRACKS={};
+function loadTracks(){ if(!/^https?:/.test(location.protocol)) return Promise.resolve();
+  return Promise.all([fetch('/audio/index.json').then(r=>r.ok?r.json():[]),fetch('/audio/tracks.json').then(r=>r.ok?r.json():{})]).then(([ids,tr])=>{ const have=new Set(ids); for(const k in tr){ const T=tr[k]; if(T.segs&&T.segs.every(g=>have.has(g.clip))) TRACKS[k]=T; } }).catch(()=>{}); }
+let CAPW=[];
+function captionWords(words){ const c=$x('#xp-cap'); if(!c) return; CAPW=words; c.innerHTML=words.map((w,i)=>`<span class="w fut" data-i="${i}">${escx(w)}</span>`).join(' '); }
+function captionIdx(i){ const c=$x('#xp-cap'); if(!c) return; c.querySelectorAll('.w').forEach((s,j)=>{ s.className='w '+(j<i?'past':j===i?'on':'fut'); }); }
+function captionAt(text,ci){ const before=text.slice(0,ci).trim(); captionIdx(before?before.split(/\s+/).length:0); }
+function captionAll(){ const c=$x('#xp-cap'); if(!c) return; c.querySelectorAll('.w').forEach(s=>s.className='w past'); }
+function captionText(t){ const c=$x('#xp-cap'); if(c) c.innerHTML=escx(t); }
+const TTS={ ok:'speechSynthesis' in window, voice:null, on:true, rate:1, cur:null,
+  pick(){ if(!this.ok) return; const vs=speechSynthesis.getVoices()||[]; this.voice=vs.find(v=>/^ar[-_]SA/i.test(v.lang))||vs.find(v=>/^ar/i.test(v.lang))||null; },
+  usable(){ return this.on&&this.ok&&!!this.voice; },
+  say(text){ return new Promise(resolve=>{ const job={text,resolve,stopped:false,timers:[]}; this.cur=job; this._run(job); }); },
+  _run(job){ const words=job.text.split(/\s+/); captionWords(words);
+    if(this.usable()){ try{ speechSynthesis.cancel(); }catch(e){}
+      const u=new SpeechSynthesisUtterance(job.text); u.voice=this.voice; u.lang=this.voice.lang; u.rate=Math.min(1.6,this.rate*0.95); let bounded=false;
+      u.onboundary=e=>{ if(e.name&&e.name!=='word') return; bounded=true; captionAt(job.text,e.charIndex); };
+      u.onend=()=>{ if(this.cur===job&&!job.stopped){ captionAll(); this.cur=null; job.resolve(); } };
+      u.onerror=()=>{ if(this.cur===job&&!job.stopped){ this.cur=null; job.resolve(); } };
+      speechSynthesis.speak(u); const est=this._est(job.text); job.timers.push(setTimeout(()=>{ if(!bounded) this._timedWords(job,est); },500)); }
+    else { const est=this._est(job.text); this._timedWords(job,est); job.timers.push(setTimeout(()=>{ if(this.cur===job&&!job.stopped){ captionAll(); this.cur=null; job.resolve(); } },est+250)); } },
+  _est(t){ return Math.max(1500,(t.length/13)*1000/this.rate); },
+  _timedWords(job,ms){ const n=job.text.split(/\s+/).length; for(let i=0;i<n;i++) job.timers.push(setTimeout(()=>{ if(this.cur===job&&!job.stopped) captionIdx(i); },(ms*i)/n)); },
+  pause(){ const j=this.cur; if(!j) return; j.stopped=true; j.timers.forEach(clearTimeout); j.timers=[]; try{ speechSynthesis.cancel(); }catch(e){} },
+  resume(){ const j=this.cur; if(!j) return; j.stopped=false; this._run(j); },
+  stop(){ const j=this.cur; if(j){ j.stopped=true; j.timers.forEach(clearTimeout); } this.cur=null; try{ speechSynthesis.cancel(); }catch(e){} } };
+if(TTS.ok){ TTS.pick(); try{ speechSynthesis.addEventListener('voiceschanged',()=>TTS.pick()); }catch(e){} }
+
+/* ---------- player ---------- */
+const IC={
+  play:'<svg class="xp-ic" viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg>',
+  pause:'<svg class="xp-ic" viewBox="0 0 24 24"><path d="M8 5v14M16 5v14" stroke-width="3.2"/></svg>',
+  next:'<svg class="xp-ic" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>', prev:'<svg class="xp-ic" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>',
+  replay:'<svg class="xp-ic" viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.4-5.7"/><path d="M4 4v4h4"/></svg>',
+  vol:'<svg class="xp-ic" viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg>',
+  cc:'<svg class="xp-ic" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M10 10.5a2.5 2.5 0 1 0 0 3M17 10.5a2.5 2.5 0 1 0 0 3"/></svg>',
+  x:'<svg class="xp-ic" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+  check:'<svg class="xp-ic" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7"/></svg>' };
+let P=null, RUN=0;
+function stopTrack(){ const k=P&&P.trk; if(k){ k.dead=true; if(k.audio){ k.audio.pause(); k.audio.removeAttribute('src'); } cancelAnimationFrame(k.raf); } if(P) P.trk=null; }
+function stopPlayer(){ RUN++; TTS.stop(); if(P){ stopTrack(); if(P.tl) P.tl.kill(); } if(HAS_GSAP){ gsap.killTweensOf('*'); gsap.globalTimeline.resume(); } P=null; }
+function trackFor(key){ const T=TRACKS[key]; return T&&T.segs&&T.segs.length?T:null; }
+function close(){ stopPlayer(); const o=$x('#xp'); if(o) o.remove(); document.body.classList.remove('xp-open'); document.removeEventListener('keydown',onKey); HOOKS.onClose(); }
+function onKey(e){ if(!P) return; if(e.key==='Escape'){ close(); return; } if(e.key===' '&&!e.target.closest('button,input,textarea')){ e.preventDefault(); $x('#xp-pp').click(); } }
+function open(key,opt={}){
+  if(!HAS_GSAP) return; stopPlayer(); const L=LESSONS[key]; if(!L) return;
+  const only=opt.only; const scenes=only!=null?[only]:L.scenes.map((_,i)=>i);
+  P={L,key,scenes,idx:0,playing:false,started:false,only,tl:null,cc:true,waiting:false};
+  let o=$x('#xp'); if(!o){ o=document.createElement('div'); o.id='xp'; o.className='xp'; o.setAttribute('role','dialog'); o.setAttribute('aria-modal','true'); o.setAttribute('dir','rtl'); o.setAttribute('lang','ar'); document.body.appendChild(o); }
+  document.body.classList.add('xp-open'); o.setAttribute('aria-label',L.title);
+  const sibs=forSkill(L.sk), ix=sibs.indexOf(L);
+  o.innerHTML=`<div class="xp-in">
+    <div class="xp-top"><button class="xp-ib" id="xp-x" aria-label="إغلاق">${IC.x}</button><div class="xp-tt"><span class="xp-eyebrow"><span>شرح ${AD(ix+1)} من ${AD(sibs.length)}</span>${L.min?`<span class="xp-dot">${L.min}</span>`:''}</span><h2>${escx(opt.title||L.title)}</h2></div></div>
+    <div class="xp-grid">
+      <div>
+        <div class="xp-stage-wrap" id="xp-sw">
+          <div class="xp-segs" id="xp-segs">${scenes.map(()=>'<i><b></b></i>').join('')}</div>
+          <svg id="xp-stage" class="xp-stage" viewBox="0 0 640 360" role="img" aria-label="${escx(L.title)}"></svg>
+          <div class="xp-scene-t" id="xp-scene-t"></div>
+          <div class="xp-cover" id="xp-cover"><button class="xp-big" id="xp-start"><span class="c">${IC.play}</span><b>ابدأ الشرح</b><small>شغّل الصوت. يتوقف الشرح عند الوقفات التفاعلية حتى تجرّب بنفسك.</small></button></div>
+        </div>
+        <div class="xp-cap" id="xp-cap" aria-live="polite"></div>
+        <div class="xp-ctl">
+          <button class="xp-ib main" id="xp-pp" aria-label="تشغيل">${IC.play}</button>
+          <button class="xp-ib" id="xp-prev" aria-label="المشهد السابق">${IC.prev}</button>
+          <button class="xp-ib" id="xp-rep" aria-label="أعد المشهد">${IC.replay}</button>
+          <button class="xp-ib" id="xp-nxt" aria-label="المشهد التالي">${IC.next}</button>
+          <span class="xp-sp"></span>
+          <div class="xp-speed" role="group" aria-label="السرعة">${[0.85,1,1.25].map(r=>`<button data-rate="${r}" class="${TTS.rate===r?'on':''}">${r===1?'١×':r<1?'٠٫٨٥×':'١٫٢٥×'}</button>`).join('')}</div>
+          <button class="xp-ib" id="xp-vo" aria-pressed="${TTS.on}" aria-label="الصوت">${IC.vol}</button>
+          <button class="xp-ib" id="xp-ccb" aria-pressed="true" aria-label="النص المكتوب">${IC.cc}</button>
+        </div>
+      </div>
+      <aside class="xp-side">
+        <div class="xp-panel"><h3>المشاهد</h3><ol class="xp-chap" id="xp-chap"></ol></div>
+        ${only==null&&L.goals?`<div class="xp-panel"><h3>بعد هذا الشرح</h3><ul class="xp-goals">${L.goals.map(g=>`<li>${escx(g)}</li>`).join('')}</ul></div>`:''}
+      </aside>
+    </div></div>`;
+  captionText(`اضغط «ابدأ الشرح».`);
+  renderChapters(); setSceneTitle(); document.addEventListener('keydown',onKey);
+  $x('#xp-x').onclick=close;
+  $x('#xp-start').onclick=()=>{ $x('#xp-cover').hidden=true; P.started=true; playScene(0); };
+  $x('#xp-pp').onclick=()=>{ if(!P.started){ $x('#xp-start').click(); return; } P.playing?pause():resume(); };
+  $x('#xp-nxt').onclick=()=>go(P.idx+1); $x('#xp-prev').onclick=()=>go(P.idx-1); $x('#xp-rep').onclick=()=>go(P.idx);
+  $x('#xp-vo').onclick=()=>{ TTS.on=!TTS.on; $x('#xp-vo').setAttribute('aria-pressed',String(TTS.on)); if(P.started&&!P.waiting&&P.idx<P.scenes.length) playScene(P.idx); };
+  $x('#xp-ccb').onclick=()=>{ P.cc=!P.cc; $x('#xp-ccb').setAttribute('aria-pressed',String(P.cc)); $x('#xp-cap').classList.toggle('off',!P.cc); };
+  o.querySelectorAll('[data-rate]').forEach(b=>b.onclick=()=>{ TTS.rate=+b.dataset.rate; if(P&&P.trk&&P.trk.audio) P.trk.audio.playbackRate=TTS.rate; o.querySelectorAll('[data-rate]').forEach(x=>x.classList.toggle('on',x===b)); gsap.globalTimeline.timeScale((RM?2.5:1)*TTS.rate); });
+  gsap.globalTimeline.timeScale((RM?2.5:1)*TTS.rate);
+  setTimeout(()=>$x('#xp-start')?.focus(),0);
+}
+function renderChapters(){ const L=P.L; $x('#xp-chap').innerHTML=P.scenes.map((si,i)=>{ const sc=L.scenes[si]; const st=i<P.idx?'done':i===P.idx?'cur':''; return `<li class="${st}"><button data-go="${i}"><span class="n">${AD(i+1)}</span><span>${escx(sc.t)}</span>${sc.interactive?'<span class="k">تفاعلي</span>':''}</button></li>`; }).join('')+(P.only==null&&L.quiz?`<li class="${P.idx>=P.scenes.length?'cur':''}"><button data-go="quiz"><span class="n">${IC.check}</span><span>التحدي الختامي</span></button></li>`:'');
+  document.querySelectorAll('#xp-chap [data-go]').forEach(b=>b.onclick=()=>{ if(!P.started){ $x('#xp-cover').hidden=true; P.started=true; } b.dataset.go==='quiz'?showQuiz():go(+b.dataset.go); }); }
+function setSceneTitle(){ const sc=P.L.scenes[P.scenes[P.idx]]; $x('#xp-scene-t').textContent=sc?sc.t:''; }
+function setPlaying(v){ P.playing=v; const b=$x('#xp-pp'); if(b){ b.innerHTML=v?IC.pause:IC.play; b.setAttribute('aria-label',v?'إيقاف مؤقت':'تشغيل'); } }
+function pause(){ if(!P) return; setPlaying(false); if(P.trk&&P.trk.audio){ P.trk.audio.pause(); gsap.globalTimeline.pause(); return; } TTS.pause(); if(P.tl) P.tl.pause(); }
+function resume(){ if(!P) return; setPlaying(true); if(P.trk&&P.trk.audio){ gsap.globalTimeline.resume(); if(!P.waiting) P.trk.audio.play().catch(()=>{}); return; } if(P.tl) P.tl.resume(); TTS.resume(); }
+function go(i){ if(!P) return; if(i<0) i=0; if(i>=P.scenes.length){ P.only!=null?finishQuick():showQuiz(); return; } playScene(i); }
+function segProgress(i,frac){ document.querySelectorAll('#xp-segs i').forEach((s,j)=>{ s.classList.toggle('done',j<i); const b=s.querySelector('b'); if(j===i) b.style.inlineSize=Math.round(frac*100)+'%'; else if(j>i) b.style.inlineSize='0'; else b.style.inlineSize=''; }); }
+function setupSceneAt(pi){ if(P.tl) P.tl.kill(); gsap.killTweensOf('*'); gsap.globalTimeline.resume(); const q=$x('#xp-quiz'); if(q) q.remove();
+  P.idx=pi; renderChapters(); setSceneTitle();
+  const sc=P.L.scenes[P.scenes[pi]], stage=$x('#xp-stage'); stage.innerHTML=''; P.ctx=sc.setup(stage); P.ctx._stage=stage; P.ctxScene=P.scenes[pi]; gsap.fromTo(stage,{opacity:0},{opacity:1,duration:.25}); return P.ctx; }
+async function playScene(i){
+  if(TTS.on&&trackFor(P.key)) return playTrack(i);
+  const my=++RUN; TTS.stop(); stopTrack();
+  setPlaying(true); const ctx=setupSceneAt(i); const sc=P.L.scenes[P.scenes[i]]; const n=sc.beats.length;
+  for(let b=0;b<n;b++){
+    if(my!==RUN) return; const beat=sc.beats[b]; segProgress(i,b/n);
+    const t=beat.run?beat.run(ctx):null; P.tl=t;
+    await Promise.all([TTS.say(beat.say),tlDone(t)]); if(my!==RUN) return;
+    if(beat.wait){ P.waiting=true; setPlaying(false); captionText('دورك: جرّب على اللوحة.'); const ok=await beat.wait(ctx); P.waiting=false; if(my!==RUN) return; setPlaying(true);
+      const t2=beat.after?beat.after(ctx,ok):null; P.tl=t2; await Promise.all([TTS.say(ok?beat.right:beat.wrong),tlDone(t2)]); if(my!==RUN) return; }
+    await sleep(450); if(my!==RUN) return;
+    while(P&&!P.playing&&my===RUN) await sleep(120);
+  }
+  segProgress(i+1,0); await sleep(400); if(my!==RUN) return; go(i+1);
+}
+/* continuous track: beats fire at their time in the recording */
+function beatById(L,id){ for(let si=0;si<L.scenes.length;si++){ const bi=L.scenes[si].beats.findIndex(b=>b.id===id); if(bi>=0) return {si,bi,beat:L.scenes[si].beats[bi]}; } return null; }
+function playClip(src,onTick,start=0){ return new Promise((resolve,reject)=>{ const a=new Audio(); a.preload='auto'; a.src=src; a.playbackRate=TTS.rate; a.preservesPitch=true; P.trk.audio=a; const k=P.trk;
+  a.onended=()=>{ cancelAnimationFrame(k.raf); resolve(); }; a.onerror=()=>reject(new Error('audio'));
+  const tick=()=>{ if(k.dead) return; onTick&&onTick(a.currentTime); k.raf=requestAnimationFrame(tick); };
+  const goPlay=()=>{ if(start) a.currentTime=start; a.play().then(()=>{ k.raf=requestAnimationFrame(tick); }).catch(reject); };
+  if(a.readyState>=1) goPlay(); else a.addEventListener('loadedmetadata',goPlay,{once:true}); }); }
+function capBeat(text,frac){ const w=text.split(/\s+/); if(CAPW.join(' ')!==w.join(' ')) captionWords(w); captionIdx(Math.min(w.length-1,Math.max(0,Math.floor(frac*w.length)))); }
+async function playTrack(pi){
+  const my=++RUN; TTS.stop(); stopTrack(); const T=trackFor(P.key), L=P.L, sceneIdx=P.scenes[pi];
+  P.trk={dead:false}; P.ctx=null; P.ctxScene=null; setPlaying(true);
+  let si=T.segs.findIndex(g=>g.beats.some(b=>{ const l=beatById(L,b.id); return l&&l.si===sceneIdx; }));
+  if(si<0){ P.trk=null; TTS.on=false; return playScene(pi); }
+  let startBeat=T.segs[si].beats.findIndex(b=>beatById(L,b.id).si===sceneIdx);
+  const only=P.only!=null;
+  try{
+    for(;si<T.segs.length;si++){
+      const seg=T.segs[si]; let next=startBeat; startBeat=0; const k=P.trk; if(my!==RUN) return;
+      const firstT=seg.beats[next].t0; let cur=null, stopAt=null;
+      if(only){ const end=seg.beats.findIndex(b=>beatById(L,b.id).si!==sceneIdx&&b.t0>firstT); stopAt=end>=0?seg.beats[end].t0:null; }
+      const fire=b=>{ const loc=beatById(L,b.id); if(!loc) return; const pIdx=P.scenes.indexOf(loc.si); if(pIdx<0) return;
+        if(pIdx!==P.idx||!P.ctx||P.ctxScene!==loc.si) setupSceneAt(pIdx);
+        const sc=L.scenes[loc.si]; segProgress(pIdx,loc.bi/sc.beats.length); P.tl=loc.beat.run?loc.beat.run(P.ctx):null; cur={b,loc}; };
+      const p=playClip(seg.src,t=>{
+        if(stopAt!=null&&t>=stopAt){ k.audio.pause(); k.resolveStop&&k.resolveStop(); return; }
+        while(next<seg.beats.length&&t+0.05>=seg.beats[next].t0){ fire(seg.beats[next]); next++; }
+        if(cur) capBeat(cur.loc.beat.say,(t-cur.b.t0)/Math.max(.3,cur.b.t1-cur.b.t0));
+      },firstT);
+      await Promise.race([p,new Promise(r=>{ k.resolveStop=r; })]); if(my!==RUN) return;
+      while(next<seg.beats.length){ fire(seg.beats[next]); next++; }
+      if(only) break;
+      const last=cur&&cur.loc;
+      if(last&&last.beat.wait){ P.waiting=true; setPlaying(false); captionText('دورك: جرّب على اللوحة.');
+        const ok=await last.beat.wait(P.ctx); P.waiting=false; if(my!==RUN) return; setPlaying(true);
+        P.tl=last.beat.after?last.beat.after(P.ctx,ok):null; const fb=T.fb&&T.fb[last.beat.id], text=ok?last.beat.right:last.beat.wrong;
+        if(fb&&fb[ok?'ok':'no']){ captionWords(text.split(/\s+/)); await playClip(fb[ok?'ok':'no'],t=>{ const a=P.trk.audio; if(a.duration) capBeat(text,t/a.duration); }); }
+        else { const was=TTS.on; TTS.on=false; await TTS.say(text); TTS.on=was; }  /* no recording: captions only, keep one voice per lesson */
+        await tlDone(P.tl); if(my!==RUN) return; await sleep(300); }
+      else await sleep(250);
+      while(P&&!P.playing&&my===RUN) await sleep(120);
+    }
+  }catch(e){ if(my!==RUN) return; P.trk=null; TTS.on=false; $x('#xp-vo')?.setAttribute('aria-pressed','false'); return playScene(P.idx); }
+  if(my!==RUN) return; P.trk=null; segProgress(P.scenes.length,0);
+  only?finishQuick():showQuiz();
+}
+function finishQuick(){ RUN++; TTS.stop(); stopTrack(); setPlaying(false); segProgress(P.scenes.length,0); captionText('انتهى المقطع.');
+  const d=document.createElement('div'); d.className='xp-quiz'; d.id='xp-quiz';
+  d.innerHTML=`<p class="xp-qn">انتهى المقطع</p><h3>تريد الشرح كاملًا مع التحدي؟</h3><div class="xp-row"><button class="xp-btn pri" id="xp-full">افتح الشرح الكامل</button><button class="xp-btn" id="xp-again">أعد المقطع</button><button class="xp-btn" id="xp-bk">إغلاق</button></div>`;
+  $x('#xp-sw').appendChild(d); $x('#xp-full').onclick=()=>open(P.key); $x('#xp-again').onclick=()=>playScene(0); $x('#xp-bk').onclick=close; }
+function showQuiz(){
+  RUN++; TTS.stop(); stopTrack(); if(P.tl) P.tl.kill(); setPlaying(false); P.idx=P.scenes.length; renderChapters(); segProgress(P.scenes.length,0); $x('#xp-scene-t').textContent='';
+  const Q=P.L.quiz||[]; if(!Q.length){ close(); return; } let k=0, score=0; let d=$x('#xp-quiz'); if(!d){ d=document.createElement('div'); d.className='xp-quiz'; d.id='xp-quiz'; $x('#xp-sw').appendChild(d); }
+  captionText('التحدي الختامي: أسئلة سريعة على الفكرة نفسها.');
+  const show=()=>{ const it=Q[k]; d.innerHTML=`<p class="xp-qn">التحدي ${AD(k+1)} من ${AD(Q.length)}</p><h3 ${it.ltr?'dir="ltr"':''}>${escx(it.q)}</h3><div class="xp-opts">${it.o.map((o,i)=>`<button class="xp-opt" data-i="${i}">${escx(o)}</button>`).join('')}</div><div id="xp-fb"></div>`;
+    d.querySelectorAll('.xp-opt').forEach(b=>b.onclick=()=>{ const i=+b.dataset.i, ok=i===it.a; if(ok) score++; d.querySelectorAll('.xp-opt').forEach((x,j)=>{ x.disabled=true; if(j===it.a) x.classList.add('right'); else if(j===i) x.classList.add('wrong'); });
+      $x('#xp-fb').innerHTML=`<p class="xp-why"><b>${ok?'صحيح.':'ليس هذا.'}</b> ${escx(it.e)}</p><div class="xp-row"><button class="xp-btn pri" id="xp-qn">${k<Q.length-1?'التالي':'النتيجة'}</button></div>`; $x('#xp-qn').focus(); $x('#xp-qn').onclick=()=>{ k++; k<Q.length?show():end(); }; }); };
+  const end=()=>{ const need=Math.ceil(Q.length*2/3), pass=score>=need; if(pass) HOOKS.onDone(P.key,score,Q.length);
+    const sibs=forSkill(P.L.sk), nx=sibs[sibs.indexOf(P.L)+1];
+    d.innerHTML=`<p class="xp-qn">النتيجة</p><div class="xp-score">${AD(score)} / ${AD(Q.length)}</div><h3>${pass?'أتممت الشرح.':'راجع الفكرة ثم أعد التحدي.'}</h3>
+      <div class="xp-row">${pass?(nx?`<button class="xp-btn pri" id="xp-nx">الشرح التالي: ${escx(nx.title)}</button>`:`<button class="xp-btn pri" id="xp-done">تم</button>`):`<button class="xp-btn pri" id="xp-retry">أعد التحدي</button>`}<button class="xp-btn" id="xp-rw">أعد الشرح</button><button class="xp-btn" id="xp-bk">إغلاق</button></div>`;
+    captionText(pass?'أحسنت!':'أعد المحاولة بعد مراجعة المشهد الذي أخطأت فيه.');
+    const on=(id,f)=>{ const b=$x(id); if(b) b.onclick=f; }; on('#xp-nx',()=>open(nx.key)); on('#xp-done',close); on('#xp-retry',showQuiz); on('#xp-rw',()=>playScene(0)); on('#xp-bk',close); };
+  show();
+}
+
+window.XP={ add, forSkill, all:()=>ORDER.map(k=>LESSONS[k]), get:k=>LESSONS[k], open, close, setHooks:h=>Object.assign(HOOKS,h), loadTracks, ready:HAS_GSAP,
+  h:{el,note,txt,drawIn,checkMark,crossMark,arrow,tl,AD,tlDone} };
+})();
+/* Legacy hand-built explainers (percent, balance, analogy) */
+(function(){ if(!window.XP||!XP.ready) return;
+const {el,note,txt,drawIn,checkMark,crossMark,arrow,tl,AD,tlDone}=XP.h;
+/* 10×10 grid used by the percent lesson */
+function hundredGrid(p,x0,y0,cell=22,gap=2){ const cells=[]; for(let r=0;r<10;r++) for(let c=0;c<10;c++){ const x=x0+c*(cell+gap), y=y0+r*(cell+gap); const g=el('g',{},p);
+  el('rect',{x,y,width:cell,height:cell,rx:4,class:'f-surface2',stroke:'var(--line)','stroke-width':1},g); const f=el('rect',{x,y,width:cell,height:cell,rx:4,class:'f-pri',opacity:0},g); cells.push({g,f,r,c}); } return cells; }
+
+/* balance scale used by the equations lesson */
+function makeScale(p){
+  const g=el('g',{},p);
+  el('path',{d:'M270 332 L370 332 L338 312 L302 312 Z',class:'f-ink'},g);
+  el('rect',{x:315,y:120,width:10,height:194,rx:4,class:'f-ink'},g);
+  const beam=el('g',{},g); el('rect',{x:150,y:114,width:340,height:12,rx:6,class:'f-ink'},beam); el('circle',{cx:320,cy:120,r:10,class:'f-butter',stroke:'var(--edge)','stroke-width':2},beam);
+  const pan=()=>{ const pg=el('g',{},g); el('path',{d:'M0 0 L-62 78 M0 0 L62 78',class:'s-ink'},pg); el('path',{d:'M-72 78 Q0 104 72 78 Z',class:'f-surface',stroke:'var(--edge)','stroke-width':2.5},pg); const c=el('g',{},pg); gsap.set(c,{y:78}); return {g:pg,c,items:[]}; };
+  const L=pan(), R=pan(); const st={a:0};
+  const setA=a=>{ gsap.set(beam,{rotation:a,svgOrigin:'320 120'}); const r=a*Math.PI/180; gsap.set(L.g,{x:320-165*Math.cos(r),y:120-165*Math.sin(r)}); gsap.set(R.g,{x:320+165*Math.cos(r),y:120+165*Math.sin(r)}); };
+  setA(0);
+  return { g, L, R, tilt:(a,d=1.1,ease='elastic.out(1,0.45)')=>gsap.to(st,{a,duration:d,ease,onUpdate:()=>setA(st.a)}) };
+}
+function weight(pan){ const g=el('g',{},pan.c); el('rect',{x:-11,y:-22,width:22,height:22,rx:5,class:'f-butter',stroke:'var(--edge)','stroke-width':2},g); pan.items.push(g); return g; }
+function xbox(pan,label='س'){ const g=el('g',{},pan.c); el('rect',{x:-19,y:-38,width:38,height:38,rx:6,class:'f-pri',stroke:'var(--edge)','stroke-width':2},g); el('text',{x:0,y:-12,'text-anchor':'middle','font-size':22,'font-weight':800,class:'t-inv',text:label},g); pan.items.push(g); return g; }
+function layout(pan){ // boxes side by side, then weights beside them (3 per row next to a box, 5 per row alone)
+  const boxes=pan.items.filter(i=>i.querySelector('text')), ws=pan.items.filter(i=>!i.querySelector('text'));
+  const per=boxes.length?3:5, cols=Math.min(per,ws.length), W=boxes.length*42+cols*24+(boxes.length&&cols?6:0), x0=-W/2;
+  boxes.forEach((b,i)=>gsap.set(b,{x:x0+21+i*42,y:-2}));
+  const wx0=x0+boxes.length*42+(boxes.length&&cols?6:0)+12;
+  ws.forEach((w,i)=>{ const row=Math.floor(i/per), col=i%per; gsap.set(w,{x:wx0+col*24,y:-2-row*24}); });
+}
+
+/* =================== LESSONS =================== */
+const LESSONS={
+/* ---------------- 1. percent ---------------- */
+percent:{ key:'percent', sk:'arith', ord:40, area:'q', title:'النسبة المئوية من الصفر', min:'٤ دقائق', level:'تأسيس',
+  goals:['تفهم معنى النسبة المئوية بصريًا','تحوّل النسبة إلى كسر مألوف','تحسب ١٠٪ و٥٪ و٢٠٪ ذهنيًا','تتجنب فخ الزيادة ثم النقص'],
+  scenes:[
+  { t:'كم من كل مئة؟', setup(s){ const cells=hundredGrid(s,40,60); const title=txt(s,{x:470,y:120,s:30,text:'النسبة المئوية'}); const sub=txt(s,{x:470,y:160,s:22,cls:'t-hand',text:'= كم من كل ١٠٠؟'}); const cnt=txt(s,{x:470,y:240,s:64,cls:'t-pri',text:'٠'}); const big=note(s,{x:470,y:250,w:170,h:96,c:'n0',text:'٢٥٪',size:52,rot:-4}); gsap.set([title,sub,cnt,big],{opacity:0}); return {cells,title,sub,cnt,big}; },
+    beats:[
+      { say:'النسبة المئوية سؤال واحد فقط: كم من كل مئة؟', run:c=>tl().from(c.cells.map(x=>x.g),{scale:0,opacity:0,transformOrigin:'50% 50%',duration:.35,stagger:{each:.006,grid:[10,10],from:'start'}}).to([c.title,c.sub],{opacity:1,duration:.5,stagger:.25},'-=.6') },
+      { say:'أمامك مئة مربع. سنلوّن منها خمسة وعشرين.', run:c=>{ const o={v:0}; return tl().set(c.cnt,{opacity:1}).to(c.cells.slice(0,25).map(x=>x.f),{opacity:1,duration:.25,stagger:.07}).to(o,{v:25,duration:25*.07,ease:'none',onUpdate:()=>c.cnt.textContent=AD(Math.round(o.v))},'<'); } },
+      { say:'خمسة وعشرون من مئة نكتبها خمسة وعشرين في المئة.', run:c=>tl().to(c.cnt,{opacity:0,duration:.2}).fromTo(c.big,{opacity:0,scale:.2},{opacity:1,scale:1,transformOrigin:'50% 50%',duration:.7,ease:'back.out(2)'}) },
+    ]},
+  { t:'النسبة كسرٌ متنكّر', setup(s){ const eq=txt(s,{x:320,y:70,s:34,text:'٢٥٪ = ٢٥ ÷ ١٠٠ = ¼'}); gsap.set(eq,{opacity:0});
+      const pie=el('g',{},s); el('circle',{cx:320,cy:200,r:80,class:'f-surface2',stroke:'var(--edge)','stroke-width':2.5},pie); const w=el('circle',{cx:320,cy:200,r:40,fill:'none',stroke:'var(--pink)','stroke-width':80,transform:'rotate(-90 320 200)'},pie); const C=2*Math.PI*40; gsap.set(w,{strokeDasharray:`0 ${C}`}); gsap.set(pie,{opacity:0});
+      const notes=[['٥٠٪','½','n1',150],['٢٥٪','¼','n0',320],['١٠٪','⅒','n3',490]].map(([a,b,c,x],i)=>{ const n=note(s,{x,y:190,w:130,h:110,c,text:a,size:36,rot:[-4,3,-2][i]}); gsap.set(n._t,{attr:{y:180}}); el('text',{x,y:228,'text-anchor':'middle','font-size':30,'font-weight':800,class:'t-note',text:'= '+b},n); gsap.set(n,{opacity:0}); return n; });
+      return {eq,pie,w,C,notes}; },
+    beats:[
+      { say:'كل نسبة مئوية هي كسرٌ مقامه مئة.', run:c=>tl().fromTo(c.eq,{opacity:0,y:10},{opacity:1,y:0,duration:.6}) },
+      { say:'وخمسة وعشرون من مئة هي الربع تمامًا.', run:c=>tl().to(c.pie,{opacity:1,duration:.3}).to(c.w,{strokeDasharray:`${c.C/4} ${c.C}`,duration:1.1,ease:'power2.out'}) },
+      { say:'احفظ هذه الثلاث: خمسون في المئة نصف، وخمسة وعشرون ربع، وعشرة في المئة عُشر.', run:c=>tl().to([c.pie,c.eq],{opacity:0,duration:.3}).fromTo(c.notes,{opacity:0,y:-120},{opacity:1,y:0,duration:.6,ease:'bounce.out',stagger:.6}) },
+    ]},
+  { t:'حيلة العشرة', setup(s){ const q=txt(s,{x:320,y:66,s:28,text:'١٠٪ من ٢٤٠ = ؟'});
+      const digits=['٢','٤','٠'].map((d,i)=>txt(s,{x:250+i*54,y:175,s:84,cls:'t-ink',text:d}));
+      const unit=txt(s,{x:430,y:175,s:26,cls:'t-ink2',text:'ريال'}); const res=note(s,{x:320,y:170,w:150,h:90,c:'n0',text:'٢٤',size:52,rot:-3}); gsap.set(res,{opacity:0});
+      const ch1=note(s,{x:190,y:290,w:210,h:62,c:'n2',text:'٢٠٪ = ٢ × ٢٤ = ٤٨',size:22,rot:-2}), ch2=note(s,{x:450,y:290,w:210,h:62,c:'n1',text:'٥٪ = ٢٤ ÷ ٢ = ١٢',size:22,rot:2}); gsap.set([ch1,ch2],{opacity:0});
+      return {q,digits,unit,res,ch1,ch2}; },
+    beats:[
+      { say:'لتحسب عشرة في المئة من أي عدد، اقسمه على عشرة.', run:c=>tl().from(c.q,{opacity:0,y:-20,duration:.5}).from(c.digits,{opacity:0,y:30,stagger:.12,duration:.4},'<.2').from(c.unit,{opacity:0,duration:.3}) },
+      { say:'أي احذف صفرًا واحدًا، فمئتان وأربعون تصبح أربعة وعشرين.', run:c=>tl().to(c.digits[2],{y:80,opacity:0,rotation:25,transformOrigin:'50% 50%',duration:.7,ease:'power2.in'}).to([c.digits[0],c.digits[1],c.unit],{opacity:0,duration:.3}).fromTo(c.res,{opacity:0,scale:.3},{opacity:1,scale:1,transformOrigin:'50% 50%',duration:.6,ease:'back.out(2)'}) },
+      { say:'ومنها تبني الباقي: عشرون في المئة ضعفها، ثمانية وأربعون. وخمسة في المئة نصفها، اثنا عشر.', run:c=>tl().fromTo(c.ch1,{opacity:0,y:30},{opacity:1,y:0,duration:.5}).fromTo(c.ch2,{opacity:0,y:30},{opacity:1,y:0,duration:.5},'+=1.8') },
+    ]},
+  { t:'دورك: لوّن ٤٠٪', interactive:true, setup(s){ const cols=[]; const x0=110,y0=62,cell=19,gap=2;
+      for(let c=0;c<10;c++){ const g=el('g',{class:'hot',tabindex:0,role:'button','aria-pressed':'false','aria-label':'العمود '+AD(c+1)},s); const ring=el('rect',{x:x0+c*(cell+gap)-2,y:y0-2,width:cell+4,height:10*(cell+gap)+2,rx:6,fill:'transparent',class:'hot-ring',stroke:'transparent'},g); const fs=[];
+        for(let r=0;r<10;r++){ const y=y0+r*(cell+gap); el('rect',{x:x0+c*(cell+gap),y,width:cell,height:cell,rx:3,class:'f-surface2',stroke:'var(--line)','stroke-width':1},g); fs.push(el('rect',{x:x0+c*(cell+gap),y,width:cell,height:cell,rx:3,class:'f-pink',opacity:0},g)); }
+        cols.push({g,fs,on:false}); }
+      const pct=txt(s,{x:470,y:150,s:60,cls:'t-pri',text:'٠٪'}); txt(s,{x:470,y:188,s:18,cls:'t-ink2',text:'اضغط الأعمدة لتلوينها'});
+      const btn=el('g',{class:'hot',tabindex:0,role:'button','aria-label':'تحقّق'},s); el('rect',{x:405,y:230,width:130,height:50,rx:12,class:'f-edge'},btn); el('rect',{x:401,y:226,width:130,height:50,rx:12,class:'f-pri',stroke:'var(--edge)','stroke-width':2},btn); txt(btn,{x:466,y:259,s:22,cls:'t-inv',text:'تحقّق'});
+      gsap.set(btn,{opacity:.45}); return {cols,pct,btn}; },
+    beats:[
+      { say:'دورك الآن. كل عمود فيه عشرة مربعات. اضغط الأعمدة لتلوّن أربعين في المئة، ثم اضغط تحقّق.', run:c=>tl().from(c.cols.map(x=>x.g),{opacity:0,y:20,stagger:.05,duration:.3}),
+        wait:c=>new Promise(res=>{ const upd=()=>{ const n=c.cols.filter(x=>x.on).length; c.pct.textContent=AD(n*10)+'٪'; gsap.to(c.btn,{opacity:n?1:.45,duration:.2}); };
+          c.cols.forEach(col=>{ const tog=()=>{ col.on=!col.on; col.g.setAttribute('aria-pressed',String(col.on)); gsap.to(col.fs,{opacity:col.on?1:0,duration:.18,stagger:{each:.02,from:col.on?'end':'start'}}); upd(); };
+            col.g.addEventListener('click',tog); col.g.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); tog(); } }); });
+          const chk=()=>{ const n=c.cols.filter(x=>x.on).length; if(!n) return; c.cols.forEach(x=>x.g.style.pointerEvents='none'); res(n===4); };
+          c.btn.addEventListener('click',chk); c.btn.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); chk(); } }); }),
+        right:'ممتاز! أربعة أعمدة من عشرة، أي أربعون مربعًا من مئة.', wrong:'قريب! أربعون في المئة تعني أربعين مربعًا من مئة، أي أربعة أعمدة كاملة. هكذا.',
+        after:(c,ok)=>{ const t=tl(); if(!ok){ c.cols.forEach((col,i)=>{ col.on=i<4; t.to(col.fs,{opacity:col.on?1:0,duration:.15},'<.05'); }); t.call(()=>c.pct.textContent='٤٠٪'); } const m=checkMark(c.pct.parentNode,560,125); t.from(m.g,{scale:0,transformOrigin:'50% 50%',duration:.4,ease:'back.out(2)'}).add(drawIn(m.pa,.4)); return t; } },
+    ]},
+  { t:'الخصم وفخ الرجوع', setup(s){ const bar=el('rect',{x:120,y:80,width:400,height:46,rx:10,class:'f-n3',stroke:'var(--edge)','stroke-width':2},s); const seg=el('rect',{x:420,y:80,width:100,height:46,rx:10,class:'f-pink',opacity:0},s);
+      const lab=txt(s,{x:320,y:112,s:24,cls:'t-note',text:'٢٠٠ ريال'}); const tag=note(s,{x:560,y:60,w:110,h:48,c:'n1',text:'خصم ٢٥٪',size:20,rot:10}); const after=txt(s,{x:270,y:160,s:24,cls:'t-pri',text:'بعد الخصم: ١٥٠ ريال'});
+      const g2=el('g',{},s); const vals=[['١٠٠',140],['١٢٠',320],['٩٦',500]].map(([v,x])=>note(g2,{x,y:262,w:110,h:64,c:'n0',text:v,size:32}));
+      const a1=arrow(g2,200,236,262,236,'s-pri',-26), a2=arrow(g2,380,236,442,236,'s-pink',-26); const l1=txt(g2,{x:230,y:208,s:18,cls:'t-pri',text:'+٢٠٪'}), l2=txt(g2,{x:410,y:208,s:18,cls:'t-hand',text:'−٢٠٪ من ١٢٠'});
+      const ring=el('ellipse',{cx:500,cy:262,rx:72,ry:44,class:'s-pink'},g2);
+      gsap.set([bar,lab,tag,after,g2],{opacity:0}); gsap.set(ring,{opacity:0}); return {bar,seg,lab,tag,after,g2,vals,a1,a2,l1,l2,ring}; },
+    beats:[
+      { say:'قميص سعره مئتا ريال، وعليه خصم خمسة وعشرين في المئة.', run:c=>tl().to([c.bar,c.lab],{opacity:1,duration:.4}).fromTo(c.bar,{attr:{width:0}},{attr:{width:400},duration:.8,ease:'power2.out'},'<').fromTo(c.tag,{opacity:0,rotation:-30},{opacity:1,rotation:10,duration:.7,ease:'elastic.out(1,.5)'}) },
+      { say:'ربع المئتين خمسون، نقطعها من السعر، فيبقى مئة وخمسون.', run:c=>tl().to(c.seg,{opacity:1,duration:.3}).to(c.seg,{x:40,y:40,rotation:12,opacity:0,transformOrigin:'50% 50%',duration:.9,ease:'power2.in'},'+=.4').to(c.bar,{attr:{width:300},duration:.5},'<.3').to(c.lab,{attr:{x:270},duration:.5},'<').call(()=>c.lab.textContent='١٥٠ ريال').to(c.after,{opacity:1,duration:.4}) },
+      { say:'وانتبه لفخ شهير: زيادة عشرين في المئة ثم نقص عشرين في المئة لا يعيدك للأصل.', run:c=>{ const t=tl().to(c.g2,{opacity:1,duration:.2}); c.vals.forEach((v,i)=>{ t.fromTo(v,{opacity:0,y:20},{opacity:1,y:0,duration:.4},i?'+=.5':'<'); if(i<2){ const a=i?c.a2:c.a1; t.add(drawIn(a.pa,.5)).fromTo(a.hp,{opacity:0},{opacity:1,duration:.1}).fromTo(i?c.l2:c.l1,{opacity:0},{opacity:1,duration:.3}); } }); return t; } },
+      { say:'لأن النقص يُحسب من المئة والعشرين لا من المئة، فالنتيجة ستة وتسعون.', run:c=>tl().set(c.ring,{opacity:1}).add(drawIn(c.ring,.9)).to(c.vals[2],{scale:1.12,transformOrigin:'50% 50%',yoyo:true,repeat:1,duration:.25}) },
+    ]},
+  ],
+  quiz:[
+    {q:'كم ١٥٪ من ٤٠٠؟', o:['٤٠','٦٠','٧٥','١٥'], a:1, e:'١٠٪ من ٤٠٠ = ٤٠، و٥٪ نصفها = ٢٠، والمجموع ٦٠.'},
+    {q:'سعر ٨٠ ريالًا بعد خصم ٢٥٪ يصبح:', o:['٥٥ ريالًا','٦٠ ريالًا','٢٠ ريالًا','٦٥ ريالًا'], a:1, e:'ربع ٨٠ = ٢٠، و٨٠ − ٢٠ = ٦٠.'},
+    {q:'زاد عددٌ ١٠٪ ثم نقص ١٠٪. النتيجة مقارنة بالأصل:', o:['تساويه','أكثر منه بـ ١٪','أقل منه بـ ١٪','أقل منه بـ ١٠٪'], a:2, e:'١٠٠ ← ١١٠ ← ٩٩، أي أقل بـ ١٪ لأن النقص من ١١٠.'},
+  ]},
+
+/* ---------------- 2. equations as a balance ---------------- */
+balance:{ key:'balance', sk:'algebra', ord:10, area:'q', title:'المعادلة ميزان', min:'٤ دقائق', level:'تأسيس',
+  goals:['ترى المعادلة كميزان متوازن','تطبّق قاعدة: ما تفعله في طرف افعله في الآخر','تحل معادلة من خطوتين','تتحقق من الحل بالتعويض'],
+  scenes:[
+  { t:'المعادلة ميزان', setup(s){ const sc=makeScale(s); const eq=txt(s,{x:320,y:52,s:34,dir:'ltr',text:'س + ٣ = ٧'}); gsap.set(eq,{opacity:0}); gsap.set(sc.g,{opacity:0}); return {sc,eq}; },
+    beats:[
+      { say:'المعادلة ميزانٌ متوازن: الطرفان متساويان دائمًا.', run:c=>tl().to(c.sc.g,{opacity:1,duration:.4}).add(c.sc.tilt(9,.5,'power2.out')).add(c.sc.tilt(0,1.4)) },
+      { say:'في الكفة اليسرى صندوقٌ مجهول نسمّيه سين ومعه ثلاثة أوزان، وفي اليمنى سبعة أوزان.', run:c=>{ const L=c.sc.L,R=c.sc.R; const b=xbox(L); const w1=[1,2,3].map(()=>weight(L)); const w2=[1,2,3,4,5,6,7].map(()=>weight(R)); layout(L); layout(R);
+          return tl().from(b,{y:'-=180',opacity:0,duration:.6,ease:'bounce.out'}).from(w1,{y:'-=160',opacity:0,stagger:.12,duration:.45,ease:'bounce.out'}).from(w2,{y:'-=160',opacity:0,stagger:.1,duration:.45,ease:'bounce.out'},'<.3').to(c.eq,{opacity:1,duration:.5}); } },
+    ]},
+  { t:'ما تفعله هنا افعله هناك', setup(s){ const sc=makeScale(s); const b=xbox(sc.L); const lw=[1,2,3].map(()=>weight(sc.L)); const rw=[1,2,3,4,5,6,7].map(()=>weight(sc.R)); layout(sc.L); layout(sc.R);
+      const eq=txt(s,{x:320,y:52,s:34,dir:'ltr',text:'س + ٣ = ٧'}); const ne=txt(s,{x:320,y:96,s:26,cls:'t-bad',text:'اختلّ التوازن!'}); gsap.set(ne,{opacity:0});
+      const res=note(s,{x:320,y:60,w:170,h:64,c:'n0',text:'س = ٤',size:34,rot:-3}); gsap.set(res,{opacity:0}); return {sc,b,lw,rw,eq,ne,res}; },
+    beats:[
+      { say:'نريد أن يبقى الصندوق وحده، فلنرفع الأوزان الثلاثة من اليسار.', run:c=>tl().to(c.lw,{y:'-=140',opacity:0,stagger:.12,duration:.5,ease:'power2.in'}).add(c.sc.tilt(14),'-=.1') },
+      { say:'اختلّ الميزان! لأننا غيّرنا طرفًا واحدًا فقط.', run:c=>tl().to(c.ne,{opacity:1,duration:.3}).to(c.sc.g,{x:6,duration:.07,yoyo:true,repeat:5}) },
+      { say:'نرفع ثلاثة من اليمين أيضًا، فيعود التوازن: سين يساوي أربعة.', run:c=>tl().to(c.ne,{opacity:0,duration:.2}).to(c.rw.slice(4),{y:'-=140',opacity:0,stagger:.12,duration:.5,ease:'power2.in'}).add(c.sc.tilt(0)).to(c.eq,{opacity:0,duration:.3},'<').fromTo(c.res,{opacity:0,scale:.3},{opacity:1,scale:1,transformOrigin:'50% 50%',duration:.6,ease:'back.out(2)'}) },
+    ]},
+  { t:'القسمة على الطرفين', setup(s){ const sc=makeScale(s); const bs=[xbox(sc.L),xbox(sc.L)]; const rw=Array.from({length:10},()=>weight(sc.R)); layout(sc.L); layout(sc.R);
+      const eq=txt(s,{x:320,y:52,s:34,dir:'ltr',text:'٢س = ١٠'}); const res=note(s,{x:320,y:60,w:170,h:64,c:'n2',text:'س = ٥',size:34,rot:3}); gsap.set(res,{opacity:0}); return {sc,bs,rw,eq,res}; },
+    beats:[
+      { say:'هنا صندوقان متماثلان يوازنان عشرة أوزان.', run:c=>tl().from(c.bs,{opacity:0,y:'-=160',stagger:.2,duration:.5,ease:'bounce.out'}).from(c.rw,{opacity:0,y:'-=160',stagger:.07,duration:.4,ease:'bounce.out'},'<.2') },
+      { say:'نقسم الطرفين على اثنين: نُبقي صندوقًا واحدًا، ونصف الأوزان، أي خمسة.', run:c=>tl().to(c.bs[1],{x:'-=60',y:'-=120',opacity:0,duration:.6,ease:'power2.in'}).to(c.rw.slice(5),{y:'-=140',opacity:0,stagger:.08,duration:.45,ease:'power2.in'},'<').add(c.sc.tilt(0)).to(c.eq,{opacity:0,duration:.3}).fromTo(c.res,{opacity:0,scale:.3},{opacity:1,scale:1,transformOrigin:'50% 50%',duration:.6,ease:'back.out(2)'}) },
+    ]},
+  { t:'دورك: الخطوة الأولى', interactive:true, setup(s){ const eq=txt(s,{x:320,y:72,s:40,dir:'ltr',text:'٣س + ٢ = ١٤'}); const ask=txt(s,{x:320,y:112,s:20,cls:'t-ink2',text:'ما الخطوة الأولى الصحيحة؟'});
+      const opts=['اطرح ٢ من الطرفين','اقسم الطرف الأيسر فقط على ٣','اطرح ٢ من الطرف الأيسر فقط'].map((t,i)=>{ const g=el('g',{class:'hot',tabindex:0,role:'button','aria-label':t},s); const y=140+i*62; el('rect',{x:124,y:y+4,width:400,height:50,rx:12,class:'f-edge'},g); const r=el('rect',{x:120,y,width:400,height:50,rx:12,class:'f-surface hot-ring',stroke:'var(--edge)','stroke-width':2},g); txt(g,{x:320,y:y+33,s:21,text:t}); return {g,r}; });
+      const steps=el('g',{},s); const s1=txt(steps,{x:320,y:170,s:34,dir:'ltr',cls:'t-ink',text:'٣س = ١٢'}), s2=note(steps,{x:320,y:250,w:170,h:64,c:'n0',text:'س = ٤',size:34,rot:-3}); gsap.set([s1,s2],{opacity:0});
+      return {eq,ask,opts,steps,s1,s2}; },
+    beats:[
+      { say:'دورك. في المعادلة ثلاثة سين زائد اثنين يساوي أربعة عشر، ما الخطوة الأولى الصحيحة؟', run:c=>tl().from(c.eq,{opacity:0,y:-20,duration:.4}).from(c.opts.map(o=>o.g),{opacity:0,x:40,stagger:.15,duration:.35}),
+        wait:c=>new Promise(res=>{ c.opts.forEach((o,i)=>{ const pick=()=>{ c.opts.forEach(x=>x.g.style.pointerEvents='none'); o.r.setAttribute('class',(i===0?'f-oksoft':'f-badsoft')+' hot-ring'); if(i!==0) c.opts[0].r.setAttribute('class','f-oksoft hot-ring'); res(i===0); }; o.g.addEventListener('click',pick); o.g.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); pick(); } }); }); }),
+        right:'صحيح. نطرح اثنين من الطرفين فيصبح ثلاثة سين يساوي اثني عشر، ثم نقسم على ثلاثة: سين يساوي أربعة.',
+        wrong:'هذه الخطوة تغيّر طرفًا واحدًا فتكسر التوازن. الصحيح أن نطرح اثنين من الطرفين، ثم نقسم على ثلاثة، فيكون سين أربعة.',
+        after:c=>tl().to([c.ask,...c.opts.map(o=>o.g)],{opacity:0,duration:.4,delay:.8}).to(c.s1,{opacity:1,duration:.5}).fromTo(c.s2,{opacity:0,scale:.3},{opacity:1,scale:1,transformOrigin:'50% 50%',duration:.6,ease:'back.out(2)'},'+=1.2') },
+    ]},
+  { t:'تحقّق بالتعويض', setup(s){ const a=txt(s,{x:320,y:110,s:40,dir:'ltr',text:'٣ × ٤ + ٢'}); const b=txt(s,{x:320,y:180,s:40,dir:'ltr',cls:'t-pri',text:'= ١٤'}); const m=checkMark(s,440,168,1.2);
+      const tip=note(s,{x:320,y:275,w:420,h:70,c:'n3',text:'في الاختيار من متعدد: جرّب التعويض بالخيارات',size:19,rot:-1.5}); gsap.set([a,b,m.g,tip],{opacity:0}); return {a,b,m,tip}; },
+    beats:[
+      { say:'بعد الحل عوّض لتتأكد: ثلاثة في أربعة زائد اثنين.', run:c=>tl().fromTo(c.a,{opacity:0,y:20},{opacity:1,y:0,duration:.5}) },
+      { say:'يساوي أربعة عشر، والطرفان متساويان، فالحل صحيح.', run:c=>tl().to(c.b,{opacity:1,duration:.4}).set(c.m.g,{opacity:1}).from(c.m.g,{scale:0,transformOrigin:'50% 50%',duration:.4,ease:'back.out(2)'}).add(drawIn(c.m.pa,.4)) },
+      { say:'وفي الاختيار من متعدد، التعويض بالخيارات أحيانًا أسرع من الحل نفسه.', run:c=>tl().fromTo(c.tip,{opacity:0,y:40},{opacity:1,y:0,duration:.6,ease:'back.out(1.6)'}) },
+    ]},
+  ],
+  quiz:[
+    {q:'إذا كان س − ٥ = ٩ فإن س =', o:['٤','١٤','٤٥','−٤'], a:1, e:'نضيف ٥ للطرفين: سين = ٩ + ٥ = ١٤.'},
+    {q:'إذا كان ٤س = ٢٨ فإن س =', o:['٢٤','٣٢','٧','١١٢'], a:2, e:'نقسم الطرفين على ٤: سين = ٧.'},
+    {q:'إذا كان ٢س + ٦ = ٢٠ فإن س =', o:['٧','١٣','١٠','٤'], a:0, e:'نطرح ٦: ٢س = ١٤، ثم نقسم على ٢: سين = ٧.'},
+  ]},
+
+/* ---------------- 3. verbal analogy ---------------- */
+analogy:{ key:'analogy', sk:'analogy', ord:10, area:'v', title:'التناظر اللفظي: ابنِ الجسر', min:'٤ دقائق', level:'تأسيس',
+  goals:['تفهم أن التناظر سؤال عن العلاقة لا عن الكلمات','تبني جملة جسر قصيرة','تختبر كل خيار بالجسر نفسه','تنتبه لاتجاه العلاقة'],
+  scenes:[
+  { t:'ما هو التناظر؟', setup(s){ const a=note(s,{x:200,y:170,w:150,h:90,c:'n0',text:'قلم',size:40,rot:-4}), b=note(s,{x:440,y:170,w:150,h:90,c:'n3',text:'كتابة',size:36,rot:3});
+      const col=txt(s,{x:320,y:186,s:48,text:':'}); const ar=arrow(s,405,120,235,120,'s-pink',-70); const lab=txt(s,{x:320,y:52,s:26,cls:'t-hand',text:'ما العلاقة؟'}); gsap.set([a,b,col,ar.hp,lab],{opacity:0}); gsap.set(ar.pa,{opacity:0}); return {a,b,col,ar,lab}; },
+    beats:[
+      { say:'في سؤال التناظر تُعطى كلمتين بينهما علاقة، والمطلوب زوجٌ آخر بينهما العلاقة نفسها.', run:c=>tl().fromTo(c.a,{opacity:0,y:-140,rotation:-25},{opacity:1,y:0,rotation:-4,duration:.8,ease:'bounce.out'}).to(c.col,{opacity:1,duration:.3}).fromTo(c.b,{opacity:0,y:-140,rotation:25},{opacity:1,y:0,rotation:3,duration:.8,ease:'bounce.out'},'<') },
+      { say:'والسر: لا تنظر للكلمات نفسها، بل للعلاقة بينها.', run:c=>tl().set(c.ar.pa,{opacity:1}).add(drawIn(c.ar.pa,.8)).to(c.ar.hp,{opacity:1,duration:.1}).fromTo(c.lab,{opacity:0,scale:.6},{opacity:1,scale:1,transformOrigin:'50% 50%',duration:.5,ease:'back.out(2)'}) },
+    ]},
+  { t:'ابنِ الجملة الجسر', setup(s){ const words=['القلم','أداةٌ','تُستخدم','لـ','الكتابة']; const xs=[520,420,315,232,160]; const ws=words.map((w,i)=>txt(s,{x:xs[i],y:150,s:38,cls:i===0||i===4?'t-pri':'t-ink',text:w}));
+      const ul=el('path',{d:'M580 172 Q340 190 110 172',class:'s-pink'},s); const chip=note(s,{x:320,y:250,w:240,h:62,c:'n2',text:'أداة ← وظيفتها',size:26,rot:-2}); gsap.set([...ws,chip],{opacity:0}); gsap.set(ul,{opacity:0}); return {ws,ul,chip}; },
+    beats:[
+      { say:'حوّل العلاقة إلى جملة قصيرة واضحة نسمّيها: الجسر.', run:c=>tl().fromTo(c.ws,{opacity:0,y:24},{opacity:1,y:0,stagger:.35,duration:.4,ease:'back.out(2)'}) },
+      { say:'القلم أداةٌ تُستخدم للكتابة. إذن العلاقة: أداة ووظيفتها.', run:c=>tl().set(c.ul,{opacity:1}).add(drawIn(c.ul,.7)).fromTo(c.chip,{opacity:0,y:30},{opacity:1,y:0,duration:.5,ease:'back.out(2)'}) },
+    ]},
+  { t:'اختبر الخيارات بالجسر', setup(s){ txt(s,{x:320,y:60,s:22,cls:'t-ink2',text:'الـ ____ أداةٌ تُستخدم لـ ____'});
+      const slotA=el('rect',{x:360,y:84,width:120,height:48,rx:10,fill:'transparent',stroke:'var(--pri)','stroke-width':2.5,'stroke-dasharray':'6 6'},s), slotB=el('rect',{x:150,y:84,width:120,height:48,rx:10,fill:'transparent',stroke:'var(--pri)','stroke-width':2.5,'stroke-dasharray':'6 6'},s);
+      txt(s,{x:315,y:116,s:20,cls:'t-ink2',text:'تُستخدم لـ'});
+      const pairs=[['مقص','قص','n0',true],['كتاب','مكتبة','n1',false],['شجرة','ورقة','n3',false]].map(([a,b,col,ok],i)=>{ const g=el('g',{},s); const x=[500,320,140][i];
+        const na=note(g,{x:x+42,y:280,w:80,h:52,c:col,text:a,size:22}), nb=note(g,{x:x-42,y:280,w:80,h:52,c:col,text:b,size:22}); txt(g,{x,y:287,s:22,text:':'}); return {g,na,nb,ok,x}; });
+      return {pairs,slotA,slotB}; },
+    beats:[0,1,2].map(i=>({
+      say:['نضع كل خيار في الجسر نفسه. مقص وقص: المقص أداةٌ تُستخدم للقص. يصلح.','كتاب ومكتبة: الكتاب أداةٌ تُستخدم للمكتبة؟ لا يستقيم.','شجرة وورقة: علاقة كلٍّ وجزء، لا أداة ووظيفة. نستبعدها.'][i],
+      run:c=>{ const p=c.pairs[i]; const t=tl(); const dxA=420-(p.x+42), dxB=210-(p.x-42);
+        t.to(p.na,{x:dxA,y:-172,duration:.6,ease:'power2.inOut'}).to(p.nb,{x:dxB,y:-172,duration:.6,ease:'power2.inOut'},'<.1');
+        if(p.ok){ const m=checkMark(c.pairs[0].g.parentNode,560,108); t.from(m.g,{scale:0,transformOrigin:'50% 50%',duration:.35,ease:'back.out(2)'}).add(drawIn(m.pa,.35)).to(m.g,{opacity:0,duration:.3,delay:1}); t.to([p.na,p.nb],{x:0,y:0,duration:.5}).call(()=>el('rect',{x:p.x-86,y:250,width:172,height:62,rx:12,fill:'none',stroke:'var(--ok)','stroke-width':4},p.g)); }
+        else { const m=crossMark(c.pairs[0].g.parentNode,560,108); t.to([p.na,p.nb],{x:'+=8',duration:.06,yoyo:true,repeat:5}).from(m.g,{scale:0,transformOrigin:'50% 50%',duration:.3},'<').to(m.g,{opacity:0,duration:.3,delay:.9}).to([p.na,p.nb],{x:0,y:0,duration:.5}).to(p.g,{opacity:.35,duration:.3}); }
+        return t; } })) },
+  { t:'دورك: طبيب ومستشفى', interactive:true, setup(s){ const a=note(s,{x:230,y:62,w:130,h:58,c:'n0',text:'مستشفى',size:24,rot:2}), b=note(s,{x:410,y:62,w:130,h:58,c:'n0',text:'طبيب',size:26,rot:-3}); txt(s,{x:320,y:72,s:32,text:':'});
+      const hint=txt(s,{x:320,y:128,s:20,cls:'t-hand',text:'الجسر: يعمل الطبيب في المستشفى'});
+      const opts=[['معلّم','مدرسة'],['كتاب','قارئ'],['ماء','عطش'],['قلم','حبر']].map(([x,y],i)=>{ const g=el('g',{class:'hot',tabindex:0,role:'button','aria-label':x+' : '+y},s); const cx=[455,185][i%2], cy=[178,258][Math.floor(i/2)];
+        el('rect',{x:cx-118,y:cy-26,width:236,height:56,rx:12,class:'f-edge'},g); const r=el('rect',{x:cx-122,y:cy-30,width:236,height:56,rx:12,class:'f-surface hot-ring',stroke:'var(--edge)','stroke-width':2},g); txt(g,{x:cx-4,y:cy+6,s:23,text:x+' : '+y}); return {g,r}; });
+      return {opts,hint}; },
+    beats:[
+      { say:'دورك. طبيب ومستشفى. ابنِ الجسر في ذهنك: يعمل الطبيب في المستشفى. أيّ زوج يطابقه؟', run:c=>tl().from(c.hint,{opacity:0,duration:.4}).from(c.opts.map(o=>o.g),{opacity:0,y:20,stagger:.12,duration:.35}),
+        wait:c=>new Promise(res=>{ c.opts.forEach((o,i)=>{ const pick=()=>{ c.opts.forEach(x=>x.g.style.pointerEvents='none'); o.r.setAttribute('class',(i===0?'f-oksoft':'f-badsoft')+' hot-ring'); if(i) c.opts[0].r.setAttribute('class','f-oksoft hot-ring'); res(i===0); }; o.g.addEventListener('click',pick); o.g.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); pick(); } }); }); }),
+        right:'أحسنت. يعمل المعلم في المدرسة: العلاقة نفسها، شخصٌ ومكان عمله.',
+        wrong:'جرّب الجسر: يعمل الكتاب في القارئ؟ لا. الزوج الوحيد الذي يصلح: يعمل المعلم في المدرسة.',
+        after:c=>tl().to(c.opts[0].g,{scale:1.06,transformOrigin:'50% 50%',yoyo:true,repeat:1,duration:.25}) },
+    ]},
+  { t:'فخ الاتجاه', setup(s){ const p1=el('g',{},s), p2=el('g',{},s);
+      note(p1,{x:240,y:110,w:120,h:60,c:'n2',text:'دجاجة',size:24,rot:2}); note(p1,{x:400,y:110,w:120,h:60,c:'n2',text:'بيضة',size:26,rot:-2}); txt(p1,{x:320,y:120,s:30,text:':'});
+      const a2=note(p2,{x:400,y:250,w:120,h:60,c:'n1',text:'دجاجة',size:24,rot:-2}), b2=note(p2,{x:240,y:250,w:120,h:60,c:'n1',text:'بيضة',size:26,rot:2}); txt(p2,{x:320,y:260,s:30,text:':'});
+      const lab1=txt(s,{x:320,y:58,s:20,cls:'t-hand',text:'البيضة تخرج من الدجاجة'}); const x=crossMark(s,540,250); const ar=arrow(s,470,190,170,190,'s-pri',-10);
+      gsap.set([p1,p2,lab1,x.g,ar.hp],{opacity:0}); gsap.set(ar.pa,{opacity:0}); return {p1,p2,a2,b2,lab1,x,ar}; },
+    beats:[
+      { say:'انتبه لترتيب الكلمتين. بيضة ودجاجة: البيضة تخرج من الدجاجة.', run:c=>tl().fromTo(c.p1,{opacity:0,y:-40},{opacity:1,y:0,duration:.5}).to(c.lab1,{opacity:1,duration:.4}) },
+      { say:'فإذا جاء الخيار دجاجة وبيضة، فالعلاقة معكوسة، وهذا خطأ شائع.', run:c=>tl().to(c.p2,{opacity:1,duration:.3}).to(c.a2,{x:-160,duration:.6,ease:'power2.inOut'}).to(c.b2,{x:160,duration:.6,ease:'power2.inOut'},'<').to(c.x.g,{opacity:1,duration:.2}).from(c.x.g,{scale:0,transformOrigin:'50% 50%',duration:.35,ease:'back.out(2)'},'<') },
+      { say:'اقرأ الجسر دائمًا بالترتيب نفسه: الكلمة الأولى ثم الثانية.', run:c=>tl().set(c.ar.pa,{opacity:1}).add(drawIn(c.ar.pa,.8)).to(c.ar.hp,{opacity:1,duration:.1}) },
+    ]},
+  ],
+  quiz:[
+    {q:'مِشرط : جرّاح', o:['كتاب : مكتبة','فرشاة : رسّام','سيارة : طريق','بحر : سمك'], a:1, e:'الجسر: المشرط أداة يستخدمها الجرّاح، والفرشاة أداة يستخدمها الرسّام.'},
+    {q:'عطش : ماء', o:['نار : دخان','مطر : غيم','جوع : طعام','نوم : سرير'], a:2, e:'الجسر: العطش يزول بالماء، والجوع يزول بالطعام.'},
+    {q:'غصن : شجرة', o:['يد : إصبع','إصبع : يد','قلم : دفتر','باب : مفتاح'], a:1, e:'الغصن جزء من الشجرة، والإصبع جزء من اليد. «يد : إصبع» العلاقة نفسها لكن معكوسة.'},
+  ]},
+};
+
+['percent','balance','analogy'].forEach(k=>XP.add(LESSONS[k]));
+})();
+/* Explainers: algebra */
+(function(){ if(!window.XP||!XP.ready) return;
+/* pre-set the transform origin of pop-in items (see engine note: revealTl sets transformOrigin only in the "to" vars, which shifts them) */
+const POPT=['box','circle','check','cross','dot','poly','pie'];
+/* keep text readable in dark mode: light fills get note ink, dark fills get stage ink */
+const LIGHT=['n0','n1','n2','n3','butter','sky'], DARKF=['surface','surface2','prisoft','pinksoft'];
+const ADD=L=>{ L.scenes.forEach(sc=>{ for(const k in (sc.items||{})){ const it=sc.items[k]; if(POPT.includes(it.type)&&!it.rot) it.rot=.01; if((it.type==='box'||it.type==='circle')&&LIGHT.includes(it.c)&&!it.cls) it.cls='t-note'; if(it.type==='note'&&DARKF.includes(it.c)&&!it.cls) it.cls='t-ink'; } }); XP.add(L); };
+const LR=s=>'⁦'+s+'⁩'; /* keep √ and nested powers in left-to-right order */
+
+/* ---------- 1. variables and expressions ---------- */
+ADD({ key:'al-vars', sk:'algebra', ord:5, title:'المتغيرات والعبارات الجبرية', min:'٣ دقائق',
+  goals:['تعرف معنى المتغير «س»','تجمع الحدود المتشابهة','تبسّط عبارة جبرية','تعوّض بقيمة المتغير'],
+  scenes:[
+  { t:'ما المتغير؟',
+    items:{
+      bx:{type:'box',x:270,y:90,w:100,h:100,c:'prisoft',text:'س',s:56,cls:'t-pri'},
+      lbl:{type:'text',x:320,y:225,s:22,cls:'t-ink2',text:'صندوق مغلق فيه عدد لا نعرفه بعد'},
+      n1:{type:'note',x:140,y:110,w:80,h:60,c:'n0',text:'٣',size:30,rot:-5},
+      n2:{type:'note',x:130,y:190,w:80,h:60,c:'n1',text:'٧',size:30,rot:4},
+      n3:{type:'note',x:500,y:150,w:80,h:60,c:'n3',text:'١٠',size:30,rot:-3},
+      eq:{type:'text',dir:'rtl',x:320,y:262,s:32,text:'٣س = ٣ × س'},
+      m1:{type:'box',x:240,y:290,w:44,h:44,c:'prisoft',text:'س',s:22,cls:'t-pri'},
+      m2:{type:'box',x:298,y:290,w:44,h:44,c:'prisoft',text:'س',s:22,cls:'t-pri'},
+      m3:{type:'box',x:356,y:290,w:44,h:44,c:'prisoft',text:'س',s:22,cls:'t-pri'},
+    },
+    beats:[
+      {say:'المتغير رمزٌ يحجز مكان عددٍ لا نعرفه بعد، ونكتبه غالبًا بحرف مثل سين.', show:['bx','lbl']},
+      {say:'تخيّله صندوقًا مغلقًا؛ قد يكون فيه ثلاثة أو سبعة أو عشرة، بحسب المسألة.', show:['n1','n2','n3'], gap:.3},
+      {say:'وحين نكتب ثلاثة سين فالمعنى ثلاثة في سين، أي ثلاثة صناديق متماثلة.', hide:['n1','n2','n3','lbl'], show:['eq','m1','m2','m3'], gap:.25},
+    ]},
+  { t:'الحدود المتشابهة',
+    items:{
+      q:{type:'text',dir:'rtl',x:320,y:105,s:40,text:'٢س + ٣س'},
+      a1:{type:'box',x:454,y:140,w:52,h:52,c:'pinksoft',text:'س',s:24},
+      a2:{type:'box',x:394,y:140,w:52,h:52,c:'pinksoft',text:'س',s:24},
+      pl:{type:'text',x:353,y:178,s:34,text:'+'},
+      b1:{type:'box',x:260,y:140,w:52,h:52,c:'sky',text:'س',s:24},
+      b2:{type:'box',x:200,y:140,w:52,h:52,c:'sky',text:'س',s:24},
+      b3:{type:'box',x:140,y:140,w:52,h:52,c:'sky',text:'س',s:24},
+      res:{type:'note',x:320,y:245,w:170,h:62,c:'n0',text:'٥س',size:36,rot:-2},
+      e2:{type:'text',dir:'rtl',x:410,y:335,s:28,text:'٢س + ٣ص'},
+      cr:{type:'cross',x:305,y:325,s:.8},
+      e2t:{type:'text',x:210,y:335,s:22,hand:true,text:'لا يُجمعان'},
+    },
+    beats:[
+      {say:'الحدود المتشابهة تحمل المتغير نفسه، مثل اثنين سين وثلاثة سين.', show:['q']},
+      {say:'صندوقان وثلاثة صناديق من النوع نفسه تصبح معًا خمسة صناديق.', show:['a1','a2','pl','b1','b2','b3'], gap:.2},
+      {say:'إذن اثنان سين زائد ثلاثة سين يساوي خمسة سين؛ نجمع المعاملات ونُبقي سين كما هي.', hide:['pl'], move:{a1:[-37,0],a2:[-37,0],b1:[37,0],b2:[37,0],b3:[37,0]}, show:['res']},
+      {say:'لكن سين وصاد حدّان مختلفان، فاثنان سين وثلاثة صاد لا يُجمعان في حد واحد.', show:['e2','cr','e2t']},
+    ]},
+  { t:'تبسيط العبارة',
+    items:{
+      ex:{type:'text',dir:'rtl',x:320,y:105,s:40,text:'٤س + ٥ − س + ٢'},
+      l1:{type:'text',dir:'rtl',x:320,y:175,s:30,cls:'t-pri',text:'٤س − س = ٣س'},
+      l2:{type:'text',dir:'rtl',x:320,y:225,s:30,cls:'t-ink2',text:'٥ + ٢ = ٧'},
+      res:{type:'note',x:320,y:292,w:200,h:62,c:'n3',text:'٣س + ٧',size:32,rot:2},
+    },
+    beats:[
+      {say:'لتبسيط عبارة طويلة، اجمع كل نوع مع نوعه: حدود سين معًا، والأعداد معًا.', show:['ex']},
+      {say:'حدود سين: أربعة سين ناقص سين يساوي ثلاثة سين، فسين وحدها تعني سينًا واحدة.', show:['l1']},
+      {say:'والأعداد: خمسة زائد اثنين يساوي سبعة. فالعبارة المبسطة ثلاثة سين زائد سبعة.', show:['l2','res']},
+    ]},
+  { t:'التعويض',
+    items:{
+      g1:{type:'text',x:402,y:82,s:24,cls:'t-ink2',text:'إذا كان'},
+      g2:{type:'text',dir:'rtl',x:284,y:82,s:32,cls:'t-pri',text:'س = ٤'},
+      q:{type:'text',dir:'rtl',x:320,y:126,s:34,text:'٣س + ٢ = ؟'},
+      w1:{type:'text',dir:'rtl',x:320,y:215,s:36,text:'٣ × ٤ + ٢ = ١٤'},
+      tip:{type:'note',x:320,y:288,w:360,h:56,c:'n1',text:'المعامل يُضرب في المتغير',size:22,rot:-1.5},
+    },
+    beats:[
+      {say:'التعويض أن نفتح الصندوق ونضع العدد مكان سين.', show:['g1','g2']},
+      {say:'دورك. إذا كان سين يساوي أربعة، فكم تساوي ثلاثة سين زائد اثنين؟', show:['q']},
+    ],
+    ask:{ opts:['٣٤','١٤','١٢','٩'], a:1,
+      right:'أحسنت. ثلاثة في أربعة يساوي اثني عشر، زائد اثنين يساوي أربعة عشر.',
+      wrong:'ثلاثة سين تعني ثلاثة في سين، لا ثلاثة بجانب أربعة. ثلاثة في أربعة اثنا عشر، زائد اثنين يساوي أربعة عشر.',
+      show:['w1','tip'] }},
+  { t:'بسّط ثم عوّض',
+    items:{
+      e1:{type:'text',dir:'rtl',x:320,y:110,s:38,text:'٢س + ٣س − ٤س'},
+      e2:{type:'text',dir:'rtl',x:320,y:170,s:38,cls:'t-pri',text:'= س'},
+      e3:{type:'box',x:210,y:205,w:220,h:54,c:'butter',text:'س = ١٠ ← الناتج ١٠',s:22},
+      tip:{type:'note',x:320,y:305,w:300,h:56,c:'n2',text:'بسّط أولًا، ثم عوّض',size:24,rot:-2},
+    },
+    beats:[
+      {say:'في القدرات بسّط قبل أن تعوّض؛ فالحساب يقصر كثيرًا.', show:['e1','tip']},
+      {say:'اثنان سين زائد ثلاثة سين ناقص أربعة سين يساوي سين فقط. فإذا كان سين عشرة، فالناتج عشرة مباشرة.', show:['e2','e3']},
+    ]},
+  ],
+  quiz:[
+    {q:'بسّط: ٥س + ٢ − ٢س + ٤', o:['٣س + ٦','٧س + ٦','٣س + ٢','٩س'], a:0, e:'٥س − ٢س = ٣س، و٢ + ٤ = ٦.'},
+    {q:'إذا كان س = ٣، فما قيمة ٤س − ٥؟', o:['٣٩','٧','١٢','١٧'], a:1, e:'٤ × ٣ = ١٢، ثم ١٢ − ٥ = ٧.'},
+    {q:'إذا كان س = ٢ و ص = ٥، فما قيمة ٣س + ص؟', o:['١١','٣٧','١٠','٢١'], a:0, e:'٣ × ٢ + ٥ = ٦ + ٥ = ١١.'},
+  ]});
+
+/* ---------- 2. exponents and roots ---------- */
+ADD({ key:'al-exp', sk:'algebra', ord:20, title:'الأسس والجذور', min:'٤ دقائق',
+  goals:['تفهم الأس كضرب متكرر','تطبّق قاعدتي ضرب القوى وقوة القوة','تعرف أن الأس صفر يعطي واحدًا','تحسب جذور المربعات الكاملة'],
+  scenes:[
+  { t:'الأس: ضرب متكرر',
+    items:{
+      pw:{type:'text',dir:'rtl',x:150,y:160,s:76,cls:'t-pri',text:'٢⁵'},
+      ex:{type:'text',dir:'rtl',x:410,y:135,s:32,text:'٢ × ٢ × ٢ × ٢ × ٢'},
+      res:{type:'text',dir:'rtl',x:410,y:190,s:36,cls:'t-pri',text:'= ٣٢'},
+      nb:{type:'note',x:170,y:268,w:170,h:56,c:'n3',text:'الأساس: ٢',size:22,rot:-2},
+      ne:{type:'note',x:420,y:268,w:250,h:56,c:'n1',text:'الأس: ٥ مرات',size:22,rot:1.5},
+    },
+    beats:[
+      {say:'الأس اختصار للضرب المتكرر. اثنان أُس خمسة يعني أن نضرب اثنين في نفسه خمس مرات.', show:['pw','ex']},
+      {say:'العدد الكبير هو الأساس، والعدد الصغير في الأعلى هو الأس، ويخبرنا بعدد المرات.', show:['nb','ne']},
+      {say:'نضرب خطوة خطوة: اثنان، أربعة، ثمانية، ستة عشر، اثنان وثلاثون.', show:['res']},
+    ]},
+  { t:'ضرب قوتين',
+    items:{
+      q:{type:'text',dir:'rtl',x:320,y:100,s:42,text:'٢³ × ٢⁴'},
+      x1:{type:'text',dir:'rtl',x:320,y:165,s:28,text:'(٢ × ٢ × ٢) × (٢ × ٢ × ٢ × ٢)'},
+      r:{type:'text',dir:'rtl',x:320,y:225,s:42,cls:'t-pri',text:'= ٢⁷'},
+      rule:{type:'note',x:320,y:298,w:330,h:58,c:'n0',text:'الأساس نفسه ← اجمع الأسس',size:23,rot:-1.5},
+    },
+    beats:[
+      {say:'عندما نضرب قوتين لهما الأساس نفسه، مثل اثنين تكعيب في اثنين أُس أربعة، فماذا يحدث؟', show:['q']},
+      {say:'نفكّ كل قوة: ثلاث اثنينات، ثم أربع اثنينات، فيصبح المجموع سبع اثنينات.', show:['x1']},
+      {say:'فالناتج اثنان أُس سبعة. والقاعدة: الأساس نفسه، والأسس تُجمع.', show:['r','rule']},
+    ]},
+  { t:'قوة القوة، والأس صفر',
+    items:{
+      pp:{type:'text',dir:'rtl',x:170,y:110,s:40,text:LR('(٣²)³')},
+      pp2:{type:'text',dir:'rtl',x:170,y:165,s:26,text:'٣² × ٣² × ٣²'},
+      pp3:{type:'text',dir:'rtl',x:170,y:220,s:40,cls:'t-pri',text:'= ٣⁶'},
+      r2:{type:'note',x:170,y:292,w:220,h:56,c:'n2',text:'اضرب الأسّين',size:24,rot:2},
+      dv:{type:'line',x1:320,y1:85,x2:320,y2:325,cls:'s-line'},
+      z1:{type:'text',dir:'rtl',x:480,y:105,s:28,text:'٢³ = ٨'},
+      z2:{type:'text',dir:'rtl',x:480,y:147,s:28,text:'٢² = ٤'},
+      z3:{type:'text',dir:'rtl',x:480,y:189,s:28,text:'٢¹ = ٢'},
+      z4:{type:'text',dir:'rtl',x:480,y:237,s:38,cls:'t-pri',text:'٢⁰ = ١'},
+      zh:{type:'text',x:585,y:150,s:20,hand:true,text:'÷ ٢'},
+      r3:{type:'note',x:480,y:292,w:230,h:56,c:'n3',text:'الأس صفر ← ١',size:24,rot:-2},
+    },
+    beats:[
+      {say:'وإذا رفعنا قوة إلى قوة، مثل ثلاثة تربيع الكل تكعيب، فهذا ثلاثة تربيع مضروبًا في نفسه ثلاث مرات.', show:['dv','pp','pp2']},
+      {say:'نجمع الأسس: اثنان واثنان واثنان، فالناتج ثلاثة أُس ستة. أي أننا نضرب الأسين.', show:['pp3','r2']},
+      {say:'أما الأس صفر فانظر إلى هذا النمط: كلما نقص الأس واحدًا، قسمنا الناتج على اثنين.', show:['z1','z2','z3','zh'], gap:.35},
+      {say:'ثمانية، أربعة، اثنان، ثم واحد. إذن اثنان أُس صفر يساوي واحدًا، وكذلك أي عدد غير الصفر أُسه صفر.', show:['z4','r3']},
+    ]},
+  { t:'الجذر التربيعي',
+    items:{
+      g:{type:'grid',x:90,y:90,rows:5,cols:5,cell:30,gap:3,fill:25,c:'prisoft'},
+      gl:{type:'text',dir:'rtl',x:172,y:292,s:26,text:'٥ × ٥ = ٢٥'},
+      q1:{type:'text',x:440,y:130,s:22,text:'أيّ عدد في نفسه يعطي ٢٥؟'},
+      sq:{type:'text',dir:'rtl',x:440,y:205,s:44,cls:'t-pri',text:LR('√٢٥')+' = ٥'},
+      q2:{type:'text',dir:'rtl',x:320,y:118,s:44,text:LR('√٦٤')+' = ؟'},
+      a1:{type:'text',dir:'rtl',x:320,y:215,s:40,cls:'t-pri',text:'٨ × ٨ = ٦٤'},
+      tip:{type:'note',x:320,y:290,w:300,h:56,c:'n0',text:'الجذر ليس النصف!',size:24,rot:-2},
+    },
+    beats:[
+      {say:'الجذر التربيعي عكس التربيع: نسأل أيُّ عدد إذا ضُرب في نفسه أعطانا العدد المُعطى؟', show:['q1']},
+      {say:'هذا المربع فيه خمس وعشرون خانة، وضلعه خمس خانات؛ فالجذر التربيعي لخمسة وعشرين خمسة.', show:['g','gl','sq']},
+      {say:'دورك. ما الجذر التربيعي لأربعة وستين؟', hide:['g','gl','q1','sq'], show:['q2']},
+    ],
+    ask:{ opts:['٣٢','٨','١٦','٦'], a:1,
+      right:'صحيح. ثمانية في ثمانية يساوي أربعة وستين.',
+      wrong:'اثنان وثلاثون نصف العدد وليس جذره. نبحث عن عدد في نفسه يعطي أربعة وستين، وهو ثمانية.',
+      show:['a1','tip'] }},
+  { t:'احفظ المربعات',
+    items:Object.assign({
+      t1:{type:'text',dir:'rtl',x:320,y:264,s:32,text:'٢³ = ٢ × ٢ × ٢ = ٨'},
+      t2:{type:'note',x:320,y:320,w:300,h:48,c:'n1',text:'وليس ٢ × ٣ = ٦',size:22,rot:-1.5},
+    }, (function(){ const o={}, A='٠١٢٣٤٥٦٧٨٩', ad=n=>String(n).replace(/\d/g,d=>A[d]);
+      for(let i=1;i<=12;i++){ const r=Math.floor((i-1)/4), k=3-(i-1)%4; o['s'+i]={type:'box',x:62+k*132,y:72+r*50,w:120,h:40,c:r%2?'surface2':'prisoft',text:ad(i)+'² = '+ad(i*i),s:20}; }
+      return o; })()),
+    beats:[
+      {say:'احفظ مربعات الأعداد من واحد إلى اثني عشر؛ فهي أساس الجذور السريعة في القدرات.', show:['s1','s2','s3','s4','s5','s6','s7','s8','s9','s10','s11','s12'], gap:.1},
+      {say:'وانتبه للفخ: اثنان تكعيب ثمانية لا ستة؛ فالأس عدد مرات الضرب، وليس عددًا نضرب فيه.', show:['t1','t2']},
+    ]},
+  ],
+  quiz:[
+    {q:'٣² × ٣³ = ؟', o:['٣⁵','٣⁶','٩⁵','٦⁵'], a:0, e:'الأساس نفسه، فنجمع الأسس: ٢ + ٣ = ٥.'},
+    {q:'(٢³)² = ؟', o:['٢⁵','٢⁶','٢⁹','٤³'], a:1, e:'قوة القوة: نضرب الأسين ٣ × ٢ = ٦، أي ٦٤.'},
+    {q:'√١٤٤ + ٧⁰ = ؟', o:['١٢','١٣','١٩','٨'], a:1, e:'√١٤٤ = ١٢، و٧⁰ = ١، والمجموع ١٣.'},
+  ]});
+
+/* ---------- 3. sequences ---------- */
+const row=(pre,xs,y,texts,cs,w=86,h=66,size=28)=>{ const o={}; xs.forEach((x,i)=>{ o[pre+(i+1)]={type:'note',x,y,w,h,c:cs[i]||'n0',text:texts[i],size,rot:[-3,2,-2,3,-1][i%5]}; }); return o; };
+const X5=[550,440,330,220,110];
+ADD({ key:'al-seq', sk:'algebra', ord:30, title:'المتتابعات والأنماط', min:'٤ دقائق',
+  goals:['تكتشف قاعدة المتتابعة من الانتقال بين الحدود','تميّز الحسابية (فرق ثابت) من الهندسية (نسبة ثابتة)','تجد الحد التالي والحد المفقود'],
+  scenes:[
+  { t:'المتتابعة الحسابية',
+    items:Object.assign(row('t',X5,190,['٣','٧','١١','١٥','؟'],['n3','n3','n3','n3','n1']),{
+      a1:{type:'arrow',x1:525,y1:150,x2:465,y2:150,bend:-30,text:'+٤'},
+      a2:{type:'arrow',x1:415,y1:150,x2:355,y2:150,bend:-30,text:'+٤'},
+      a3:{type:'arrow',x1:305,y1:150,x2:245,y2:150,bend:-30,text:'+٤'},
+      a4:{type:'arrow',x1:195,y1:150,x2:135,y2:150,bend:-30,text:'+٤',cls:'s-pink'},
+      nt:{type:'note',x:320,y:295,w:300,h:56,c:'n0',text:'فرق ثابت ← حسابية',size:24,rot:-1.5},
+    }),
+    beats:[
+      {say:'المتتابعة أعداد مرتبة تسير وفق قاعدة ثابتة، وكل عدد فيها يسمى حدًّا.', show:['t1','t2','t3','t4','t5'], gap:.2},
+      {say:'لا تنظر إلى كل عدد وحده، بل إلى الانتقال بين كل حدين: من ثلاثة إلى سبعة نضيف أربعة، وهكذا.', show:['a1','a2','a3'], gap:.3},
+      {say:'هذا الفرق الثابت يجعلها متتابعة حسابية، فالحد التالي خمسة عشر زائد أربعة، أي تسعة عشر.', show:['a4','nt'], set:{t5:'١٩'}},
+    ]},
+  { t:'الفرق قد يكون سالبًا',
+    items:Object.assign(row('t',X5,190,['٢٠','١٧','١٤','١١','؟'],['n2','n2','n2','n2','n1']),{
+      a1:{type:'arrow',x1:525,y1:150,x2:465,y2:150,bend:-30,text:'−٣'},
+      a2:{type:'arrow',x1:415,y1:150,x2:355,y2:150,bend:-30,text:'−٣'},
+      a3:{type:'arrow',x1:305,y1:150,x2:245,y2:150,bend:-30,text:'−٣'},
+      a4:{type:'arrow',x1:195,y1:150,x2:135,y2:150,bend:-30,text:'−٣',cls:'s-pink'},
+      nt:{type:'note',x:320,y:295,w:330,h:56,c:'n0',text:'فرق ثابت ولو كان سالبًا',size:23,rot:1.5},
+    }),
+    beats:[
+      {say:'وقد يكون الفرق سالبًا: عشرون، سبعة عشر، أربعة عشر، أحد عشر.', show:['t1','t2','t3','t4','t5'], gap:.2},
+      {say:'هنا نطرح ثلاثة في كل خطوة، فالحد التالي ثمانية. المهم أن يبقى الفرق ثابتًا.', show:['a1','a2','a3','a4','nt'], gap:.25, set:{t5:'٨'}},
+    ]},
+  { t:'المتتابعة الهندسية',
+    items:Object.assign(row('g',X5,180,['٢','٦','١٨','٥٤','؟'],['n0','n0','n0','n0','n1']),{
+      d1:{type:'text',dir:'rtl',x:495,y:255,s:22,cls:'t-bad',text:'+٤'},
+      d2:{type:'text',dir:'rtl',x:385,y:255,s:22,cls:'t-bad',text:'+١٢'},
+      d3:{type:'text',dir:'rtl',x:275,y:255,s:22,cls:'t-bad',text:'+٣٦'},
+      m1:{type:'arrow',x1:525,y1:140,x2:465,y2:140,bend:-30,text:'×٣'},
+      m2:{type:'arrow',x1:415,y1:140,x2:355,y2:140,bend:-30,text:'×٣'},
+      m3:{type:'arrow',x1:305,y1:140,x2:245,y2:140,bend:-30,text:'×٣'},
+      m4:{type:'arrow',x1:195,y1:140,x2:135,y2:140,bend:-30,text:'×٣',cls:'s-pink'},
+      nt:{type:'note',x:320,y:312,w:320,h:52,c:'n2',text:'نسبة ثابتة ← هندسية',size:22,rot:1.5},
+    }),
+    beats:[
+      {say:'أما هنا فالفروق غير ثابتة: أربعة، ثم اثنا عشر، ثم ستة وثلاثون.', show:['g1','g2','g3','g4','g5','d1','d2','d3'], gap:.15},
+      {say:'لكن كل حد يساوي الذي قبله في ثلاثة. هذه متتابعة هندسية، والعدد الثابت ثلاثة هو النسبة.', strike:['d1','d2','d3'], show:['m1','m2','m3','nt'], gap:.3},
+      {say:'فالحد التالي أربعة وخمسون في ثلاثة، أي مئة واثنان وستون.', show:['m4'], set:{g5:'١٦٢'}},
+    ]},
+  { t:'الحد المفقود',
+    items:Object.assign(row('k',[530,425,320,215,110],100,['٥','١١','؟','٢٣','٢٩'],['n3','n3','n1','n3','n3'],80,60,28),{
+      p1:{type:'arrow',x1:510,y1:138,x2:445,y2:138,bend:36,cls:'s-pink'},
+      p2:{type:'arrow',x1:195,y1:138,x2:130,y2:138,bend:36,cls:'s-pink'},
+      p1t:{type:'text',dir:'rtl',x:478,y:182,s:22,cls:'t-hand',text:'+٦'},
+      p2t:{type:'text',dir:'rtl',x:162,y:182,s:22,cls:'t-hand',text:'+٦'},
+      ans:{type:'text',dir:'rtl',x:320,y:225,s:36,cls:'t-pri',text:'١١ + ٦ = ١٧'},
+      chk:{type:'text',dir:'rtl',x:320,y:285,s:28,cls:'t-ink2',text:'١٧ + ٦ = ٢٣'},
+      ck:{type:'check',x:200,y:276,s:.8},
+    }),
+    beats:[
+      {say:'إذا اختفى حد من الوسط، فاستخرج القاعدة من الحدود المعروفة المتجاورة.', show:['k1','k2','k3','k4','k5'], gap:.2},
+      {say:'من خمسة إلى أحد عشر نضيف ستة، ومن ثلاثة وعشرين إلى تسعة وعشرين نضيف ستة أيضًا.', show:['p1','p1t','p2','p2t'], gap:.3},
+      {say:'دورك. ما الحد المفقود؟', hide:['p1','p1t','p2','p2t']},
+    ],
+    ask:{ opts:['١٦','١٧','١٨','٢٠'], a:1,
+      right:'أحسنت. أحد عشر زائد ستة يساوي سبعة عشر، وسبعة عشر زائد ستة يساوي ثلاثة وعشرين.',
+      wrong:'الفرق الثابت ستة. أحد عشر زائد ستة يساوي سبعة عشر، ونتحقق: سبعة عشر زائد ستة يساوي ثلاثة وعشرين.',
+      show:['ans','chk','ck'] }},
+  { t:'خطتك في القدرات',
+    items:{
+      r1:{type:'box',x:120,y:72,w:400,h:50,c:'n3',text:'الفروق ثابتة؟ ← حسابية',s:22},
+      r2:{type:'box',x:120,y:136,w:400,h:50,c:'pinksoft',text:'النسبة ثابتة؟ ← هندسية',s:22},
+      r3:{type:'box',x:120,y:200,w:400,h:50,c:'prisoft',text:'لا هذا ولا ذاك؟ ← فروق الفروق',s:22},
+      ex:{type:'text',dir:'rtl',x:320,y:295,s:28,text:'٣ ، ٥ ، ٩ ، ١٧ ، ...'},
+      exd:{type:'text',x:320,y:333,s:22,hand:true,text:'الفروق: ٢ ، ٤ ، ٨ تتضاعف'},
+    },
+    beats:[
+      {say:'خطتك: احسب الفروق أولًا؛ فإن كانت ثابتة فالمتتابعة حسابية.', show:['r1']},
+      {say:'وإن لم تثبت فجرّب القسمة؛ فإن ثبتت النسبة فهي هندسية.', show:['r2']},
+      {say:'وإلا فانظر إلى فروق الفروق. في ثلاثة، خمسة، تسعة، سبعة عشر، الفروق تتضاعف: اثنان، أربعة، ثمانية.', show:['r3','ex','exd']},
+    ]},
+  ],
+  quiz:[
+    {q:'ما الحد التالي: ٤ ، ٩ ، ١٤ ، ١٩ ، ...؟', o:['٢٣','٢٤','٢٥','٢٩'], a:1, e:'متتابعة حسابية فرقها ٥: ١٩ + ٥ = ٢٤.'},
+    {q:'ما الحد التالي: ٣ ، ٦ ، ١٢ ، ٢٤ ، ...؟', o:['٣٠','٣٦','٤٨','٤٢'], a:2, e:'متتابعة هندسية نسبتها ٢: ٢٤ × ٢ = ٤٨.'},
+    {q:'ما الحد المفقود: ٨١ ، ٢٧ ، ؟ ، ٣ ، ١', o:['٩','١٢','١٨','٦'], a:0, e:'كل حد ثلث الذي قبله: ٢٧ ÷ ٣ = ٩.'},
+  ]});
+
+/* ---------- 4. word problems ---------- */
+const dict=(i,ar,m,y)=>({ ['p'+i]:{type:'box',x:350,y,w:230,h:40,c:'surface2',text:ar,s:20}, ['r'+i]:{type:'text',x:300,y:y+28,s:24,cls:'t-pri',text:'←'}, ['e'+i]:{type:'text',dir:'rtl',x:170,y:y+29,s:26,text:m} });
+ADD({ key:'al-word', sk:'algebra', ord:40, title:'من المسألة اللفظية إلى معادلة', min:'٤ دقائق',
+  goals:['تترجم عبارات مثل «ضعف العدد» و«يزيد بمقدار» و«مجموع»','تسمّي المجهول وتكتب المعادلة','تحل مسألة أعمار أو أسعار','تعود إلى المطلوب قبل الاختيار'],
+  scenes:[
+  { t:'قاموس الترجمة',
+    items:Object.assign({},
+      dict(1,'ضعف العدد','٢س',70), dict(2,'نصف العدد','½ س',118), dict(3,'يزيد عليه بمقدار ٥','س + ٥',166),
+      dict(4,'يقل عنه بمقدار ٥','س − ٥',214), dict(5,'مجموع العددين','س + ص',262), dict(6,'يساوي / أصبح','=',310)),
+    beats:[
+      {say:'المسألة اللفظية جملة تخفي معادلة، ونترجمها عبارة عبارة. نسمّي المجهول سين، فضعف العدد اثنان سين.', show:['p1','r1','e1'], gap:.3},
+      {say:'ونصف العدد نصف سين، أي سين مقسومًا على اثنين.', show:['p2','r2','e2'], gap:.3},
+      {say:'وعبارة يزيد بمقدار خمسة تعني زائد خمسة، ويقل بمقدار خمسة تعني ناقص خمسة.', show:['p3','r3','e3','p4','r4','e4'], gap:.25},
+      {say:'ومجموع عددين هو سين زائد صاد، وكلمة يساوي أو أصبح هي علامة المساواة.', show:['p5','r5','e5','p6','r6','e6'], gap:.25},
+    ]},
+  { t:'مثال: الأعمار',
+    items:{
+      pr1:{type:'text',x:320,y:96,s:21,text:'عمر أحمد ضعف عمر أخيه، ومجموع عمريهما ٣٠ سنة.'},
+      pr2:{type:'text',x:320,y:130,s:22,cls:'t-pri',text:'كم عمر الأخ؟'},
+      na:{type:'note',x:190,y:192,w:170,h:58,c:'n3',text:'الأخ: س',size:24,rot:-2},
+      nb:{type:'note',x:450,y:192,w:170,h:58,c:'n1',text:'أحمد: ٢س',size:24,rot:2},
+      eq1:{type:'text',dir:'rtl',x:320,y:270,s:32,text:'س + ٢س = ٣س = ٣٠'},
+      eq2:{type:'text',dir:'rtl',x:320,y:322,s:32,cls:'t-pri',text:'س = ٣٠ ÷ ٣ = ١٠'},
+    },
+    beats:[
+      {say:'مثال: عمر أحمد ضعف عمر أخيه، ومجموع عمريهما ثلاثون سنة. فكم عمر الأخ؟', show:['pr1','pr2']},
+      {say:'نسمّي الأصغر سين؛ فعمر الأخ سين، وعمر أحمد اثنان سين.', show:['na','nb'], gap:.4},
+      {say:'ومجموعهما ثلاثون: سين زائد اثنين سين يساوي ثلاثة سين، وهي تساوي ثلاثين.', show:['eq1']},
+      {say:'نقسم على ثلاثة، فسين يساوي عشرة: الأخ عمره عشر سنوات، وأحمد عشرون.', show:['eq2']},
+    ]},
+  { t:'ارجع إلى المطلوب',
+    items:{
+      t1:{type:'text',x:320,y:105,s:26,text:'لو كان السؤال: كم عمر أحمد؟'},
+      c10:{type:'note',x:220,y:195,w:120,h:72,c:'n1',text:'١٠',size:36,rot:-3},
+      cr:{type:'cross',x:220,y:282},
+      c20:{type:'note',x:420,y:195,w:120,h:72,c:'n3',text:'٢٠',size:36,rot:2},
+      ck:{type:'check',x:420,y:282},
+    },
+    beats:[
+      {say:'بعد الحل ارجع إلى السؤال: هل المطلوب سين نفسه أم شيء آخر؟', show:['t1']},
+      {say:'إن سُئلت عن عمر أحمد فالجواب عشرون لا عشرة. والعشرة غالبًا تكون بين الخيارات فخًّا.', show:['c10','cr','c20','ck'], gap:.35},
+    ]},
+  { t:'دورك: الأسعار',
+    items:{
+      pr1:{type:'text',x:320,y:84,s:21,text:'ثمن القلم يزيد على ثمن الدفتر بـ ٤ ريالات،'},
+      pr2:{type:'text',x:320,y:118,s:21,text:'ومجموع ثمنيهما ٢٠ ريالًا. ثمن الدفتر س.'},
+      w1:{type:'text',dir:'rtl',x:320,y:222,s:32,text:'٢س + ٤ = ٢٠'},
+      w2:{type:'box',x:170,y:250,w:300,h:54,c:'butter',text:'الدفتر ٨ ، القلم ١٢',s:22},
+    },
+    beats:[
+      {say:'دورك. ثمن القلم يزيد على ثمن الدفتر بأربعة ريالات، ومجموع ثمنيهما عشرون ريالًا.', show:['pr1']},
+      {say:'إذا كان ثمن الدفتر سين، فما المعادلة الصحيحة؟', show:['pr2']},
+    ],
+    ask:{ opts:['س + ٤ = ٢٠','س + (س + ٤) = ٢٠','٤س = ٢٠','س − ٤ = ٢٠'], a:1, s:20,
+      right:'صحيح. الدفتر سين والقلم سين زائد أربعة، ومجموعهما عشرون، فالدفتر ثمانية ريالات والقلم اثنا عشر.',
+      wrong:'المجموع يضم الثمنين معًا: سين للدفتر، وسين زائد أربعة للقلم، والناتج عشرون. فالدفتر ثمانية والقلم اثنا عشر.',
+      show:['w1','w2'] }},
+  { t:'الخطوات الأربع',
+    items:{
+      n1:{type:'note',x:445,y:120,w:230,h:64,c:'n0',text:'١. سمِّ المجهول',size:22,rot:-2},
+      n2:{type:'note',x:195,y:120,w:230,h:64,c:'n3',text:'٢. ترجم العبارات',size:22,rot:2},
+      n3:{type:'note',x:445,y:210,w:230,h:64,c:'n2',text:'٣. حُلّ المعادلة',size:22,rot:1.5},
+      n4:{type:'note',x:195,y:210,w:230,h:64,c:'n1',text:'٤. ارجع للمطلوب',size:22,rot:-1.5},
+      tip:{type:'text',x:320,y:300,s:24,hand:true,text:'الخطوة الرابعة تحميك من الفخ'},
+    },
+    beats:[
+      {say:'تذكّر الخطوات الأربع: سمِّ المجهول، وترجم العبارات، وحُلّ المعادلة، ثم ارجع إلى المطلوب.', show:['n1','n2','n3','n4','tip'], gap:.5},
+    ]},
+  ],
+  quiz:[
+    {q:'عدد إذا أُضيف ٦ إلى ضعفه أصبح الناتج ٢٠. ما العدد؟', o:['٧','١٣','١٤','٨'], a:0, e:'٢س + ٦ = ٢٠، إذن ٢س = ١٤ و س = ٧.'},
+    {q:'مجموع عددين ٣٠، وأحدهما يزيد على الآخر بـ ٦. ما العدد الأكبر؟', o:['١٢','١٨','٢٤','١٥'], a:1, e:'س + (س + ٦) = ٣٠، إذن س = ١٢، والأكبر ١٨.'},
+    {q:'عمر خالد ثلاثة أمثال عمر ابنه، ومجموع عمريهما ٤٨ سنة. كم عمر خالد؟', o:['١٢','٣٦','٢٤','٣٢'], a:1, e:'س + ٣س = ٤٨، إذن س = ١٢ (الابن)، وخالد ٣٦. انتبه: المطلوب عمر خالد.'},
+  ]});
+})();
+/* Explainers: analogy (التناظر اللفظي) */
+(function(){ if(!window.XP||!XP.ready) return;
+
+/* Pre-set a centered transform origin on pop-in items so the engine's scale-in does not leave them offset (see report). */
+const POPT=new Set(['note','box','circle','check','cross','poly','pie','dot']);
+const fixO=items=>{ for(const k in items){ const it=items[k]; if(POPT.has(it.type)&&!it.rot) it.rot=.01; } return items; };
+
+/* a word pair: two notes (first word on the right) with a colon between them */
+const pair=(items,id,y,a,b,c,{xa=530,xb=380,w=120,h=60,size=26}={})=>{
+  items[id+'a']={type:'note',x:xa,y,w,h,c,text:a,size,rot:-1.5};
+  items[id+'c']={type:'text',x:(xa+xb)/2,y:y+10,s:30,text:':'};
+  items[id+'b']={type:'note',x:xb,y,w,h,c,text:b,size,rot:1.5};
+  return [id+'a',id+'c',id+'b']; };
+
+/* ================= Lesson: relation types ================= */
+const T1={}; const t1a=pair(T1,'p',130,'صفحة','كتاب','n0'), t1b=pair(T1,'q',258,'مقص','قص','n3');
+Object.assign(T1,{ ar1:{type:'arrow',x1:520,y1:94,x2:392,y2:94,cls:'s-pink',bend:-22,text:'جزء من'},
+  tag1:{type:'note',x:150,y:130,w:190,h:62,c:'n2',text:'جزء ← كل',size:26,rot:-2},
+  ar2:{type:'arrow',x1:520,y1:222,x2:392,y2:222,cls:'s-pink',bend:-22,text:'أداة لـ'},
+  tag2:{type:'note',x:150,y:258,w:190,h:62,c:'n2',text:'أداة ← وظيفة',size:24,rot:1.5} });
+delete T1.pc; delete T1.qc;
+
+const T2={}; const t2a=pair(T2,'p',125,'إهمال','فشل','n1'), t2b=pair(T2,'q',232,'قاضٍ','محكمة','n3');
+Object.assign(T2,{ ar1:{type:'arrow',x1:520,y1:90,x2:392,y2:90,cls:'s-pink',bend:-22,text:'يؤدي إلى'},
+  tag1:{type:'note',x:150,y:125,w:190,h:62,c:'n2',text:'سبب ← نتيجة',size:24,rot:-2},
+  ar2:{type:'arrow',x1:520,y1:197,x2:392,y2:197,cls:'s-pink',bend:-22,text:'يعمل في'},
+  tag2:{type:'note',x:150,y:232,w:190,h:62,c:'n2',text:'مكان',size:26,rot:1.5},
+  ex:{type:'box',x:330,y:292,w:250,h:46,c:'surface2',text:'ومثلها: نحلة : خلية',s:21} });
+delete T2.pc; delete T2.qc;
+
+const T3={}; const r1=pair(T3,'a',92,'جسور','شجاع','n0',{xa:535,xb:395,h:54,size:24}), r2=pair(T3,'b',164,'كريم','بخيل','n1',{xa:535,xb:395,h:54,size:24}), r3=pair(T3,'c',236,'دافئ','حار','n3',{xa:535,xb:395,h:54,size:24});
+Object.assign(T3,{ t1:{type:'box',x:110,y:70,w:170,h:44,c:'prisoft',text:'ترادف',s:22}, t2:{type:'box',x:110,y:142,w:170,h:44,c:'prisoft',text:'تضاد',s:22},
+  t3:{type:'box',x:110,y:214,w:170,h:44,c:'pinksoft',text:'تدرّج',s:22},
+  l1:{type:'box',x:482,y:292,w:110,h:44,c:'sky',text:'بارد',s:21}, l2:{type:'box',x:357,y:292,w:110,h:44,c:'butter',text:'فاتر',s:21},
+  l3:{type:'box',x:232,y:292,w:110,h:44,c:'pinksoft',text:'دافئ',s:21}, l4:{type:'box',x:107,y:292,w:110,h:44,c:'pink',text:'حار',s:21} });
+
+const T4={}; const t4=pair(T4,'p',95,'تفاح','فاكهة','n0',{xa:520,xb:380});
+Object.assign(T4,{ tag:{type:'note',x:170,y:95,w:190,h:62,c:'n2',text:'نوع ← فئة',size:26,rot:-2},
+  q:{type:'text',x:320,y:100,s:26,text:'أيّ زوج علاقته تدرّج؟'},
+  ans:{type:'note',x:320,y:222,w:350,h:66,c:'n0',text:'القهقهة أشدّ من الابتسامة',size:22,rot:-1} });
+
+const TY=[['جزء وكل','n0'],['أداة ووظيفة','n1'],['سبب ونتيجة','n2'],['ترادف','n3'],['تضاد','n1'],['تدرّج','n0'],['مكان','n3'],['نوع وفئة','n2']];
+const T5={}; TY.forEach(([t,c],i)=>{ T5['k'+i]={type:'note',x:[548,398,248,98][i%4],y:i<4?135:228,w:140,h:70,c,text:t,size:19,rot:i%2?.8:-.8}; });
+T5.foot={type:'text',x:320,y:318,s:26,hand:true,text:'سمِّ النوع أولًا، ثم ابنِ الجسر'};
+
+[T1,T2,T3,T4,T5].forEach(fixO);
+XP.add({ key:'an-types', sk:'analogy', ord:20, title:'أنواع العلاقات في التناظر', min:'٤ دقائق',
+  goals:['تعرف أشهر أنواع العلاقات في التناظر اللفظي','تسمّي نوع العلاقة من مثالها بسرعة','تفرّق بين الترادف والتدرّج','تبني الجسر المناسب لكل نوع'],
+  scenes:[
+  { t:'الجزء والأداة', items:T1, beats:[
+    { say:'علاقات التناظر تتكرر في أنواع قليلة، ومن يعرفها يبني الجسر في ثوانٍ. أولها الجزء والكل.', show:['pa','pb'] },
+    { say:'صفحة إلى كتاب، الصفحة جزء من الكتاب.', show:['ar1','tag1'] },
+    { say:'والثاني الأداة ووظيفتها. مقص إلى قص، المقص أداة تُستخدم للقص.', show:['qa','qb','ar2','tag2'] } ]},
+  { t:'السبب والمكان', items:T2, beats:[
+    { say:'والثالث السبب والنتيجة. إهمال إلى فشل، الإهمال يؤدي إلى الفشل.', show:['pa','pb','ar1','tag1'] },
+    { say:'والرابع المكان. قاضٍ إلى محكمة، القاضي يعمل في المحكمة.', show:['qa','qb','ar2','tag2'] },
+    { say:'ومن المكان أيضًا مسكن الكائن، نحلة إلى خلية.', show:['ex'] } ]},
+  { t:'الترادف والتضاد والتدرّج', items:T3, beats:[
+    { say:'الترادف كلمتان بمعنى واحد، جسور إلى شجاع.', show:[...r1,'t1'] },
+    { say:'والتضاد كلمتان متعاكستان، كريم إلى بخيل.', show:[...r2,'t2'] },
+    { say:'أما دافئ إلى حار فليست ترادفًا، بل تدرّج. الحار أشد من الدافئ.', show:[...r3,'t3'], hl:['t3'] },
+    { say:'تخيّل سلّمًا، بارد ثم فاتر ثم دافئ ثم حار. كل درجة أشد مما قبلها.', show:['l1','l2','l3','l4'], gap:.3 } ]},
+  { t:'النوع والفئة', items:T4, beats:[
+    { say:'وأخيرًا النوع والفئة. تفاح إلى فاكهة، التفاح نوعٌ من الفاكهة.', show:[...t4,'tag'] },
+    { say:'دورك. أيّ هذه الأزواج علاقته تدرّج؟', hide:[...t4,'tag'], show:['q'] } ],
+    ask:{ opts:['طويل : قصير','غصن : شجرة','ابتسامة : قهقهة','إبرة : خياطة'], a:2, show:['ans'],
+      right:'أحسنت. القهقهة ضحكٌ أشد من الابتسامة، فهي درجة أعلى من الشيء نفسه.',
+      wrong:'ليس هذا. طويل وقصير تضاد، وغصن وشجرة جزء من كل، وإبرة وخياطة أداة. التدرّج في ابتسامة إلى قهقهة.' } },
+  { t:'لوحة الأنواع', items:T5, beats:[
+    { say:'هذه أشهر الأنواع، اجعلها لوحة تذكير أمامك.', show:TY.map((_,i)=>'k'+i), gap:.15 },
+    { say:'فحين ترى زوجًا، سمِّ نوع علاقته أولًا، ثم ابنِ الجسر واختبر به الخيارات.', show:['foot'] } ]},
+  ],
+  quiz:[
+    {q:'ما نوع العلاقة في «إهمال : فشل»؟', o:['ترادف','سبب ونتيجة','جزء من كل','تدرّج'], a:1, e:'الإهمال يؤدي إلى الفشل: سبب ثم نتيجة.'},
+    {q:'نحلة : خلية', o:['قلم : حبر','طائر : عُشّ','أسد : شبل','شجرة : غصن'], a:1, e:'مكان: الخلية مسكن النحلة، والعش مسكن الطائر.'},
+    {q:'فاتر : ساخن', o:['نسيم : عاصفة','ليل : نهار','جبل : صخرة','ماء : نهر'], a:0, e:'تدرّج: الساخن أشد حرارة من الفاتر، والعاصفة أشد من النسيم.'},
+  ] });
+
+/* ================= Lesson: tricky analogies ================= */
+const K1={}; const k1=pair(K1,'s',95,'مطر','سيول','n3',{xa:400,xb:250});
+Object.assign(K1,{ br:{type:'text',x:320,y:162,s:24,hand:true,text:'المطر الغزير يسبّب السيول'},
+  oA:{type:'box',x:345,y:196,w:220,h:56,c:'surface2',text:'نجاح : اجتهاد',s:24}, oB:{type:'box',x:75,y:196,w:220,h:56,c:'surface2',text:'إهمال : فشل',s:24},
+  cA:{type:'text',x:455,y:280,s:20,cls:'t-ink2',text:'نتيجة ← سبب'}, cB:{type:'text',x:185,y:280,s:20,cls:'t-ink2',text:'سبب ← نتيجة'},
+  xA:{type:'cross',x:455,y:318,s:.7}, vB:{type:'check',x:185,y:318,s:.7} });
+
+const K2={}; const k2=pair(K2,'s',92,'ماء','عطش','n3',{xa:400,xb:250});
+Object.assign(K2,{ br:{type:'text',x:320,y:160,s:24,hand:true,text:'الماء يزيل العطش'},
+  oA:{type:'box',x:345,y:190,w:220,h:56,c:'surface2',text:'دواء : مرض',s:24}, oB:{type:'box',x:75,y:190,w:220,h:56,c:'surface2',text:'طعام : جوع',s:24},
+  vA:{type:'check',x:455,y:290,s:.7}, vB:{type:'check',x:185,y:290,s:.7}, xA:{type:'cross',x:455,y:290,s:.7} });
+
+const K3={}; const k3=pair(K3,'s',80,'شبل','أسد','n0',{xa:390,xb:250,h:52});
+Object.assign(K3,{ br:{type:'text',x:320,y:134,s:22,hand:true,text:'الشبل صغير الأسد'},
+  ans:{type:'note',x:320,y:222,w:260,h:64,c:'n0',text:'المهر صغير الحصان',size:25,rot:-1.5} });
+
+const K4={ q1:{type:'note',x:510,y:150,w:176,h:96,c:'n0',text:'الترتيب نفسه؟',size:21,rot:-2},
+  q2:{type:'note',x:320,y:150,w:170,h:96,c:'n1',text:'جسر أدق؟',size:25,rot:1.5},
+  q3:{type:'note',x:130,y:150,w:176,h:96,c:'n3',text:'مطابقة تامة؟',size:21,rot:-1.5},
+  foot:{type:'text',x:320,y:290,s:26,hand:true,text:'ثلاثة أسئلة قبل أن تختار'} };
+
+[K1,K2,K3,K4].forEach(fixO);
+XP.add({ key:'an-tricky', sk:'analogy', ord:30, title:'تناظرات خادعة', min:'٣ دقائق',
+  goals:['تكشف الخيار الذي عُكس ترتيبه','تجعل الجسر أدق عندما يصلح خياران','تستبعد الخيار الذي علاقته قريبة لا مطابقة'],
+  scenes:[
+  { t:'فخ الترتيب المعكوس', items:K1, beats:[
+    { say:'مطر إلى سيول. الجسر، المطر الغزير يسبّب السيول، فالعلاقة سبب ثم نتيجة.', show:[...k1,'br'] },
+    { say:'الخيار نجاح إلى اجتهاد يبدو قريبًا، لكن النجاح نتيجة والاجتهاد سببه. الترتيب معكوس.', show:['oA','cA','xA'] },
+    { say:'أما إهمال إلى فشل، فالسبب أولًا ثم النتيجة، تمامًا كالأصل.', show:['oB','cB','vB'] } ]},
+  { t:'خياران يصلحان؟', items:K2, beats:[
+    { say:'أحيانًا يمرّ خياران من الجسر نفسه. ماء إلى عطش، الماء يزيل العطش.', show:[...k2,'br'] },
+    { say:'دواء إلى مرض يصلح، وطعام إلى جوع يصلح أيضًا. إذن الجسر عامّ أكثر من اللازم.', show:['oA','vA','oB','vB'] },
+    { say:'نجعله أدق، العطش حاجةٌ طبيعية يُشبعها الماء.', set:{br:'العطش حاجةٌ طبيعية يُشبعها الماء'}, hl:['br'] },
+    { say:'والجوع حاجة يُشبعها الطعام، أما المرض فليس حاجة. نستبعد دواء إلى مرض.', hide:['vA'], show:['xA'], strike:['oA'] } ]},
+  { t:'دورك: قريب أم مطابق؟', items:K3, beats:[
+    { say:'أخطر الخيارات ما كانت علاقته قريبة لا مطابقة. شبل إلى أسد، الشبل صغير الأسد.', show:[...k3,'br'] },
+    { say:'أيّ زوج يطابق هذا الجسر تمامًا؟', hl:['br'] } ],
+    ask:{ opts:['قطة : نمر','مهر : حصان','بيضة : دجاجة','أسد : غابة'], a:1, show:['ans'],
+      right:'أحسنت. المهر صغير الحصان. أما القطة فليست صغير النمر، والبيضة تخرج من الدجاجة ولا تُسمّى صغيرها.',
+      wrong:'انتبه. القطة من فصيلة النمر لكنها ليست صغيره، والبيضة ليست صغير الدجاجة. المطابق هو مهر إلى حصان.' } },
+  { t:'قبل أن تختار', items:K4, beats:[
+    { say:'قبل أن تختار، اسأل ثلاثة أسئلة. أولها، هل الترتيب نفسه؟', show:['q1'] },
+    { say:'وثانيها، هل يمرّ خيار واحد فقط؟ فإن مرّ اثنان فدقّق الجسر.', show:['q2'] },
+    { say:'وثالثها، هل العلاقة مطابقة تمامًا لا مجرد قريبة؟ عندها فقط اختر.', show:['q3','foot'] } ]},
+  ],
+  quiz:[
+    {q:'حريق : دخان', o:['دخان : نار','زلزال : دمار','ماء : نهر','شمس : قمر'], a:1, e:'سبب ثم نتيجة. «دخان : نار» العلاقة نفسها لكن بترتيب معكوس.'},
+    {q:'قاضٍ : محكمة', o:['طبيب : مستشفى','طالب : مدرسة','مسافر : مطار','سمكة : ماء'], a:0, e:'كلها أماكن، لكن الجسر الدقيق «يعمل فيها»: الطبيب يعمل في المستشفى، والطالب والمسافر لا يعملان في مكانيهما.'},
+    {q:'غرفة : منزل', o:['سقف : مطر','لاعب : ملعب','فصل : مدرسة','نافذة : ضوء'], a:2, e:'الغرفة جزء من المنزل، والفصل جزء من المدرسة. «لاعب : ملعب» علاقة مكان قريبة لكنها ليست جزءًا من كل.'},
+  ] });
+})();
+/* Explainers: arith */
+(function(){ if(!window.XP||!XP.ready) return;
+/* a strip of n equal boxes, left to right; returns items keyed p0..p(n-1) */
+function strip(p,{x,y,w,h,n,colors,texts,s=20,cls}){ const o={}, sw=w/n;
+  for(let i=0;i<n;i++) o[p+i]={type:'box',x:x+i*sw,y,w:sw,h,rx:4,c:Array.isArray(colors)?colors[i]:(colors||'surface'),text:texts?texts[i]:undefined,s,cls};
+  return o; }
+/* POP items (box, circle, check...) get their transform origin set up front; otherwise the engine's
+   pop-in (origin given only in the 'to' vars) leaves a leftover translate. rot:0.01 is invisible. */
+const POPT=new Set(['box','circle','check','cross','poly','pie','dot']);
+const add=L=>{ L.scenes.forEach(sc=>{ for(const k in sc.items||{}){ const it=sc.items[k]; if(POPT.has(it.type)&&!it.rot) it.rot=0.01; } }); XP.add(L); };
+const ks=(p,n)=>Array.from({length:n},(_,i)=>p+i);
+/* a table row: light box + three centred cells (fraction · decimal · percent) */
+function trow(p,y,a,b,c,{hdr=false}={}){ const cls=hdr?'t-pri':'t-ink';
+  return { [p+'b']:{type:'box',x:100,y:y-24,w:470,h:36,rx:8,c:hdr?'prisoft':'surface2',stroke:false},
+    [p+'a']:{type:'text',x:490,y:y,s:hdr?20:24,text:a,cls}, [p+'d']:{type:'text',x:335,y:y,s:hdr?20:24,text:b,cls}, [p+'p']:{type:'text',x:180,y:y,s:hdr?20:24,text:c,cls} }; }
+const rk=p=>[p+'b',p+'a',p+'d',p+'p'];
+
+/* ================= 1. order of operations ================= */
+add({ key:'ar-order', sk:'arith', ord:10, title:'ترتيب العمليات الحسابية', min:'٣ دقائق',
+  goals:['تعرف لماذا نحتاج ترتيبًا ثابتًا للعمليات','تطبّق الدرجات الأربع: الأقواس، الأسس، الضرب والقسمة، الجمع والطرح','تتجنب فخ تقديم الضرب على القسمة','تحسب تعبيرًا مركبًا ذهنيًا بلا أخطاء'],
+  scenes:[
+  { t:'لماذا نحتاج ترتيبًا؟',
+    items:{ q:{type:'text',x:320,y:130,s:54,text:'٢ + ٣ × ٤'},
+      wbox:{type:'box',x:60,y:180,w:230,h:62,c:'badsoft',text:'٥ × ٤ = ٢٠',s:28}, wx:{type:'cross',x:175,y:290},
+      rbox:{type:'box',x:350,y:180,w:230,h:62,c:'oksoft',text:'٢ + ١٢ = ١٤',s:28}, rx:{type:'check',x:465,y:290} },
+    beats:[
+      { say:'في هذا الشرح نبدأ من سؤال بسيط: اثنان زائد ثلاثة في أربعة. كم الناتج؟', show:['q'] },
+      { say:'لو حسبنا بالترتيب كما هي مكتوبة، لقلنا خمسة في أربعة يساوي عشرين. وهذا خطأ.', show:['wbox','wx'] },
+      { say:'الصحيح أن الضرب يسبق الجمع: ثلاثة في أربعة اثنا عشر، ثم نضيف اثنين فيصبح أربعة عشر.', show:['rbox','rx'] },
+      { say:'إذن للعمليات ترتيب ثابت يتفق عليه الجميع، وإلا اختلف الناتج من شخص لآخر.', hl:['rbox'] },
+    ]},
+  { t:'السلّم ذو الدرجات الأربع',
+    items:{ c1:{type:'circle',cx:540,cy:95,r:24,c:'pri',text:'١',s:24,cls:'t-inv'}, b1:{type:'box',x:130,y:72,w:370,h:46,c:'n3',text:'الأقواس  ( )',s:24,cls:'t-note'},
+      c2:{type:'circle',cx:540,cy:157,r:24,c:'pri',text:'٢',s:24,cls:'t-inv'}, b2:{type:'box',x:130,y:134,w:370,h:46,c:'n2',text:'الأسس: تربيع وتكعيب',s:24,cls:'t-note'},
+      c3:{type:'circle',cx:540,cy:219,r:24,c:'pri',text:'٣',s:24,cls:'t-inv'}, b3:{type:'box',x:130,y:196,w:370,h:46,c:'n1',text:'الضرب والقسمة',s:24,cls:'t-note'},
+      c4:{type:'circle',cx:540,cy:281,r:24,c:'pri',text:'٤',s:24,cls:'t-inv'}, b4:{type:'box',x:130,y:258,w:370,h:46,c:'n0',text:'الجمع والطرح',s:24,cls:'t-note'},
+      h3:{type:'text',x:75,y:226,s:18,text:'الأسبق أولًا',hand:true}, h4:{type:'text',x:75,y:288,s:18,text:'الأسبق أولًا',hand:true} },
+    beats:[
+      { say:'نحفظ الترتيب سلّمًا من أربع درجات. الدرجة الأولى: ما داخل الأقواس.', show:['c1','b1'] },
+      { say:'الدرجة الثانية: الأسس، مثل التربيع والتكعيب.', show:['c2','b2'] },
+      { say:'الثالثة: الضرب والقسمة معًا في درجة واحدة، ننفذ الأسبق منهما في الكتابة أولًا.', show:['c3','b3','h3'] },
+      { say:'والرابعة: الجمع والطرح، وهما أيضًا درجة واحدة، نبدأ بالأسبق منهما.', show:['c4','b4','h4'] },
+    ]},
+  { t:'فخ الضرب أولًا',
+    items:{ q:{type:'text',x:320,y:115,s:50,text:'٢٤ ÷ ٤ × ٢'},
+      wbox:{type:'box',x:60,y:160,w:230,h:62,c:'badsoft',text:'٢٤ ÷ ٨ = ٣',s:34}, wx:{type:'cross',x:175,y:262},
+      rbox:{type:'box',x:350,y:160,w:230,h:62,c:'oksoft',text:'٦ × ٢ = ١٢',s:34}, rx:{type:'check',x:465,y:262},
+      tip:{type:'note',x:320,y:318,w:360,h:52,c:'n0',text:'درجة واحدة؟ الأسبق أولًا',size:22,rot:-1} },
+    beats:[
+      { say:'والآن فخ شائع جدًا: أربعة وعشرون على أربعة في اثنين.', show:['q'] },
+      { say:'كثيرون يضربون أولًا، فيقولون أربعة وعشرون على ثمانية يساوي ثلاثة.', show:['wbox','wx'] },
+      { say:'لكن الضرب والقسمة في درجة واحدة، فنبدأ بالأسبق: أربعة وعشرون على أربعة ستة، ثم ستة في اثنين اثنا عشر.', show:['rbox','rx'] },
+      { say:'والقاعدة نفسها للجمع والطرح: عشرة ناقص ثلاثة زائد اثنين يساوي تسعة، لا خمسة.', show:['tip'] },
+    ]},
+  { t:'دورك: طبّق السلّم',
+    items:{ q:{type:'text',x:330,y:100,s:46,text:'٢٠ − ٣ × (٥ − ٣)'}, ex:{type:'text',x:122,y:70,s:24,text:'٢'},
+      s1:{type:'text',x:320,y:200,s:26,text:'القوس: ٥ − ٣ = ٢ ، ومربعه ٤',cls:'t-ink2'}, s2:{type:'text',x:320,y:250,s:28,text:'٣ × ٤ = ١٢',cls:'t-ink2'},
+      s3:{type:'box',x:220,y:275,w:200,h:52,c:'n0',text:'٢٠ − ١٢ = ٨',s:28,cls:'t-note'} },
+    beats:[
+      { say:'دورك الآن. طبّق السلّم خطوة خطوة على هذا التعبير.', show:['q','ex'] },
+      { say:'عشرون ناقص ثلاثة في مربع القوس خمسة ناقص ثلاثة. كم الناتج؟', hl:['q'] },
+    ],
+    ask:{ opts:['٦٨','٨','١٤','٤'], a:1,
+      right:'أحسنت! القوس اثنان، ومربعه أربعة، وثلاثة في أربعة اثنا عشر، فالناتج ثمانية.',
+      wrong:'نبدأ بالقوس: اثنان، ومربعه أربعة. ثم ثلاثة في أربعة اثنا عشر، وأخيرًا عشرون ناقص اثني عشر يساوي ثمانية.',
+      show:['s1','s2','s3'] } },
+  ],
+  quiz:[
+    {q:'٦ + ١٨ ÷ ٣ × ٢ = ؟', o:['٨','١٨','٧','١٦'], a:1, e:'القسمة أولًا لأنها الأسبق: ١٨ ÷ ٣ = ٦، ثم ٦ × ٢ = ١٢، ثم ٦ + ١٢ = ١٨.'},
+    {q:'ما ناتج: مربع (٤ + ٢) − ٤ × ٥ ؟', o:['١٦','١٠','٨٠','٢٠'], a:0, e:'القوس ٦، ومربعه ٣٦، ثم ٤ × ٥ = ٢٠، والناتج ٣٦ − ٢٠ = ١٦.'},
+    {q:'القيمة الأولى: ١٢ − ٤ + ٢ ، والقيمة الثانية: ١٢ − (٤ + ٢)', o:['القيمة الأولى أكبر','القيمة الثانية أكبر','القيمتان متساويتان','المعطيات غير كافية'], a:0, e:'الأولى بالترتيب: ١٢ − ٤ = ٨، ثم ٨ + ٢ = ١٠. الثانية: ١٢ − ٦ = ٦. إذن الأولى أكبر.'},
+  ] });
+
+/* ================= 2. fractions ================= */
+add({ key:'ar-frac', sk:'arith', ord:20, title:'الكسور من الصفر', min:'٤ دقائق',
+  goals:['تفهم الكسر بصريًا: البسط والمقام','تكوّن كسورًا متكافئة وتبسّطها','تجمع كسرين بعد توحيد المقامين','تقارن كسرين بالضرب التبادلي'],
+  scenes:[
+  { t:'ما الكسر؟',
+    items:{ pie0:{type:'pie',cx:180,cy:200,r:105,parts:4,fill:0}, pie3:{type:'pie',cx:180,cy:200,r:105,parts:4,fill:3,c:'pink'},
+      num:{type:'text',x:400,y:165,s:64,text:'٣',cls:'t-pri'}, bar:{type:'line',x1:365,y1:185,x2:435,y2:185,cls:'s-ink'}, den:{type:'text',x:400,y:252,s:64,text:'٤',cls:'t-pri'},
+      ln:{type:'text',x:540,y:150,s:20,text:'البسط: كم أخذنا',hand:true}, ld:{type:'text',x:540,y:238,s:20,text:'المقام: كم قطعة',hand:true} },
+    beats:[
+      { say:'الكسر جزء من كل. خذ هذه الدائرة، وقسّمها أربع قطع متساوية تمامًا.', show:['pie0'] },
+      { say:'لوّنا ثلاث قطع منها، فنقول: ثلاثة أرباع.', hide:['pie0'], show:['pie3','num','bar','den'] },
+      { say:'العدد السفلي هو المقام، ويخبرنا بعدد القطع المتساوية في الكل.', show:['ld'], hl:['den'] },
+      { say:'والعدد العلوي هو البسط، ويخبرنا بعدد القطع التي أخذناها.', show:['ln'], hl:['num'] },
+    ]},
+  { t:'كسور متكافئة',
+    items:Object.assign({},
+      strip('a',{x:120,y:72,w:360,h:44,n:2,colors:['surface2','pink']}),
+      strip('b',{x:120,y:142,w:360,h:44,n:4,colors:['surface2','surface2','pink','pink']}),
+      strip('c',{x:120,y:212,w:360,h:44,n:8,colors:['surface2','surface2','surface2','surface2','pink','pink','pink','pink']}),
+      { la:{type:'text',x:550,y:103,s:28,text:'١/٢'}, lb:{type:'text',x:550,y:173,s:28,text:'٢/٤'}, lc:{type:'text',x:550,y:243,s:28,text:'٤/٨'},
+        rule:{type:'note',x:320,y:312,w:440,h:54,c:'n0',text:'اضرب البسط والمقام في العدد نفسه',size:22,rot:-1} }),
+    beats:[
+      { say:'نصف هذا الشريط ملوّن. هذا واحد على اثنين.', show:[...ks('a',2),'la'], gap:.15 },
+      { say:'نقسم كل قطعة نصفين: صار الملوّن اثنين من أربعة، والمساحة لم تتغير.', show:[...ks('b',4),'lb'], gap:.12 },
+      { say:'ومرة أخرى: أربعة من ثمانية. ثلاثة كسور بأشكال مختلفة وقيمة واحدة، نسميها كسورًا متكافئة.', show:[...ks('c',8),'lc'], gap:.08 },
+      { say:'القاعدة: اضرب البسط والمقام في العدد نفسه، أو اقسمهما عليه للتبسيط، فتبقى القيمة كما هي.', show:['rule'] },
+    ]},
+  { t:'جمع الكسور',
+    items:Object.assign({},
+      { e1:{type:'text',x:320,y:95,s:34,text:'١/٥ + ٢/٥ = ٣/٥'} },
+      strip('s',{x:170,y:118,w:300,h:40,n:5,colors:['surface2','surface2','pri','pri','pink']}),
+      { w1:{type:'text',x:320,y:215,s:30,text:'١/٥ + ٢/٥ = ٣/١٠',cls:'t-bad'},
+        e3:{type:'box',x:95,y:255,w:450,h:58,c:'n3',text:'١/٢ + ١/٤ = ٢/٤ + ١/٤ = ٣/٤',s:28,cls:'t-note'} }),
+    beats:[
+      { say:'لجمع كسرين لهما المقام نفسه، نجمع البسطين ونُبقي المقام كما هو.', show:['e1'] },
+      { say:'خُمس زائد خُمسين يساوي ثلاثة أخماس. القطع من الحجم نفسه، فنعدّها فقط.', show:ks('s',5), gap:.12 },
+      { say:'والفخ: لا نجمع المقامين أبدًا. ثلاثة أعشار هنا خطأ.', show:['w1'], strike:['w1'] },
+      { say:'وإن اختلف المقامان نوحّدهما أولًا: النصف يساوي ربعين، فنصف زائد ربع يساوي ثلاثة أرباع.', show:['e3'] },
+    ]},
+  { t:'أيّهما أكبر؟',
+    items:{ v1:{type:'box',x:350,y:64,w:210,h:58,c:'n1',text:'الأولى:  ٢/٣',s:26,cls:'t-note'}, v2:{type:'box',x:80,y:64,w:210,h:58,c:'n3',text:'الثانية:  ٣/٤',s:26,cls:'t-note'},
+      r1:{type:'text',x:455,y:205,s:32,text:'٢ × ٤ = ٨'}, r2:{type:'text',x:185,y:205,s:32,text:'٣ × ٣ = ٩'}, ck:{type:'check',x:185,y:265},
+      gt:{type:'text',x:320,y:320,s:24,text:'٩ أكبر من ٨، فالثانية أكبر',cls:'t-pri'} },
+    beats:[
+      { say:'في أسئلة المقارنة يأتيك كسران. القيمة الأولى ثلثان، والقيمة الثانية ثلاثة أرباع.', show:['v1','v2'] },
+      { say:'الحيلة: اضرب تبادليًا، بسط كل كسر في مقام الآخر، ثم قارن الناتجين.', hl:['v1','v2'] },
+      { say:'جرّب بنفسك. أيّ الخيارات صحيح؟', hl:['v2'] },
+    ],
+    ask:{ opts:['القيمة الأولى أكبر','القيمة الثانية أكبر','القيمتان متساويتان','المعطيات غير كافية'], a:1, s:19,
+      right:'صحيح! اثنان في أربعة ثمانية، وثلاثة في ثلاثة تسعة، فالقيمة الثانية أكبر.',
+      wrong:'اضرب تبادليًا: اثنان في أربعة يساوي ثمانية، وثلاثة في ثلاثة يساوي تسعة. إذن ثلاثة أرباع أكبر.',
+      show:['r1','r2','ck','gt'] } },
+  ],
+  quiz:[
+    {q:'أيّ الكسور التالية يكافئ ٣/٤؟', o:['٦/٩','٩/١٢','٤/٥','٦/١٠'], a:1, e:'اضرب البسط والمقام في ٣: ٣/٤ = ٩/١٢.'},
+    {q:'١/٣ + ١/٦ = ؟', o:['٢/٩','١/٢','١/٩','٢/٣'], a:1, e:'وحّد المقام: ٢/٦ + ١/٦ = ٣/٦ = ١/٢.'},
+    {q:'أيّ الكسور التالية هو الأكبر؟', o:['٣/٥','٥/٨','٢/٣','٤/٧'], a:2, e:'بالعشري تقريبًا: ٠٫٦ و٠٫٦٢٥ و٠٫٦٧ و٠٫٥٧، فالأكبر ٢/٣.'},
+  ] });
+
+/* ================= 3. decimals & conversion ================= */
+add({ key:'ar-dec', sk:'arith', ord:30, title:'الكسور العشرية والتحويل', min:'٤ دقائق',
+  goals:['تفهم معنى الخانات بعد الفاصلة','تحوّل بين الكسر والعشري والنسبة المئوية','تحفظ التحويلات الشائعة في الاختبار','تتجنب فخ الخانة الناقصة'],
+  scenes:[
+  { t:'ما الكسر العشري؟',
+    items:{ g0:{type:'grid',x:60,y:82,rows:10,cols:10,cell:20,gap:2,fill:0}, g30:{type:'grid',x:60,y:82,rows:10,cols:10,cell:20,gap:2,fill:30,c:'pri'},
+      g25:{type:'grid',x:60,y:82,rows:10,cols:10,cell:20,gap:2,fill:25,c:'pink'},
+      e1:{type:'text',x:460,y:130,s:36,text:'٣/١٠ = ٠٫٣'}, e2:{type:'text',x:460,y:195,s:36,text:'٢٥/١٠٠ = ٠٫٢٥',cls:'t-pri'},
+      n1:{type:'note',x:535,y:278,w:130,h:58,c:'n3',text:'٢ أعشار',size:22,rot:-2}, n2:{type:'note',x:385,y:278,w:150,h:58,c:'n1',text:'٥ من مئة',size:22,rot:2} },
+    beats:[
+      { say:'الكسر العشري كسرٌ مقامه عشرة أو مئة أو ألف، نكتبه بفاصلة بدل الخط.', show:['g0'] },
+      { say:'لوّنا ثلاثة صفوف من عشرة، فهذه ثلاثة أعشار، ونكتبها صفرًا فاصلة ثلاثة.', hide:['g0'], show:['g30','e1'] },
+      { say:'ولو لوّنا خمسة وعشرين مربعًا من مئة، لكتبنا صفرًا فاصلة خمسة وعشرين.', hide:['g30'], show:['g25','e2'] },
+      { say:'الخانة الأولى بعد الفاصلة للأعشار، والثانية للأجزاء من مئة: عُشران وخمسة أجزاء من مئة.', show:['n1','n2'] },
+    ]},
+  { t:'ثلاثة أسماء لقيمة واحدة',
+    items:{ nF:{type:'note',x:320,y:100,w:120,h:66,c:'n2',text:'١/٢',size:34}, lF:{type:'text',x:320,y:160,s:18,text:'كسر',cls:'t-ink2'},
+      nD:{type:'note',x:140,y:255,w:120,h:66,c:'n3',text:'٠٫٥',size:34}, lD:{type:'text',x:140,y:315,s:18,text:'عشري',cls:'t-ink2'},
+      nP:{type:'note',x:500,y:255,w:120,h:66,c:'n1',text:'٥٠٪',size:34}, lP:{type:'text',x:500,y:315,s:18,text:'نسبة مئوية',cls:'t-ink2'},
+      a1:{type:'arrow',x1:250,y1:112,x2:160,y2:210,bend:0,cls:'s-pri'}, t1:{type:'text',x:165,y:150,s:20,text:'البسط على المقام',hand:true},
+      a2:{type:'arrow',x1:215,y1:255,x2:425,y2:255,bend:-40,cls:'s-pri'}, t2:{type:'text',x:320,y:222,s:22,text:'× ١٠٠',cls:'t-pri'},
+      a3:{type:'arrow',x1:480,y1:210,x2:390,y2:112,bend:0,cls:'s-pink'}, t3:{type:'text',x:490,y:150,s:20,text:'على ١٠٠ ثم بسّط',hand:true} },
+    beats:[
+      { say:'الكسر والعشري والنسبة المئوية ثلاثة أسماء لقيمة واحدة. خذ النصف مثلًا.', show:['nF','lF'] },
+      { say:'من الكسر إلى العشري: اقسم البسط على المقام. واحد على اثنين يساوي صفرًا فاصلة خمسة.', show:['a1','t1','nD','lD'] },
+      { say:'ومن العشري إلى النسبة المئوية: اضرب في مئة، أي انقل الفاصلة خانتين، فتصبح خمسين في المئة.', show:['a2','t2','nP','lP'] },
+      { say:'وللرجوع إلى الكسر: اقسم على مئة ثم بسّط. خمسون على مئة يساوي نصفًا.', show:['a3','t3'] },
+    ]},
+  { t:'تحويلات تحفظها',
+    items:Object.assign({}, trow('h',80,'كسر','عشري','نسبة',{hdr:true}), trow('r1',120,'١/٢','٠٫٥','٥٠٪'), trow('r2',160,'١/٤','٠٫٢٥','٢٥٪'),
+      trow('r3',200,'٣/٤','٠٫٧٥','٧٥٪'), trow('r4',240,'١/٥','٠٫٢','٢٠٪'), trow('r5',280,'١/٨','٠٫١٢٥','١٢٫٥٪'),
+      { trap:{type:'note',x:320,y:326,w:300,h:44,c:'n1',text:'٠٫٠٥ = ٥٪ لا ٥٠٪',size:22,rot:-1} }),
+    beats:[
+      { say:'بعض التحويلات تتكرر كثيرًا في الاختبار، فاحفظها لتوفّر وقتك. النصف خمسون في المئة.', show:[...rk('h'),...rk('r1')], gap:.15 },
+      { say:'والربع خمسة وعشرون في المئة، وثلاثة أرباع خمسة وسبعون في المئة.', show:[...rk('r2'),...rk('r3')], gap:.12 },
+      { say:'والخُمس عشرون في المئة، والثُّمن اثنا عشر ونصف في المئة.', show:[...rk('r4'),...rk('r5')], gap:.12 },
+      { say:'وانتبه للخانات: صفر فاصلة صفر خمسة تساوي خمسة في المئة فقط، لا خمسين.', show:['trap'] },
+    ]},
+  { t:'دورك: حوّل',
+    items:{ q:{type:'text',x:320,y:92,s:44,text:'٣/٨ = ؟٪'}, hint:{type:'text',x:320,y:135,s:22,text:'تذكّر: الثُّمن = ١٢٫٥٪',hand:true},
+      res:{type:'box',x:150,y:190,w:340,h:62,c:'n0',text:'٣ × ١٢٫٥ = ٣٧٫٥٪',s:30,cls:'t-note'}, ck:{type:'check',x:320,y:295} },
+    beats:[
+      { say:'دورك. حوّل ثلاثة أثمان إلى نسبة مئوية.', show:['q'] },
+      { say:'تذكّر أن الثُّمن اثنا عشر ونصف في المئة. فكم تكون ثلاثة أثمان؟', show:['hint'] },
+    ],
+    ask:{ opts:['٣٨٪','٣٧٫٥٪','٣٫٧٥٪','٠٫٣٧٥٪'], a:1,
+      right:'أحسنت! ثلاثة في اثني عشر ونصف يساوي سبعة وثلاثين ونصفًا في المئة.',
+      wrong:'الثُّمن اثنا عشر ونصف في المئة، وثلاثة أثمان ثلاثة أضعافه: سبعة وثلاثون ونصف في المئة.',
+      show:['res','ck'] } },
+  ],
+  quiz:[
+    {q:'٠٫٦ تساوي:', o:['٦/١٠٠','٣/٥','٦٪','٢/٣'], a:1, e:'٠٫٦ = ٦/١٠ = ٣/٥ بعد القسمة على ٢.'},
+    {q:'أيّ الأعداد التالية هو الأكبر؟', o:['٠٫٠٩','٨٪','١/١٠','٠٫٠٩٩'], a:2, e:'١/١٠ = ٠٫١، وهي أكبر من ٠٫٠٩٩ و٠٫٠٩ و٠٫٠٨.'},
+    {q:'٤٥٪ على صورة كسر في أبسط صورة:', o:['٤٥/١٠','٩/٢٠','٩/٢','٤/٥'], a:1, e:'٤٥/١٠٠، ثم نقسم البسط والمقام على ٥ فنحصل على ٩/٢٠.'},
+  ] });
+
+/* ================= 5. ratio & proportion ================= */
+const S1c=['sky','sky','sky','pink','pink'];
+add({ key:'ar-ratio', sk:'arith', ord:50, title:'النسبة والتناسب', min:'٤ دقائق',
+  goals:['تفهم النسبة مقارنة بين كميتين','تقسم مبلغًا بنسبة معطاة بطريقة الأجزاء','تحل التناسب بالضرب التبادلي','تحل أسئلة الأجزاء من الكل بسرعة'],
+  scenes:[
+  { t:'ما النسبة؟',
+    items:Object.assign({ d1:{type:'circle',cx:425,cy:110,r:20,c:'pink'}, d2:{type:'circle',cx:475,cy:110,r:20,c:'pink'},
+      d3:{type:'circle',cx:140,cy:110,r:20,c:'sky'}, d4:{type:'circle',cx:190,cy:110,r:20,c:'sky'}, d5:{type:'circle',cx:240,cy:110,r:20,c:'sky'},
+      l1:{type:'text',x:450,y:160,s:18,text:'وردي',cls:'t-ink2'}, l2:{type:'text',x:190,y:160,s:18,text:'أزرق',cls:'t-ink2'},
+      r:{type:'text',x:325,y:125,s:46,text:'٢ : ٣',cls:'t-pri'} },
+      strip('p',{x:120,y:200,w:400,h:48,n:5,colors:S1c}),
+      { f1:{type:'text',x:440,y:285,s:26,text:'٢/٥'}, f2:{type:'text',x:240,y:285,s:26,text:'٣/٥'},
+        dbl:{type:'text',x:320,y:332,s:20,text:'٤ : ٦ هي نفسها ٢ : ٣',hand:true} }),
+    beats:[
+      { say:'النسبة مقارنة بين كميتين. في هذا الكيس كرتان ورديتان وثلاث كرات زرقاء.', show:['d1','d2','d3','d4','d5','l1','l2'], gap:.12 },
+      { say:'نقول: نسبة الوردي إلى الأزرق اثنان إلى ثلاثة.', show:['r'] },
+      { say:'ومنها نعرف الكل: خمسة أجزاء، الوردي منها خُمسان، والأزرق ثلاثة أخماس.', show:[...ks('p',5),'f1','f2'], gap:.12 },
+      { say:'والنسبة لا تتغير إذا ضاعفنا الكميتين معًا: أربع وست ما زالت اثنين إلى ثلاثة.', show:['dbl'] },
+    ]},
+  { t:'قسمة مبلغ بنسبة',
+    items:Object.assign({ q:{type:'text',x:300,y:92,s:24,text:'قسّم ٤٥ ريالًا بين خالد وسعد بنسبة ٢ : ٣'} },
+      strip('p',{x:120,y:125,w:400,h:56,n:5,colors:S1c,texts:['','','','',''],s:26,cls:'t-note'}),
+      { e:{type:'text',x:320,y:238,s:36,text:'٤٥ ÷ ٥ = ٩'},
+        k:{type:'note',x:440,y:300,w:150,h:54,c:'n1',text:'خالد: ١٨',size:24,rot:-2}, s:{type:'note',x:220,y:300,w:150,h:54,c:'n3',text:'سعد: ٢٧',size:24,rot:2} }),
+    beats:[
+      { say:'مثال شائع: قسّم خمسة وأربعين ريالًا بين خالد وسعد بنسبة اثنين إلى ثلاثة.', show:['q'] },
+      { say:'اجمع أجزاء النسبة: اثنان زائد ثلاثة يساوي خمسة أجزاء متساوية.', show:ks('p',5), gap:.12 },
+      { say:'قيمة الجزء الواحد: خمسة وأربعون على خمسة يساوي تسعة.', show:['e'], set:{p0:'٩',p1:'٩',p2:'٩',p3:'٩',p4:'٩'} },
+      { say:'فلخالد جزءان، أي ثمانية عشر ريالًا، ولسعد ثلاثة أجزاء، أي سبعة وعشرون.', show:['k','s'] },
+    ]},
+  { t:'التناسب والضرب التبادلي',
+    items:{ q:{type:'text',x:300,y:88,s:22,text:'٣ أقلام بـ ١٢ ريالًا، فكم ثمن ٧ أقلام؟'},
+      n1:{type:'text',x:410,y:150,s:40,text:'٣'}, b1:{type:'line',x1:380,y1:163,x2:440,y2:163}, d1:{type:'text',x:410,y:205,s:40,text:'١٢'},
+      eqs:{type:'text',x:320,y:178,s:40,text:'='},
+      n2:{type:'text',x:230,y:150,s:40,text:'٧'}, b2:{type:'line',x1:200,y1:163,x2:260,y2:163}, d2:{type:'text',x:230,y:205,s:40,text:'س',cls:'t-pri'},
+      x1:{type:'line',x1:255,y1:130,x2:385,y2:200,cls:'s-pink'}, x2:{type:'line',x1:255,y1:200,x2:385,y2:130,cls:'s-pink'},
+      e:{type:'text',x:320,y:258,s:28,text:'٣ × س = ١٢ × ٧ = ٨٤'},
+      ans:{type:'box',x:230,y:282,w:180,h:52,c:'n0',text:'س = ٢٨',s:28,cls:'t-note'} },
+    beats:[
+      { say:'التناسب نسبتان متساويتان. ثلاثة أقلام باثني عشر ريالًا، فكم ثمن سبعة أقلام؟', show:['q'] },
+      { say:'نكتبهما كسرين متساويين: ثلاثة على اثني عشر يساوي سبعة على سين.', show:['n1','b1','d1','eqs','n2','b2','d2'], gap:.1 },
+      { say:'نضرب تبادليًا: ثلاثة في سين يساوي اثني عشر في سبعة، أي أربعة وثمانين.', show:['x1','x2','e'] },
+      { say:'ونقسم على ثلاثة: سين يساوي ثمانية وعشرين ريالًا.', show:['ans'] },
+    ]},
+  { t:'دورك: أجزاء من الكل',
+    items:Object.assign({ q1:{type:'text',x:300,y:84,s:22,text:'علبة فيها ٣٥ قلمًا'}, q2:{type:'text',x:300,y:122,s:22,text:'نسبة الأزرق إلى الأحمر ٣ : ٤ ، كم قلمًا أحمر؟'} },
+      strip('p',{x:110,y:180,w:420,h:52,n:7,colors:['bad','bad','bad','bad','sky','sky','sky'],texts:['٥','٥','٥','٥','٥','٥','٥'],s:24,cls:'t-note'}),
+      { e:{type:'box',x:210,y:262,w:220,h:54,c:'n0',text:'٤ × ٥ = ٢٠',s:28,cls:'t-note'} }),
+    beats:[
+      { say:'دورك. علبة فيها خمسة وثلاثون قلمًا، ونسبة الأزرق إلى الأحمر ثلاثة إلى أربعة.', show:['q1','q2'] },
+      { say:'اجمع الأجزاء أولًا، ثم أوجد قيمة الجزء الواحد. كم قلمًا أحمر في العلبة؟', hl:['q2'] },
+    ],
+    ask:{ opts:['١٥','٢٠','٢٨','٢٥'], a:1,
+      right:'ممتاز! سبعة أجزاء، والجزء خمسة أقلام، فالأحمر أربعة أجزاء، أي عشرون قلمًا.',
+      wrong:'الأجزاء ثلاثة زائد أربعة يساوي سبعة، والجزء خمسة وثلاثون على سبعة يساوي خمسة. فالأحمر أربعة في خمسة، أي عشرون.',
+      show:[...ks('p',7),'e'] } },
+  ],
+  quiz:[
+    {q:'قُسّم ٦٠ ريالًا بين شخصين بنسبة ١ : ٤. كم نصيب الأكبر؟', o:['١٥','٤٨','٤٠','١٢'], a:1, e:'٥ أجزاء، والجزء ٦٠ ÷ ٥ = ١٢، فالأكبر ٤ × ١٢ = ٤٨.'},
+    {q:'إذا كان س/٥ = ١٢/٢٠ فما قيمة س؟', o:['٣','٤','٦','٢'], a:0, e:'اضرب تبادليًا: ٢٠ × س = ٦٠، إذن س = ٣.'},
+    {q:'تقطع سيارة ١٢٠ كم بـ ٨ لترات. كم لترًا تحتاج لقطع ٢١٠ كم؟', o:['١٢','١٦','١٤','١٥'], a:2, e:'١٢٠/٨ = ٢١٠/س، إذن س = ٢١٠ × ٨ ÷ ١٢٠ = ١٤.'},
+  ] });
+})();
+/* Explainers: comparison */
+(function(){ if(!window.XP||!XP.ready) return;
+/* pre-set the transform origin of pop-in items (engine's revealTl sets transformOrigin only in the "to" vars, which shifts them) */
+const POPT=['box','circle','check','cross','dot','poly','pie'];
+/* keep text readable in dark mode: light fills get note ink, dark fills get stage ink */
+const LIGHT=['n0','n1','n2','n3','butter','sky'], DARKF=['surface','surface2','prisoft','pinksoft'];
+const ADD=L=>{ L.scenes.forEach(sc=>{ for(const k in (sc.items||{})){ const it=sc.items[k]; if(POPT.includes(it.type)&&!it.rot) it.rot=.01; if((it.type==='box'||it.type==='circle')&&LIGHT.includes(it.c)&&!it.cls) it.cls='t-note'; if(it.type==='note'&&DARKF.includes(it.c)&&!it.cls) it.cls='t-ink'; } }); XP.add(L); };
+const M=(x,y,s,text,cls)=>({type:'text',dir:'rtl',x,y,s,text,cls});
+const CH=['أ: الأولى أكبر','ب: الثانية أكبر','ج: متساويتان','د: غير كافية'];
+/* two quantity boxes: first on the right (RTL), second on the left */
+const QB=(y,a,b,h=56,s=24)=>({
+  qa:{type:'box',x:345,y,w:230,h,c:'prisoft',text:a,s},
+  qb:{type:'box',x:65,y,w:230,h,c:'surface2',text:b,s},
+});
+
+/* ---------- 1. the four choices ---------- */
+ADD({ key:'cm-choices', sk:'comparison', ord:10, title:'الخيارات الأربعة في المقارنة', min:'٣ دقائق',
+  goals:['تعرف شكل سؤال المقارنة وخياراته الثابتة','تفهم معنى كل خيار','تعرف متى يكون الجواب «المعطيات غير كافية»','تستبعد «غير كافية» حين لا يوجد مجهول'],
+  scenes:[
+  { t:'شكل السؤال',
+    items:{
+      la:{type:'text',x:462,y:92,s:20,cls:'t-ink2',text:'القيمة الأولى'},
+      lb:{type:'text',x:177,y:92,s:20,cls:'t-ink2',text:'القيمة الثانية'},
+      qa:{type:'box',x:360,y:105,w:205,h:90,c:'prisoft',text:'؟',s:44,cls:'t-pri'},
+      qb:{type:'box',x:75,y:105,w:205,h:90,c:'surface2',text:'؟',s:44,cls:'t-pri'},
+      vs:{type:'text',x:320,y:160,s:22,hand:true,text:'مقابل'},
+      c1:{type:'note',x:536,y:270,w:136,h:56,c:'n0',text:'أ: الأولى أكبر',size:16,rot:-2},
+      c2:{type:'note',x:392,y:270,w:136,h:56,c:'n1',text:'ب: الثانية أكبر',size:16,rot:1.5},
+      c3:{type:'note',x:248,y:270,w:136,h:56,c:'n3',text:'ج: متساويتان',size:16,rot:-1.5},
+      c4:{type:'note',x:104,y:270,w:136,h:56,c:'n2',text:'د: غير كافية',size:16,rot:2},
+    },
+    beats:[
+      {say:'في سؤال المقارنة قيمتان: القيمة الأولى والقيمة الثانية، والمطلوب معرفة العلاقة بينهما.', show:['la','qa','vs','lb','qb'], gap:.3},
+      {say:'والخيارات أربعة ثابتة في كل الأسئلة، فاحفظها جيدًا لتوفّر وقتك.', show:['c1','c2','c3','c4'], gap:.35},
+    ]},
+  { t:'معنى كل خيار',
+    items:(function(){ const o={}, rows=[['أ','الأولى أكبر دائمًا','١٢  مقابل  ٩','n0'],['ب','الثانية أكبر دائمًا','٣ × ٤  مقابل  ١٥','n1'],['ج','متساويتان دائمًا','½  مقابل  ٠٫٥','n3'],['د','المعطيات غير كافية','س  مقابل  ٥','n2']];
+      rows.forEach((r,i)=>{ const y=100+i*64; o['k'+i]={type:'circle',cx:560,cy:y,r:22,c:r[3],text:r[0],s:22};
+        o['m'+i]={type:'text',x:415,y:y+8,s:22,text:r[1]};
+        o['e'+i]={type:'box',x:70,y:y-24,w:220,h:48,c:'surface2',text:r[2],s:22}; }); return o; })(),
+    beats:[
+      {say:'الخيار ألف: القيمة الأولى أكبر دائمًا، مثل اثني عشر مقابل تسعة.', show:['k0','m0','e0'], gap:.3},
+      {say:'الخيار باء: القيمة الثانية أكبر دائمًا، مثل ثلاثة في أربعة مقابل خمسة عشر.', show:['k1','m1','e1'], gap:.3},
+      {say:'الخيار جيم: القيمتان متساويتان دائمًا، مثل نصف مقابل خمسة أعشار.', show:['k2','m2','e2'], gap:.3},
+      {say:'والخيار دال: المعطيات غير كافية، أي لا توجد علاقة واحدة ثابتة بين القيمتين.', show:['k3','m3','e3'], gap:.3},
+      {say:'لاحظ كلمة دائمًا في الخيارات الثلاثة الأولى؛ فالعلاقة يجب أن تصح في كل الحالات، لا في حالة واحدة.', hl:['m0','m1','m2']},
+    ]},
+  { t:'متى تكون غير كافية؟',
+    items:{
+      top:M(320,100,32,'س  مقابل  ٥'),
+      t1:{type:'box',x:335,y:125,w:240,h:52,c:'n3',text:'س = ٨ ← الأولى أكبر',s:20},
+      t2:{type:'box',x:65,y:125,w:240,h:52,c:'n1',text:'س = ٢ ← الثانية أكبر',s:20},
+      cn:{type:'note',x:320,y:232,w:300,h:58,c:'n2',text:'العلاقة تغيّرت ← د',size:24,rot:-1.5},
+      n2:{type:'note',x:320,y:312,w:420,h:50,c:'n0',text:'لا مجهول؟ إذن الجواب ليس «د»',size:21,rot:1},
+    },
+    beats:[
+      {say:'اختر دال عندما تتغير العلاقة بتغير قيمة المجهول. خذ مثلًا سين مقابل خمسة، بلا أي شرط.', show:['top']},
+      {say:'إذا كان سين ثمانية فالأولى أكبر، وإذا كان اثنين فالثانية أكبر؛ فالعلاقة غير ثابتة، والجواب دال.', show:['t1','t2','cn'], gap:.5},
+      {say:'أما إذا كانت القيمتان أعدادًا صريحة بلا مجهول، فلا يمكن أن يكون الجواب دال أبدًا.', show:['n2']},
+    ]},
+  { t:'دورك',
+    items:Object.assign(QB(72,'٢٥٪ من ٤٠','٤٠٪ من ٢٥',56,24),{
+      s1:M(320,222,32,'١٠ = ١٠','t-pri'),
+      tip:{type:'note',x:320,y:290,w:340,h:56,c:'n0',text:'أ٪ من ب = ب٪ من أ',size:23,rot:-1.5},
+    }),
+    beats:[
+      {say:'دورك. القيمة الأولى خمسة وعشرون في المئة من أربعين، والثانية أربعون في المئة من خمسة وعشرين.', show:['qa','qb'], gap:.4},
+      {say:'فأيّ الخيارات الأربعة هو الصحيح؟'},
+    ],
+    ask:{ opts:CH, a:2,
+      right:'أحسنت. كلتاهما تساوي عشرة، فالجواب جيم.',
+      wrong:'ربع الأربعين عشرة، وأربعون في المئة من خمسة وعشرين عشرة أيضًا؛ فهما متساويتان، والجواب جيم. ولا مكان لدال لأنه لا مجهول هنا.',
+      show:['s1','tip'] }},
+  ],
+  quiz:[
+    {q:'القيمة الأولى: ٣ × ٨ — القيمة الثانية: ٢٥', o:CH, a:1, e:'٣ × ٨ = ٢٤، و٢٤ أصغر من ٢٥.'},
+    {q:'القيمة الأولى: ٠٫٧٥ — القيمة الثانية: ¾', o:CH, a:2, e:'¾ = ٠٫٧٥، فهما متساويتان.'},
+    {q:'س عدد حقيقي. القيمة الأولى: س — القيمة الثانية: ٣', o:CH, a:3, e:'عند س = ٥ الأولى أكبر، وعند س = ١ الثانية أكبر.'},
+  ]});
+
+/* ---------- 2. testing values ---------- */
+ADD({ key:'cm-test', sk:'comparison', ord:20, title:'تجريب القيم', min:'٤ دقائق',
+  goals:['تعرف لماذا لا تكفي تجربة واحدة','تجرّب الصفر والسالب والكسر والعدد الكبير','تختار «د» فور انقلاب العلاقة','تقرأ الشرط وتجرّب ضمنه فقط'],
+  scenes:[
+  { t:'لا تكتفِ بتجربة واحدة',
+    items:Object.assign(QB(75,'الأولى: س²','الثانية: س',58,24),{
+      t2:{type:'text',x:320,y:190,s:24,text:'س = ٢ ← ٤ أكبر من ٢'},
+      wc:{type:'note',x:320,y:268,w:320,h:58,c:'n1',text:'الأولى أكبر دائمًا؟',size:24,rot:-1.5},
+    }),
+    beats:[
+      {say:'عندما يظهر مجهول في المقارنة، مثل سين تربيع مقابل سين، لا تكتفِ بأول عدد يخطر ببالك.', show:['qa','qb'], gap:.4},
+      {say:'أغلبنا يجرّب اثنين: أربعة أكبر من اثنين، فنظن أن الأولى أكبر دائمًا.', show:['t2','wc'], gap:.5},
+      {say:'لكن هذا استعجال؛ فالسؤال يترك مجالًا لأعداد لا نتوقعها.', strike:['wc']},
+    ]},
+  { t:'القائمة الذهبية',
+    items:(function(){ const o={}, xs=[515,385,255,125], v=['٠','−١','½','١٠٠'], k=['صفر','سالب','كسر','عدد كبير'], h=['يمحو الضرب','يقلب الإشارة','يصغُر بالتربيع','يكشف الأسرع'], c=['n0','n1','n3','n2'];
+      xs.forEach((x,i)=>{ o['n'+i]={type:'note',x,y:140,w:110,h:84,c:c[i],text:v[i],size:36,rot:[-3,2,-2,3][i]}; o['k'+i]={type:'text',x,y:218,s:21,cls:'t-ink2',text:k[i]}; o['h'+i]={type:'text',x,y:262+(i%2)*28,s:19,hand:true,text:h[i]}; }); return o; })(),
+    beats:[
+      {say:'جرّب دائمًا هذه الأنواع: الصفر، وعددًا سالبًا، وكسرًا بين الصفر والواحد، وعددًا كبيرًا.', show:['n0','k0','n1','k1','n2','k2','n3','k3'], gap:.3},
+      {say:'لكل منها سلوك خاص: الصفر يمحو الضرب، والسالب يقلب الإشارة، والكسر يصغر عند التربيع، والكبير يكشف أيهما ينمو أسرع.', show:['h0','h1','h2','h3'], gap:.4},
+    ]},
+  { t:'جرّب معي',
+    items:{
+      hA:{type:'text',x:450,y:92,s:24,cls:'t-pri',text:'الأولى: س²'},
+      hB:{type:'text',x:190,y:92,s:24,cls:'t-pri',text:'الثانية: س'},
+      r1:{type:'box',x:90,y:122,w:460,h:52,c:'n3',text:'س = ٢ :  ٤ مقابل ٢ ← الأولى أكبر',s:21},
+      r2:{type:'box',x:90,y:190,w:460,h:52,c:'n1',text:'س = ½ :  ¼ مقابل ½ ← الثانية أكبر',s:21},
+      rn:{type:'note',x:320,y:298,w:320,h:58,c:'n2',text:'انقلبت العلاقة ← د',size:25,rot:-1.5},
+    },
+    beats:[
+      {say:'نعود إلى سين تربيع مقابل سين. عند سين يساوي اثنين: أربعة مقابل اثنين، فالأولى أكبر.', show:['hA','hB','r1'], gap:.3},
+      {say:'وعند سين يساوي نصفًا: ربع مقابل نصف، فالثانية أكبر!', show:['r2']},
+      {say:'انقلبت العلاقة بين تجربتين، فالجواب دال فورًا، ولا حاجة إلى تجارب أخرى.', show:['rn']},
+    ]},
+  { t:'اقرأ الشرط أولًا',
+    items:{
+      cond:{type:'box',x:190,y:72,w:260,h:52,c:'butter',text:'الشرط: س > ١',s:24},
+      e1:{type:'note',x:440,y:170,w:80,h:54,c:'surface2',text:'٠',size:28,rot:-2},
+      e2:{type:'note',x:320,y:170,w:80,h:54,c:'surface2',text:'−١',size:28,rot:2},
+      e3:{type:'note',x:200,y:170,w:80,h:54,c:'surface2',text:'½',size:28,rot:-1},
+      a1:M(320,245,24,'س = ٢ :  ٤ أكبر من ٢'),
+      a2:M(320,285,24,'س = ١٠ :  ١٠٠ أكبر من ١٠'),
+      ans:{type:'text',x:320,y:333,s:24,hand:true,text:'الأولى أكبر دائمًا ← أ'},
+    },
+    beats:[
+      {say:'اقرأ الشرط قبل التجريب. هنا سين أكبر من واحد، فالصفر والسالب والكسر ممنوعة.', show:['cond','e1','e2','e3'], strike:['e1','e2','e3'], gap:.3},
+      {say:'فنجرّب اثنين وعشرة: الأولى أكبر في الحالتين، وتبقى كذلك لكل سين أكبر من واحد؛ فالجواب ألف.', show:['a1','a2','ans'], gap:.5},
+    ]},
+  { t:'دورك',
+    items:Object.assign(QB(70,'الأولى: ٢س','الثانية: س',48,23),{
+      cond:{type:'text',x:320,y:134,s:18,cls:'t-ink2',text:'لا شرط على س'},
+      w1:M(320,200,22,'س = ١ :  ٢ مقابل ١ ← أ'),
+      w2:M(320,245,22,'س = −١ :  −٢ مقابل −١ ← ب'),
+      w3:{type:'note',x:320,y:305,w:280,h:52,c:'n2',text:'العلاقة تتغير ← د',size:23,rot:-1.5},
+    }),
+    beats:[
+      {say:'دورك. القيمة الأولى اثنان سين، والثانية سين، ولا شرط على سين.', show:['qa','qb','cond'], gap:.35},
+      {say:'جرّب الصفر والسالب والموجب، ثم اختر.'},
+    ],
+    ask:{ opts:CH, a:3,
+      right:'صحيح. عند واحد الأولى أكبر، وعند سالب واحد الثانية أكبر، فالعلاقة تتغير والجواب دال.',
+      wrong:'جرّب سالب واحد: الأولى سالب اثنين والثانية سالب واحد، فالثانية أكبر. وعند واحد الأولى أكبر؛ فالجواب دال.',
+      show:['w1','w2','w3'] }},
+  ],
+  quiz:[
+    {q:'س عدد سالب. القيمة الأولى: س² — القيمة الثانية: س', o:CH, a:0, e:'مربع السالب موجب، والموجب أكبر من السالب دائمًا.'},
+    {q:'لا شرط على س. القيمة الأولى: س² — القيمة الثانية: ٠', o:CH, a:3, e:'عند س = ٠ متساويتان، وعند س = ١ الأولى أكبر.'},
+    {q:'٠ < س < ١. القيمة الأولى: س³ — القيمة الثانية: س', o:CH, a:1, e:'الكسر يصغر كلما رفعناه لأس أكبر: عند س = ½ تكون س³ = ⅛.'},
+  ]});
+
+/* ---------- 3. simplify before computing ---------- */
+const SIDE=(pre,x,y,t1,t2,op='+')=>({ [pre+'1']:M(x+58,y,32,t1), [pre+'p']:M(x,y,30,op), [pre+'2']:M(x-44,y,32,t2) });
+ADD({ key:'cm-simplify', sk:'comparison', ord:30, title:'بسّط قبل أن تحسب', min:'٣ دقائق',
+  goals:['تحذف الحدود المتطابقة من الطرفين','تعرف ما يجوز فعله بالطرفين دون تغيير العلاقة','تقارن بالتقدير بدل الحساب الكامل'],
+  scenes:[
+  { t:'احذف المشترك',
+    items:Object.assign({
+      la:{type:'text',x:460,y:88,s:20,cls:'t-ink2',text:'القيمة الأولى'},
+      lb:{type:'text',x:180,y:88,s:20,cls:'t-ink2',text:'القيمة الثانية'},
+      ba:{type:'box',x:345,y:100,w:230,h:64,c:'prisoft'},
+      bb:{type:'box',x:65,y:100,w:230,h:64,c:'surface2'},
+    }, SIDE('a',455,144,'٤٨٧','٣٩'), SIDE('b',175,144,'٤٨٧','٤١'), {
+      rem:{type:'text',x:320,y:222,s:24,text:'يبقى: ٣٩ مقابل ٤١'},
+      v:{type:'note',x:320,y:290,w:280,h:58,c:'n0',text:'الثانية أكبر ← ب',size:25,rot:-1.5},
+    }),
+    beats:[
+      {say:'في المقارنة لا يهمّك الناتج الدقيق، بل أيّ الطرفين أكبر.', show:['la','ba','a1','ap','a2','lb','bb','b1','bp','b2'], gap:.12},
+      {say:'العدد أربعمئة وسبعة وثمانون موجود في الطرفين، فاحذفه منهما.', strike:['a1','b1']},
+      {say:'يبقى تسعة وثلاثون مقابل واحد وأربعين، فالثانية أكبر دون أي حساب طويل.', show:['rem','v'], gap:.5},
+    ]},
+  { t:'ما يجوز فعله بالطرفين',
+    items:{
+      r1:{type:'box',x:130,y:78,w:440,h:56,c:'n3',text:'اجمع أو اطرح العدد نفسه من الطرفين',s:20},
+      k1:{type:'check',x:88,y:106},
+      r2:{type:'box',x:130,y:156,w:440,h:56,c:'n3',text:'اضرب أو اقسم على العدد الموجب نفسه',s:20},
+      k2:{type:'check',x:88,y:184},
+      r3:{type:'box',x:130,y:234,w:440,h:56,c:'n1',text:'لا تضرب في سالب أو مجهول الإشارة',s:20},
+      k3:{type:'cross',x:88,y:262},
+    },
+    beats:[
+      {say:'يجوز أن تضيف العدد نفسه إلى الطرفين أو تطرحه منهما، والعلاقة لا تتغير.', show:['r1','k1'], gap:.3},
+      {say:'ويجوز أن تضرب الطرفين أو تقسمهما على العدد الموجب نفسه.', show:['r2','k2'], gap:.3},
+      {say:'أما الضرب في عدد سالب، أو في مجهول لا تعرف إشارته، فقد يقلب العلاقة؛ فتجنّبه.', show:['r3','k3'], gap:.3},
+    ]},
+  { t:'مجهول في الطرفين',
+    items:Object.assign({
+      ba:{type:'box',x:345,y:90,w:230,h:64,c:'prisoft'},
+      bb:{type:'box',x:65,y:90,w:230,h:64,c:'surface2'},
+    }, SIDE('a',455,134,'س','٧'), SIDE('b',175,134,'س','٩'), {
+      rem:{type:'text',x:320,y:212,s:24,text:'يبقى: ٧ مقابل ٩'},
+      v:{type:'note',x:320,y:282,w:360,h:58,c:'n0',text:'الثانية أكبر دائمًا ← ب لا د',size:24,rot:1.5},
+    }),
+    beats:[
+      {say:'قد يكون المجهول في الطرفين، مثل سين زائد سبعة مقابل سين زائد تسعة.', show:['ba','a1','ap','a2','bb','b1','bp','b2'], gap:.12},
+      {say:'اطرح سين من الطرفين، فيبقى سبعة مقابل تسعة؛ فالثانية أكبر دائمًا، والجواب باء لا دال.', strike:['a1','b1'], show:['rem','v'], gap:.5},
+    ]},
+  { t:'قدّر ولا تحسب',
+    items:Object.assign(QB(78,'١٩٨ × ٥','١٠٠٠',58,28),{
+      s1:{type:'text',x:320,y:190,s:24,text:'١٩٨ أقل من ٢٠٠'},
+      s2:M(320,238,28,'٢٠٠ × ٥ = ١٠٠٠'),
+      v:{type:'note',x:320,y:302,w:280,h:56,c:'n0',text:'الثانية أكبر ← ب',size:25,rot:-1.5},
+    }),
+    beats:[
+      {say:'وإذا صعب الحساب فقدّر. قارن مئة وثمانية وتسعين في خمسة بألف.', show:['qa','qb'], gap:.4},
+      {say:'مئة وثمانية وتسعون أقل من مئتين، ومئتان في خمسة ألف.', show:['s1','s2'], gap:.5},
+      {say:'إذن الأولى أقل من ألف، والثانية أكبر. قرّبنا إلى عدد سهل، وانتبهنا لاتجاه التقريب.', show:['v']},
+    ]},
+  { t:'دورك',
+    items:Object.assign(QB(66,'','½',72,34),{
+      f1:M(460,93,26,'٧'), fl:{type:'line',x1:440,y1:101,x2:480,y2:101,cls:'s-ink'}, f2:M(460,128,26,'١٥'),
+      w1:{type:'text',x:320,y:215,s:26,text:'نصف ١٥ هو ٧٫٥'},
+      w2:{type:'text',x:320,y:260,s:26,text:'و٧ أقل من ٧٫٥'},
+      v:{type:'note',x:320,y:318,w:280,h:52,c:'n0',text:'الثانية أكبر ← ب',size:24,rot:-1.5},
+    }),
+    beats:[
+      {say:'دورك. القيمة الأولى سبعة على خمسة عشر، والثانية نصف.', show:['qa','f1','fl','f2','qb'], gap:.2},
+      {say:'قارن دون قسمة طويلة. ما الجواب؟'},
+    ],
+    ask:{ opts:CH, a:1,
+      right:'أحسنت. نصف خمسة عشر سبعة ونصف، وسبعة أقل منها، فالكسر أصغر من النصف والجواب باء.',
+      wrong:'نصف خمسة عشر سبعة ونصف، والبسط سبعة فقط، فالكسر أصغر من النصف. إذن الثانية أكبر، والجواب باء.',
+      show:['w1','w2','v'] }},
+  ],
+  quiz:[
+    {q:'القيمة الأولى: ٣٦٥ + ٨٩ — القيمة الثانية: ٣٦٥ + ٩٨', o:CH, a:1, e:'احذف ٣٦٥ من الطرفين: ٨٩ أصغر من ٩٨.'},
+    {q:'القيمة الأولى: ١٠٢ × ١٠ — القيمة الثانية: ١٠٠٠', o:CH, a:0, e:'١٠٢ أكبر من ١٠٠، و١٠٠ × ١٠ = ١٠٠٠، فالأولى أكبر.'},
+    {q:'القيمة الأولى: ٤ × ٢٥ × ٧ — القيمة الثانية: ٧ × ١٠٠', o:CH, a:2, e:'٤ × ٢٥ = ١٠٠، فالطرفان ١٠٠ × ٧.'},
+  ]});
+})();
+/* Explainers: completion (إكمال الجمل) */
+(function(){ if(!window.XP||!XP.ready) return;
+
+/* Pre-set a centered transform origin on pop-in items so the engine's scale-in does not leave them offset (see report). */
+const POPT=new Set(['note','box','circle','check','cross','poly','pie','dot']);
+const fixO=items=>{ for(const k in items){ const it=items[k]; if(POPT.has(it.type)&&!it.rot) it.rot=.01; } return items; };
+const blank=(x,y,w=110,h=44,s=22)=>({type:'box',x,y,w,h,c:'surface2',text:'......',s,cls:'t-pri'});
+
+/* ================= Lesson: signal words ================= */
+const S1={ s:{type:'text',x:532,y:140,s:26,text:'كان الجوّ ممطرًا،'},
+  sig:{type:'note',x:338,y:130,w:110,h:60,c:'n1',text:'لذلك',size:28,rot:-1.5},
+  b:blank(48,106,215,50,24),
+  hint:{type:'text',x:338,y:205,s:26,hand:true,text:'تُكمل ←'},
+  foot:{type:'note',x:320,y:290,w:330,h:62,c:'n0',text:'الأداة تحدد اتجاه الفراغ',size:24,rot:-1} };
+
+const RW=[['لكنّ',540,150],['رغم',410,150],['بينما',540,235],['إلا أنّ',410,235]], LW=[['لأنّ',230,150],['لذلك',100,150],['كما',230,235],['و',100,235]];
+const S2={ hR:{type:'box',x:345,y:70,w:260,h:46,c:'pinksoft',text:'تقلب المعنى',s:23}, hL:{type:'box',x:35,y:70,w:260,h:46,c:'oksoft',text:'تُكمل المعنى',s:23} };
+RW.forEach(([t,x,y],i)=>{ S2['r'+i]={type:'note',x,y,w:112,h:62,c:'n1',text:t,size:t.length>4?23:27,rot:i%2?1.5:-1.5}; });
+LW.forEach(([t,x,y],i)=>{ S2['l'+i]={type:'note',x,y,w:112,h:62,c:'n3',text:t,size:27,rot:i%2?1.5:-1.5}; });
+S2.foot={type:'text',x:320,y:320,s:28,hand:true,text:'تقلب أم تُكمل؟'};
+
+const OP=[['وفرة',530],['محدودية',390],['ضخامة',250],['تنوّع',110]];
+const S3={ w1:{type:'text',x:515,y:95,s:26,text:'رغم'}, b:blank(345,64,120,46,24), w2:{type:'text',x:262,y:95,s:26,text:'الإمكانات،'},
+  w3:{type:'text',x:320,y:150,s:26,text:'حقق الفريق نتائج مبهرة.'},
+  pred:{type:'note',x:320,y:212,w:220,h:54,c:'n0',text:'توقّعك: قِلّة',size:24,rot:-1.5} };
+OP.forEach(([t,x],i)=>{ S3['o'+i]={type:'box',x:x-60,y:258,w:120,h:46,c:'surface',text:t,s:21}; });
+S3.v={type:'check',x:390,y:330,s:.6};
+
+const S4={ l1:{type:'text',x:320,y:80,s:26,text:'اجتهد سالم في التدريب،'},
+  b:blank(345,100,110,46,24), l2:{type:'text',x:240,y:132,s:26,text:'خسر السباق.'},
+  ans:{type:'note',x:400,y:123,w:118,h:50,c:'n0',text:'لكنه',size:26,rot:-1.5},
+  why:{type:'text',x:320,y:235,s:26,hand:true,text:'اجتهاد ثم خسارة: المعنى انقلب'} };
+
+const S5={ a:{type:'note',x:510,y:160,w:170,h:96,c:'n0',text:'١ حدّد الأداة',size:23,rot:-2},
+  b:{type:'note',x:320,y:160,w:170,h:96,c:'n1',text:'٢ توقّع كلمتك',size:23,rot:1.5},
+  c:{type:'note',x:130,y:160,w:170,h:96,c:'n3',text:'٣ ثم الخيارات',size:23,rot:-1.5},
+  foot:{type:'text',x:320,y:292,s:26,hand:true,text:'الخيارات تأتي بعد توقّعك، لا قبله'} };
+
+[S1,S2,S3,S4,S5].forEach(fixO);
+XP.add({ key:'co-signals', sk:'completion', ord:10, title:'كلمات الإشارة في إكمال الجمل', min:'٤ دقائق',
+  goals:['تعرف أن أداة الربط تحدد اتجاه الكلمة المفقودة','تميّز أدوات التضاد من أدوات السبب والإضافة','تتوقع الكلمة المفقودة قبل قراءة الخيارات'],
+  scenes:[
+  { t:'للجملة اتجاه', items:S1, beats:[
+    { say:'في إكمال الجمل، أداة الربط هي البوصلة، فهي تدلّك على اتجاه الكلمة المفقودة.', show:['s','sig','b'] },
+    { say:'كان الجو ممطرًا، لذلك حملنا المظلات. لذلك تُكمل المعنى في الاتجاه نفسه.', set:{b:'حملنا المظلات'}, show:['hint'] },
+    { say:'فإذا وضعنا لكنّ، انقلب الاتجاه، لكنّ الرحلة لم تُلغَ.', set:{sig:'لكنّ',b:'الرحلة لم تُلغَ',hint:'تقلب ↩'}, show:['foot'] } ]},
+  { t:'أدوات تقلب وأدوات تُكمل', items:S2, beats:[
+    { say:'أدوات التضاد تقلب المعنى، مثل لكنّ ورغم وبينما وإلا أنّ. ما بعدها عكس ما قبلها.', show:['hR','r0','r1','r2','r3'], gap:.3 },
+    { say:'وأدوات السبب والإضافة تُكمل المعنى، مثل لأنّ ولذلك وكما وحرف الواو.', show:['hL','l0','l1','l2','l3'], gap:.3 },
+    { say:'فاسأل نفسك أولًا، هل الأداة تقلب المعنى أم تُكمله؟', show:['foot'], hl:['hR','hL'] } ]},
+  { t:'توقّع قبل الخيارات', items:S3, beats:[
+    { say:'اقرأ الجملة أولًا وغطِّ الخيارات. الفراغ يصف الإمكانات، والفريق حقق نتائج مبهرة.', show:['w1','b','w2','w3'], gap:.2 },
+    { say:'رغم أداة قلب، والنتيجة مبهرة، إذن الإمكانات عكس ذلك، أي قليلة.', hl:['w1'], show:['pred'] },
+    { say:'الآن اقرأ الخيارات وابحث عمّا يوافق توقعك. محدودية هي الأقرب.', show:['o0','o1','o2','o3','v'], gap:.15, set:{b:'محدودية'} },
+    { say:'أما وفرة وضخامة فتوافقان النتيجة ولا تقلبانها، فنستبعدهما.', strike:['o0','o2'] } ]},
+  { t:'دورك: أيّ أداة؟', items:S4, beats:[
+    { say:'دورك. اقرأ الجملة، واسأل هل الشطر الثاني يُكمل الأول أم يقلبه؟', show:['l1','b','l2'], gap:.25 },
+    { say:'اجتهد سالم في التدريب، ثم خسر السباق. أيّ أداة تناسب الفراغ؟', hl:['b'] } ],
+    ask:{ opts:['لذلك','لأنه','لكنه','كما'], a:2, show:['ans','why'],
+      right:'أحسنت. الخسارة عكس المتوقع من الاجتهاد، فنحتاج أداة قلب، لكنه.',
+      wrong:'انتبه. الاجتهاد يوحي بالفوز، والنتيجة خسارة، فالمعنى انقلب. نحتاج أداة قلب، لكنه.' } },
+  { t:'خطواتك', items:S5, beats:[
+    { say:'خطواتك إذن، حدّد الأداة، ثم توقّع كلمتك، ثم اقرأ الخيارات.', show:['a','b','c'], gap:.4 },
+    { say:'فالتوقع يحميك من خيار جميل لكنه يسير في الاتجاه الخطأ.', show:['foot'] } ]},
+  ],
+  quiz:[
+    {q:'رغم ......... الطقس، خرج الأطفال للعب في الحديقة.', o:['اعتدال','برودة','جمال','صفاء'], a:1, e:'«رغم» تقلب المعنى: خرجوا للعب مع أن الطقس غير مناسب، أي بارد.'},
+    {q:'نام مبكرًا، ......... استيقظ نشيطًا.', o:['لكنه','رغم أنه','لذلك','بينما'], a:2, e:'النشاط نتيجة للنوم المبكر، فالأداة أداة نتيجة: «لذلك».'},
+    {q:'يحب أخي الرياضة، ......... تفضّل أختي القراءة.', o:['لأن','بينما','لذلك','كما'], a:1, e:'مقابلة بين تفضيلين مختلفين، فالمناسب «بينما».'},
+  ] });
+
+/* ================= Lesson: two blanks & meaning agreement ================= */
+const OPT=[['يقوّي / بينما',470,202],['يُضعف / لكنّ',170,202],['يقوّي / لذلك',470,264],['يُتلف / كما',170,264]];
+const T1={ a1:{type:'text',x:505,y:92,s:26,text:'النوم الكافي'}, b1:blank(305,66,110,42,22), a2:{type:'text',x:215,y:92,s:26,text:'الذاكرة،'},
+  b2:blank(365,118,110,42,22), a3:{type:'text',x:250,y:145,s:26,text:'السهر يُضعفها.'} };
+OPT.forEach(([t,x,y],i)=>{ T1['o'+i]={type:'box',x:x-120,y:y-24,w:240,h:48,c:'surface',text:t,s:22}; });
+T1.v={type:'check',x:615,y:202,s:.6};
+
+const T2={ a1:{type:'text',x:470,y:110,s:26,text:'كان المتحدث'}, b1:blank(250,84,120,44,24),
+  a2:{type:'text',x:450,y:180,s:26,text:'فلم يفهم الحاضرون'}, b2:blank(190,154,120,44,24), a3:{type:'text',x:110,y:180,s:26,text:'من كلامه.'},
+  x:{type:'cross',x:320,y:262,s:.8}, v:{type:'check',x:320,y:262,s:.8},
+  tag:{type:'text',x:320,y:325,s:24,hand:true,text:'كل فراغ وحده لا يكفي: المعنى كله يتفق'} };
+
+const CL=[['يُولي','اهتمامًا',470,125],['يتّخذ','قرارًا',170,125],['يُبدي','رأيًا',470,225],['يُلقي','كلمة',170,225]];
+const T3={}; CL.forEach(([v,n,x,y],i)=>{ T3['v'+i]={type:'note',x:x+62,y,w:118,h:62,c:'n2',text:v,size:26,rot:-1.5}; T3['n'+i]={type:'note',x:x-62,y,w:118,h:62,c:'n0',text:n,size:n.length>5?22:26,rot:1.5}; });
+T3.foot={type:'text',x:320,y:315,s:26,hand:true,text:'الفعل يستدعي رفيقه المعتاد'};
+
+const T4={ l1:{type:'text',x:430,y:84,s:25,text:'تُولي المملكة التعليمَ'}, b1:blank(160,60,110,40,22),
+  w2:{type:'text',x:520,y:132,s:25,text:'كبيرًا،'}, b2:blank(370,108,110,40,22), l2:{type:'text',x:230,y:132,s:25,text:'تُنفق عليه بسخاء.'},
+  ans:{type:'note',x:320,y:225,w:280,h:64,c:'n0',text:'اهتمامًا + لذلك',size:27,rot:-1.5} };
+
+const T5={ a:{type:'note',x:510,y:160,w:180,h:96,c:'n0',text:'١ الفراغ الأوضح',size:20,rot:-2},
+  b:{type:'note',x:320,y:160,w:170,h:96,c:'n1',text:'٢ استبعد',size:25,rot:1.5},
+  c:{type:'note',x:130,y:160,w:170,h:96,c:'n3',text:'٣ اقرأ كاملة',size:23,rot:-1.5},
+  foot:{type:'text',x:320,y:292,s:26,hand:true,text:'وانتبه للكلمات المتلازمة'} };
+
+[T1,T2,T3,T4,T5].forEach(fixO);
+XP.add({ key:'co-twoblank', sk:'completion', ord:20, title:'الفراغان وتوافق المعنى', min:'٤ دقائق',
+  goals:['تبدأ بالفراغ الأوضح وتستبعد به الخيارات','تتحقق من اتفاق معنى الجملة كاملة','تعرف الكلمات المتلازمة مثل «يُولي اهتمامًا»'],
+  scenes:[
+  { t:'ابدأ بالفراغ الأوضح', items:T1, beats:[
+    { say:'في سؤال الفراغين لا تحاول حلّهما معًا. ابدأ بالفراغ الأوضح.', show:['a1','b1','a2','b2','a3','o0','o1','o2','o3'], gap:.12 },
+    { say:'النوم الكافي يقوّي الذاكرة، لا يُضعفها ولا يُتلفها. نستبعد خيارين.', set:{b1:'يقوّي'}, strike:['o1','o3'] },
+    { say:'بقي خياران. بين النوم والسهر مقابلة، فنحتاج أداة تضاد، بينما.', set:{b2:'بينما'}, strike:['o2'], show:['v'] } ]},
+  { t:'اقرأ الجملة كاملة', items:T2, beats:[
+    { say:'بعد الاختيار، أعد قراءة الجملة كاملة. قد يصلح كل فراغ وحده، ويبقى المعنى متناقضًا.', show:['a1','b1','a2','b2','a3'], gap:.15 },
+    { say:'كان المتحدث فصيحًا فلم يفهم الحاضرون شيئًا. تبدو سليمة، لكن الفصاحة لا تمنع الفهم.', set:{b1:'فصيحًا',b2:'شيئًا'}, show:['x'] },
+    { say:'والصحيح، كان المتحدث غامضًا فلم يفهم الحاضرون كثيرًا من كلامه. الآن اتفق المعنى.', set:{b1:'غامضًا',b2:'كثيرًا'}, hide:['x'], show:['v','tag'] } ]},
+  { t:'كلمات تأتي معًا', items:T3, beats:[
+    { say:'بعض الكلمات تأتي معًا في الفصحى، ونسمّيها المتلازمات. نقول يُولي اهتمامًا.', show:['v0','n0'] },
+    { say:'ونقول يتّخذ قرارًا، ويُبدي رأيًا، ويُلقي كلمة.', show:['v1','n1','v2','n2','v3','n3'], gap:.25 },
+    { say:'فإذا رأيت أحد هذه الأفعال قبل الفراغ، فابحث عن رفيقه المعتاد.', show:['foot'], hl:['v0','n0'] } ]},
+  { t:'دورك: فراغان', items:T4, beats:[
+    { say:'دورك. في الجملة فراغان. ابدأ بالأول بعد الفعل تُولي، ثم تحقّق من المعنى كله.', show:['l1','b1','w2','b2','l2'], gap:.2 },
+    { say:'أيّ خيار يملأ الفراغين معًا؟', hl:['b1','b2'] } ],
+    ask:{ opts:['اهتمامًا / لذلك','إهمالًا / لذلك','اهتمامًا / لكنها','تجاهلًا / كما'], a:0, show:['ans'],
+      right:'أحسنت. تُولي تطلب اهتمامًا، والإنفاق بسخاء نتيجة لهذا الاهتمام، فالأداة لذلك.',
+      wrong:'تُولي تطلب اهتمامًا، فنستبعد إهمالًا وتجاهلًا. والإنفاق نتيجة للاهتمام لا عكسه، فالصحيح اهتمامًا مع لذلك.' } },
+  { t:'خطوات الفراغين', items:T5, beats:[
+    { say:'خطواتك إذن، ابدأ بالفراغ الأوضح، واستبعد به، ثم اقرأ الجملة كاملة.', show:['a','b','c'], gap:.4 },
+    { say:'وانتبه دائمًا للكلمات المتلازمة، فهي تحسم الفراغ بسرعة.', show:['foot'] } ]},
+  ],
+  quiz:[
+    {q:'كان العدّاء ......... في بداية السباق، ......... تمكّن من الفوز في نهايته.', o:['متقدّمًا / لكنه','متأخرًا / لكنه','متأخرًا / لذلك','متعبًا / لأنه'], a:1, e:'الفوز بعد التأخر مفاجأة، فالأداة أداة قلب «لكنه».'},
+    {q:'يُولي الأبُ تربيةَ أبنائه ......... بالغًا.', o:['اهتمامًا','تفكيرًا','قرارًا','رأيًا'], a:0, e:'الفعل «يُولي» يلازم «اهتمامًا».'},
+    {q:'اتّخذ المدير ......... حاسمًا، ......... انتهت المشكلة سريعًا.', o:['قرارًا / لذلك','رأيًا / لكن','قرارًا / رغم','موقفًا / بينما'], a:0, e:'«اتّخذ قرارًا» متلازمة، وانتهاء المشكلة نتيجة للقرار فالأداة «لذلك».'},
+  ] });
+})();
+/* Explainers: context (الخطأ السياقي) */
+(function(){ if(!window.XP||!XP.ready) return;
+
+/* Lays out an Arabic sentence word by word (RTL, centered on x=320).
+   Words starting with '*' are underlined with a line item.
+   Adds to `items`: highlight boxes <id>g<k> (oksoft) and <id>r<k> (badsoft) behind each underlined word,
+   words <id>w<l>_<i>, underlines <id>u<k>. Returns {words:[keys], lines:[keys], pos:[{x,y,w}]} per underlined word. */
+function sentence(items,id,lines,{y0=110,lh=66,s=24,gap}={}){
+  const G=gap??s*.55, est=w=>Math.max(1,w.replace(/[ً-ْ]/g,'').length)*s*.62;
+  const out={words:[],lines:[],pos:[]}, words=[], k={n:0};
+  lines.forEach((ln,li)=>{ const y=y0+li*lh; const ws=ln.map(w=>{ const u=w[0]==='*', t=u?w.slice(1):w; return {t,u,w:est(t)}; });
+    const W=ws.reduce((a,b)=>a+b.w,0)+G*(ws.length-1); let x=320+W/2;
+    ws.forEach((o,i)=>{ const cx=x-o.w/2; x-=o.w+G; words.push({key:`${id}w${li}_${i}`,t:o.t,cx,y});
+      if(o.u){ const n=k.n++; const hw=o.w/2+8; out.pos.push({x:cx,y,w:o.w});
+        items[`${id}g${n}`]={type:'box',x:cx-hw,y:y-s*1.05,w:hw*2,h:s*1.55,c:'oksoft',stroke:false,rx:8};
+        items[`${id}r${n}`]={type:'box',x:cx-hw,y:y-s*1.05,w:hw*2,h:s*1.55,c:'badsoft',stroke:false,rx:8}; } }); });
+  words.forEach(w=>{ items[w.key]={type:'text',x:w.cx,y:w.y,s,text:w.t}; out.words.push(w.key); });
+  out.pos.forEach((p,n)=>{ const key=`${id}u${n}`; items[key]={type:'line',x1:p.x+p.w*.42,y1:p.y+10,x2:p.x-p.w*.42,y2:p.y+10,cls:'s-pri'}; out.lines.push(key); });
+  return out;
+}
+/* Pre-set a centered transform origin on pop-in items so the engine's scale-in does not leave them offset (see report). */
+const POPT=new Set(['note','box','circle','check','cross','poly','pie','dot']);
+const fixO=items=>{ for(const k in items){ const it=items[k]; if(POPT.has(it.type)&&!it.rot) it.rot=.01; } return items; };
+const mark=(items,key,type,p,dy=40,s=.62)=>{ items[key]={type,x:p.x,y:p.y+dy,s}; };
+
+/* ================= Lesson 1: what a contextual error is ================= */
+const A1={}, a1=sentence(A1,'a',[['*بذل','اللاعب','*جهدًا','كبيرًا','في','التدريب،'],['*فتراجع','مستواه','*وتألّق','في','المباراة.']],{y0:115,lh:74});
+A1.tag={type:'note',x:320,y:292,w:350,h:62,c:'n1',text:'خطأ في المعنى، لا في النحو',size:23,rot:-1};
+
+const A2={}, a2=sentence(A2,'b',[['*بذل','اللاعب','*جهدًا','كبيرًا','في','التدريب،'],['*فتراجع','مستواه','*وتألّق','في','المباراة.']],{y0:115,lh:74});
+Object.assign(A2,{ idea:{type:'note',x:430,y:290,w:190,h:62,c:'n3',text:'الفكرة: اجتهاد',size:22,rot:-1.5},
+  ar:{type:'arrow',x1:318,y1:280,x2:236,y2:280,cls:'s-pink',bend:-26},
+  idea2:{type:'note',x:170,y:290,w:120,h:62,c:'n3',text:'تألّق',size:24,rot:1.5} });
+
+const A3={}, a3=sentence(A3,'c',[['*بذل','اللاعب','*جهدًا','كبيرًا','في','التدريب،'],['*فتراجع','مستواه','*وتألّق','في','المباراة.']],{y0:100,lh:92});
+a3.pos.forEach((p,i)=>mark(A3,'m'+i,i===2?'cross':'check',p,42));
+A3.fix={type:'note',x:320,y:318,w:230,h:54,c:'n0',text:'تراجع ← تحسّن',size:24,rot:-1.5};
+
+const A4={}, a4=sentence(A4,'d',[['*يذوب','الثلج','عند','*انخفاض','درجة','الحرارة'],['*فيتحوّل','إلى','*ماء.']],{y0:74,lh:52,s:22});
+A4.ans={type:'note',x:320,y:230,w:250,h:64,c:'n0',text:'انخفاض ← ارتفاع',size:25,rot:-1.5};
+
+const A5={ s1:{type:'note',x:510,y:170,w:160,h:90,c:'n0',text:'١ الفكرة',size:26,rot:-2},
+  s2:{type:'note',x:320,y:170,w:160,h:90,c:'n1',text:'٢ المرتكزان',size:24,rot:1.5},
+  s3:{type:'note',x:130,y:170,w:160,h:90,c:'n3',text:'٣ اختبر كلًّا',size:24,rot:-1.5},
+  foot:{type:'text',x:320,y:292,s:26,hand:true,text:'ضع العكس: إن استقام المعنى فهي الخطأ'} };
+
+[A1,A2,A3,A4,A5].forEach(fixO);
+XP.add({ key:'cx-what', sk:'context', ord:10, title:'ما الخطأ السياقي؟', min:'٣ دقائق',
+  goals:['تعرف أن الخطأ السياقي كلمة واحدة تكسر معنى الجملة','تحدد الفكرة العامة قبل النظر في الكلمات','تختبر كل كلمة تحتها خط على الفكرة','تتأكد من الخطأ بوضع عكسه'],
+  scenes:[
+  { t:'كلمة تكسر المعنى', items:A1, beats:[
+    { say:'في سؤال الخطأ السياقي تأتيك جملة سليمة في لغتها، وتحت أربع كلمات منها خط.', show:a1.words, gap:.08 },
+    { say:'كلمة واحدة فقط من هذه الأربع تكسر معنى الجملة، وهي المطلوبة.', show:a1.lines, gap:.3 },
+    { say:'فالخطأ هنا ليس في النحو ولا في الإملاء، بل في المعنى.', show:['tag'] } ]},
+  { t:'ابدأ بالفكرة العامة', items:A2, beats:[
+    { say:'لا تبدأ بالكلمات واحدةً واحدة. اقرأ الجملة كاملة واسأل، ما فكرتها؟', show:a2.words, gap:.05 },
+    { say:'لاعبٌ بذل جهدًا كبيرًا في التدريب، ثم تألّق في المباراة. هذه هي الفكرة.', show:['bg1','bg3','idea','ar','idea2'] },
+    { say:'الجهد والتألق هما مرتكزا المعنى، وكلاهما في اتجاه واحد.', show:a2.lines, hl:['idea','idea2'] } ]},
+  { t:'اختبر كل كلمة', items:A3, beats:[
+    { say:'الآن اختبر كل كلمة تحتها خط على الفكرة. بذل، تنسجم. جهدًا، تنسجم.', show:[...a3.words,...a3.lines,'cg0','cg1','m0','m1'], gap:.03 },
+    { say:'فتراجع مستواه؟ من اجتهد لا يتراجع ثم يتألق. هذه الكلمة تناقض الفكرة.', show:['cr2','m2'] },
+    { say:'وتألّق تنسجم. ضع عكس الكلمة المشتبه بها، تحسّن مستواه، فيستقيم المعنى.', show:['cg3','m3','fix'] } ]},
+  { t:'دورك: الثلج', items:A4, beats:[
+    { say:'دورك. اقرأ الجملة وحدد فكرتها أولًا، ثم اختبر الكلمات الأربع.', show:[...a4.words,...a4.lines], gap:.06 },
+    { say:'يذوب الثلج عند انخفاض درجة الحرارة فيتحول إلى ماء. أيّ كلمة تكسر المعنى؟', hl:a4.lines } ],
+    ask:{ opts:['يذوب','انخفاض','فيتحوّل','ماء'], a:1, show:['ans'],
+      right:'أحسنت. الثلج يذوب عند ارتفاع الحرارة لا انخفاضها، فالخطأ انخفاض وصوابها ارتفاع.',
+      wrong:'انتبه للحقيقة العلمية. الثلج يذوب عند ارتفاع الحرارة، فالكلمة التي تكسر المعنى هي انخفاض.' } },
+  { t:'خطواتك', items:A5, beats:[
+    { say:'خطواتك إذن، حدد الفكرة، ثم المرتكزين، ثم اختبر كل كلمة.', show:['s1','s2','s3'], gap:.45 },
+    { say:'وإذا شككت في كلمة، ضع عكسها. إن استقام المعنى فقد وجدت الخطأ.', show:['foot'] } ]},
+  ],
+  quiz:[
+    {q:'حدّد الخطأ السياقي: «اشتدّ العطش بالمسافر فشرب الماء حتى جاع.»', o:['اشتدّ','العطش','فشرب','جاع'], a:3, e:'من يشرب الماء يرتوي لا يجوع؛ الصواب «ارتوى».'},
+    {q:'حدّد الخطأ السياقي: «تشرق الشمس من الغرب كل صباح فتملأ الأرض نورًا.»', o:['تشرق','الغرب','صباح','نورًا'], a:1, e:'الشمس تشرق من الشرق؛ الكلمة التي تكسر المعنى «الغرب».'},
+    {q:'ما أول خطوة في حل سؤال الخطأ السياقي؟', o:['اختيار أصعب كلمة','تحديد الفكرة العامة للجملة','قراءة الخيارات فقط','البحث عن خطأ نحوي'], a:1, e:'الفكرة العامة هي المقياس الذي تختبر عليه كل كلمة تحتها خط.'},
+  ] });
+
+/* ================= Lesson 2: strategies and traps ================= */
+const B1={}, b1=sentence(B1,'a',[['القائد','*الحكيم','يتّخذ','قراراته','*بتهوّر'],['بعد','*دراسة','*متأنّية.']],{y0:105,lh:70});
+Object.assign(B1,{ x:{type:'cross',x:b1.pos[1].x,y:b1.pos[1].y+42,s:.62},
+  fix:{type:'note',x:320,y:292,w:240,h:62,c:'n0',text:'بتهوّر ← بتروٍّ',size:26,rot:-1.5} });
+
+const B2={}, b2=sentence(B2,'b',[['استيقظ','*مبكرًا','*فأدرك','الحافلة،'],['*لكنه','وصل','إلى','المدرسة','*قبل','الجميع.']],{y0:95,lh:62});
+Object.assign(B2,{ c1:{type:'box',x:390,y:215,w:200,h:52,c:'surface2',text:'استيقظ مبكرًا',s:21},
+  ar:{type:'arrow',x1:385,y1:230,x2:262,y2:230,cls:'s-pink',bend:-30,text:'نتيجة'},
+  c2:{type:'box',x:52,y:215,w:200,h:52,c:'surface2',text:'وصل قبل الجميع',s:21},
+  x:{type:'cross',x:b2.pos[2].x,y:b2.pos[2].y+40,s:.6},
+  fix:{type:'note',x:320,y:316,w:230,h:50,c:'n0',text:'لكنه ← لذلك',size:24,rot:-1.5} });
+
+const B3={}, b3=sentence(B3,'c',[['كان','العالِم','*دؤوبًا','في','بحثه،','فقضى'],['*سنواتٍ','*يتجاهل','تجاربه','حتى','بلغ','*الاكتشاف.']],{y0:96,lh:92});
+Object.assign(B3,{ ok:{type:'check',x:b3.pos[0].x,y:b3.pos[0].y+40,s:.6}, x:{type:'cross',x:b3.pos[2].x,y:b3.pos[2].y+40,s:.6},
+  n1:{type:'note',x:470,y:290,w:210,h:58,c:'n3',text:'دؤوب = مثابر',size:24,rot:-1.5},
+  n2:{type:'note',x:180,y:290,w:220,h:58,c:'n1',text:'يتجاهل ← يكرّر',size:24,rot:1.5} });
+
+const B4={}, b4=sentence(B4,'d',[['كان','الطقس','*باردًا،','*فارتدى','الأطفال'],['ملابس','*خفيفة','قبل','*الخروج.']],{y0:74,lh:52,s:22});
+B4.ans={type:'note',x:320,y:230,w:230,h:64,c:'n0',text:'خفيفة ← ثقيلة',size:26,rot:-1.5};
+
+const B5={ r1:{type:'note',x:510,y:160,w:160,h:90,c:'n0',text:'العكس',size:30,rot:-1.5},
+  r2:{type:'note',x:320,y:160,w:160,h:90,c:'n3',text:'الرابط',size:30,rot:1.5},
+  r3:{type:'note',x:130,y:160,w:160,h:90,c:'n1',text:'الصعوبة',size:30,rot:-1.5},
+  k1:{type:'text',x:510,y:245,s:22,hand:true,text:'جرّبه'}, k2:{type:'text',x:320,y:245,s:22,hand:true,text:'افحصه'}, k3:{type:'text',x:130,y:245,s:22,hand:true,text:'لا تحكم بها'},
+  foot:{type:'text',x:320,y:312,s:24,text:'الخطأ يصطدم بالفكرة، لا بمستوى الكلمة'} };
+
+[B1,B2,B3,B4,B5].forEach(fixO);
+XP.add({ key:'cx-traps', sk:'context', ord:20, title:'الخطأ السياقي: استراتيجيات وفخاخ', min:'٤ دقائق',
+  goals:['تكشف الخطأ بتجربة عكس الكلمة','تفحص العلاقة بين شطري الجملة: سبب أم تضاد','لا تحكم على الكلمة بصعوبتها','تطبق الخطوات على سؤال كامل'],
+  scenes:[
+  { t:'الخطأ عكس الصواب', items:B1, beats:[
+    { say:'في أكثر الأسئلة، الكلمة الخاطئة هي عكس الكلمة الصحيحة تمامًا.', show:[...b1.words,...b1.lines], gap:.05 },
+    { say:'القائد الحكيم يتخذ قراراته بتهوّر؟ الحكمة والتهوّر لا يجتمعان.', show:['ar1','x'] },
+    { say:'ضع العكس، بتروٍّ، فيستقيم المعنى. إذن وجدت الخطأ.', show:['ag0','ag2','ag3','fix'] } ]},
+  { t:'افحص أداة الربط', items:B2, beats:[
+    { say:'انظر إلى العلاقة بين شطري الجملة. هل الثاني نتيجة للأول، أم عكسه؟', show:[...b2.words,...b2.lines], gap:.05 },
+    { say:'من استيقظ مبكرًا وأدرك الحافلة يصل قبل الجميع. هذه نتيجة طبيعية.', show:['c1','ar','c2'] },
+    { say:'فأداة الاستدراك لكنه لا تناسب هنا، والصواب لذلك.', show:['br2','x','fix'] } ]},
+  { t:'لا تحكم بالصعوبة', items:B3, beats:[
+    { say:'الكلمة الصعبة ليست بالضرورة الخطأ، وقد توضع لتشتيتك.', show:[...b3.words,...b3.lines], gap:.05 },
+    { say:'دؤوبًا تعني مثابرًا، وهي تنسجم مع سنوات البحث الطويلة.', show:['cg0','ok','n1'] },
+    { say:'أما يتجاهل فسهلة لكنها تكسر المعنى. الدؤوب يكرّر تجاربه ولا يتجاهلها.', show:['cr2','x','n2'] } ]},
+  { t:'دورك: الطقس البارد', items:B4, beats:[
+    { say:'دورك. حدد الفكرة، ثم افحص الرابط بين الشطرين، ثم جرّب العكس.', show:[...b4.words,...b4.lines], gap:.06 },
+    { say:'كان الطقس باردًا فارتدى الأطفال ملابس خفيفة قبل الخروج. أين الخطأ؟', hl:b4.lines } ],
+    ask:{ opts:['باردًا','فارتدى','خفيفة','الخروج'], a:2, show:['ans'],
+      right:'أحسنت. الفاء تربط سببًا بنتيجة، والبرد يدفع إلى ملابس ثقيلة لا خفيفة.',
+      wrong:'انظر إلى الفاء، فهي تربط سببًا بنتيجة. البرد يدفع إلى ملابس ثقيلة، فالخطأ هو خفيفة.' } },
+  { t:'ثلاث قواعد', items:B5, beats:[
+    { say:'تذكّر ثلاث قواعد، جرّب العكس، وافحص الرابط بين الشطرين، ولا تخدعك صعوبة الكلمة.', show:['r1','k1','r2','k2','r3','k3'], gap:.3 },
+    { say:'فالخطأ السياقي يصطدم بفكرة الجملة، لا بمستوى الكلمة.', show:['foot'] } ]},
+  ],
+  quiz:[
+    {q:'حدّد الخطأ السياقي: «ذاكر محمد بجدّ، لكنه نجح بتفوّق في الاختبار.»', o:['ذاكر','بجدّ','لكنه','بتفوّق'], a:2, e:'النجاح نتيجة للمذاكرة، فالمناسب «لذلك» لا أداة الاستدراك «لكنه».'},
+    {q:'حدّد الخطأ السياقي: «اتّسم الخطيب بالفصاحة، فكانت عباراته ركيكة يفهمها الجميع.»', o:['اتّسم','الفصاحة','ركيكة','يفهمها'], a:2, e:'الركاكة عكس الفصاحة؛ الصواب «بليغة» أو «واضحة».'},
+    {q:'في جملة الخطأ السياقي، الكلمة الأصعب والأقل شيوعًا:', o:['هي الخطأ دائمًا','ليست بالضرورة الخطأ','تكون أداة ربط','تأتي أول الجملة'], a:1, e:'الحكم يكون على انسجام الكلمة مع الفكرة، لا على صعوبتها.'},
+  ] });
+})();
+/* Explainers: geometry */
+(function(){ if(!window.XP||!XP.ready) return;
+/* ---- small geometry helpers (angles in visual degrees, counter-clockwise, 0 = pointing right) ---- */
+const R1=v=>Math.round(v*10)/10;
+const P=(c,r,a)=>[R1(c[0]+r*Math.cos(a*Math.PI/180)),R1(c[1]-r*Math.sin(a*Math.PI/180))];
+const arcD=(c,r,a0,a1)=>{ const p=P(c,r,a0), q=P(c,r,a1); return `M${p[0]} ${p[1]} A${r} ${r} 0 ${a1-a0>180?1:0} 0 ${q[0]} ${q[1]}`; };
+const ang=(c,r,a0,a1,cls='s-pri')=>({type:'path',d:arcD(c,r,a0,a1),cls});
+const lab=(c,r,a,text,cls='t-ink',s=20)=>{ const p=P(c,r,a); return {type:'eq',x:p[0],y:R1(p[1]+s*0.36),s,text,cls}; };
+const seg=(p,q,cls='s-ink')=>({type:'line',x1:p[0],y1:p[1],x2:q[0],y2:q[1],cls});
+const pts=a=>a.map(p=>p.join(',')).join(' ');
+const rmark=(c,a0,k=14)=>{ const u=P(c,k,a0), w=P(c,k,a0+90), m=[R1(u[0]+w[0]-c[0]),R1(u[1]+w[1]-c[1])]; return {type:'path',d:`M${u[0]} ${u[1]} L${m[0]} ${m[1]} L${w[0]} ${w[1]}`,cls:'s-ink'}; };
+const tick=(p,q)=>{ const mx=(p[0]+q[0])/2, my=(p[1]+q[1])/2, L=Math.hypot(q[0]-p[0],q[1]-p[1]), nx=-(q[1]-p[1])/L*9, ny=(q[0]-p[0])/L*9;
+  return {type:'path',d:`M${R1(mx-nx)} ${R1(my-ny)} L${R1(mx+nx)} ${R1(my+ny)}`,cls:'s-pri'}; };
+/* apex of a triangle on base b-c with base angles ab (at b) and ac (at c) */
+const apex=(b,c,ab,ac)=>{ const w=c[0]-b[0], tb=Math.tan(ab*Math.PI/180), tc=Math.tan(ac*Math.PI/180), x=w*tc/(tb+tc); return [R1(b[0]+x),R1(b[1]-x*tb)]; };
+/* POP items (poly, circle, dot, box) get their transform origin set at draw time via rot:360 (a no-op rotation);
+   otherwise the engine's scale-in sets transformOrigin mid-tween and GSAP's smoothOrigin leaves them shifted. */
+const POPT=new Set(['poly','circle','dot','box']);
+/* Labels are laid out right-to-left like the rest of the page (Arabic math reads RTL). A number with ° is isolated
+   so the degree sign always sits to its right; 'eq' items become plain RTL text for the same reason. */
+const DEG=t=>String(t).replace(/([٠-٩٫]+°)/g,'\u2066$1\u2069');
+const add=L=>{ L.scenes.forEach(sc=>{ for(const k in (sc.items||{})){ const it=sc.items[k];
+    if(POPT.has(it.type)&&!it.rot) it.rot=360;
+    if(it.type==='eq') it.type='text';
+    if(it.type==='box') it.ltr=false;
+    if(it.text!=null) it.text=DEG(it.text);
+    if(it.labels) it.labels.forEach(l=>{ l[2]=DEG(l[2]); }); } }); XP.add(L); };
+const circD=(c,r)=>`M${c[0]+r} ${c[1]} A${r} ${r} 0 1 0 ${c[0]-r} ${c[1]} A${r} ${r} 0 1 0 ${c[0]+r} ${c[1]}`;
+
+/* =================== 1. Angles =================== */
+{
+const O=[220,230], O2=[220,210];
+const X=[220,205];
+const T1=[250,130], T2=[R1(250-100/Math.tan(Math.PI/3)),230];
+const Q1=[340,100], Q2=[R1(340-65/Math.tan(Math.PI/3)),165];
+add({ key:'ge-angles', sk:'geometry', ord:10, title:'الزوايا والمستقيمات المتوازية', min:'٣ دقائق',
+  goals:['تعرف أن الزاوية المستقيمة ١٨٠° والدورة الكاملة ٣٦٠°','تستخدم تساوي الزاويتين المتقابلتين بالرأس','تميّز الزوايا المتناظرة والمتبادلة عند التوازي','تحسب زاوية مجهولة في شكل من أشكال القدرات'],
+  scenes:[
+  { t:'المستقيم والدورة الكاملة', items:{
+      ln:seg([70,230],[370,230]), o:{type:'dot',x:O[0],y:O[1],r:5,c:'ink'},
+      a180:ang(O,45,0,180,'s-pri'), l180:lab(O,72,90,'١٨٠°','t-pri',22),
+      ray:seg(O,P(O,150,50)),
+      a50:ang(O,40,0,50,'s-pink'), l50:lab(O,68,22,'؟','t-hand',24),
+      a130:ang(O,30,50,180,'s-ok'), l130:lab(O,58,118,'١٣٠°','t-ok'),
+      eq1:{type:'eq',x:220,y:292,s:26,text:'١٨٠ − ١٣٠ = ٥٠',cls:'t-ink'},
+      n1:{type:'note',x:505,y:135,h:62,c:'n0',w:230,text:'مستقيمة = ١٨٠°',size:22,rot:-3},
+      r1:seg(O2,P(O2,115,90)), r2:seg(O2,P(O2,115,200)), r3:seg(O2,P(O2,115,320)), o2:{type:'dot',x:O2[0],y:O2[1],r:5,c:'ink'},
+      b1:ang(O2,30,90,200,'s-pink'), b2:ang(O2,30,200,320,'s-ok'), b3:ang(O2,30,320,450,'s-pri'),
+      k1:lab(O2,60,145,'١١٠°','t-ink'), k2:lab(O2,60,260,'١٢٠°','t-ink'), k3:lab(O2,62,25,'١٣٠°','t-ink'),
+      n2:{type:'note',x:505,y:255,w:236,h:62,c:'n3',text:'دورة كاملة = ٣٦٠°',size:22,rot:2} },
+    beats:[
+      { say:'الزاوية المستقيمة هي نصف دورة، وقياسها مئة وثمانون درجة.', show:['ln','o','a180','l180','n1'] },
+      { say:'إذا قسمها شعاع إلى زاويتين، فمجموعهما مئة وثمانون دائمًا.', hide:['a180','l180'], show:['ray','a130','l130','a50','l50'] },
+      { say:'فإذا كانت إحداهما مئة وثلاثين، فالأخرى مئة وثمانون ناقص مئة وثلاثين، أي خمسون.', set:{l50:DEG('٥٠°')}, show:['eq1'] },
+      { say:'أما الدورة الكاملة حول نقطة فقياسها ثلاثمئة وستون درجة، فمجموع الزوايا حول أي نقطة ثلاثمئة وستون.', hide:['ln','o','ray','a50','l50','a130','l130','eq1'], show:['r1','r2','r3','o2','b1','k1','b2','k2','b3','k3','n2'], gap:.12 },
+    ]},
+  { t:'المتقابلتان بالرأس', items:{
+      m1:seg(P(X,150,30),P(X,150,210)), m2:seg(P(X,150,150),P(X,150,330)),
+      aR:ang(X,36,-30,30,'s-pink'), aL:ang(X,36,150,210,'s-pink'), aT:ang(X,28,30,150,'s-ok'), aB:ang(X,28,210,330,'s-ok'),
+      lR:lab(X,66,0,'٦٠°','t-ink'), lL:lab(X,66,180,'٦٠°','t-ink'), lT:lab(X,52,90,'١٢٠°','t-ink'), lB:lab(X,52,270,'١٢٠°','t-ink'),
+      n1:{type:'note',x:505,y:140,w:240,h:62,c:'n1',text:'المتقابلتان متساويتان',size:19,rot:-2},
+      n2:{type:'note',x:505,y:255,w:240,h:62,c:'n0',text:'المتجاورتان = ١٨٠°',size:19,rot:2} },
+    beats:[
+      { say:'عندما يتقاطع مستقيمان تتكوّن أربع زوايا حول نقطة التقاطع.', show:['m1','m2'] },
+      { say:'كل زاويتين متقابلتين بالرأس متساويتان. فإذا كانت هذه ستين، فالمقابلة لها ستون أيضًا.', show:['aR','lR','aL','lL','n1'] },
+      { say:'والزاويتان المتجاورتان على مستقيم واحد، فمجموعهما مئة وثمانون، وكل واحدة من الأخريين مئة وعشرون.', show:['aT','lT','aB','lB','n2'] },
+    ]},
+  { t:'متوازيان وقاطع', items:{
+      p1:seg([50,T1[1]],[370,T1[1]]), p2:seg([50,T2[1]],[370,T2[1]]), tr:seg(P(T1,55,60),P(T2,55,240)),
+      F:{type:'path',d:`M${P(T1,55,60).join(' ')} L${T2.join(' ')} L${T2[0]+90} ${T2[1]} M${T1.join(' ')} L${T1[0]+90} ${T1[1]}`,cls:'s-pri'},
+      Z:{type:'path',d:`M${T1[0]-90} ${T1[1]} L${T1.join(' ')} L${T2.join(' ')} L${T2[0]+90} ${T2[1]}`,cls:'s-pri'},
+      c1:ang(T1,26,0,60,'s-pink'), lc1:lab(T1,50,30,'٦٠°','t-ink'),
+      c2:ang(T2,26,0,60,'s-pink'), lc2:lab(T2,50,30,'٦٠°','t-ink'),
+      al:ang(T1,26,180,240,'s-ok'), lal:lab(T1,50,210,'٦٠°','t-ink'),
+      n1:{type:'note',x:508,y:140,w:230,h:60,c:'n1',text:'متناظرتان: متساويتان',size:19,rot:-2},
+      n2:{type:'note',x:508,y:235,w:230,h:60,c:'n3',text:'متبادلتان: متساويتان',size:19,rot:2},
+      warn:{type:'text',x:225,y:318,s:22,text:'بشرط أن يكون المستقيمان متوازيين',hand:true} },
+    beats:[
+      { say:'المستقيمان المُتوازيان لا يلتقيان أبدًا. والقاطع مستقيم يقطعهما معًا.', show:['p1','p2','tr'] },
+      { say:'الزاويتان المتناظرتان تقعان في الموقع نفسه عند التقاطعين، وهما متساويتان.', show:['F','c1','lc1','c2','lc2','n1'] },
+      { say:'والزاويتان المتبادلتان داخليًا تقعان بين المستقيمين على جانبين مختلفين من القاطع، وهما متساويتان أيضًا.', hide:['F','c1','lc1'], show:['Z','al','lal','n2'], hl:['c2'] },
+      { say:'انتبه: هذه القاعدة تصح فقط إذا كان المستقيمان متوازيين.', show:['warn'] },
+    ]},
+  { t:'دورك: أوجد سين', items:{
+      p1:seg([150,Q1[1]],[520,Q1[1]]), p2:seg([150,Q2[1]],[520,Q2[1]]), tr:seg(P(Q1,32,60),P(Q2,32,240)),
+      a60:ang(Q1,22,0,60,'s-pink'), l60:lab(Q1,52,18,'٦٠°','t-ink'),
+      as:ang(Q2,22,240,360,'s-ok'), ls:lab(Q2,40,300,'س','t-ok',22),
+      c2:ang(Q2,22,0,60,'s-pink'), lc2:lab(Q2,52,18,'٦٠°','t-pink'),
+      eq:{type:'eq',x:320,y:290,s:30,text:'١٨٠ − ٦٠ = ١٢٠°',cls:'t-pri'} },
+    beats:[
+      { say:'مستقيمان مُتوازيان يقطعهما قاطع، والزاوية عند التقاطع الأعلى ستون درجة.', show:['p1','p2','tr','a60','l60'] },
+      { say:'ما قياس الزاوية سين عند التقاطع الأسفل؟', show:['as','ls'] },
+    ],
+    ask:{ opts:['٦٠°','١٢٠°','٣٠°','٢٤٠°'], a:1, y:246, ltr:true,
+      right:'صحيح. عند التقاطع الأسفل زاوية مناظرة قياسها ستون، وهي مع سين على مستقيم واحد، فسين مئة وعشرون.',
+      wrong:'الجواب مئة وعشرون. الزاوية المناظرة للستين تقع بجوار سين على مستقيم واحد، فسين مئة وثمانون ناقص ستين.',
+      show:['c2','lc2','eq'] } },
+  ],
+  quiz:[
+    {q:'زاويتان متجاورتان على مستقيم، إحداهما ١١٠°. ما قياس الأخرى؟', o:['٧٠°','١١٠°','٨٠°','٢٥٠°'], a:0, e:'مجموعهما ١٨٠°، إذن ١٨٠ − ١١٠ = ٧٠°.'},
+    {q:'تقاطع مستقيمان فكانت إحدى الزوايا ٤٥°. ما قياس الزاوية المقابلة لها بالرأس؟', o:['١٣٥°','٤٥°','٩٠°','٣١٥°'], a:1, e:'المتقابلتان بالرأس متساويتان، أما ١٣٥° فهي المجاورة.'},
+    {q:'ثلاث زوايا حول نقطة: ١٢٠° و ١٥٠° و س. ما قيمة س؟', o:['٦٠°','١٠٠°','٩٠°','٢١٠°'], a:2, e:'مجموع الزوايا حول نقطة ٣٦٠°، إذن س = ٣٦٠ − ٢٧٠ = ٩٠°.'},
+  ] });
+}
+
+/* =================== 2. Triangles =================== */
+{
+const B=[60,275], C=[330,275], A=apex(B,C,60,50);
+const I1=[80,280], I2=[250,280], IA=apex(I1,I2,65,65);
+const E1=[360,280], E2=[560,280], EA=apex(E1,E2,60,60);
+const S1=[268,200], S2=[372,200], SA=apex(S1,S2,70,70);
+const letters=[[A[0],A[1]-12,'أ',22],[B[0]-12,B[1]+24,'ب',22],[C[0]+12,C[1]+24,'ج',22]];
+add({ key:'ge-triangles', sk:'geometry', ord:20, title:'المثلث وزواياه', min:'٣ دقائق',
+  goals:['تعرف لماذا مجموع زوايا المثلث ١٨٠°','تحسب الزاوية الخارجية من الداخليتين البعيدتين','تستخدم خواص المثلث المتساوي الساقين والمتساوي الأضلاع'],
+  scenes:[
+  { t:'مجموع زوايا المثلث', items:{
+      tri:{type:'poly',points:pts([A,B,C]),c:'prisoft',labels:letters},
+      aB:ang(B,34,0,60,'s-pink'), lB:lab(B,60,28,'٦٠°'),
+      aC:ang(C,34,130,180,'s-ok'), lC:lab(C,60,156,'٥٠°'),
+      aA:ang(A,30,240,310,'s-pri'), lA:lab(A,58,275,'٧٠°'),
+      par:seg([A[0]-110,A[1]],[A[0]+110,A[1]]),
+      cL:ang(A,30,180,240,'s-pink'), lcL:lab(A,54,208,'٦٠°'),
+      cR:ang(A,30,310,360,'s-ok'), lcR:lab(A,54,332,'٥٠°'),
+      n1:{type:'note',x:510,y:135,w:200,h:62,c:'n0',text:'المجموع = ١٨٠°',size:24,rot:-3},
+      bx:{type:'box',x:392,y:215,w:236,h:56,c:'surface',text:'٦٠ + ٧٠ + ٥٠ = ١٨٠',s:22,ltr:true} },
+    beats:[
+      { say:'هذا المثلث ألف باء جيم، وله ثلاث زوايا.', show:['tri'] },
+      { say:'زاوية باء ستون، وزاوية جيم خمسون، وزاوية ألف سبعون.', show:['aB','lB','aC','lC','aA','lA'], gap:.3 },
+      { say:'ارسم من ألف مستقيمًا يوازي القاعدة، فتظهر عنده زاويتان تساويان زاويتي القاعدة، لأنهما متبادلتان.', show:['par','cL','lcL','cR','lcR'] },
+      { say:'والزوايا الثلاث عند ألف تكوّن زاوية مستقيمة. إذن مجموع زوايا أي مثلث مئة وثمانون درجة.', show:['n1','bx'], hl:['aA'] },
+    ]},
+  { t:'الزاوية الخارجية', items:{
+      tri:{type:'poly',points:pts([A,B,C]),c:'prisoft',labels:letters},
+      aB:ang(B,34,0,60,'s-pink'), lB:lab(B,60,28,'٦٠°'),
+      aA:ang(A,30,240,310,'s-pri'), lA:lab(A,58,275,'٧٠°'),
+      ext:seg(C,[420,C[1]]),
+      aX:ang(C,26,0,130,'s-pink'), lX:lab(C,52,62,'؟','t-pink',24),
+      aC:ang(C,40,130,180,'s-ok'), lC:lab(C,64,156,'٥٠°','t-ok'),
+      bx:{type:'box',x:415,y:100,w:195,h:56,c:'surface',text:'٦٠ + ٧٠ = ١٣٠',s:22,ltr:true},
+      n1:{type:'note',x:510,y:205,w:236,h:66,c:'n1',text:'الخارجية = البعيدتان',size:19,rot:2} },
+    beats:[
+      { say:'في المثلث نفسه، الزاوية عند باء ستون، والزاوية عند ألف سبعون.', show:['tri','aB','lB','aA','lA'] },
+      { say:'مُدّ القاعدة بعد جيم، فتتكوّن زاوية خارجية. كم قياسها؟', show:['ext','aX','lX'] },
+      { say:'الزاوية الخارجية تساوي مجموع الزاويتين الداخليتين البعيدتين عنها: ستون زائد سبعين يساوي مئة وثلاثين.', set:{lX:DEG('١٣٠°')}, show:['bx','n1'] },
+      { say:'وتحقّق بنفسك: هي مع الزاوية المجاورة لها، الخمسين، تكمل مئة وثمانين.', show:['aC','lC'] },
+    ]},
+  { t:'متساوي الساقين والأضلاع', items:{
+      iso:{type:'poly',points:pts([IA,I1,I2]),c:'pinksoft'}, t1:tick(I1,IA), t2:tick(I2,IA),
+      i1:ang(I1,28,0,65,'s-pink'), li1:lab(I1,52,30,'٦٥°'), i2:ang(I2,28,115,180,'s-pink'), li2:lab(I2,52,150,'٦٥°'),
+      i3:ang(IA,26,245,295,'s-pri'), li3:lab(IA,50,270,'٥٠°','t-pri'),
+      cap1:{type:'text',x:165,y:322,s:20,text:'متساوي الساقين',cls:'t-ink2'},
+      equ:{type:'poly',points:pts([EA,E1,E2]),c:'oksoft'}, u1:tick(E1,EA), u2:tick(E2,EA), u3:tick(E1,E2),
+      e1:lab(E1,42,30,'٦٠°'), e2:lab(E2,42,150,'٦٠°'), e3:lab(EA,44,270,'٦٠°'),
+      cap2:{type:'text',x:460,y:322,s:20,text:'متساوي الأضلاع',cls:'t-ink2'} },
+    beats:[
+      { say:'المثلث المتساوي الساقين له ضلعان متساويان، نعلّمهما بشرطتين.', show:['iso','t1','t2','cap1'] },
+      { say:'والزاويتان عند قاعدته متساويتان. فإذا كانت إحداهما خمسًا وستين، فالأخرى مثلها.', show:['i1','li1','i2','li2'] },
+      { say:'والثالثة مئة وثمانون ناقص مئة وثلاثين، أي خمسون.', show:['i3','li3'] },
+      { say:'أما المتساوي الأضلاع فأضلاعه الثلاثة متساوية، وكل زاوية فيه ستون درجة.', show:['equ','u1','u2','u3','e1','e2','e3','cap2'], gap:.2 },
+    ]},
+  { t:'دورك: زاوية القاعدة', items:{
+      tri:{type:'poly',points:pts([SA,S1,S2]),c:'pinksoft'}, t1:tick(S1,SA), t2:tick(S2,SA),
+      aA:ang(SA,24,250,290,'s-pri'), lA:lab(SA,46,270,'٤٠°','t-pri',20),
+      b1:ang(S1,22,0,70,'s-pink'), lb:lab(S1,42,35,'س','t-pink',22), b2:ang(S2,22,110,180,'s-pink'),
+      cap:{type:'text',x:140,y:136,s:24,text:'متساوي الساقين',hand:true},
+      eq:{type:'eq',x:320,y:290,s:30,text:'(١٨٠ − ٤٠) ÷ ٢ = ٧٠°',cls:'t-pri'} },
+    beats:[
+      { say:'مثلث متساوي الساقين، وزاوية رأسه أربعون درجة.', show:['tri','t1','t2','aA','lA','cap'] },
+      { say:'ما قياس كل زاوية من زاويتي القاعدة، سين؟', show:['b1','b2','lb'] },
+    ],
+    ask:{ opts:['٤٠°','٧٠°','١٤٠°','٥٠°'], a:1, y:246, ltr:true,
+      right:'أحسنت. الباقي مئة وأربعون، نقسمه على زاويتين متساويتين، فتكون كل واحدة سبعين.',
+      wrong:'الجواب سبعون. نطرح أربعين من مئة وثمانين فيبقى مئة وأربعون، ثم نقسمه بالتساوي على زاويتي القاعدة.',
+      show:['eq'] } },
+  ],
+  quiz:[
+    {q:'زاويتان في مثلث قياسهما ٤٥° و ٧٥°. ما قياس الثالثة؟', o:['٦٠°','٥٠°','٧٠°','١٢٠°'], a:0, e:'١٨٠ − (٤٥ + ٧٥) = ٦٠°.'},
+    {q:'زاوية خارجية لمثلث قياسها ١١٠°، وإحدى الداخليتين البعيدتين ٤٠°. ما قياس الأخرى؟', o:['٣٠°','٧٠°','١٥٠°','٥٠°'], a:1, e:'الخارجية = مجموع البعيدتين، إذن ١١٠ − ٤٠ = ٧٠°.'},
+    {q:'مثلث متساوي الأضلاع. القيمة الأولى: قياس إحدى زواياه. القيمة الثانية: ٦٠°', o:['القيمة الأولى أكبر','القيمة الثانية أكبر','القيمتان متساويتان','المعطيات غير كافية'], a:2, e:'كل زاوية في المثلث المتساوي الأضلاع = ١٨٠ ÷ ٣ = ٦٠°.'},
+  ] });
+}
+
+/* =================== 3. Perimeter and area =================== */
+{
+const rect=[[90,100],[330,100],[330,260],[90,260]];
+const L=[[300,70],[400,70],[400,190],[240,190],[240,130],[300,130]];
+add({ key:'ge-area', sk:'geometry', ord:30, title:'المحيط والمساحة', min:'٤ دقائق',
+  goals:['تفرّق بين المحيط والمساحة','تحسب مساحة المستطيل والمربع','تحسب مساحة المثلث بنصف القاعدة في الارتفاع','تقسم الشكل المركّب إلى أشكال بسيطة'],
+  scenes:[
+  { t:'المحيط: طول السور', items:{
+      r:{type:'poly',points:pts(rect),c:'prisoft'},
+      lt:{type:'text',x:210,y:88,s:22,text:'٦ سم'}, lb:{type:'text',x:210,y:290,s:22,text:'٦ سم'},
+      ll:{type:'text',x:58,y:188,s:22,text:'٤ سم'}, lr:{type:'text',x:362,y:188,s:22,text:'٤ سم'},
+      trace:{type:'path',d:'M90 100 H330 V260 H90 Z',cls:'s-pink'},
+      eq1:{type:'eq',x:510,y:150,s:24,text:'٦ + ٤ + ٦ + ٤ = ٢٠',cls:'t-pink'},
+      n1:{type:'note',x:505,y:250,w:250,h:66,c:'n0',text:'٢ × (الطول + العرض)',size:20,rot:-2} },
+    beats:[
+      { say:'المحيط هو طول الحدود حول الشكل، كأنك تمشي على السور دورة كاملة.', show:['r','lt','lr','lb','ll'], gap:.25 },
+      { say:'في هذا المستطيل نجمع الأضلاع الأربعة: ستة زائد أربعة زائد ستة زائد أربعة يساوي عشرين سنتيمترًا.', show:['trace','eq1'] },
+      { say:'وباختصار: محيط المستطيل ضعف مجموع الطول والعرض.', show:['n1'] },
+    ]},
+  { t:'المساحة: كم مربعًا؟', items:{
+      g:{type:'grid',x:90,y:100,rows:4,cols:6,cell:38,gap:2,fill:24,c:'n2'},
+      lt:{type:'text',x:209,y:88,s:22,text:'٦ سم'}, ll:{type:'text',x:58,y:188,s:22,text:'٤ سم'},
+      eq1:{type:'eq',x:510,y:150,s:26,text:'٦ × ٤ = ٢٤ سم²',cls:'t-pri'},
+      sq:{type:'grid',x:460,y:225,rows:5,cols:5,cell:16,gap:2,fill:25,c:'n1'},
+      eq2:{type:'eq',x:505,y:345,s:22,text:'٥ × ٥ = ٢٥',cls:'t-ink'},
+      n1:{type:'text',x:505,y:212,s:22,text:'المربع',cls:'t-ink2'} },
+    beats:[
+      { say:'المساحة هي عدد المربعات الصغيرة التي تغطي الشكل من الداخل.', show:['g'] },
+      { say:'هنا أربعة صفوف، في كل صف ستة مربعات. فالمساحة ستة في أربعة، أي أربعة وعشرون سنتيمترًا مربعًا.', show:['lt','ll','eq1'] },
+      { say:'والمربع طوله يساوي عرضه، فمساحته الضلع في نفسه. مربع ضلعه خمسة مساحته خمسة وعشرون.', show:['sq','n1','eq2'] },
+    ]},
+  { t:'مساحة المثلث', items:{
+      box:{type:'path',d:'M70 110 H286 V254 H70 Z',cls:'s-ink'},
+      oL:{type:'poly',points:'70,110 170,110 70,254',c:'surface2'}, oR:{type:'poly',points:'170,110 286,110 286,254',c:'surface2'},
+      tri:{type:'poly',points:'70,254 286,254 170,110',c:'pinksoft'},
+      h:seg([170,110],[170,254],'s-pri'), rm:{type:'path',d:'M170 242 H182 V254',cls:'s-ink'},
+      lbase:{type:'text',x:178,y:284,s:22,text:'القاعدة ٦'},
+      hb:seg([300,110],[300,254],'s-pri'), lh:{type:'text',x:362,y:190,s:22,text:'الارتفاع ٤',cls:'t-pri'},
+      eq1:{type:'eq',x:515,y:150,s:26,text:'½ × ٦ × ٤ = ١٢',cls:'t-pri'},
+      n1:{type:'note',x:510,y:255,w:236,h:66,c:'n0',text:'½ القاعدة × الارتفاع',size:19,rot:-2} },
+    beats:[
+      { say:'لنجد مساحة المثلث، نرسمه داخل مستطيل له القاعدة نفسها والارتفاع نفسه.', show:['box','tri','lbase'] },
+      { say:'ارتفاع المثلث يقسم المستطيل جزأين، والمثلث يأخذ نصف كل جزء بالضبط.', show:['h','rm','oL','oR'] },
+      { say:'إذن مساحة المثلث نصف مساحة المستطيل: نصف في ستة في أربعة يساوي اثني عشر.', show:['hb','lh','eq1'] },
+      { say:'احفظها: نصف القاعدة في الارتفاع. والارتفاع عمودي على القاعدة دائمًا، وليس الضلع المائل.', show:['n1'], hl:['h'] },
+    ]},
+  { t:'دورك: شكل مركّب', items:{
+      sh:{type:'poly',points:pts(L),c:'prisoft'},
+      l5:lab([350,62],0,0,'٥'), l6:lab([416,130],0,0,'٦'), l8:lab([320,203],0,0,'٨'), l3:lab([226,160],0,0,'٣'),
+      l3a:lab([270,120],0,0,'٣','t-ink2',18), l3b:lab([288,100],0,0,'٣','t-ink2',18),
+      cut:seg([300,130],[400,130],'s-pink'),
+      iA:lab([320,160],0,0,'٢٤','t-pri',22), iB:lab([350,100],0,0,'١٥','t-pri',22),
+      eq:{type:'eq',x:320,y:290,s:30,text:'٢٤ + ١٥ = ٣٩',cls:'t-pri'} },
+    beats:[
+      { say:'هذا شكل مركّب، ليس له قانون مباشر.', show:['sh','l5','l6','l8','l3','l3a','l3b'], gap:.15 },
+      { say:'الحيلة أن نقسمه بخط إلى مستطيلين، ثم نجمع مساحتيهما. ما مساحة الشكل؟', show:['cut'] },
+    ],
+    ask:{ opts:['٤٨','٣٩','٢٨','٤٥'], a:1, y:248,
+      right:'صحيح. المستطيل السفلي ثمانية في ثلاثة، أربعة وعشرون، والعلوي خمسة في ثلاثة، خمسة عشر، والمجموع تسعة وثلاثون.',
+      wrong:'الجواب تسعة وثلاثون: أربعة وعشرون للمستطيل السفلي وخمسة عشر للعلوي. وانتبه، ثمانية وعشرون هي المحيط لا المساحة.',
+      show:['iA','iB','eq'] } },
+  ],
+  quiz:[
+    {q:'مستطيل طوله ٩ سم وعرضه ٤ سم. ما مساحته؟', o:['٢٦ سم²','٣٦ سم²','١٣ سم²','٤٥ سم²'], a:1, e:'٩ × ٤ = ٣٦. أما ٢٦ فهو المحيط.'},
+    {q:'مثلث قاعدته ١٠ وارتفاعه ٦. ما مساحته؟', o:['٦٠','١٦','٣٠','٣٢'], a:2, e:'½ × ١٠ × ٦ = ٣٠.'},
+    {q:'مربع محيطه ٢٠ سم. ما مساحته؟', o:['٢٥ سم²','٢٠ سم²','١٠٠ سم²','٤٠ سم²'], a:0, e:'الضلع ٢٠ ÷ ٤ = ٥، والمساحة ٥ × ٥ = ٢٥.'},
+  ] });
+}
+
+/* =================== 4. Pythagoras =================== */
+{
+const C1=[110,270], A1=[110,138], B1=[286,270];
+const C=[220,232], A=[220,160], B=[316,232];
+const Q=[270,190], QA=[270,118], QB=[366,190];
+add({ key:'ge-pyth', sk:'geometry', ord:40, title:'نظرية فيثاغورس', min:'٣ دقائق',
+  goals:['تعرف الوتر في المثلث القائم','تفهم نظرية فيثاغورس بالمربعات','تحفظ الثلاثيات ٣-٤-٥ و ٦-٨-١٠ و ٥-١٢-١٣','تجد الضلع المجهول بسرعة'],
+  scenes:[
+  { t:'المثلث القائم', items:{
+      tri:{type:'poly',points:pts([A1,B1,C1]),c:'prisoft'}, rm:rmark(C1,0,16),
+      g1:{type:'text',x:84,y:212,s:20,text:'ضلع',cls:'t-ink2'}, g2:{type:'text',x:198,y:296,s:20,text:'ضلع',cls:'t-ink2'},
+      hyp:seg(A1,B1,'s-pink'), lh:{type:'text',x:222,y:190,s:24,text:'الوتر',hand:true},
+      n1:{type:'note',x:500,y:140,w:200,h:62,c:'n1',text:'الوتر أطول ضلع',size:22,rot:-2},
+      n2:{type:'note',x:500,y:250,w:240,h:62,c:'n3',text:'يقابل الزاوية القائمة',size:19,rot:2} },
+    beats:[
+      { say:'المثلث القائم فيه زاوية قياسها تسعون درجة، ونعلّمها بمربع صغير.', show:['tri','rm'] },
+      { say:'الضلعان اللذان يصنعان الزاوية القائمة يسمّيان ضلعي القائمة.', show:['g1','g2'] },
+      { say:'والضلع المقابل للزاوية القائمة هو الوتر، وهو أطول الأضلاع دائمًا.', show:['hyp','lh','n1','n2'] },
+    ]},
+  { t:'القانون بالمربعات', items:{
+      q3:{type:'grid',x:148,y:160,rows:3,cols:3,cell:22,gap:2,fill:9,c:'n1'},
+      q4:{type:'grid',x:220,y:232,rows:4,cols:4,cell:22,gap:2,fill:16,c:'n3'},
+      q5:{type:'grid',x:245,y:89,rows:5,cols:5,cell:22,gap:2,fill:25,c:'n2',rot:36.87},
+      tri:{type:'poly',points:pts([A,B,C]),c:'prisoft'}, rm:rmark(C,0,12),
+      s3:lab([204,203],0,0,'٣'), s4:lab([268,254],0,0,'٤'), s5:lab([280,182],0,0,'٥'),
+      t9:lab([184,196],0,0,'٩','t-note',28), t16:lab([268,282],0,0,'١٦','t-note',28), t25:lab([304,150],0,0,'٢٥','t-note',30),
+      bx:{type:'box',x:425,y:120,w:185,h:56,c:'surface',text:'٩ + ١٦ = ٢٥',s:24,ltr:true},
+      n1:{type:'note',x:517,y:240,w:190,h:66,c:'n0',text:'أ² + ب² = ج²',size:28,rot:-2},
+      cap:{type:'text',x:517,y:310,s:20,text:'ج هو الوتر',hand:true} },
+    beats:[
+      { say:'في هذا المثلث القائم، ضلعا القائمة ثلاثة وأربعة، والوتر خمسة.', show:['tri','rm','s3','s4','s5'] },
+      { say:'ارسم مربعًا على كل ضلع. مساحة الأول تسعة، ومساحة الثاني ستة عشر.', hide:['s3','s4','s5'], show:['q3','t9','q4','t16'] },
+      { say:'ومربع الوتر مساحته خمسة وعشرون، وهي تسعة زائد ستة عشر تمامًا.', show:['q5','t25','bx'] },
+      { say:'هذه نظرية فيثاغورس: ألف تربيع زائد باء تربيع يساوي جيم تربيع، وجيم هو الوتر.', show:['n1','cap'] },
+    ]},
+  { t:'ثلاثيات تحفظها', items:{
+      n1:{type:'note',x:490,y:145,w:180,h:76,c:'n0',text:'٣ ، ٤ ، ٥',size:32,rot:-3},
+      e1:{type:'eq',x:490,y:218,s:20,text:'٩ + ١٦ = ٢٥',cls:'t-ink2'},
+      ar:{type:'arrow',x1:390,y1:128,x2:262,y2:128,bend:-40,text:'× ٢'},
+      n2:{type:'note',x:160,y:145,w:180,h:76,c:'n3',text:'٦ ، ٨ ، ١٠',size:32,rot:2},
+      e2:{type:'eq',x:160,y:218,s:20,text:'٣٦ + ٦٤ = ١٠٠',cls:'t-ink2'},
+      n3:{type:'note',x:325,y:275,w:210,h:76,c:'n1',text:'٥ ، ١٢ ، ١٣',size:32,rot:-1},
+      e3:{type:'eq',x:325,y:340,s:20,text:'٢٥ + ١٤٤ = ١٦٩',cls:'t-ink2'} },
+    beats:[
+      { say:'احفظ أطوالًا مشهورة توفّر عليك الحساب. أشهرها ثلاثة وأربعة وخمسة.', show:['n1','e1'] },
+      { say:'ومضاعفاتها تصلح أيضًا: ضاعفها تحصل على ستة وثمانية وعشرة.', show:['ar','n2','e2'] },
+      { say:'والثلاثية الثانية: خمسة واثنا عشر وثلاثة عشر. ابحث عنها قبل أن تحسب.', show:['n3','e3'] },
+    ]},
+  { t:'دورك: الضلع المجهول', items:{
+      tri:{type:'poly',points:pts([QA,QB,Q]),c:'prisoft'}, rm:rmark(Q,0,12),
+      l6:lab([254,160],0,0,'٦'), l10:lab([332,142],0,0,'١٠'), ls:lab([318,210],0,0,'س','t-pink',22),
+      n1:{type:'note',x:130,y:150,w:190,h:62,c:'n2',text:'س² = ١٠² − ٦²',size:24,rot:-3},
+      eq:{type:'eq',x:320,y:290,s:28,text:'س² = ١٠٠ − ٣٦ = ٦٤  ←  س = ٨',cls:'t-pri'} },
+    beats:[
+      { say:'في هذا المثلث القائم نعرف الوتر، وهو عشرة، وأحد الضلعين، وهو ستة.', show:['tri','rm','l6','l10','ls'] },
+      { say:'لإيجاد ضلع مجهول نطرح: مربع الوتر ناقص مربع الضلع المعلوم.', show:['n1'] },
+      { say:'ما طول الضلع سين؟', hl:['ls'] },
+    ],
+    ask:{ opts:['٤','٨','١٦','١٢'], a:1, y:248,
+      right:'أحسنت. مئة ناقص ستة وثلاثين يساوي أربعة وستين، وجذرها ثمانية. إنها ضعف ثلاثية ثلاثة وأربعة وخمسة.',
+      wrong:'الجواب ثمانية. مئة ناقص ستة وثلاثين يساوي أربعة وستين، وجذرها ثمانية. لاحظ أنها ضعف ثلاثة وأربعة وخمسة.',
+      show:['eq'] } },
+  ],
+  quiz:[
+    {q:'مثلث قائم ضلعا القائمة فيه ٥ و ١٢. ما طول الوتر؟', o:['١٧','١٣','١٥','١٤'], a:1, e:'ثلاثية (٥، ١٢، ١٣): ٢٥ + ١٤٤ = ١٦٩ = ١٣².'},
+    {q:'مثلث قائم وتره ٢٠ وأحد ضلعيه ١٢. ما طول الضلع الآخر؟', o:['٨','١٦','١٤','١٠'], a:1, e:'مضاعف (٣، ٤، ٥) × ٤: الأطوال ١٢، ١٦، ٢٠.'},
+    {q:'أي مما يلي يصلح أطوالًا لمثلث قائم؟', o:['٤ ، ٥ ، ٦','٥ ، ٦ ، ٧','٩ ، ١٢ ، ١٥','٢ ، ٣ ، ٤'], a:2, e:'٩، ١٢، ١٥ = (٣، ٤، ٥) × ٣، و ٨١ + ١٤٤ = ٢٢٥.'},
+  ] });
+}
+
+/* =================== 5. Circles =================== */
+{
+const K=[190,210], K2=[190,205];
+const cl=[170,200], cr=[460,200], d=R1(85/Math.SQRT2);
+add({ key:'ge-circle', sk:'geometry', ord:50, title:'الدائرة', min:'٣ دقائق',
+  goals:['تعرف نصف القطر والقطر والعلاقة بينهما','تحسب محيط الدائرة ٢πنق ومساحتها πنق²','تربط الدائرة بالمربع المرسوم داخلها أو حولها'],
+  scenes:[
+  { t:'نصف القطر والقطر', items:{
+      c:{type:'circle',cx:K[0],cy:K[1],r:110,c:'surface2'},
+      r1:seg(K,P(K,110,45),'s-line'), r2:seg(K,P(K,110,205),'s-line'), r3:seg(K,P(K,110,255),'s-line'),
+      cen:{type:'dot',x:K[0],y:K[1],r:5,c:'ink',text:'م',dx:12,dy:28},
+      rad:seg(K,P(K,110,0),'s-pri'), lr:{type:'text',x:250,y:198,s:22,text:'نق',cls:'t-pri'},
+      dia:seg(P(K,110,150),P(K,110,330),'s-pink'), ld:{type:'text',x:120,y:210,s:22,text:'القطر',hand:true},
+      n1:{type:'note',x:505,y:140,w:200,h:62,c:'n1',text:'القطر = ٢ × نق',size:24,rot:-2},
+      n2:{type:'note',x:505,y:255,w:200,h:62,c:'n3',text:'نق = القطر ÷ ٢',size:24,rot:2} },
+    beats:[
+      { say:'الدائرة كل نقاطها على البعد نفسه من نقطة واحدة هي المركز.', show:['c','cen','r1','r2','r3'] },
+      { say:'هذا البعد اسمه نصف القطر.', show:['rad','lr'] },
+      { say:'والقطر يمر بالمركز من طرف إلى طرف، فهو ضعف نصف القطر.', show:['dia','ld','n1'] },
+      { say:'انتبه: إذا أُعطيت القطر فاقسمه على اثنين قبل أن تعوّض في القانون.', show:['n2'] },
+    ]},
+  { t:'المحيط والمساحة', items:{
+      fill:{type:'circle',cx:K2[0],cy:K2[1],r:100,c:'prisoft'},
+      edge:{type:'circle',cx:K2[0],cy:K2[1],r:100,c:'surface2'},
+      trace:{type:'path',d:circD(K2,100),cls:'s-pink'},
+      rad:seg(K2,P(K2,100,0),'s-ink'), lr:{type:'eq',x:240,y:196,s:22,text:'نق = ٣',cls:'t-ink'},
+      n1:{type:'note',x:500,y:115,w:256,h:58,c:'n1',text:'المحيط = ٢ × π × نق',size:21,rot:-2},
+      n2:{type:'note',x:500,y:200,w:256,h:58,c:'n2',text:'المساحة = π × نق²',size:21,rot:2},
+      x1:{type:'text',x:505,y:275,s:22,text:'المحيط = ٦π',cls:'t-pink'},
+      x2:{type:'text',x:505,y:310,s:22,text:'المساحة = ٩π',cls:'t-pri'},
+      pi:{type:'eq',x:190,y:342,s:22,text:'π = ط ≈ ٣٫١٤',cls:'t-ink2'} },
+    beats:[
+      { say:'محيط الدائرة هو طول حدودها، ويساوي اثنين في باي في نصف القطر.', show:['edge','trace','n1'] },
+      { say:'ومساحتها ما بداخلها، وتساوي باي في مربع نصف القطر.', hide:['edge'], show:['fill','n2'] },
+      { say:'دائرة نصف قطرها ثلاثة: محيطها ستة باي، ومساحتها تسعة باي.', show:['rad','lr','x1','x2'] },
+      { say:'وباي عدد ثابت قيمته تقريبًا ثلاثة فاصلة أربعة عشر، ويُكتب أحيانًا بالحرف طاء. وغالبًا تبقى الإجابة بدلالة باي.', show:['pi'] },
+    ]},
+  { t:'الدائرة والمربع', items:{
+      sqO:{type:'poly',points:pts([[cl[0]-70,cl[1]-70],[cl[0]+70,cl[1]-70],[cl[0]+70,cl[1]+70],[cl[0]-70,cl[1]+70]]),c:'oksoft'},
+      cL:{type:'circle',cx:cl[0],cy:cl[1],r:70,c:'prisoft'},
+      dL:seg([cl[0]-70,cl[1]],[cl[0]+70,cl[1]],'s-pri'),
+      capL:{type:'text',x:cl[0],y:302,s:20,text:'ضلع المربع = القطر'},
+      cR:{type:'circle',cx:cr[0],cy:cr[1],r:85,c:'oksoft'},
+      sqI:{type:'poly',points:pts([[cr[0]-d,cr[1]-d],[cr[0]+d,cr[1]-d],[cr[0]+d,cr[1]+d],[cr[0]-d,cr[1]+d]]),c:'prisoft'},
+      dR:seg([cr[0]-d,cr[1]+d],[cr[0]+d,cr[1]-d],'s-pink'),
+      capR:{type:'text',x:cr[0],y:318,s:20,text:'قطر المربع = القطر'},
+      tip:{type:'text',x:320,y:348,s:22,text:'ارسم القطر دائمًا',hand:true} },
+    beats:[
+      { say:'إذا رُسمت دائرة داخل مربع تمس أضلاعه، فضلع المربع يساوي قطر الدائرة.', show:['sqO','cL','dL','capL'] },
+      { say:'وإذا رُسم مربع داخل دائرة، فقطر المربع هو نفسه قطر الدائرة.', show:['cR','sqI','dR','capR'] },
+      { say:'هاتان الحالتان تتكرران كثيرًا في أسئلة القدرات، فارسم القطر أولًا، وستجد الحل.', show:['tip'], hl:['dL','dR'] },
+    ]},
+  { t:'دورك: دائرة داخل مربع', items:{
+      sq:{type:'poly',points:'260,72 380,72 380,192 260,192',c:'oksoft'},
+      c:{type:'circle',cx:320,cy:132,r:60,c:'prisoft'},
+      l10:lab([244,139],0,0,'١٠','t-ink',22),
+      dia:seg([260,132],[380,132],'s-pri'),
+      eq:{type:'eq',x:320,y:290,s:30,text:'نق = ٥  ←  المساحة = ٢٥π',cls:'t-pri'} },
+    beats:[
+      { say:'مربع طول ضلعه عشرة، رُسمت بداخله دائرة تمس أضلاعه الأربعة.', show:['sq','c','l10'] },
+      { say:'تذكّر أن ضلع المربع هنا هو قطر الدائرة. فما مساحة الدائرة؟', show:['dia'] },
+    ],
+    ask:{ opts:['١٠٠π','٢٥π','١٠π','٢٠π'], a:1, y:248, ltr:true,
+      right:'ممتاز. القطر عشرة، فنصف القطر خمسة، والمساحة باي في خمسة وعشرين، أي خمسة وعشرون باي.',
+      wrong:'الجواب خمسة وعشرون باي. القطر عشرة، فنصف القطر خمسة، ومربعه خمسة وعشرون. ومن نسي القسمة على اثنين وصل إلى مئة باي.',
+      show:['eq'] } },
+  ],
+  quiz:[
+    {q:'دائرة نصف قطرها ٤ سم. ما محيطها؟', o:['١٦π','٨π','٤π','٦٤π'], a:1, e:'المحيط = ٢ × π × ٤ = ٨π. أما ١٦π فهي المساحة.'},
+    {q:'دائرة قطرها ١٠. ما مساحتها؟', o:['١٠٠π','١٠π','٢٥π','٥٠π'], a:2, e:'نق = ٥، والمساحة = π × ٥² = ٢٥π.'},
+    {q:'مربع مرسوم داخل دائرة نصف قطرها ٥. ما طول قطر المربع؟', o:['٥','١٠','٢٥','٥√٢'], a:1, e:'قطر المربع = قطر الدائرة = ٢ × ٥ = ١٠.'},
+  ] });
+}
+})();
+/* Explainers: odd (المفردة الشاذة) */
+(function(){ if(!window.XP||!XP.ready) return;
+
+/* Workaround for an engine reveal bug: POP items (box, circle, check, cross, dot, pie, poly) without an
+   initial transformOrigin end up shifted by GSAP smoothOrigin after the scale .3 -> 1 pop. A near-zero rot
+   makes draw() set transformOrigin at scale 1, so the pop no longer shifts them. Harmless once the engine is fixed. */
+const POPT=new Set(['box','circle','check','cross','dot','pie','poly']);
+const ADD=L=>{ L.scenes.forEach(sc=>{ const it=sc.items||{}; for(const k in it) if(POPT.has(it[k].type)&&!it[k].rot) it[k].rot=.001; }); XP.add(L); };
+
+/* four word notes in a row (RTL: first word on the right) */
+const W4=(words,y,cols)=>{ const xs=[525,395,265,135], o={}; words.forEach((w,i)=>{ o['w'+(i+1)]={type:'note',x:xs[i],y,w:112,h:76,c:cols[i],text:w,size:28,rot:[-3,2,-2,3][i]}; }); return o; };
+
+ADD({ key:'od-link', sk:'odd', ord:10, title:'المفردة الشاذة: ابحث عن الرابط', min:'٣ دقائق',
+  goals:['تعرف شكل سؤال المفردة الشاذة','تبحث عن الرابط بين ثلاث كلمات قبل أن تختار','تميّز أنواع الرابط: المعنى، والصنف، والجزء، والدرجة','تختار الكلمة التي تكسر الرابط'],
+  scenes:[
+  { t:'ثلاث تجتمع وواحدة تخرج',
+    items:{
+      frame:{type:'path',d:'M207 128 H583 Q597 128 597 142 V218 Q597 232 583 232 H207 Q193 232 193 218 V142 Q193 128 207 128 Z',cls:'s-pri'},
+      q:{type:'text',x:300,y:84,s:22,cls:'t-ink2',text:'أيّ الكلمات لا تنتمي إلى المجموعة؟'},
+      ...W4(['صقر','حمامة','نسر','ذئب'],180,['n0','n3','n2','n1']),
+      lab:{type:'text',x:395,y:278,s:28,hand:true,text:'كلها طيور'},
+      x:{type:'cross',x:135,y:270},
+    },
+    beats:[
+      { say:'في سؤال المفردة الشاذة تُعطى أربع كلمات، ثلاث منها يجمعها رابط واحد، والرابعة خارجة عنه.', show:['q','w1','w2','w3','w4'], gap:.3 },
+      { say:'لا تبحث عن الشاذة مباشرة. ابحث أولًا عن الرابط: صقر وحمامة ونسر، كلها طيور.', show:['frame','lab'] },
+      { say:'أما الذئب فليس طائرًا، فهو يكسر الرابط. إذن الذئب هو المفردة الشاذة.', show:['x'], hl:['w4'] },
+    ]},
+  { t:'أنواع الرابط',
+    items:(()=>{ const o={}; const rows=[['المعنى','فرح · سرور · بهجة','حزن'],['الصنف','تفاح · موز · عنب','جزر'],['جزء من كل','عجلة · مِقوَد · محرّك','شِراع'],['الدرجة','رذاذ · مطر · وابل','رعد']];
+      rows.forEach(([tag,ws,odd],i)=>{ const y=100+i*66; o['t'+i]={type:'box',x:470,y:y-22,w:140,h:44,c:'prisoft',text:tag,s:20,cls:'t-pri'}; o['r'+i]={type:'text',x:295,y:y+7,s:24,text:ws}; o['o'+i]={type:'box',x:40,y:y-21,w:110,h:42,c:'pinksoft',text:odd,s:22}; });
+      return o; })(),
+    beats:[
+      { say:'قد يكون الرابط في المعنى: فرح وسرور وبهجة مترادفات، والحزن ضدها.', show:['t0','r0','o0'] },
+      { say:'وقد يكون صنفًا واحدًا: التفاح والموز والعنب فواكه، والجزر من الخضار.', show:['t1','r1','o1'] },
+      { say:'وقد يكون أجزاءً من شيء واحد: العجلة والمقود والمحرك أجزاء السيارة، أما الشراع فمن السفينة.', show:['t2','r2','o2'] },
+      { say:'وقد يكون درجات لشيء واحد: الرذاذ ثم المطر ثم الوابل، أي المطر الغزير. والرعد ليس منها.', show:['t3','r3','o3'] },
+    ]},
+  { t:'ثلاث خطوات',
+    items:{
+      s1:{type:'note',x:510,y:170,w:160,h:72,c:'n0',text:'اقرأ الأربع',size:23,rot:-2},
+      s2:{type:'note',x:320,y:170,w:160,h:72,c:'n3',text:'صِغ الرابط',size:23,rot:2},
+      s3:{type:'note',x:130,y:170,w:160,h:72,c:'n2',text:'اختبر الرابعة',size:23,rot:-2},
+      n1:{type:'text',x:510,y:112,s:22,cls:'t-pri',text:'١'},
+      n2:{type:'text',x:320,y:112,s:22,cls:'t-pri',text:'٢'},
+      n3:{type:'text',x:130,y:112,s:22,cls:'t-pri',text:'٣'},
+      a1:{type:'arrow',x1:432,y1:215,x2:402,y2:215,bend:22,cls:'s-pink'},
+      a2:{type:'arrow',x1:242,y1:215,x2:212,y2:215,bend:22,cls:'s-pink'},
+      tip:{type:'text',x:320,y:292,s:24,hand:true,text:'لا رابط؟ جرّب: المعنى، الصنف، الجزء، الدرجة'},
+    },
+    beats:[
+      { say:'أولًا: اقرأ الكلمات الأربع كلها قبل أن تحكم على أي منها.', show:['n1','s1'] },
+      { say:'ثانيًا: صِغ الرابط بين ثلاث منها في كلمة واحدة، مثل: طيور، أو فواكه.', show:['a1','n2','s2'] },
+      { say:'ثالثًا: اختبر الكلمة الرابعة بالرابط نفسه. إن كسرته فهي الشاذة.', show:['a2','n3','s3'] },
+      { say:'فإن لم يظهر لك رابط، فجرّب نوعًا آخر: المعنى، ثم الصنف، ثم الجزء، ثم الدرجة.', show:['tip'] },
+    ]},
+  { t:'دورك',
+    items:{
+      q:{type:'text',x:320,y:92,s:32,cls:'t-pri',text:'صفحة · غلاف · فهرس · رفّ'},
+      sub:{type:'text',x:320,y:130,s:19,cls:'t-ink2',text:'ابحث عن الرابط أولًا، ثم اختر الشاذة'},
+      ans:{type:'note',x:320,y:220,w:400,h:70,c:'n0',text:'كلها أجزاء الكتاب إلا الرفّ',size:24,rot:-1},
+    },
+    beats:[
+      { say:'دورك الآن: صفحة، غلاف، فهرس، رفّ. ابحث عن الرابط أولًا، ثم اختر الكلمة الشاذة.', show:['q','sub'] },
+    ],
+    ask:{ opts:['صفحة','غلاف','فهرس','رفّ'], a:3,
+      right:'أحسنت. الصفحة والغلاف والفهرس أجزاء من الكتاب، أما الرف فيوضع عليه الكتاب وليس جزءًا منه.',
+      wrong:'انتبه للرابط: الصفحة والغلاف والفهرس أجزاء من الكتاب. أما الرف فليس جزءًا منه، فهو الشاذة.',
+      show:['ans'] } },
+  ],
+  quiz:[
+    {q:'اختر الكلمة الشاذة:', o:['نحلة','فراشة','عصفور','ذبابة'], a:2, e:'النحلة والفراشة والذبابة حشرات، والعصفور طائر.'},
+    {q:'اختر الكلمة الشاذة:', o:['شجاع','جبان','جريء','مقدام'], a:1, e:'شجاع وجريء ومقدام مترادفات، والجبان ضدها.'},
+    {q:'اختر الكلمة الشاذة:', o:['جذع','غصن','مِزهرية','ورقة'], a:2, e:'الجذع والغصن والورقة أجزاء من الشجرة، والمزهرية ليست جزءًا منها.'},
+  ]});
+
+ADD({ key:'od-deep', sk:'odd', ord:20, title:'روابط أدق وفخ الشكل', min:'٤ دقائق',
+  goals:['تبحث عن رابط أدق حين يجمع الرابط العام الكلمات الأربع','تعرف روابط مثل أدوات مهنة واحدة والمترادفات','لا تنخدع بتشابه الحروف أو الوزن','تتحقق من جوابك بجملة: كلها … إلا …'],
+  scenes:[
+  { t:'رابط أدق',
+    items:{
+      ...W4(['مِنجَل','مِحراث','مِشرَط','مِعوَل'],140,['n0','n0','n0','n0']),
+      g:{type:'text',x:320,y:250,s:26,hand:true,text:'كلها أدوات؟ رابط عام جدًا'},
+      t1:{type:'box',x:475,y:205,w:100,h:40,c:'prisoft',text:'فلّاح',s:20,cls:'t-pri'},
+      t2:{type:'box',x:345,y:205,w:100,h:40,c:'prisoft',text:'فلّاح',s:20,cls:'t-pri'},
+      t3:{type:'box',x:215,y:205,w:100,h:40,c:'pinksoft',text:'جرّاح',s:20},
+      t4:{type:'box',x:85,y:205,w:100,h:40,c:'prisoft',text:'فلّاح',s:20,cls:'t-pri'},
+      rule:{type:'text',x:320,y:300,s:24,cls:'t-pri',text:'الرابط الدقيق: أدوات مهنة واحدة'},
+    },
+    beats:[
+      { say:'منجل، محراث، مشرط، معول. للوهلة الأولى كلها أدوات، فأين الشاذة؟', show:['w1','w2','w3','w4'], gap:.3 },
+      { say:'الرابط «أدوات» عام جدًا؛ يجمع الأربع ولا يفرّق بينها. نحتاج رابطًا أدق.', show:['g'] },
+      { say:'المنجل والمحراث والمعول أدوات الفلاح، أما المشرط فأداة الجرّاح. إذن المشرط هو الشاذة.', hide:['g'], show:['t1','t2','t4','t3','rule'], gap:.3, hl:['w3'] },
+    ]},
+  { t:'حروف مختلفة ومعنى واحد',
+    items:{
+      ...W4(['حُسام','رُمح','سيف','مُهنّد'],140,['n3','n1','n3','n3']),
+      x:{type:'cross',x:395,y:222},
+      xl:{type:'text',x:395,y:274,s:22,hand:true,text:'سلاح آخر'},
+      nt:{type:'note',x:180,y:260,w:210,h:64,c:'n0',text:'أسماء للسيف',size:24,rot:-2},
+    },
+    beats:[
+      { say:'حسام، رمح، سيف، مهنّد. كلمات مختلفة الحروف تمامًا، فكيف نجد الرابط؟', show:['w1','w2','w3','w4'], gap:.3 },
+      { say:'الرابط هنا في المعنى: الحسام والمهنّد اسمان من أسماء السيف، فهي مترادفات.', show:['nt'], hl:['w1','w3','w4'] },
+      { say:'أما الرمح فسلاح آخر، وليس اسمًا للسيف. فالرمح هو الشاذة.', show:['x','xl'] },
+    ]},
+  { t:'فخ الشكل',
+    items:{
+      ...W4(['نهر','بحر','محيط','شجر'],140,['n3','n3','n3','n1']),
+      trap:{type:'text',x:320,y:236,s:24,hand:true,text:'نهر · بحر · شجر: وزن واحد'},
+      m1:{type:'box',x:475,y:205,w:100,h:40,c:'n3',text:'ماء',s:20,cls:'t-note'},
+      m2:{type:'box',x:345,y:205,w:100,h:40,c:'n3',text:'ماء',s:20,cls:'t-note'},
+      m3:{type:'box',x:215,y:205,w:100,h:40,c:'n3',text:'ماء',s:20,cls:'t-note'},
+      x:{type:'cross',x:135,y:225},
+      rule:{type:'text',x:320,y:300,s:24,cls:'t-pri',text:'الشكل ليس رابطًا، المعنى هو الرابط'},
+    },
+    beats:[
+      { say:'نهر، بحر، محيط، شجر. لاحظ أن نهرًا وبحرًا وشجرًا تتشابه في الوزن وفي الحرف الأخير.', show:['w1','w2','w3','w4'], gap:.3 },
+      { say:'فيظن بعض الطلاب أن المحيط هو الشاذ لأنه مختلف الشكل. وهذا فخ؛ فتشابه الحروف ليس رابطًا.', show:['trap'], strike:['trap'] },
+      { say:'الرابط الحقيقي في المعنى: النهر والبحر والمحيط مسطحات مائية. فالشاذة هي: شجر.', hide:['trap'], show:['m1','m2','m3','x','rule'], gap:.3 },
+    ]},
+  { t:'تحقّق بجملة',
+    items:{
+      fr:{type:'note',x:320,y:76,w:210,h:50,c:'n2',text:'كلها … إلا …',size:26,rot:-1},
+      ex:{type:'box',x:130,y:190,w:380,h:56,c:'surface2',text:'كلها مسطحات مائية إلا الشجر',s:23},
+      ok:{type:'text',x:320,y:296,s:23,hand:true,text:'جملة دقيقة = جواب صحيح'},
+      q:{type:'text',x:320,y:138,s:27,cls:'t-pri',text:'أحمر · أصفر · أعرج · أزرق'},
+      ans:{type:'note',x:320,y:222,w:340,h:66,c:'n3',text:'كلها ألوان إلا «أعرج»',size:25,rot:-1},
+    },
+    beats:[
+      { say:'قبل أن تعتمد إجابتك، تحقق منها بجملة قصيرة: كلها كذا إلا كذا.', show:['fr'] },
+      { say:'مثل: كلها مسطحات مائية إلا الشجر. إن استقامت الجملة ودقّت، فجوابك صحيح.', show:['ex','ok'] },
+      { say:'جرّب الآن: أحمر، أصفر، أعرج، أزرق. أيها الشاذة؟ ولا تنسَ جملة التحقق.', hide:['ex','ok'], show:['q'] },
+    ],
+    ask:{ opts:['أحمر','أصفر','أعرج','أزرق'], a:2,
+      right:'أحسنت. كلها ألوان إلا أعرج، ولم يخدعك الوزن المتشابه.',
+      wrong:'الكلمات الأربع على وزن واحد، فالشكل لا يفيد هنا. كلها ألوان إلا أعرج، فهي الشاذة.',
+      show:['ans'] } },
+  ],
+  quiz:[
+    {q:'اختر الكلمة الشاذة:', o:['مِقصّ','مِشط','مِجفّف','مِجداف'], a:3, e:'المقص والمشط والمجفف أدوات الحلّاق، والمجداف أداة التجديف.'},
+    {q:'اختر الكلمة الشاذة:', o:['ليث','ذئب','ضِرغام','غَضَنفر'], a:1, e:'الليث والضرغام والغضنفر من أسماء الأسد، والذئب حيوان آخر.'},
+    {q:'اختر الكلمة الشاذة:', o:['قمر','شمس','شجر','نجم'], a:2, e:'القمر والشمس والنجم أجرام سماوية. تشابه «قمر» و«شجر» في الوزن لا يصنع رابطًا.'},
+  ]});
+})();
+/* Explainers: reading (استيعاب المقروء) */
+(function(){ if(!window.XP||!XP.ready) return;
+
+/* Workaround for an engine reveal bug: POP items (box, circle, check, cross, dot, pie, poly) without an
+   initial transformOrigin end up shifted by GSAP smoothOrigin after the scale .3 -> 1 pop. A near-zero rot
+   makes draw() set transformOrigin at scale 1, so the pop no longer shifts them. Harmless once the engine is fixed. */
+const POPT=new Set(['box','circle','check','cross','dot','pie','poly']);
+const ADD=L=>{ L.scenes.forEach(sc=>{ const it=sc.items||{}; for(const k in it) if(POPT.has(it[k].type)&&!it[k].rot) it[k].rot=.001; }); XP.add(L); };
+
+/* passage card: a box plus one text item per line (keys pbox, l1, l2, …) */
+const PASS=(lines,y,{lh=38,s=21,h}={})=>{ const o={pbox:{type:'box',x:50,y,w:540,h:h||(lines.length*lh+26),c:'surface2'}};
+  lines.forEach((t,i)=>{ o['l'+(i+1)]={type:'text',x:320,y:y+13+lh*(i+0.5)+s*0.36,s,text:t}; }); return o; };
+
+/* ---------- 1. main idea vs details ---------- */
+const PALM=['تُعدّ النخلة شجرةً نافعةً في كل أجزائها؛','فثمرها غذاءٌ للناس، وسَعَفها يُصنع منه الحصير،','وجذعها يُستخدم في البناء وتسقيف البيوت.'];
+ADD({ key:'re-main', sk:'reading', ord:10, title:'الفكرة الرئيسة والتفاصيل', min:'٣ دقائق',
+  goals:['تميّز الفكرة الرئيسة من التفاصيل','تجد جملة الفكرة في النص','تختار عنوانًا يغطي النص كله','تستبعد العنوان الضيّق والعنوان الواسع'],
+  scenes:[
+  { t:'نصٌّ قصير',
+    items:{
+      ...PASS(PALM,76,{lh:40}),
+      ul:{type:'line',x1:520,y1:126,x2:120,y2:126,cls:'s-pink'},
+      tag:{type:'note',x:320,y:262,w:220,h:58,c:'n2',text:'جملة الفكرة',size:24,rot:-2},
+      tip:{type:'text',x:320,y:328,s:22,hand:true,text:'تجدها غالبًا في أول النص أو آخره'},
+    },
+    beats:[
+      { say:'اقرأ هذا النص القصير عن النخلة. ثلاث جمل، ولكل جملة دور.', show:['pbox','l1','l2','l3'], gap:.5 },
+      { say:'الجملة الأولى تقول: النخلة نافعة في كل أجزائها. هذه جملة الفكرة، وما بعدها يشرحها.', show:['ul','tag'] },
+      { say:'وتجد جملة الفكرة غالبًا في أول النص أو في آخره، والجمل الأخرى تفصّلها.', show:['tip'] },
+    ]},
+  { t:'المظلة والتفاصيل',
+    items:{
+      idea:{type:'note',x:320,y:104,w:380,h:62,c:'n0',text:'الفكرة: النخلة نافعة كلها',size:24,rot:-1},
+      k1:{type:'line',x1:320,y1:138,x2:510,y2:208,cls:'s-pri'},
+      k2:{type:'line',x1:320,y1:138,x2:320,y2:208,cls:'s-pri'},
+      k3:{type:'line',x1:320,y1:138,x2:130,y2:208,cls:'s-pri'},
+      d1:{type:'box',x:435,y:208,w:150,h:48,c:'prisoft',text:'ثمرها غذاء',s:20,cls:'t-pri'},
+      d2:{type:'box',x:245,y:208,w:150,h:48,c:'prisoft',text:'سعفها حصير',s:20,cls:'t-pri'},
+      d3:{type:'box',x:55,y:208,w:150,h:48,c:'prisoft',text:'جذعها بناء',s:20,cls:'t-pri'},
+      bot:{type:'text',x:320,y:312,s:23,hand:true,text:'التفصيل جزء من الصورة، لا الصورة كلها'},
+    },
+    beats:[
+      { say:'الفكرة الرئيسة هي ما يدور حوله النص كله، ونلخّصها في جملة واحدة: النخلة نافعة في كل أجزائها.', show:['idea'] },
+      { say:'أما التفاصيل فأمثلة تشرح الفكرة: الثمر غذاء، والسعف للحصير، والجذع للبناء.', show:['k1','d1','k2','d2','k3','d3'], gap:.25 },
+      { say:'كل تفصيل صحيح، لكنه يغطي جزءًا واحدًا فقط؛ لذلك لا يصلح أن يكون فكرة رئيسة.', show:['bot'], hl:['d3'] },
+    ]},
+  { t:'دورك: اختر العنوان',
+    items:{
+      q:{type:'text',x:320,y:90,s:28,cls:'t-pri',text:'ما أنسب عنوان للنص؟'},
+      sub:{type:'text',x:320,y:128,s:18,cls:'t-ink2',text:'تذكّر: النخلة نافعة في كل أجزائها'},
+      ans:{type:'note',x:320,y:222,w:360,h:64,c:'n3',text:'العنوان = الفكرة الرئيسة',size:24,rot:-1},
+    },
+    beats:[
+      { say:'سؤال العنوان هو سؤال الفكرة الرئيسة، لكن بكلمات قليلة.', show:['q'] },
+      { say:'تذكّر النص: النخلة نافعة في كل أجزائها. ما أنسب عنوان له؟', show:['sub'] },
+    ],
+    ask:{ opts:['النخلة في البناء','منافع النخلة','تاريخ الجزيرة العربية','صناعة الحصير'], a:1,
+      right:'أحسنت. «منافع النخلة» يغطي النص كله: الثمر والسعف والجذع.',
+      wrong:'العنوان الأنسب «منافع النخلة»؛ لأنه يجمع الثمر والسعف والجذع. أما البقية فتفصيل ضيّق أو موضوع واسع.',
+      show:['ans'] } },
+  { t:'ضيّق، واسع، مناسب',
+    items:(()=>{ const o={}; [['النخلة في البناء','ضيّق','n1'],['تاريخ الجزيرة العربية','واسع','n1'],['منافع النخلة','يغطي النص','n3']].forEach(([tt,tag,c],i)=>{ const y=100+i*70;
+      o['r'+i]={type:'box',x:260,y:y-25,w:330,h:50,c:'surface2',text:tt,s:22}; o['t'+i]={type:'note',x:150,y,w:180,h:50,c,text:tag,size:22,rot:i%2?2:-2}; });
+      o.tip={type:'text',x:320,y:320,s:23,hand:true,text:'هل يغطي العنوان أول النص وآخره؟'}; return o; })(),
+    beats:[
+      { say:'العنوان «النخلة في البناء» ضيّق؛ فهو يغطي الجملة الأخيرة وحدها. هذا فخ التفصيل.', show:['r0','t0'] },
+      { say:'والعنوان «تاريخ الجزيرة العربية» واسع جدًا؛ فالنص لم يتحدث عن التاريخ أصلًا.', show:['r1','t1'] },
+      { say:'أما «منافع النخلة» فمناسب؛ يغطي الثمر والسعف والجذع، أي النص كله دون زيادة.', show:['r2','t2'] },
+      { say:'فقبل أن تختار عنوانًا، اسأل نفسك: هل يشمل أول النص وآخره؟', show:['tip'] },
+    ]},
+  ],
+  quiz:[
+    {q:'«الماء أساس الحياة؛ فالإنسان لا يعيش بدونه، والنبات يذبل إذا حُرم منه، والحيوان يهاجر بحثًا عنه.» أنسب عنوان للنص:', o:['هجرة الحيوان','أهمية الماء للحياة','ذبول النبات','مصادر المياه'], a:1, e:'الجملة الأولى هي جملة الفكرة، وما بعدها أمثلة عليها.'},
+    {q:'في النص السابق، عبارة «النبات يذبل إذا حُرم منه» تمثّل:', o:['الفكرة الرئيسة','تفصيلًا يدعم الفكرة','رأيًا مخالفًا للكاتب','عنوان النص'], a:1, e:'هي مثال واحد يشرح أهمية الماء، أي تفصيل.'},
+    {q:'العنوان الذي يغطي جملة واحدة فقط من النص يُعدّ عنوانًا:', o:['مناسبًا','ضيّقًا','واسعًا','شاملًا'], a:1, e:'العنوان المناسب يغطي النص كله؛ ما يغطي جزءًا منه ضيّق.'},
+  ]});
+
+/* ---------- 2. stated, inferred, not mentioned ---------- */
+const STORK=['يهاجر اللقلق كل خريف من أوروبا إلى أفريقيا،','فيقطع آلاف الكيلومترات دون أن يضلّ طريقه،','ثم يعود في الربيع إلى عشّه القديم في الغالب.'];
+ADD({ key:'re-stated', sk:'reading', ord:20, title:'مذكور، مستنتج، أم غير مذكور؟', min:'٤ دقائق',
+  goals:['تفرّق بين المعلومة المذكورة صراحة والمستنتجة','تجد الدليل في النص لكل إجابة','تجيب من النص لا من معلوماتك العامة','تحلّ أسئلة «جميع ما يلي … عدا»'],
+  scenes:[
+  { t:'ثلاثة أنواع',
+    items:{
+      ...PASS(STORK,74,{lh:40}),
+      a:{type:'note',x:510,y:272,w:150,h:60,c:'n3',text:'مذكور',size:25,rot:-2},
+      b:{type:'note',x:320,y:272,w:150,h:60,c:'n2',text:'مستنتج',size:25,rot:2},
+      c:{type:'note',x:130,y:272,w:150,h:60,c:'n1',text:'غير مذكور',size:23,rot:-2},
+    },
+    beats:[
+      { say:'إليك نصًّا قصيرًا عن طائر اللقلق. كل معلومة في الخيارات ستكون واحدة من ثلاث.', show:['pbox','l1','l2','l3'], gap:.5 },
+      { say:'إما مذكورة في النص صراحة، وإما مستنتجة منه؛ أي يدل عليها النص دون أن يقولها بلفظها.', show:['a','b'] },
+      { say:'وإما غير مذكورة أصلًا، حتى لو كانت صحيحة في الواقع.', show:['c'] },
+    ]},
+  { t:'مذكور أم مستنتج؟',
+    items:{
+      qa:{type:'box',x:50,y:66,w:540,h:44,c:'surface2',text:'«يهاجر اللقلق كل خريف…»',s:20,cls:'t-ink2'},
+      sa:{type:'box',x:245,y:124,w:345,h:48,c:'surface',text:'يهاجر اللقلق في فصل الخريف',s:21},
+      ta:{type:'note',x:135,y:148,w:150,h:50,c:'n3',text:'مذكور',size:22,rot:-2},
+      qb:{type:'box',x:50,y:200,w:540,h:44,c:'surface2',text:'«…دون أن يضلّ طريقه»',s:20,cls:'t-ink2'},
+      sb:{type:'box',x:245,y:258,w:345,h:48,c:'surface',text:'اللقلق يعرف طريقه جيدًا',s:21},
+      tb:{type:'note',x:135,y:282,w:150,h:50,c:'n2',text:'مستنتج',size:22,rot:2},
+    },
+    beats:[
+      { say:'قارن الخيار بالنص دائمًا. «يهاجر اللقلق في الخريف»: هذا مكتوب في الجملة الأولى تقريبًا بلفظه.', show:['qa','sa'] },
+      { say:'فهي معلومة مذكورة صراحة، ودليلها واضح.', show:['ta'] },
+      { say:'أما «اللقلق يعرف طريقه جيدًا» فلم تُكتب بهذا اللفظ في أي جملة.', show:['qb','sb'] },
+      { say:'لكن النص قال: دون أن يضلّ طريقه. فهذه معلومة مستنتجة، ودليلها في النص أيضًا.', show:['tb'] },
+    ]},
+  { t:'فخ المعرفة العامة',
+    items:{
+      st:{type:'box',x:100,y:78,w:440,h:56,c:'surface2',text:'يتغذّى اللقلق على الضفادع والأسماك',s:22},
+      ck:{type:'check',x:545,y:190},
+      ckt:{type:'text',x:395,y:198,s:22,text:'صحيح في الواقع'},
+      cr:{type:'cross',x:545,y:252},
+      crt:{type:'text',x:385,y:260,s:22,cls:'t-bad',text:'غير مذكور في النص'},
+      rule:{type:'note',x:145,y:226,w:240,h:66,c:'n0',text:'الجواب من النص فقط',size:21,rot:-3},
+    },
+    beats:[
+      { say:'قد يأتيك خيار مثل: يتغذّى اللقلق على الضفادع والأسماك.', show:['st'] },
+      { say:'وقد تعرف أن هذه المعلومة صحيحة في الواقع.', show:['ck','ckt'] },
+      { say:'لكن النص لم يذكرها، والسؤال عن النص لا عن معلوماتك. فهي غير مذكورة، ولا تُختار.', show:['cr','crt','rule'], gap:.35 },
+    ]},
+  { t:'دورك: سؤال «عدا»',
+    items:{
+      q:{type:'text',x:320,y:90,s:27,cls:'t-pri',text:'ورد في النص جميع ما يلي عدا:'},
+      sub:{type:'text',x:320,y:128,s:18,cls:'t-ink2',text:'ثلاثة خيارات لها دليل، والمطلوب الخيار الذي لا دليل له'},
+      ans:{type:'note',x:320,y:222,w:360,h:64,c:'n3',text:'الأسراب لم يذكرها النص',size:24,rot:-1},
+    },
+    beats:[
+      { say:'في سؤال «جميع ما يلي عدا» تنقلب المهمة: ثلاثة خيارات في النص، والمطلوب الخيار الذي لم يَرِد.', show:['q'] },
+      { say:'طابِق كل خيار بدليله من النص. ما الذي لم يذكره النص عن اللقلق؟', show:['sub'] },
+    ],
+    ask:{ opts:['يهاجر في الخريف','يقطع مسافات طويلة','يعود في الربيع','يهاجر في أسراب'], a:3,
+      right:'أحسنت. الخريف والمسافات الطويلة والعودة في الربيع كلها في النص، أما الأسراب فلم تُذكر.',
+      wrong:'راجع الأدلة: الخريف في الجملة الأولى، والمسافات في الثانية، والربيع في الثالثة. أما الأسراب فلم يذكرها النص.',
+      show:['ans'] } },
+  ],
+  quiz:[
+    {q:'«أغلقت المكتبة أبوابها مبكرًا بسبب العاصفة، فعاد الطلاب إلى بيوتهم قبل إكمال بحوثهم.» ما سبب إغلاق المكتبة حسب النص؟', o:['العطلة الرسمية','العاصفة','أعمال الصيانة','قلة الزوّار'], a:1, e:'مذكور صراحة: «بسبب العاصفة».'},
+    {q:'يُفهم من النص السابق أن الطلاب:', o:['أنهوا بحوثهم مبكرًا','كانوا يعملون على بحوثهم في المكتبة','لا يحبون المكتبة','يخافون من العواصف'], a:1, e:'لم يقله النص بلفظه، لكن عودتهم «قبل إكمال بحوثهم» حين أُغلقت المكتبة تدل عليه.'},
+    {q:'في النص السابق، ورد جميع ما يلي عدا:', o:['أُغلقت المكتبة مبكرًا','هبّت عاصفة','عاد الطلاب إلى بيوتهم','انقطعت الكهرباء'], a:3, e:'انقطاع الكهرباء قد يحدث في العواصف، لكن النص لم يذكره.'},
+  ]});
+
+/* ---------- 3. efficient reading strategy ---------- */
+const MINT=['زرع سعيدٌ النعناعَ على سطح منزله، فسخر جيرانه','من فكرته أول الأمر، غير أنهم تحمّسوا لها','حين رأوا نجاحها، فطلبوا منه أن يعلّمهم.'];
+ADD({ key:'re-strategy', sk:'reading', ord:30, title:'قراءة ذكية وسريعة', min:'٤ دقائق',
+  goals:['تبدأ بالأسئلة أو بمسح سريع للنص','تحدد الكلمة المفتاحية وترجع إلى موضعها','تستنتج معنى الكلمة من سياقها','تعرف على مَن يعود الضمير'],
+  scenes:[
+  { t:'ابدأ بالسؤال',
+    items:{
+      qa:{type:'box',x:335,y:74,w:250,h:48,c:'prisoft',text:'ما معنى «سخر»؟',s:21,cls:'t-pri'},
+      qb:{type:'box',x:55,y:74,w:250,h:48,c:'prisoft',text:'علامَ يعود «لها»؟',s:21,cls:'t-pri'},
+      tip:{type:'text',x:320,y:162,s:23,hand:true,text:'السؤال يحدد ما تبحث عنه'},
+      ...PASS(MINT,190,{lh:40,s:20}),
+    },
+    beats:[
+      { say:'لا تبدأ بقراءة النص كلمة كلمة. ألقِ نظرة على الأسئلة أولًا، لتعرف عمّا تبحث.', show:['qa','qb'] },
+      { say:'فالسؤال يحدد هدفك: هنا نبحث عن معنى كلمة، وعن مرجع ضمير.', show:['tip'] },
+      { say:'ثم امسح النص مسحًا سريعًا لتعرف موضوعه: سعيد زرع النعناع على سطح منزله.', show:['pbox','l1','l2','l3'], gap:.4 },
+    ]},
+  { t:'الكلمة المفتاحية',
+    items:{
+      ...PASS(MINT,64,{lh:38,s:20}),
+      chip:{type:'note',x:505,y:250,w:130,h:58,c:'n1',text:'سخر',size:28,rot:-3},
+      sent:{type:'box',x:40,y:224,w:385,h:52,c:'butter',text:'فسخر جيرانه من فكرته أول الأمر',s:20,cls:'t-note'},
+      hint:{type:'text',x:320,y:325,s:23,hand:true,text:'اقرأ ما حولها فقط، لا النص كله'},
+    },
+    beats:[
+      { say:'حدد في السؤال كلمته المفتاحية. في سؤال المعنى، الكلمة المفتاحية هي: سخر.', show:['pbox','l1','l2','l3','chip'], gap:.25 },
+      { say:'ابحث عنها في النص بعينك، واقرأ الجملة التي تحتويها وما حولها.', show:['sent'] },
+      { say:'بهذا لا تعيد قراءة النص كاملًا لكل سؤال، فتوفّر وقتك للأسئلة الأخرى.', show:['hint'] },
+    ]},
+  { t:'المعنى من السياق',
+    items:{
+      s1:{type:'box',x:335,y:72,w:250,h:50,c:'surface2',text:'فسخر جيرانه من فكرته',s:20},
+      s2:{type:'box',x:55,y:72,w:250,h:50,c:'surface2',text:'غير أنهم تحمّسوا لها',s:20},
+      gn:{type:'note',x:320,y:170,w:310,h:56,c:'n2',text:'غير أنّ ← عكس ما قبلها',size:21,rot:-1},
+      mean:{type:'text',x:320,y:236,s:26,cls:'t-pri',text:'سخر = استهزأ'},
+      test:{type:'box',x:130,y:262,w:380,h:52,c:'oksoft',text:'فاستهزأ جيرانه من فكرته',s:21},
+      ck:{type:'check',x:555,y:288,s:.9},
+    },
+    beats:[
+      { say:'ما معنى سخر؟ لا تحتاج إلى معجم. انظر إلى ما بعدها: غير أنهم تحمّسوا لها.', show:['s1','s2'] },
+      { say:'غير أنّ تدل على عكس ما قبلها، والحماس عكس الاستهزاء. إذن سخر تعني: استهزأ.', show:['gn','mean'] },
+      { say:'تحقق بوضع المعنى مكان الكلمة: فاستهزأ جيرانه من فكرته. المعنى مستقيم.', show:['test','ck'] },
+    ]},
+  { t:'دورك: عود الضمير',
+    items:{
+      rule:{type:'note',x:320,y:92,w:420,h:58,c:'n0',text:'الضمير يعود على اسم سابق يطابقه',size:22,rot:-1},
+      d1:{type:'box',x:150,y:160,w:340,h:52,c:'surface2',text:'فطلبوا مِنْهُ أن يعلّمهم',s:22},
+      dn:{type:'note',x:320,y:262,w:200,h:56,c:'n3',text:'منه ← سعيد',size:24,rot:2},
+      q:{type:'text',x:320,y:88,s:28,cls:'t-pri',text:'غير أنهم تحمّسوا لها'},
+      sub:{type:'text',x:320,y:128,s:19,cls:'t-ink2',text:'علامَ يعود الضمير في «لها»؟'},
+      ans:{type:'note',x:320,y:222,w:260,h:64,c:'n3',text:'لها ← الفكرة',size:26,rot:-1},
+    },
+    beats:[
+      { say:'الضمير يعود على اسم سابق يطابقه في التذكير والتأنيث والعدد، ويستقيم به المعنى.', show:['rule'] },
+      { say:'في قوله: فطلبوا منه، الضمير يعود على سعيد؛ فهو صاحب الفكرة، والجيران طلبوا منه أن يعلّمهم.', show:['d1','dn'] },
+      { say:'والآن: غير أنهم تحمّسوا لها. على أي شيء يعود الضمير في كلمة لها؟', hide:['rule','d1','dn'], show:['q','sub'] },
+    ],
+    ask:{ opts:['الفكرة','النعناع','السطح','الجيران'], a:0,
+      right:'أحسنت. «لها» ضمير لمفرد مؤنث، ولا يطابقه قبله إلا الفكرة: تحمّسوا للفكرة بعد أن سخروا منها.',
+      wrong:'الضمير في «لها» لمفرد مؤنث. النعناع والسطح مذكران، والجيران جمع. فهو يعود على الفكرة.',
+      show:['ans'] } },
+  ],
+  quiz:[
+    {q:'«كان الطبيب حاذقًا؛ يشخّص المرض من أول نظرة، فيقصده المرضى من مدن بعيدة.» معنى «حاذقًا»:', o:['ماهرًا','غاضبًا','كريمًا','مُتعَبًا'], a:0, e:'يدل عليه ما بعده: يشخّص المرض من أول نظرة.'},
+    {q:'في النص السابق، الضمير في «يقصده» يعود على:', o:['المرض','الطبيب','المرضى','المدن'], a:1, e:'المرضى يقصدون الطبيب؛ والضمير مفرد مذكر يطابق «الطبيب».'},
+    {q:'أفضل خطوة أولى لتوفير الوقت في استيعاب المقروء:', o:['حفظ النص قبل الأسئلة','قراءة الأسئلة أو مسح النص سريعًا','قراءة كل خيار ثلاث مرات','البدء بأطول سؤال'], a:1, e:'معرفة المطلوب أولًا تجعلك تبحث عن الدليل مباشرة.'},
+  ]});
+})();
+/* Explainers: stats */
+(function(){ if(!window.XP||!XP.ready) return;
+/* POP items (box, circle, check...) get their transform origin set up front; otherwise the engine's
+   pop-in (origin given only in the 'to' vars) leaves a leftover translate. rot:0.01 is invisible. */
+const POPT=new Set(['box','circle','check','cross','poly','pie','dot']);
+const add=L=>{ L.scenes.forEach(sc=>{ for(const k in sc.items||{}){ const it=sc.items[k]; if(POPT.has(it.type)&&!it.rot) it.rot=0.01; } }); XP.add(L); };
+
+/* ================= 1. mean, median, mode ================= */
+const card=(x,v,c)=>({type:'note',x,y:130,w:64,h:64,c,text:v,size:30});
+add({ key:'st-mean', sk:'stats', ord:10, title:'المتوسط والوسيط والمنوال', min:'٤ دقائق',
+  goals:['تحسب المتوسط وتفهمه نقطةَ توازن','تستخدم حيلة المجموع لإيجاد القيمة المفقودة','تجد الوسيط بعد الترتيب والمنوال بالتكرار','تتجنب أخذ الأوسط قبل الترتيب'],
+  scenes:[
+  { t:'المتوسط: التسوية',
+    items:{ bars:{type:'bars',x:70,y:90,w:300,h:200,values:[2,8,6,4],labels:['خالد','نورة','سارة','علي'],max:10,c:'pri'},
+      ml:{type:'line',x1:62,y1:190,x2:378,y2:190,cls:'s-pink'},
+      e1:{type:'text',x:505,y:130,s:24,text:'٢ + ٨ + ٦ + ٤ = ٢٠'}, e2:{type:'text',x:505,y:192,s:34,text:'٢٠ ÷ ٤ = ٥',cls:'t-pri'},
+      n:{type:'note',x:505,y:268,w:180,h:58,c:'n0',text:'المتوسط = ٥',size:26,rot:-2} },
+    beats:[
+      { say:'المتوسط يجيب عن سؤال واحد: لو وزّعنا المجموع بالتساوي، كم يأخذ كل واحد؟', show:['bars'] },
+      { say:'نجمع القيم أولًا: اثنان زائد ثمانية زائد ستة زائد أربعة يساوي عشرين.', show:['e1'] },
+      { say:'ثم نقسم المجموع على عددها: عشرون على أربعة يساوي خمسة.', show:['e2','ml'] },
+      { say:'المتوسط نقطة توازن: ما يزيد فوق الخط يعوّض تمامًا ما ينقص تحته.', show:['n'], hl:['ml'] },
+    ]},
+  { t:'حيلة المجموع',
+    items:{ rule:{type:'note',x:320,y:98,w:400,h:62,c:'n2',text:'المجموع = المتوسط × العدد',size:26,rot:-1},
+      q:{type:'text',x:320,y:168,s:21,text:'متوسط ٥ أعداد = ١٢ ، ومجموع أربعة منها = ٤٥',cls:'t-ink2'},
+      e1:{type:'text',x:320,y:218,s:30,text:'المجموع: ١٢ × ٥ = ٦٠'}, e2:{type:'text',x:320,y:266,s:30,text:'٦٠ − ٤٥ = ١٥',cls:'t-pri'},
+      ans:{type:'box',x:210,y:290,w:220,h:50,c:'n0',text:'العدد المفقود ١٥',s:24,cls:'t-note'} },
+    beats:[
+      { say:'اقلب القاعدة تحصل على أقوى حيلة في هذا الباب: المجموع يساوي المتوسط في العدد.', show:['rule'] },
+      { say:'مثال: متوسط خمسة أعداد اثنا عشر، فمجموعها اثنا عشر في خمسة، أي ستون.', show:['q','e1'] },
+      { say:'وإن كان مجموع أربعة منها خمسة وأربعين، فالخامس ستون ناقص خمسة وأربعين.', show:['e2'] },
+      { say:'إذن العدد المفقود خمسة عشر. في أي سؤال عن قيمة مفقودة، ابدأ بالمجموع.', show:['ans'] },
+    ]},
+  { t:'الوسيط والمنوال',
+    items:{ c7:card(480,'٧','n3'), c3a:card(400,'٣','n1'), c9:card(320,'٩','n3'), c3b:card(240,'٣','n1'), c5:card(160,'٥','n0'),
+      lm:{type:'text',x:320,y:200,s:24,text:'الوسيط',hand:true}, lo:{type:'text',x:440,y:200,s:24,text:'المنوال',hand:true},
+      ev:{type:'text',x:320,y:252,s:22,text:'زوجي؟ ٢، ٤، ٦، ٨ ← الوسيط (٤ + ٦) على ٢ = ٥',cls:'t-ink2'},
+      trap:{type:'note',x:320,y:312,w:330,h:52,c:'n1',text:'رتّب أولًا، ثم خذ الأوسط',size:22,rot:-1} },
+    beats:[
+      { say:'الوسيط هو العدد الذي يقع في المنتصف. خذ هذه القيم الخمس.', show:['c7','c3a','c9','c3b','c5'], gap:.12 },
+      { say:'أولًا نرتّبها من الأصغر إلى الأكبر.', move:{c7:[-240,0],c3a:[80,0],c9:[-160,0],c3b:[160,0],c5:[160,0]} },
+      { say:'العدد الأوسط الآن خمسة، فالوسيط خمسة.', show:['lm'], hl:['c5'] },
+      { say:'وإن كان عدد القيم زوجيًا، فالوسيط متوسط العددين اللذين في المنتصف.', show:['ev'] },
+      { say:'أما المنوال فهو القيمة الأكثر تكرارًا. الثلاثة تكررت مرتين، فالمنوال ثلاثة.', show:['lo'], hl:['c3a','c3b'] },
+      { say:'والفخ: من يأخذ الأوسط قبل الترتيب يقول تسعة، وهذا خطأ.', show:['trap'] },
+    ]},
+  { t:'دورك: القيمة المفقودة',
+    items:{ q1:{type:'text',x:320,y:82,s:24,text:'متوسط درجات ٤ طلاب = ٨٠'}, q2:{type:'text',x:320,y:122,s:22,text:'انضم طالب خامس فصار المتوسط ٨٢. كم درجته؟'},
+      t1:{type:'text',x:320,y:198,s:26,text:'قبل: ٤ × ٨٠ = ٣٢٠',cls:'t-ink2'}, t2:{type:'text',x:320,y:244,s:26,text:'بعد: ٥ × ٨٢ = ٤١٠',cls:'t-ink2'},
+      r:{type:'box',x:200,y:270,w:240,h:54,c:'n0',text:'٤١٠ − ٣٢٠ = ٩٠',s:28,cls:'t-note'} },
+    beats:[
+      { say:'دورك. متوسط درجات أربعة طلاب ثمانون، ثم انضم طالب خامس فصار المتوسط اثنين وثمانين.', show:['q1','q2'] },
+      { say:'استخدم حيلة المجموع. كم درجة الطالب الخامس؟', hl:['q2'] },
+    ],
+    ask:{ opts:['٨٢','٩٠','٨٦','١٠٠'], a:1,
+      right:'صحيح! المجموع كان ثلاثمئة وعشرين، وصار أربعمئة وعشرة، والفرق تسعون.',
+      wrong:'المجموع قبل: أربعة في ثمانين يساوي ثلاثمئة وعشرين. وبعد: خمسة في اثنين وثمانين يساوي أربعمئة وعشرة. الفرق تسعون.',
+      show:['t1','t2','r'] } },
+  ],
+  quiz:[
+    {q:'ما وسيط القيم: ٨، ٢، ٦، ٤، ١٠، ٥؟', o:['٥','٦','٥٫٥','٧'], a:2, e:'بعد الترتيب: ٢، ٤، ٥، ٦، ٨، ١٠. العددان الأوسطان ٥ و٦، ومتوسطهما ٥٫٥.'},
+    {q:'متوسط ٦ أعداد ١٥. حُذف عدد فأصبح متوسط الباقي ١٤. ما العدد المحذوف؟', o:['٢٠','١٥','١','١٩'], a:0, e:'المجموع قبل ٦ × ١٥ = ٩٠، وبعد ٥ × ١٤ = ٧٠، فالمحذوف ٢٠.'},
+    {q:'ما منوال القيم: ٤، ٧، ٤، ٩، ٧، ٤، ٢؟', o:['٧','٤','٥','٩'], a:1, e:'العدد ٤ تكرر ثلاث مرات، وهو الأكثر تكرارًا.'},
+  ] });
+
+/* ================= 2. probability ================= */
+const balls={}; const bcol=['bad','bad','bad','bad','butter','butter','butter','butter','butter','butter','sky','sky'];
+bcol.forEach((c,i)=>{ balls['b'+i]={type:'circle',cx:463-26*i,cy:106,r:10,c}; });
+add({ key:'st-prob', sk:'stats', ord:20, title:'الاحتمال من الصفر', min:'٣ دقائق',
+  goals:['تحسب الاحتمال: المطلوب على الكل','تعرف أن الاحتمال بين الصفر والواحد','تستخدم الاحتمال المتمّم لتختصر الحل','تستبعد الخيارات المستحيلة فورًا'],
+  scenes:[
+  { t:'ما الاحتمال؟',
+    items:{ g:{type:'grid',x:70,y:110,rows:2,cols:5,cell:40,gap:8,fill:3,c:'pink'}, cap:{type:'text',x:190,y:236,s:18,text:'١٠ مكعبات: ٣ وردية و٧ بيضاء',cls:'t-ink2'},
+      qq:{type:'text',x:190,y:300,s:26,text:'سحبة عشوائية: وردي؟',hand:true},
+      top:{type:'text',x:470,y:128,s:20,text:'عدد الحالات المطلوبة'}, bar:{type:'line',x1:375,y1:144,x2:565,y2:144}, bot:{type:'text',x:470,y:174,s:20,text:'عدد الحالات كلها'},
+      res:{type:'box',x:390,y:220,w:160,h:60,c:'n2',text:'٣/١٠',s:34,cls:'t-note'} },
+    beats:[
+      { say:'الاحتمال عدد يقيس فرصة حدوث شيء. أمامك عشرة مكعبات: ثلاثة وردية وسبعة بيضاء.', show:['g','cap'] },
+      { say:'نسحب مكعبًا دون أن ننظر. ما احتمال أن يكون ورديًا؟', show:['qq'] },
+      { say:'القاعدة: عدد الحالات المطلوبة على عدد الحالات كلها.', show:['top','bar','bot'] },
+      { say:'المطلوب ثلاثة، والكل عشرة، فالاحتمال ثلاثة على عشرة.', show:['res'], hl:['g'] },
+    ]},
+  { t:'من صفر إلى واحد',
+    items:{ nl:{type:'nline',x1:110,x2:530,y:175,from:0,to:1,step:.25},
+      d0:{type:'dot',x:110,y:175,r:9,c:'bad',text:'مستحيل',dy:-24,s:20}, d1:{type:'dot',x:530,y:175,r:9,c:'pri',text:'مؤكد',dy:-24,s:20},
+      dh:{type:'dot',x:320,y:175,r:9,c:'pink',text:'نصف',dy:-24,s:20},
+      n:{type:'note',x:320,y:275,w:400,h:54,c:'n0',text:'لا يقل عن ٠ ولا يزيد على ١',size:22,rot:-1} },
+    beats:[
+      { say:'كل احتمال عدد بين الصفر والواحد.', show:['nl'] },
+      { say:'الصفر يعني مستحيلًا، كأن تسحب مكعبًا أصفر من كيس ليس فيه أصفر.', show:['d0'] },
+      { say:'والواحد يعني مؤكدًا، كأن تكون المكعبات كلها وردية.', show:['d1'] },
+      { say:'وفي المنتصف النصف، مثل رمي قطعة نقود: وجه من وجهين.', show:['dh'] },
+      { say:'لذلك أي خيار سالب أو أكبر من واحد، استبعده فورًا.', show:['n'] },
+    ]},
+  { t:'الاحتمال المتمّم',
+    items:{ rule:{type:'note',x:320,y:92,w:470,h:58,c:'n2',text:'احتمال عدم الحدوث = ١ − احتمال الحدوث',size:22,rot:-1},
+      g:{type:'grid',x:70,y:150,rows:2,cols:5,cell:40,gap:8,fill:3,c:'pink'},
+      e:{type:'text',x:470,y:195,s:30,text:'١ − ٣/١٠ = ٧/١٠'}, h:{type:'text',x:470,y:262,s:24,text:'عُدّ العكس إن كان أسهل',hand:true} },
+    beats:[
+      { say:'احتمال ألا يحدث الشيء يساوي واحدًا ناقص احتمال حدوثه.', show:['rule'] },
+      { say:'في مثالنا، احتمال الوردي ثلاثة على عشرة، فاحتمال غير الوردي سبعة على عشرة.', show:['g','e'] },
+      { say:'وهذه حيلة مفيدة عندما يكون عدّ المطلوب طويلًا، وعدّ عكسه سهلًا.', show:['h'] },
+    ]},
+  { t:'دورك: ألا تكون حمراء',
+    items:Object.assign({ t1:{type:'text',x:320,y:76,s:22,text:'في صندوق: ٤ حمراء، ٦ صفراء، ٢ زرقاء'},
+      t2:{type:'text',x:320,y:142,s:20,text:'ما احتمال ألا تكون الكرة المسحوبة حمراء؟',cls:'t-ink2'},
+      r1:{type:'box',x:220,y:190,w:200,h:60,c:'n0',text:'٨/١٢ = ٢/٣',s:32,cls:'t-note'}, r2:{type:'text',x:320,y:292,s:24,text:'أو: ١ − ٤/١٢ = ٢/٣',cls:'t-ink2'} }, balls),
+    beats:[
+      { say:'دورك. في صندوق أربع كرات حمراء، وست صفراء، وكرتان زرقاوان.', show:['t1',...Object.keys(balls)], gap:.05 },
+      { say:'سحبنا كرة عشوائيًا. ما احتمال ألا تكون حمراء؟', show:['t2'] },
+    ],
+    ask:{ opts:['١/٣','٢/٣','٨/١٠','٤/٨'], a:1,
+      right:'أحسنت! غير الحمراء ثماني كرات من اثنتي عشرة، أي ثلثان.',
+      wrong:'الكرات كلها اثنتا عشرة، وغير الحمراء ثمانٍ، فالاحتمال ثمانية على اثني عشر، أي ثلثان.',
+      show:['r1','r2'] } },
+  ],
+  quiz:[
+    {q:'رُمي حجر نرد مرة واحدة. ما احتمال ظهور عدد زوجي أكبر من ٢؟', o:['١/٢','١/٣','١/٦','٢/٣'], a:1, e:'الحالات المطلوبة ٤ و٦ فقط، أي ٢ من ٦ = ١/٣.'},
+    {q:'إذا كان احتمال نجاح خطة ٠٫٦٥، فما احتمال فشلها؟', o:['٠٫٦٥','٠٫٤٥','٠٫٣٥','١٫٦٥'], a:2, e:'المتمّم: ١ − ٠٫٦٥ = ٠٫٣٥.'},
+    {q:'أيّ القيم التالية لا يمكن أن تكون احتمالًا؟', o:['٠','٠٫٩٩','٥/٤','١'], a:2, e:'٥/٤ أكبر من ١، والاحتمال لا يزيد على ١.'},
+  ] });
+
+/* ================= 3. charts & tables ================= */
+const DAYS=['الثلاثاء','الاثنين','الأحد','السبت'], SALES=[40,15,30,20];
+const tb={}; const TH=['اليوم','السبت','الأحد','الاثنين','الثلاثاء'], TV=['المبيعات','٢٠','٣٠','١٥','٤٠'];
+TH.forEach((h,i)=>{ const x=470-100*i; tb['h'+i]={type:'box',x,y:64,w:100,h:36,rx:6,c:'prisoft',text:h,s:18,cls:'t-pri'}; tb['v'+i]={type:'box',x,y:100,w:100,h:36,rx:6,c:'surface',text:TV[i],s:i?22:18}; });
+const tk=[].concat(...TH.map((_,i)=>['h'+i,'v'+i]));
+add({ key:'st-charts', sk:'stats', ord:30, title:'قراءة الرسوم البيانية والجداول', min:'٤ دقائق',
+  goals:['تقرأ العنوان والمحاور والوحدة قبل الحساب','تحسب نسبة التغير من القيمة القديمة','تحوّل قطاع الدائرة إلى نسبة وقيمة وزاوية','تستخرج المطلوب من جدول بسرعة'],
+  scenes:[
+  { t:'الأعمدة: اقرأ قبل أن تحسب',
+    items:{ bars:{type:'bars',x:60,y:90,w:320,h:200,values:SALES,labels:DAYS,max:40,c:'pri'},
+      unit:{type:'text',x:510,y:100,s:20,text:'المبيعات بالآلاف',cls:'t-ink2'},
+      hi:{type:'note',x:510,y:165,w:180,h:54,c:'n3',text:'الأعلى: ٤٠',size:24,rot:-2}, lo:{type:'note',x:510,y:235,w:180,h:54,c:'n1',text:'الأقل: ١٥',size:24,rot:2},
+      d:{type:'text',x:510,y:312,s:28,text:'٤٠ − ١٥ = ٢٥',cls:'t-pri'} },
+    beats:[
+      { say:'قبل أي حساب، اقرأ العنوان والمحورين والوحدة: ماذا يمثل كل عمود؟', show:['bars','unit'] },
+      { say:'هنا مبيعات متجر بالآلاف في أربعة أيام. أعلى عمود يوم الثلاثاء: أربعون ألفًا.', show:['hi'] },
+      { say:'وأقلها يوم الاثنين: خمسة عشر ألفًا.', show:['lo'] },
+      { say:'والفرق بينهما أربعون ناقص خمسة عشر، أي خمسة وعشرون ألفًا.', show:['d'] },
+    ]},
+  { t:'نسبة التغير',
+    items:{ bars:{type:'bars',x:40,y:100,w:300,h:190,values:SALES,labels:DAYS,max:40,c:['surface2','surface2','pink','pink']},
+      e1:{type:'text',x:495,y:108,s:24,text:'الفرق: ٣٠ − ٢٠ = ١٠'}, e2:{type:'text',x:495,y:170,s:34,text:'١٠ ÷ ٢٠ = ٥٠٪',cls:'t-pri'},
+      w:{type:'text',x:495,y:236,s:34,text:'١٠ ÷ ٣٠ ≈ ٣٣٪',cls:'t-bad'},
+      rule:{type:'note',x:500,y:308,w:230,h:52,c:'n0',text:'اقسم على القديمة',size:22,rot:-1} },
+    beats:[
+      { say:'سؤال متكرر: ما نسبة الزيادة من يوم السبت إلى يوم الأحد؟', show:['bars'] },
+      { say:'أولًا الفرق: ثلاثون ناقص عشرين يساوي عشرة.', show:['e1'] },
+      { say:'ثم نقسم الفرق على القيمة القديمة: عشرة على عشرين نصف، أي خمسون في المئة.', show:['e2'] },
+      { say:'والفخ: القسمة على القيمة الجديدة تعطي ثلاثة وثلاثين في المئة تقريبًا، وهي خطأ.', show:['w','rule'], strike:['w'] },
+    ]},
+  { t:'الدائرة: حصة من الكل',
+    items:{ p0:{type:'pie',cx:180,cy:205,r:112,parts:10,fill:0}, p3:{type:'pie',cx:180,cy:205,r:112,parts:10,fill:3,c:'pink'},
+      l:{type:'text',x:470,y:115,s:28,text:'الطعام = ٣٠٪'},
+      e1:{type:'text',x:470,y:185,s:28,text:'٣٠٪ من ٨٠٠٠ = ٢٤٠٠',cls:'t-pri'},
+      e2:{type:'text',x:470,y:255,s:28,text:'٣ × ٣٦° = ١٠٨°'}, n:{type:'text',x:470,y:300,s:20,text:'الدائرة كلها ٣٦٠°',hand:true} },
+    beats:[
+      { say:'الدائرة البيانية تعرض أجزاء من كل، والدائرة كلها مئة في المئة. هنا قسّمناها عشر شرائح.', show:['p0'] },
+      { say:'هذه ميزانية أسرة، والطعام ثلاث شرائح من عشر، أي ثلاثون في المئة.', hide:['p0'], show:['p3','l'] },
+      { say:'فإن كانت الميزانية ثمانية آلاف ريال، فالطعام ثلاثون في المئة منها: ألفان وأربعمئة.', show:['e1'] },
+      { say:'وللزاوية: الدائرة ثلاثمئة وستون درجة، فكل شريحة ست وثلاثون، والطعام مئة وثماني درجات.', show:['e2','n'] },
+    ]},
+  { t:'دورك: من الجدول',
+    items:Object.assign({}, tb, { r:{type:'box',x:110,y:186,w:420,h:64,c:'n0',text:'(٣٠ − ١٥) ÷ ٣٠ = ٥٠٪',s:34,cls:'t-note'}, ck:{type:'check',x:320,y:292} }),
+    beats:[
+      { say:'دورك. هذا الجدول يعرض المبيعات نفسها بالآلاف.', show:tk, gap:.06 },
+      { say:'ما نسبة النقص من يوم الأحد إلى يوم الاثنين؟', hl:['v2','v3'] },
+    ],
+    ask:{ opts:['٥٠٪','١٥٪','١٠٠٪','٣٣٪'], a:0,
+      right:'صحيح! النقص خمسة عشر، ونقسمه على القيمة القديمة ثلاثين، فيكون نصفًا، أي خمسين في المئة.',
+      wrong:'النقص ثلاثون ناقص خمسة عشر يساوي خمسة عشر، ونقسمه على القيمة القديمة ثلاثين، فنحصل على نصف، أي خمسين في المئة.',
+      show:['r','ck'] } },
+  ],
+  quiz:[
+    {q:'في دائرة بيانية تمثل ٦٠٠ طالب، قطاع الرياضيات زاويته ٩٠°. كم طالبًا يفضّل الرياضيات؟', o:['٩٠','١٥٠','٢٠٠','٢٤٠'], a:1, e:'٩٠° ربع الدائرة، وربع ٦٠٠ = ١٥٠.'},
+    {q:'ارتفعت المبيعات من ٤٠ ألفًا إلى ٥٠ ألفًا. ما نسبة الزيادة؟', o:['٢٠٪','١٠٪','٢٥٪','٥٠٪'], a:2, e:'الفرق ١٠، ونقسمه على القديم ٤٠: ١٠ من ٤٠ = ٢٥٪.'},
+    {q:'جدول: الفصل (أ) ١٨ طالبًا، (ب) ٢٢، (ج) ٢٠. ما نسبة طلاب الفصل (ب) من المجموع تقريبًا؟', o:['٢٢٪','٣٣٪','٣٧٪','٤٤٪'], a:2, e:'المجموع ٦٠، و٢٢ من ٦٠ ≈ ٣٦٫٧٪، أي ٣٧٪ تقريبًا.'},
+  ] });
+})();
 /* ============ STATE ============ */
 const KEY='masar100_v1';
 const todayStr=()=>new Date().toISOString().slice(0,10);
 const addDays=(d,n)=>{ const x=new Date(d+'T12:00:00'); x.setDate(x.getDate()+n); return x.toISOString().slice(0,10); };
-const DEF=()=>({lang:'ar',track:'sci',target:100,examDate:'',weeks:8,planStart:todayStr(),done:{},stats:{},recent:[],attempts:[],mistakes:[],days:[],sessionDays:[],vocab:{ar:{},en:{}},cards:{},models:{},causes:{concept:0,careless:0,time:0,trap:0}});
+const DEF=()=>({lang:'ar',track:'sci',target:100,examDate:'',weeks:8,planStart:todayStr(),done:{},stats:{},recent:[],attempts:[],mistakes:[],days:[],sessionDays:[],vocab:{ar:{},en:{}},cards:{},models:{},xp:{},causes:{concept:0,careless:0,time:0,trap:0}});
 let S=(()=>{ try{ let r=localStorage.getItem(KEY); if(!r){ const old=localStorage.getItem('masar95_v1'); if(old){ const o=JSON.parse(old); o.target=100; (o.mistakes||[]).forEach(m=>{m.box=0;m.due=todayStr();}); return Object.assign(DEF(),o);} }
   if(r) return Object.assign(DEF(),JSON.parse(r)); }catch(e){} return DEF(); })();
 let STORE_OK=(()=>{ try{ localStorage.setItem('__t','1'); localStorage.removeItem('__t'); return true; }catch(e){ return false; } })(), PERSIST=false;
@@ -1859,7 +4504,7 @@ function pagePlan(){
 function pageLearn(tab='cards'){
   const tabs=`<nav class="tabs">${Object.entries(t('tabs')).map(([k,v])=>`<a href="#learn-${k}" class="${tab===k?'on':''}">${v}</a>`).join('')}</nav>`;
   let body='';
-  if(tab==='lessons'){ const card=s=>{ const i=skillInfo(s), l=LESSONS[s][S.lang], c=FLASH.find(f=>f.sk===s); return `<a class="lcard" href="#lesson-${s}"><div class="lc-ill">${ILL[c.ill]()}</div><div class="lc-top"><h3>${SKILLS[s][S.lang]}</h3>${pips(i.level)}</div><p>${M(esc(l.concept[0]))}</p><div class="lc-f"><span class="muted small">${t('levels')[i.level]}</span><span class="lc-go">${t('lessonsOpen')}</span></div></a>`; };
+  if(tab==='lessons'){ const card=s=>{ const i=skillInfo(s), l=LESSONS[s][S.lang], c=FLASH.find(f=>f.sk===s); return `<a class="lcard" href="#lesson-${s}"><div class="lc-ill">${ILL[c.ill]()}</div><div class="lc-top"><h3>${SKILLS[s][S.lang]}</h3>${pips(i.level)}</div><p>${M(esc(l.concept[0]))}</p><div class="lc-f"><span class="muted small">${t('levels')[i.level]}${xpList(s).length?` · <span class="lc-xp">▶ ${numL(xpList(s).length)} ${t('xpShort')}</span>`:''}</span><span class="lc-go">${t('lessonsOpen')}</span></div></a>`; };
     body=`<h2 class="sec-h hl">${t('verbal')}</h2><div class="lgrid">${V_SKILLS.map(card).join('')}</div><h2 class="sec-h hl">${t('quant')}</h2><div class="lgrid">${Q_SKILLS.map(card).join('')}</div>`; }
   else if(tab==='cards') body=cardsView();
   else if(tab==='tech') body=`<p class="lead">${t('techIntro')}</p><div class="notes">${TECH.map((x,i)=>`<article class="note-card c${i%4}"><div class="nc-ill">${ILL[x.ill]()}</div><h3>${esc(L(x.t))}</h3><p>${M(esc(L(x.d)))}</p></article>`).join('')}</div>`;
@@ -1890,6 +4535,13 @@ function cardAct(ok){ const due=cardDue(); if(!due.length) return; const c=due[0
 function resCard(it){ const url=it.u||(it.yt?yt(L(it.yt)):''); const tag={video:S.lang==='ar'?'فيديو':'Video',link:S.lang==='ar'?'رابط':'Link',official:S.lang==='ar'?'رسمي':'Official',book:S.lang==='ar'?'كتاب':'Book'}[it.k];
   const inner=`<span class="ricon ${it.k}">${ICON[it.k]}</span><div class="rc-body"><div class="rc-top"><h3>${esc(L(it.t))}</h3><span class="chip">${tag}</span></div><p>${esc(L(it.d))}</p></div>`;
   return url?`<a class="rcard" href="${url}" target="_blank" rel="noopener">${inner}</a>`:`<div class="rcard">${inner}</div>`; }
+/* foundation explainers (animated, narrated; Arabic) */
+const XPOK=()=>!!(window.XP&&XP.ready);
+const xpList=s=>XPOK()?XP.forSkill(s):[];
+function xpSection(s){ const xs=xpList(s); if(!xs.length) return ''; const done=S.xp||{}, n=xs.filter(x=>done[x.key]).length;
+  const play='<svg viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z" fill="currentColor" stroke="none"/></svg>';
+  return `<section class="card xp-sec" id="xp-${s}"><div class="xp-sec-h"><h2>${t('xpTitle')}</h2><span class="chip num">${numL(n)} / ${numL(xs.length)}</span></div><p class="muted small">${t('xpIntro')}</p>
+    <div class="xpl" dir="rtl" lang="ar">${xs.map((x,i)=>`<button class="xpc" data-xp="${x.key}"><span class="xpn"><span class="pl">${play}</span><span>شرح ${'١٢٣٤٥٦٧٨٩'[i]||i+1}</span><span class="xpm">${esc(x.min||'')}</span>${done[x.key]?`<span class="dn">✓ ${t('xpDone')}</span>`:''}</span><b>${esc(x.title)}</b>${x.goals&&x.goals[0]?`<small>${esc(x.goals[0])}</small>`:''}</button>`).join('')}</div></section>`; }
 function pageLesson(s){
   const l=LESSONS[s]?.[S.lang]; if(!l) return pageLearn(); const i=skillInfo(s), ar=S.lang==='ar';
   const res=l.res.map(r=>r[0]==='yt'?{k:'video',t:{ar:'يوتيوب: '+r[1],en:'YouTube: '+r[1]},d:{ar:'بحث جاهز لشروحات هذه المهارة.',en:'A ready search for lessons on this skill.'},u:yt(r[1])}:{k:'link',t:{ar:r[1],en:r[1]},d:{ar:'مرجع خارجي للتعمق.',en:'External reference for deeper practice.'},u:r[2]});
@@ -1903,6 +4555,7 @@ function pageLesson(s){
   <div class="lesson">
     <div class="lesson-main">
       <section class="card"><h2>${t('concept')}</h2>${l.concept.map(p=>`<p>${M(esc(p))}</p>`).join('')}</section>
+      ${xpSection(s)}
       <section><h2 class="h2s">${t('skillCards')}</h2><div class="notes small-notes">${sc.map(c=>`<details class="mini-flash"><summary>${stickyCard(c,false,false)}</summary>${stickyCard(c,true,false)}</details>`).join('')}</div></section>
       <aside class="callout"><div class="eyebrow">${t('mind')}</div><p>${M(esc(l.mind))}</p></aside>
       <section class="card"><h2>${t('steps')}</h2><ol class="nsteps">${l.steps.map(x=>`<li>${M(esc(x))}</li>`).join('')}</ol></section>
@@ -2039,6 +4692,7 @@ function bindMain(){
   m.querySelectorAll('[data-acct]').forEach(b=>b.onclick=openAcct);
   m.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>document.getElementById(b.dataset.go)?.scrollIntoView({behavior:'smooth'}));
   m.querySelectorAll('[data-start]').forEach(b=>b.onclick=()=>startTest(b.dataset.start,{skill:b.dataset.skill}));
+  m.querySelectorAll('[data-xp]').forEach(b=>b.onclick=()=>{ XP_BACK=b.dataset.xp; XP.open(b.dataset.xp); });
   m.querySelectorAll('[data-task]').forEach(b=>b.onclick=()=>{ const tk=buildPlan().flatMap(w=>w.tasks).find(x=>x.id===b.dataset.task); if(tk) runTask(tk); });
   m.querySelectorAll('[data-scroll]').forEach(a=>a.onclick=e=>{ e.preventDefault(); document.getElementById(a.dataset.scroll)?.scrollIntoView({behavior:'smooth',block:'start'}); });
   bindSettings('pf');
@@ -2169,6 +4823,7 @@ function mergeStates(a,b){
   o.done=a.planStart===b.planStart?{...older.done,...newer.done}:{...newer.done};
   const pickBox=(x,y)=>{ const r={...x}; for(const [k,v] of Object.entries(y||{})){ const w=r[k]; if(!w||(v.box||0)>(w.box||0)||((v.box||0)===(w.box||0)&&(v.due||'')>(w.due||''))) r[k]=v; } return r; };
   o.cards=pickBox(a.cards,b.cards); o.vocab={ar:pickBox(a.vocab?.ar,b.vocab?.ar),en:pickBox(a.vocab?.en,b.vocab?.en)};
+  o.xp={...(a.xp||{})}; for(const [k,v] of Object.entries(b.xp||{})){ const w=o.xp[k]; if(!w||(v.score||0)>(w.score||0)||((v.score||0)===(w.score||0)&&(v.date||'')>(w.date||''))) o.xp[k]=v; }
   o.lastExport=[a.lastExport,b.lastExport].filter(Boolean).sort().pop()||undefined;
   o.savedAt=Math.max(a.savedAt||0,b.savedAt||0);
   return o;
@@ -2222,7 +4877,7 @@ function resetParts(parts){
   if(has('plan')){ S.done={}; S.planStart=todayStr(); }
   if(has('mistakes')){ S.mistakes=[]; S.causes={concept:0,careless:0,time:0,trap:0}; }
   if(has('models')){ Object.values(S.models||{}).forEach(m=>{ if(m.aid) delete DET[m.aid]; }); S.models={}; S.attempts=S.attempts.filter(a=>a.kind!=='model'); }
-  if(has('cards')){ S.cards={}; S.vocab={ar:{},en:{}}; }
+  if(has('cards')){ S.cards={}; S.vocab={ar:{},en:{}}; S.xp={}; }
   if(has('skills')){ DET={}; S.recent=[]; S.stats={}; S.attempts=[]; S.days=[]; S.sessionDays=[]; S.models={}; }
   try{ localStorage.setItem(DKEY,JSON.stringify(DET)); }catch(e){}
   save(); renderRoute();
@@ -2247,6 +4902,9 @@ function importText(txt){
   $('#im-yes').onclick=doIt; $('#im-no').onclick=()=>box.innerHTML=''; box.scrollIntoView({block:'nearest'});
 }
 $('#lang-btn').onclick=()=>{ S.lang=S.lang==='ar'?'en':'ar'; VC.flip=false; save(); renderRoute(); };
-window.addEventListener('hashchange',()=>{ renderRoute(); window.scrollTo(0,0); });
+let XP_BACK=null;
+if(XPOK()){ XP.setHooks({onDone:(k,sc,n)=>{ S.xp=S.xp||{}; const w=S.xp[k]; if(!w||sc>=(w.score||0)) S.xp[k]={score:sc,n,date:todayStr()}; save(); },
+  onClose:()=>{ const y=window.scrollY; renderRoute(); window.scrollTo(0,y); const b=XP_BACK&&document.querySelector(`[data-xp="${XP_BACK}"]`); if(b) b.focus({preventScroll:true}); }}); XP.loadTracks(); }
+window.addEventListener('hashchange',()=>{ if(document.body.classList.contains('xp-open')&&XPOK()) XP.close(); renderRoute(); window.scrollTo(0,0); });
 renderRoute(); initAI(); checkLive();
 { const el=$('#save-dot'); if(el){ el.classList.toggle('bad',!STORE_OK); el.title=STORE_OK?t('savedOk'):t('saveFail'); el.setAttribute('aria-label',el.title); } }

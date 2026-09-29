@@ -312,7 +312,7 @@ function thumb(key){ const m={
 /* =================== views =================== */
 let DONE=store.get('gat_explainers_done',{});
 let TAB='lessons';
-function renderVoiceBadge(){ const b=$('#vbadge'); if(!b) return; if(Object.keys(AUDIO).length){ b.className='voice-badge ok'; b.innerHTML=IC.vol+'<span>التعليق الصوتي مسجّل بصوت سعودي (ElevenLabs).</span>'; return; } const ok=TTS.ok&&TTS.voice; b.className='voice-badge'+(ok?' ok':''); b.innerHTML=IC.vol+(ok?`<span>التعليق الصوتي يعمل بصوت عربي من جهازك (${esc(TTS.voice.name)}).</span>`:'<span>لا يتوفر صوت عربي في هذا المتصفح، فيعمل الدرس بتعليق مكتوب متزامن. في النسخة النهائية يُسجَّل الصوت مسبقًا.</span>'); }
+function renderVoiceBadge(){ const b=$('#vbadge'); if(!b) return; if(Object.keys(AUDIO).length||Object.keys(TRACKS).length){ b.className='voice-badge ok'; b.innerHTML=IC.vol+'<span>التعليق الصوتي مسجّل بصوت سعودي متصل (ElevenLabs).</span>'; return; } const ok=TTS.ok&&TTS.voice; b.className='voice-badge'+(ok?' ok':''); b.innerHTML=IC.vol+(ok?`<span>التعليق الصوتي يعمل بصوت عربي من جهازك (${esc(TTS.voice.name)}).</span>`:'<span>لا يتوفر صوت عربي في هذا المتصفح، فيعمل الدرس بتعليق مكتوب متزامن. في النسخة النهائية يُسجَّل الصوت مسبقًا.</span>'); }
 
 function lib(){
   stopPlayer();
@@ -344,7 +344,7 @@ function lib(){
 
 /* =================== player =================== */
 let P=null, RUN=0;
-function stopPlayer(){ RUN++; TTS.stop(); if(P&&P.tl){ P.tl.kill(); } gsap.killTweensOf('*'); P=null; }
+function stopPlayer(){ RUN++; TTS.stop(); if(P) stopTrack(); if(P&&P.tl){ P.tl.kill(); } gsap.killTweensOf('*'); P=null; }
 
 function openLesson(key,opt={}){
   stopPlayer(); const L=LESSONS[key]; if(!L) return lib();
@@ -383,22 +383,23 @@ function openLesson(key,opt={}){
   $('#start').onclick=()=>{ $('#cover').hidden=true; P.started=true; playScene(0); };
   $('#pp').onclick=()=>{ if(!P.started){ $('#start').click(); return; } P.playing?pause():resume(); };
   $('#nxt').onclick=()=>go(P.idx+1); $('#prev').onclick=()=>go(P.idx-1); $('#rep').onclick=()=>go(P.idx);
-  $('#vo').onclick=()=>{ TTS.on=!TTS.on; $('#vo').setAttribute('aria-pressed',String(TTS.on)); if(TTS.cur&&P.playing){ TTS.pause(); TTS.resume(); } };
+  $('#vo').onclick=()=>{ TTS.on=!TTS.on; $('#vo').setAttribute('aria-pressed',String(TTS.on)); if(P.trk||(TTS.on&&trackFor(P.key)&&P.started)){ if(P.started&&!P.waiting&&P.idx<P.scenes.length) playScene(P.idx); return; } if(TTS.cur&&P.playing){ TTS.pause(); TTS.resume(); } };
   $('#ccb').onclick=()=>{ P.cc=!P.cc; $('#ccb').setAttribute('aria-pressed',String(P.cc)); $('#cap').classList.toggle('off',!P.cc); };
-  document.querySelectorAll('[data-rate]').forEach(b=>b.onclick=()=>{ TTS.rate=+b.dataset.rate; document.querySelectorAll('[data-rate]').forEach(x=>x.classList.toggle('on',x===b)); gsap.globalTimeline.timeScale((RM?2.5:1)*TTS.rate); });
+  document.querySelectorAll('[data-rate]').forEach(b=>b.onclick=()=>{ TTS.rate=+b.dataset.rate; if(P&&P.trk&&P.trk.audio) P.trk.audio.playbackRate=TTS.rate; document.querySelectorAll('[data-rate]').forEach(x=>x.classList.toggle('on',x===b)); gsap.globalTimeline.timeScale((RM?2.5:1)*TTS.rate); });
   gsap.globalTimeline.timeScale((RM?2.5:1)*TTS.rate);
 }
 function renderChapters(){ const L=P.L; $('#chap').innerHTML=P.scenes.map((si,i)=>{ const sc=L.scenes[si]; const st=i<P.idx?'done':i===P.idx?'cur':''; return `<li class="${st}"><button data-go="${i}"><span class="n">${AD(i+1)}</span><span>${esc(sc.t)}</span>${sc.interactive?'<span class="k">تفاعلي</span>':''}</button></li>`; }).join('')+(P.only==null?`<li class="${P.idx>=P.scenes.length?'cur':''}"><button data-go="quiz"><span class="n">${IC.check}</span><span>التحدي الختامي</span></button></li>`:'');
   document.querySelectorAll('#chap [data-go]').forEach(b=>b.onclick=()=>{ if(!P.started){ $('#cover').hidden=true; P.started=true; } b.dataset.go==='quiz'?showQuiz():go(+b.dataset.go); }); }
 function setSceneTitle(){ const sc=P.L.scenes[P.scenes[P.idx]]; $('#scene-t').textContent=sc?sc.t:''; }
 function setPlaying(v){ P.playing=v; const b=$('#pp'); if(b){ b.innerHTML=v?IC.pause:IC.play; b.setAttribute('aria-label',v?'إيقاف مؤقت':'تشغيل'); } }
-function pause(){ if(!P) return; setPlaying(false); TTS.pause(); if(P.tl) P.tl.pause(); }
-function resume(){ if(!P) return; setPlaying(true); if(P.tl) P.tl.resume(); TTS.resume(); }
+function pause(){ if(!P) return; setPlaying(false); if(P.trk&&P.trk.audio){ P.trk.audio.pause(); gsap.globalTimeline.pause(); return; } TTS.pause(); if(P.tl) P.tl.pause(); }
+function resume(){ if(!P) return; setPlaying(true); if(P.trk&&P.trk.audio){ gsap.globalTimeline.resume(); if(!P.waiting) P.trk.audio.play().catch(()=>{}); return; } if(P.tl) P.tl.resume(); TTS.resume(); }
 function go(i){ if(!P) return; if(i<0) i=0; if(i>=P.scenes.length){ P.only!=null?finishQuick():showQuiz(); return; } playScene(i); }
 function segProgress(i,frac){ const segs=document.querySelectorAll('#segs i'); segs.forEach((s,j)=>{ s.classList.toggle('done',j<i); const b=s.querySelector('b'); if(j===i) b.style.inlineSize=Math.round(frac*100)+'%'; else if(j>i) b.style.inlineSize='0'; else b.style.inlineSize=''; }); }
-function tlDone(t){ return new Promise(r=>{ if(!t){ r(); return; } t.eventCallback('onComplete',r); }); }
+function tlDone(t){ return new Promise(r=>{ if(!t||t.totalProgress()>=1){ r(); return; } t.eventCallback('onComplete',r); }); }
 
 async function playScene(i){
+  if(TTS.on&&trackFor(P.key)) return playTrack(i);
   const my=++RUN; TTS.stop(); if(P.tl) P.tl.kill(); gsap.killTweensOf('*');
   const q=$('#quiz'); if(q) q.remove();
   P.idx=i; renderChapters(); setSceneTitle(); setPlaying(true);
@@ -417,13 +418,66 @@ async function playScene(i){
   segProgress(i+1,0); await sleep(500); if(my!==RUN) return;
   go(i+1);
 }
-function finishQuick(){ RUN++; TTS.stop(); setPlaying(false); segProgress(P.scenes.length,0); captionText('انتهى الشرح السريع.');
+/* ===== continuous narration: one recorded track spans several scenes; beats fire at their time in the track ===== */
+const TRACKS={};   // lessonKey -> {segs:[{clip,src,beats:[{id,t0,t1}]}], fb:{beatId:{ok:src,no:src}}}
+function trackFor(key){ const T=TRACKS[key]; return T&&T.segs&&T.segs.length?T:null; }
+function beatById(L,id){ for(let si=0;si<L.scenes.length;si++){ const bi=L.scenes[si].beats.findIndex(b=>b.id===id); if(bi>=0) return {si,bi,beat:L.scenes[si].beats[bi]}; } return null; }
+function stopTrack(){ const k=P&&P.trk; if(k){ k.dead=true; if(k.audio){ k.audio.pause(); k.audio.src=''; } cancelAnimationFrame(k.raf); } if(P) P.trk=null; }
+function setupSceneAt(pi){ // pi = player index
+  if(P.tl) P.tl.kill(); gsap.killTweensOf('*'); const q=$('#quiz'); if(q) q.remove();
+  P.idx=pi; renderChapters(); setSceneTitle();
+  const sc=P.L.scenes[P.scenes[pi]], stage=$('#stage'); stage.innerHTML=''; P.ctx=sc.setup(stage); gsap.fromTo(stage,{opacity:0},{opacity:1,duration:.25}); return P.ctx; }
+function playClip(src,onTick,start=0){ return new Promise((resolve,reject)=>{ const a=new Audio(); a.preload='auto'; a.src=src; a.playbackRate=TTS.rate; a.preservesPitch=true; P.trk.audio=a; const k=P.trk;
+  a.onended=()=>{ cancelAnimationFrame(k.raf); resolve(); }; a.onerror=()=>reject(new Error('audio'));
+  const tick=()=>{ if(k.dead) return; onTick&&onTick(a.currentTime); k.raf=requestAnimationFrame(tick); };
+  const go=()=>{ if(start) a.currentTime=start; a.play().then(()=>{ k.raf=requestAnimationFrame(tick); }).catch(reject); };
+  if(a.readyState>=1) go(); else a.addEventListener('loadedmetadata',go,{once:true}); }); }
+function capBeat(text,frac){ const w=text.split(/\s+/); if(CAPW.join(' ')!==w.join(' ')) captionWords(w); captionIdx(Math.min(w.length-1,Math.floor(frac*w.length))); }
+async function playTrack(pi){
+  const my=++RUN; TTS.stop(); stopTrack(); const T=trackFor(P.key), L=P.L, sceneIdx=P.scenes[pi];
+  P.trk={dead:false}; P.ctx=null; P.ctxScene=null; setPlaying(true);
+  // find segment + beat where this scene starts
+  let si=T.segs.findIndex(g=>g.beats.some(b=>beatById(L,b.id).si===sceneIdx)); if(si<0){ P.trk=null; TTS.on=false; return playScene(pi); }
+  let startBeat=T.segs[si].beats.findIndex(b=>beatById(L,b.id).si===sceneIdx);
+  const only=P.only!=null;
+  try{
+    for(;si<T.segs.length;si++){
+      const seg=T.segs[si]; let next=startBeat; startBeat=0; const k=P.trk; if(my!==RUN) return;
+      const firstT=seg.beats[next].t0;
+      let cur=null, stopAt=null;
+      if(only){ const end=seg.beats.findIndex(b=>beatById(L,b.id).si!==sceneIdx&&b.t0>firstT); stopAt=end>=0?seg.beats[end].t0:null; }
+      const fire=(b)=>{ const loc=beatById(L,b.id); const pIdx=P.scenes.indexOf(loc.si); if(pIdx<0) return;
+        if(pIdx!==P.idx||!P.ctx||P.ctxScene!==loc.si){ setupSceneAt(pIdx); P.ctxScene=loc.si; }
+        const sc=L.scenes[loc.si]; segProgress(pIdx,loc.bi/sc.beats.length); P.tl=loc.beat.run?loc.beat.run(P.ctx):null; cur={b,loc}; };
+      const p=playClip(seg.src,t=>{
+        if(stopAt!=null&&t>=stopAt){ k.audio.pause(); k.stopped=true; k.resolveStop&&k.resolveStop(); return; }
+        while(next<seg.beats.length&&t+0.05>=seg.beats[next].t0){ fire(seg.beats[next]); next++; }
+        if(cur) capBeat(cur.loc.beat.say,(t-cur.b.t0)/Math.max(.3,cur.b.t1-cur.b.t0));
+      },firstT);
+      await Promise.race([p,new Promise(r=>{ k.resolveStop=r; })]); if(my!==RUN) return;
+      while(next<seg.beats.length){ fire(seg.beats[next]); next++; }   // any beats at the very end
+      if(only) break;
+      const lastLoc=cur&&cur.loc;
+      if(lastLoc&&lastLoc.beat.wait){ P.waiting=true; setPlaying(false); captionText('⟵ دورك: جرّب على اللوحة.');
+        const ok=await lastLoc.beat.wait(P.ctx); P.waiting=false; if(my!==RUN) return; setPlaying(true);
+        P.tl=lastLoc.beat.after?lastLoc.beat.after(P.ctx,ok):null; const fb=T.fb[lastLoc.beat.id], text=ok?lastLoc.beat.right:lastLoc.beat.wrong;
+        if(fb&&fb[ok?'ok':'no']){ captionWords(text.split(/\s+/)); await playClip(fb[ok?'ok':'no'],t=>{ const a=P.trk.audio; if(a.duration) capBeat(text,t/a.duration); }); }
+        else await TTS.say(text,lastLoc.beat.id+(ok?'-ok':'-no'));
+        await tlDone(P.tl); if(my!==RUN) return; await sleep(300); }
+      else await sleep(250);
+      while(P&&!P.playing&&my===RUN) await sleep(120);
+    }
+  }catch(e){ if(my!==RUN) return; P.trk=null; TTS.on=false; $('#vo')?.setAttribute('aria-pressed','false'); return playScene(P.idx); }
+  if(my!==RUN) return; P.trk=null; segProgress(P.scenes.length,0);
+  only?finishQuick():showQuiz();
+}
+function finishQuick(){ RUN++; TTS.stop(); stopTrack(); setPlaying(false); segProgress(P.scenes.length,0); captionText('انتهى الشرح السريع.');
   const sw=$('#sw'); const d=document.createElement('div'); d.className='quiz'; d.id='quiz';
   d.innerHTML=`<p class="qn">انتهى الشرح</p><h3>تريد الفكرة كاملة مع التحدي؟</h3><p class="why">هذا المقطع جزء من درس «${esc(P.L.title)}». الدرس الكامل فيه ${AD(P.L.scenes.length)} مشاهد ووقفات تفاعلية وتحدٍّ ختامي.</p><div class="row"><button class="btn pri" id="full">افتح الدرس الكامل</button><button class="btn" id="again">أعد المقطع</button><button class="btn" id="bk">عودة للشروحات</button></div>`;
   sw.appendChild(d); $('#full').onclick=()=>{ const k=P.key; if(location.hash==='#'+k) route(); else location.hash=k; }; $('#again').onclick=()=>playScene(0); $('#bk').onclick=()=>{ if(location.hash==='#lib') route(); else location.hash='lib'; }; }
 
 function showQuiz(){
-  RUN++; TTS.stop(); if(P.tl) P.tl.kill(); setPlaying(false); P.idx=P.scenes.length; renderChapters(); segProgress(P.scenes.length,0); $('#scene-t').textContent='';
+  RUN++; TTS.stop(); stopTrack(); if(P.tl) P.tl.kill(); setPlaying(false); P.idx=P.scenes.length; renderChapters(); segProgress(P.scenes.length,0); $('#scene-t').textContent='';
   const Q=P.L.quiz; let k=0, score=0; const sw=$('#sw'); let d=$('#quiz'); if(!d){ d=document.createElement('div'); d.className='quiz'; d.id='quiz'; sw.appendChild(d); }
   captionText('التحدي الختامي: ثلاثة أسئلة سريعة.');
   const show=()=>{ const it=Q[k]; d.innerHTML=`<p class="qn">التحدي ${AD(k+1)} من ${AD(Q.length)}</p><h3>${esc(it.q)}</h3><div class="opts">${it.o.map((o,i)=>`<button class="opt" data-i="${i}">${esc(o)}</button>`).join('')}</div><div id="fb"></div>`;
@@ -445,5 +499,8 @@ window.addEventListener('hashchange',route);
 document.addEventListener('keydown',e=>{ if(!P||!P.started||e.target.closest('input,textarea')) return; if(e.key===' '&&!e.target.closest('button')){ e.preventDefault(); $('#pp').click(); } });
 route();
 
-/* live site: load the recorded narration list from the server */
-fetch('/audio/index.json',{credentials:'same-origin'}).then(r=>r.ok?r.json():[]).then(ids=>{ ids.forEach(id=>{ AUDIO[id]='/audio/'+encodeURIComponent(id)+'.mp3'; }); renderVoiceBadge(); }).catch(()=>{});
+/* live site: continuous narration tracks (preferred) and per-line clips (fallback) from the server */
+Promise.all([fetch('/audio/index.json',{credentials:'same-origin'}).then(r=>r.ok?r.json():[]),fetch('/audio/tracks.json',{credentials:'same-origin'}).then(r=>r.ok?r.json():{})])
+ .then(([ids,tr])=>{ const have=new Set(ids); ids.forEach(id=>{ if(!/^v2-/.test(id)) AUDIO[id]='/audio/'+encodeURIComponent(id)+'.mp3'; });
+   for(const k in tr){ const T=tr[k]; if(T.segs.every(g=>have.has(g.clip))) TRACKS[k]=T; }
+   renderVoiceBadge(); }).catch(()=>{});

@@ -263,6 +263,7 @@ const adminPage = [wrap(auth), (req, res, next) => (req.user && isAdminEmail(req
   : res.status(404).type("html").sendFile(path.join(PUB, "404.html"), e => { if (e) res.end("Not found"); })];
 app.get("/preview/explainers", ...adminPage, (req, res) => { res.set({ "Cache-Control": "no-store", "X-Robots-Tag": "noindex" }); res.sendFile(path.join(PREVIEW, "explainers.html")); });
 app.get("/preview/explainers.js", ...adminPage, (req, res) => { res.set("Cache-Control", "no-store"); res.type("application/javascript").sendFile(path.join(PREVIEW, "explainers.js")); });
+app.get("/audio/tracks.json", ...adminPage, (req, res) => { res.set("Cache-Control", "no-store"); res.type("application/json").sendFile(path.join(PREVIEW, "tracks.json")); });
 app.get("/audio/index.json", ...adminPage, wrap(async (req, res) => {
   const r = await pool.query("SELECT id FROM narration ORDER BY id");
   res.set("Cache-Control", "no-store").json(r.rows.map(x => x.id));

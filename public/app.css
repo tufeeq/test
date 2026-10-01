@@ -844,3 +844,4 @@ body.sheet-open{overflow:hidden}
 }
 @media (max-width:520px) and (pointer:coarse){.top-in:has(#pro-chip:not([hidden])) #acct-btn.has-name{inline-size:44px}}
 .cmp td{background:var(--surface)} .cmp tbody th{background:var(--surface2)} .cmp td.pro-col{background:color-mix(in srgb,var(--pri-soft) 70%,var(--surface))}
+#foot .foot-home{font-weight:700;color:var(--pri);text-decoration:underline;text-underline-offset:3px;white-space:nowrap}

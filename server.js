@@ -312,7 +312,7 @@ app.get("/favicon.ico", (req, res) => res.redirect(301, "/favicon.svg"));
 // "/" is the marketing page for visitors; signed-in students go straight to the app at /app
 app.get("/", wrap(async (req, res) => {
   const tok = parseCookies(req)[COOKIE];
-  if (tok) { const r = await pool.query("SELECT 1 FROM sessions WHERE token_hash=$1 AND expires_at>now()", [sha(tok)]); if (r.rows[0]) return res.redirect(302, "/app"); }
+  if (tok && req.query.home === undefined) { const r = await pool.query("SELECT 1 FROM sessions WHERE token_hash=$1 AND expires_at>now()", [sha(tok)]); if (r.rows[0]) return res.redirect(302, "/app"); }
   res.set("Cache-Control", "no-cache").sendFile(path.join(PUB, "index.html"));
 }));
 app.get(["/app", "/app/"], (req, res) => res.set("Cache-Control", "no-cache").sendFile(path.join(PUB, "app.html")));

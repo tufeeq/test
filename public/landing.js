@@ -202,13 +202,13 @@
     var lb = $('#lp-lang');
     if (lb) {
       var other = LANG === 'ar' ? 'en' : 'ar';
-      lb.textContent = other === 'en' ? 'EN' : 'ع';
+      lb.textContent = other === 'en' ? 'English' : 'العربية';
       lb.setAttribute('lang', other); lb.setAttribute('hreflang', other);
       lb.setAttribute('href', '?lang=' + other);
       lb.setAttribute('aria-label', other === 'en' ? 'English' : 'العربية');
     }
     // app links carry the language (the app can read ?lang= for first-time visitors)
-    $$('[data-app]').forEach(function (a) { a.setAttribute('href', '/app' + (LANG === 'en' ? '?lang=en' : '') + a.getAttribute('data-app')); });
+    $$('[data-app]').forEach(function (a) { a.setAttribute('href', '/app?lang=' + LANG + a.getAttribute('data-app')); });
     var y = $('#lp-year'); if (y) y.textContent = N(new Date().getFullYear());
   }
 
@@ -245,7 +245,7 @@
 
   function renderPlans() {
     var box = $('#lp-opts'); if (!box) return;
-    var href = '/app' + (LANG === 'en' ? '?lang=en' : '');
+    var href = '/app?lang=' + LANG;
     if (!CFG) {
       if (CFG_FAILED) box.innerHTML = '<div class="lp-opt"><p>' + T('تعذّر تحميل الأسعار الآن. تجدها داخل المنصة.', 'Couldn’t load prices right now. You’ll find them in the app.') + '</p><a class="btn primary block" href="' + href + '#upgrade">' + T('اعرض الخطط في المنصة', 'See plans in the app') + '</a></div>';
       return;
@@ -261,7 +261,7 @@
         '<h4>' + name + '</h4>' +
         '<p class="lp-price"><b>' + money(price) + '</b><span>' + cur(CFG.currency) + (d ? ' · ' + days(d) : '') + '</span></p>' +
         '<p class="lp-per">' + (per ? T('≈ ' + money(per) + ' ر.س في اليوم', '≈ ' + money(per) + ' ' + (CFG.currency || 'SAR') + ' a day') : '') + '</p>' +
-        '<a class="btn ' + (p.best ? 'primary' : 'ghost') + ' block" href="' + href + '#upgrade">' + T('اشترك', 'Subscribe') + '</a>' +
+        '<a class="btn ' + (p.best ? 'primary' : 'ghost') + ' block" href="' + href + '#upgrade?plan=' + encodeURIComponent(p.id) + '">' + T('اشترك', 'Subscribe') + '</a>' +
         '</div>';
     }).join('');
     if (CFG.currency && CFG.currency !== 'SAR') $$('.lp-per', box).forEach(function (e) { e.textContent = ''; });
@@ -293,12 +293,18 @@
 
   function renderLive() { renderFree(); renderPlans(); renderRefund(); renderBanner(); }
 
+  /* a signed-in student browsing the page: "Sign in" becomes "Open the app" */
+  function signedIn() {
+    var a = $('.lp-signin'); if (!a) return;
+    AR_TXT.set(a, 'ادخل المنصة'); a.setAttribute('data-i', 'footApp'); a.setAttribute('data-app', '');
+    translate();
+  }
   function loadConfig() {
     var done = false;
     var to = setTimeout(function () { if (!done) { CFG_FAILED = true; renderPlans(); } }, 8000);
-    fetch('/api/config', { credentials: 'same-origin', headers: { Accept: 'application/json' } })
+    fetch('/api/me', { credentials: 'same-origin', headers: { Accept: 'application/json' } })
       .then(function (r) { if (!r.ok) throw new Error('http ' + r.status); return r.json(); })
-      .then(function (j) { done = true; clearTimeout(to); CFG = (j && j.config) || null; CFG_FAILED = !CFG; renderLive(); })
+      .then(function (j) { done = true; clearTimeout(to); CFG = (j && j.config) || null; CFG_FAILED = !CFG; if (j && j.user) signedIn(); renderLive(); })
       .catch(function () { done = true; clearTimeout(to); CFG_FAILED = true; renderPlans(); });
   }
 

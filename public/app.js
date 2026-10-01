@@ -1220,7 +1220,7 @@ const T = {
   deckAll:'كل البطاقات', cardsIntro:'اقرأ الوجه الأول وحاول التذكّر، ثم اقلب البطاقة. «راجعها» تعيدها إليك اليوم، و«أعرفها» تؤجلها أيامًا.', tapFlip:'اضغط للقلب', example:'مثال', allInDeck:'كل بطاقات القسم', deckDone:'أنهيت بطاقات هذا القسم لليوم. ارجع غدًا أو اختر قسمًا آخر.', techIntro:'تكنيكات يستخدمها المتفوقون لرفع الدقة والسرعة. طبّق واحدًا في كل جلسة حتى يصبح عادة.', patIntro:'أنماط أسئلة تتكرر في التجميعات التي يتداولها الطلاب بعد الاختبار. الأمثلة من إعداد المنصة على النمط نفسه.', how:'كيف يأتي', trick:'مفتاح الحل', practicePattern:'تدرّب على هذا النمط', skillCards:'بطاقات هذه المهارة',
   verbal:'القسم اللفظي', quant:'القسم الكمي',
   concept:'المفهوم', mind:'كيف يفكر واضع السؤال', steps:'خطوات الحل', types:'الأنماط مع أمثلة', rules:'القوانين والحقائق', traps:'الفخاخ', examples:'أمثلة محلولة', speed:'للوصول إلى ١٠٠', more:'للاستزادة', mastery:'مستواك في هذه المهارة', targetTime:'الزمن المستهدف',
-  practice10:'تدرّب (١٠ أسئلة بتصحيح فوري)', xpTitle:'شروحات التأسيس', xpIntro:'شروحات قصيرة متحركة بصوت معلّم، تبني الفكرة من الصفر، فيها وقفة تجرّب فيها بنفسك وتحدٍّ ختامي.', xpDone:'تم', xpShort:'شروحات', xpN:'شرح', answer:'الإجابة', why:'السبب', lessonsOpen:'افتح الدرس',
+  practice10:'تدرّب (١٠ أسئلة بتصحيح فوري)', xpTitle:'شروحات التأسيس', xpIntro:'شروحات قصيرة متحركة بصوت معلّم، تبني الفكرة من الصفر، فيها وقفة تجرّب فيها بنفسك وتحدٍّ ختامي.', xpDone:'تم', xpShort:'شروحات', xpN:'شرح', aboutSite:'عن أكاديمية القدرات', answer:'الإجابة', why:'السبب', lessonsOpen:'افتح الدرس',
   vocabIntro:'بطاقات لمفردات تتكرر في الاختبار. قل المعنى في ذهنك ثم اقلب البطاقة. البطاقات التي لا تعرفها تعود إليك أكثر.', flip:'اقلب البطاقة', know:'أعرفها', again:'راجعها', vocabDone:'أنهيت بطاقات اليوم', known:'متقنة', left:'متبقية',
   resIntro:'مصادر مختارة لكل مهارة. القاعدة: مصدر شرح واحد تنهيه، ثم التدريب هنا حتى تصل إلى «ثبات».',
   practiceTitle:'تدرّب', practiceIntro:'اختر نوع التدريب. التدريب بالتصحيح الفوري للتعلم، والأقسام والمحاكاة بتوقيت الاختبار الحقيقي.',
@@ -1287,7 +1287,7 @@ const T = {
   deckAll:'All cards', cardsIntro:'Read the front and try to recall, then flip. "Review again" brings it back today; "I know it" pushes it out by days.', tapFlip:'Tap to flip', example:'Example', allInDeck:'All cards in this deck', deckDone:'You have finished this deck for today. Come back tomorrow or pick another deck.', techIntro:'Techniques top scorers use to lift accuracy and speed. Apply one per session until it becomes a habit.', patIntro:'Question patterns that recur in the compilations students share after the test. Examples are written by the platform on the same pattern.', how:'How it appears', trick:'The key', practicePattern:'Practice this pattern', skillCards:'Cards for this skill',
   verbal:'Verbal', quant:'Quantitative',
   concept:'The concept', mind:'How the test writer thinks', steps:'How to solve', types:'Patterns with examples', rules:'Rules and facts', traps:'Traps', examples:'Worked examples', speed:'Getting to 100', more:'Go further', mastery:'Your level in this skill', targetTime:'Target time',
-  practice10:'Practice (10 questions, instant feedback)', xpTitle:'Foundation explainers', xpIntro:'Short animated explainers with a teacher’s voice. Each builds the idea from zero, pauses for you to try, and ends with a quick challenge.', xpDone:'Done', xpShort:'explainers', xpN:'Explainer', answer:'Answer', why:'Why', lessonsOpen:'Open lesson',
+  practice10:'Practice (10 questions, instant feedback)', xpTitle:'Foundation explainers', xpIntro:'Short animated explainers with a teacher’s voice. Each builds the idea from zero, pauses for you to try, and ends with a quick challenge.', xpDone:'Done', xpShort:'explainers', xpN:'Explainer', aboutSite:'About GAT Academy', answer:'Answer', why:'Why', lessonsOpen:'Open lesson',
   vocabIntro:'Cards for words that recur in the test. Say the meaning in your head, then flip. Cards you miss come back more often.', flip:'Flip card', know:'I know it', again:'Review again', vocabDone:'Today\'s cards are done', known:'known', left:'left',
   resIntro:'Selected resources for each skill. Rule: one explanation source you finish, then practice here until "Locked in".',
   practiceTitle:'Practice', practiceIntro:'Pick a type. Instant-feedback practice is for learning; sections and simulations run on real test timing.',
@@ -2291,7 +2291,7 @@ function renderUpsheet(){ const el=$('#upsheet'); if(!el) return; el.dir=S.lang=
   el.innerHTML=`<div class="up-sheet" role="dialog" aria-modal="true" aria-labelledby="up-h"><button class="icon-btn acct-x" id="up-x" aria-label="${t('close')}">${ICON.x}</button>
     <div class="up-head">${lockBadge()}<h2 id="up-h">${ben?esc(ben):t('upTitle')}</h2><p class="muted small">${t('upIntro')}</p></div>${upgradeBody(true)}</div>`;
   el.querySelector('#up-x').onclick=closeUpgrade; bindUpgrade(el,true); }
-function pageUpgrade(q){ const paid=/(^|&)paid=1/.test(q), failed=/(^|&)failed=1/.test(q);
+function pageUpgrade(q){ const paid=/(^|&)paid=1/.test(q), failed=/(^|&)failed=1/.test(q); { const m=/(^|&)plan=([\w-]+)/.exec(q); if(m&&!UP.plan) UP.plan=m[2]; }
   return `<header class="page-h"><a class="back" href="#today">${t('nav.today')}</a><h1><span class="hl">${t('upTitle')}</span></h1><p>${t('upIntro')}</p></header>
   ${paid?`<div class="up-banner ok" role="status"><b>${t('paidT')}</b><span>${PRO()?t('paidD'):t('paidWait')}</span></div>`:''}
   ${failed?`<div class="up-banner bad" role="alert"><b>${t('failedT')}</b><span>${t('failedD')}</span></div>`:''}
@@ -2333,7 +2333,9 @@ function subSection(){ const C=window.CLOUD, pi=AC.planInfo, p=C.plan||{tier:'fr
 
 /* ============ ROUTER ============ */
 const NAV=['today','learn','practice','progress','guide'];
-function route(){ const h=(location.hash||'#today').slice(1);
+let AUTHQ=null;
+function route(){ let h=(location.hash||'#today').slice(1);
+  if(h==='signin'||h==='signup'){ AUTHQ=h; h='today'; try{ history.replaceState(null,'',location.pathname+location.search+'#today'); }catch(e){} }
   if(h.startsWith('lesson-')) return {p:'learn',v:()=>pageLesson(h.slice(7))};
   if(h.startsWith('learn')) return {p:'learn',v:()=>pageLearn(h.split('-')[1]||'cards')};
   if(h==='plan') return {p:'today',v:pagePlan};
@@ -2353,7 +2355,7 @@ function renderRoute(){
   $('#nav').innerHTML=links; $('#tabbar').innerHTML=links;
   const ab=$('#acct-btn'); if(ab){ const u=window.CLOUD?.user, nm=(u&&u.name)||''; ab.hidden=!window.CLOUD; ab.classList.toggle('on',!!u); ab.classList.toggle('has-name',!!nm); ab.title=u?(nm?nm+' · ':'')+(u.email||''):t('acctJoin');
     let sp=ab.querySelector('.acct-name'); if(nm){ if(!sp){ sp=document.createElement('span'); sp.className='acct-name'; ab.appendChild(sp); } sp.textContent=nm.split(' ')[0]; ab.setAttribute('aria-label',(S.lang==='ar'?'الحساب: ':'Account: ')+nm); } else if(sp) sp.remove(); }
-  $('#main').innerHTML=r.v(); $('#foot').textContent=t('footer'); bindMain();
+  $('#main').innerHTML=r.v(); $('#foot').innerHTML=esc(t('footer'))+(window.CLOUD?` <a class="foot-home" href="/?home=1${S.lang==='en'?'&lang=en':''}">${t('aboutSite')}</a>`:''); bindMain();
   renderBanner(); renderProChip(); loadPremium(); if(NUDGE) renderNudge();
 }
 function bindMain(){
@@ -2408,6 +2410,7 @@ applyTheme();
 /* ============ ACCOUNT (only when the Firebase build provides window.CLOUD) ============ */
 function cloudLine(){ const C=window.CLOUD; if(!C||!C.user) return ''; if(C.status==='saving') return t('cloudSaving'); if(C.status==='error') return t('cloudErr'); return C.lastSync?t('cloudSynced')+' '+new Date(C.lastSync).toLocaleTimeString(S.lang==='ar'?'ar-SA':'en-GB',{timeStyle:'short'}):''; }
 let AC={tab:'signup',err:'',busy:false,confirmDel:false,info:''};
+function authIntent(){ const C=window.CLOUD; if(!AUTHQ||!C||!C.ready) return; const q=AUTHQ; AUTHQ=null; if(!C.user){ AC.tab=q; openAcct(); } }
 function openAcct(){ AC.err=''; AC.info=''; AC.confirmDel=false; closeUpgrade(); $('#acct').hidden=false; AC.planInfo=null;
   const C=window.CLOUD; if(C?.user&&C.planInfo) C.planInfo().then(r=>{ AC.planInfo=r; if(!$('#acct').hidden) renderAcct(); }).catch(()=>{ AC.planInfo={payments:[]}; if(!$('#acct').hidden) renderAcct(); });
   renderAcct(); setTimeout(()=>($('#ac-email')||$('#ac-x')||$('#acct button'))?.focus(),0); }
@@ -2466,7 +2469,7 @@ function renderAcct(){
   on('#ac-del2',()=>run(async()=>{ await C.deleteAccount(); setOwner(''); AC.confirmDel=false; AC.info=t('deleted'); }));
 }
 window.__app={
-  getS:()=>S, render:()=>{ if(window.CLOUD?.user?.email) setOwner(window.CLOUD.user.email); flushEVQ(); renderRoute(); if(!$('#acct').hidden) renderAcct(); const us=$('#upsheet'); if(us&&!us.hidden&&!us.contains(document.activeElement)) renderUpsheet(); },
+  getS:()=>S, render:()=>{ if(window.CLOUD?.user?.email) setOwner(window.CLOUD.user.email); flushEVQ(); renderRoute(); authIntent(); if(!$('#acct').hidden) renderAcct(); const us=$('#upsheet'); if(us&&!us.hidden&&!us.contains(document.activeElement)) renderUpsheet(); },
   cloudStatus:()=>{ ['#cloud-line','#cloud-line2'].forEach(id=>{ const e=$(id); if(e) e.textContent=cloudLine(); }); },
   mergeCloud:c=>{ if(!c||!c.stats) return; const em=window.CLOUD?.user?.email||'', owner=getOwner();
     if(owner&&em&&owner!==em){ DET={}; try{ localStorage.removeItem(DKEY); }catch(e){} S=Object.assign(DEF(),c); }  // local data belongs to another account: never mix it in
@@ -2591,6 +2594,6 @@ if(XPOK()){ XP.setHooks({onDone:(k,sc,n)=>{ S.xp=S.xp||{}; const w=S.xp[k]; if(!
     /* the student finished every free explainer of this skill and more are waiting: one warm invitation after the player closes */
     if(!PRO()){ const L0=XP.get?.(k), sk=L0&&L0.sk; if(sk&&lockedXp(sk).length&&xpList(sk).every(x=>S.xp[x.key])) XP_NUDGE=true; } },
   onClose:()=>{ const y=window.scrollY; renderRoute(); window.scrollTo(0,y); if(XP_NUDGE){ XP_NUDGE=false; maybeNudge('xp'); } const b=XP_BACK&&document.querySelector(`[data-xp="${XP_BACK}"]`); if(b) b.focus({preventScroll:true}); }}); XP.loadTracks(); }
-window.addEventListener('hashchange',()=>{ if(document.body.classList.contains('xp-open')&&XPOK()) XP.close(); renderRoute(); window.scrollTo(0,0); });
+window.addEventListener('hashchange',()=>{ if(document.body.classList.contains('xp-open')&&XPOK()) XP.close(); renderRoute(); authIntent(); window.scrollTo(0,0); });
 renderRoute(); initAI(); checkLive();
 { const el=$('#save-dot'); if(el){ el.classList.toggle('bad',!STORE_OK); el.title=STORE_OK?t('savedOk'):t('saveFail'); el.setAttribute('aria-label',el.title); } }

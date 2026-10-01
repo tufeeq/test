@@ -350,3 +350,5 @@ html.lp-pending body{opacity:0}
 @media (max-width:600px){.lp-play{padding:12px}.lp-play b{display:none}.lp-play-c{inline-size:52px;block-size:52px}.lp-play-c svg{inline-size:22px;block-size:22px}.lp-doodle{inline-size:84%;margin-block-end:4%}}
 @media (max-width:600px){.lp-band::before{display:none}}
 .no-js .lp-skel{display:none}
+/* language switch matches the app's text button ("English" / "العربية") */
+.lp-ib.lp-lang{inline-size:auto;min-inline-size:40px;padding-inline:12px;font-family:var(--f-head);font-size:.9rem;font-weight:800;white-space:nowrap}

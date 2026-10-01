@@ -159,7 +159,7 @@
     q4: 'Which payment methods can I use?',
     a4: '<p>Payment goes through Tap’s secure gateway and accepts mada, Apple Pay, STC Pay, and Visa and Mastercard cards. We never store your card details.</p>',
     q5: 'Can I get a refund?',
-    a5: '<p>Yes. We offer a full refund within a set period from the start of your subscription, shown in the pricing section. If the platform isn’t right for you within that period, you get the full amount back to the same payment method.</p>',
+    a5: '<p>Yes. We offer a full refund within a set period from the start of your subscription, shown in the pricing section. If the platform isn’t right for you within that period, you get the full amount back to the same payment method. To request a refund, email <a href="mailto:info@gat.academy">info@gat.academy</a>.</p>',
     q6: 'Is it in Arabic and English?',
     a6: '<p>Yes. The interface, questions and narrated explainers are available in Arabic and in English, so you practice in the language of your test, and you can switch at any time with one tap.</p>',
     q7: 'Does it work on mobile?',
@@ -273,8 +273,8 @@
     if (r && r.on && r.days) {
       $('#lp-refund-t').textContent = T('ضمان استرداد كامل خلال ' + days(+r.days) + ' من الاشتراك', 'Full refund within ' + days(+r.days) + ' of subscribing');
       el.hidden = false;
-      if (q5) q5.innerHTML = '<p>' + T('نعم. نقدم ضمان استرداد كامل خلال ' + days(+r.days) + ' من بدء الاشتراك. إن لم تناسبك المنصة خلال هذه المدة، يُعاد إليك المبلغ كاملًا إلى وسيلة الدفع نفسها.',
-        'Yes. We offer a full refund within ' + days(+r.days) + ' from the start of your subscription. If the platform isn’t right for you within that time, you get the full amount back to the same payment method.') + '</p>';
+      if (q5) q5.innerHTML = '<p>' + T('نعم. نقدم ضمان استرداد كامل خلال ' + days(+r.days) + ' من بدء الاشتراك. إن لم تناسبك المنصة خلال هذه المدة، يُعاد إليك المبلغ كاملًا إلى وسيلة الدفع نفسها. لطلب الاسترداد راسلنا على <a href="mailto:info@gat.academy" dir="ltr">info@gat.academy</a>.',
+        'Yes. We offer a full refund within ' + days(+r.days) + ' from the start of your subscription. If the platform isn’t right for you within that time, you get the full amount back to the same payment method. To request a refund, email <a href="mailto:info@gat.academy">info@gat.academy</a>.') + '</p>';
     } else {
       el.hidden = true;
       if (CFG && q5) { var d = q5.closest('details'); if (d) d.hidden = true; }

@@ -845,3 +845,12 @@ body.sheet-open{overflow:hidden}
 @media (max-width:520px) and (pointer:coarse){.top-in:has(#pro-chip:not([hidden])) #acct-btn.has-name{inline-size:44px}}
 .cmp td{background:var(--surface)} .cmp tbody th{background:var(--surface2)} .cmp td.pro-col{background:color-mix(in srgb,var(--pri-soft) 70%,var(--surface))}
 #foot .foot-home{font-weight:700;color:var(--pri);text-decoration:underline;text-underline-offset:3px;white-space:nowrap}
+/* social sign-in */
+.acct-social{display:grid;gap:8px;margin-block:12px 4px}
+.btn.social{display:flex;align-items:center;justify-content:center;gap:10px;inline-size:100%;background:var(--surface);color:var(--ink);border:2px solid var(--line);font-weight:800;text-decoration:none;padding:10px 14px;border-radius:12px;box-shadow:none}
+.btn.social:hover{border-color:var(--pri)}
+.btn.social .sic{inline-size:20px;block-size:20px;flex:none}
+.acct-snote{font-size:.8rem;color:var(--muted);margin:2px 0 0;text-align:center}
+.acct-snote a,.chkl a{color:var(--pri);font-weight:700}
+.acct-or{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:.85rem;margin:6px 0 0}
+.acct-or::before,.acct-or::after{content:"";flex:1;border-top:1px solid var(--line)}

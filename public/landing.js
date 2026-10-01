@@ -74,7 +74,7 @@
     themeAria: 'Dark mode', signIn: 'Sign in', startFree: 'Start free',
     heroEyebrow: 'General Aptitude Test · Qudurat · GAT',
     heroH: 'The GAT isn’t luck.<br>It’s <span class="lp-mark">ten skills' + SCRIB + '</span>, mastered.',
-    heroLead: 'Start with a short diagnostic that finds your level. Then a daily plan walks with you to test day: animated, narrated explainers, fresh practice, model tests in the computerized format, and a mistake box that brings back what you got wrong before you forget it.',
+    heroLead: 'Start with a short diagnostic that pinpoints your level. Then a daily plan takes you all the way to test day: animated, narrated explainers, fresh practice, model tests in the computer-based format, and a mistake box that brings back what you got wrong before you forget it.',
     watch: 'Watch an explainer', proofAria: 'What you get',
     p1b: '33', p1: 'narrated explainers per language', p2b: '30', p2: 'model tests', p3b: '10', p3: 'skills measured and tracked',
     heroMicro: 'Free plan forever · No card needed · English & عربي',
@@ -84,36 +84,36 @@
     artWeek: 'This week’s plan', artToday: 'Today’s session', artT1: 'Review due mistakes', artT2: 'Explainer: variables', artT3: 'Algebra practice',
     artScoreV: '84', artScore: 'Estimated score',
     demoEyebrow: 'Try it now, no sign-up', demoH: 'Animated, narrated, and it stops so you can try',
-    demoP: 'Each skill is explained step by step on the board with a clear voice. It pauses at interactive stops for you to answer, then a short quiz locks the idea in. These are from the free plan. Pick one and play it:',
+    demoP: 'Each skill is taught step by step on the board in a clear voice. The explainer pauses so you can answer, then a short quiz locks the idea in. These ones are in the free plan. Pick one and press play:',
     capDemo: 'The player opens full screen and works with sound or with captions.',
     noJsDemo: 'The interactive demo needs JavaScript enabled in your browser.',
     playAria: 'Play the explainer', playL: 'Play the explainer', pickAria: 'Choose an explainer',
-    pickNote: 'The platform has 33 explainers in each language, covering all ten skills.',
+    pickNote: 'GAT Academy has 33 explainers in each language, covering all ten skills.',
     dA3: 'a tool for', dA_l: 'pen', dA_r: 'writing', dA4: 'scalpel : surgery',
     dO1: '3 + 4 × 2', dO2: 'Multiply first: 4 × 2 = 8', dO3: '3 + 8 = 11',
     dG1: '110°', dS1: 'It was cold, ____ the sun was out.', dS2: 'but', dS3: 'signals the unexpected',
-    howEyebrow: 'From day one to test day', howH: 'How GAT Academy works', howP: 'Five clear steps. Every day you know what to study, and why.',
-    s1h: 'Diagnostic test', s1p: '20 questions in about 15 minutes, two from each skill, to set your level in all ten skills from the start.',
+    howEyebrow: 'From day one to test day', howH: 'How GAT Academy works', howP: 'Five clear steps, so every day you know what to study and why.',
+    s1h: 'Diagnostic test', s1p: '20 questions in about 15 minutes, two from each skill, to show your level in all ten skills from day one.',
     s2h: 'Personal plan', s2p: 'A daily plan up to your test date that starts with your weakest skills and spreads review across the days.',
     s3h: 'Learn with explainers', s3p: 'An animated, narrated explainer for each idea, a short quiz after it, then flashcards, techniques and recurring patterns.',
-    s4h: 'Practice and model tests', s4p: 'Fresh practice questions, then model tests in the computerized format: 4 sections × 24 questions × 25 minutes.',
+    s4h: 'Practice and model tests', s4p: 'Fresh practice questions, then model tests in the computer-based format: 4 sections × 24 questions × 25 minutes.',
     s5h: 'Track your progress', s5p: 'A mastery map and an estimated score, plus a mistake box that brings back every question you missed until you master it.',
     featEyebrow: 'Everything in one place', featH: 'A complete kit, not just a question bank',
     featP: 'Learn the idea, practice it, test yourself under real exam conditions, and always know where you stand.',
     f1h: '33 animated explainers per language', f1p: 'Narrated in Arabic and in English. They pause so you can try it yourself, with a short quiz after.',
-    f2h: '30 model tests', f2p: 'In the computerized format: 4 sections × 24 questions × 25 minutes each, with a real timer.',
-    f3h: 'Generated practice questions', f3p: 'New questions with changing numbers and wording, so you practice the idea, not memorized answers.',
+    f2h: '30 model tests', f2p: 'In the computer-based format: 4 sections × 24 questions, 25 minutes per section, with a real timer.',
+    f3h: 'Fresh practice questions', f3p: 'New questions with changing numbers and wording, so you practice the idea instead of memorizing answers.',
     f4h: 'Illustrated flashcards', f4p: 'Cards that sum up each rule with a drawing. Flip and review them in minutes.',
     f5h: 'Vocabulary deck', f5p: 'Words that keep coming up in analogies, sentence completion and contextual error, with meanings.',
     f6h: 'Techniques & recurring patterns', f6p: 'Solving shortcuts and the question patterns that repeat, with an example for each.',
-    f7h: 'A daily plan to your test date', f7p: 'A ready session every day: due reviews, then your two weakest skills, then mixed questions.',
+    f7h: 'A daily plan to your test date', f7p: 'A session ready for you every day: due reviews, then your two weakest skills, then a mix of questions.',
     f8h: 'Mistake box', f8p: 'Saves every question you got wrong and brings it back with spaced repetition, before you forget.',
     f9h: 'Mastery map', f9p: 'Your level in each of the ten skills at a glance, and where today’s minutes should go.',
-    f10h: 'Estimated score', f10p: 'An estimate of your score from your actual performance, with a time analysis per skill.',
+    f10h: 'Estimated score', f10p: 'An estimate of your score based on how you actually perform, with a time analysis for each skill.',
     f11h: 'Arabic & English', f11p: 'Interface, questions and explainers in Arabic and in English, so you practice in your test language.',
     f12h: 'On your phone and computer', f12p: 'Runs in the browser with nothing to install, and your account carries your progress to any device.',
     skEyebrow: 'What the test measures', skH: 'The ten skills',
-    skP: 'The test doesn’t measure what you memorized from school. It measures understanding and reasoning. Each skill gets a lesson, explainers, practice and tracking.',
+    skP: 'The test doesn’t measure what you memorized at school; it measures understanding and reasoning. Each skill comes with a lesson, explainers, practice and progress tracking.',
     verbalH: 'Verbal section', quantH: 'Quantitative section',
     skd_analogy: 'Find the relationship between two words, then pick the pair with the same relationship.',
     skd_completion: 'Choose what completes the meaning, using signal words and context.',
@@ -126,14 +126,14 @@
     skd_stats: 'Mean, median and mode, and reading tables and charts.',
     skd_comparison: 'Compare two quantities and pick from the four fixed choices.',
     vEyebrow: 'From our students', vH: 'What students say',
-    prEyebrow: 'Start free, upgrade when you need to', prH: 'Clear plans, no surprises',
-    prP: 'The free plan is permanent, with no time limit and no card. It gives you about a quarter of the platform, and everything in it works fully. A subscription unlocks everything up to your test day.',
+    prEyebrow: 'Start free, upgrade when you’re ready', prH: 'Clear plans, no surprises',
+    prP: 'The free plan is permanent: no time limit, no card, and everything in it works fully. A subscription unlocks everything up to your test day.',
     freeH: 'Free', freeTag: 'Forever', freePrice: '0 SAR', freeUnit: 'no time limit',
-    freeD: 'About 25% of the platform: enough to learn your level and start seriously.',
+    freeD: 'Enough to find your level and start preparing seriously.',
     fl1: 'A diagnostic test: 20 questions in about 15 minutes', fl2: '8 animated, narrated explainers per language', fl3: '10 practice questions a day',
-    fl4: '25% of flashcards and vocabulary, across all skills', fl5: 'The first 2 weeks of the daily plan', fl6: 'A mistake box that keeps your last 15 mistakes',
-    fl7: '25% of techniques and patterns', fl8: 'The mastery map, plus 2 skills in detail',
-    freeCta: 'Start free', proH: 'Full access', proD: 'Everything in Free, without limits, plus the tools to reach your target score:',
+    fl4: 'A selection of flashcards and vocabulary from every skill', fl5: 'The first 2 weeks of the daily plan', fl6: 'A mistake box that keeps your last 15 mistakes',
+    fl7: 'A selection of techniques and patterns', fl8: 'The mastery map, plus 2 skills in detail',
+    freeCta: 'Start free', proH: 'Full access', proD: 'Everything in Free with no limits, plus everything you need to reach your target score:',
     pl1: 'All 33 explainers in each language', pl2: 'The 30 model tests, section tests and full timed mocks',
     pl3: 'Unlimited daily practice, plus targeted practice on a skill or pattern you choose', pl4: 'All flashcards, vocabulary, techniques and patterns',
     pl5: 'The full plan up to your test date, with your own test date and target score', pl6: 'Smart spaced repetition for mistakes and cards, and the cause of every mistake',
@@ -144,7 +144,7 @@
     c1: 'Diagnostic test', c2: 'Animated, narrated explainers', c2f: '8 per language', c2p: '33 per language',
     c3: 'Practice questions', c3f: '10 a day', c3p: 'Unlimited', c4: 'Targeted practice on a skill or pattern',
     c5: 'The 30 model tests', c6: 'Section tests and full timed mocks', c7: 'Review past attempts question by question',
-    c8: 'Flashcards and vocabulary', c8f: '25%', c9: 'Techniques and recurring patterns', c9f: '25%', all: 'All',
+    c8: 'Flashcards and vocabulary', c8f: 'A selection', c9: 'Techniques and recurring patterns', c9f: 'A selection', all: 'All',
     c10: 'Daily study plan', c10f: 'First 2 weeks', c10p: 'Up to your test date', c11: 'Set your test date and target score',
     c12: 'Mistake box', c12f: 'Last 15', c12p: 'Complete', c13: 'Smart spaced repetition for mistakes and cards',
     c14: 'Mistake-cause analysis (concept, careless, time, trap)', c15: 'Mastery map', c16: 'Detailed skill analytics', c16f: '2 skills', c16p: 'All 10 skills',
@@ -153,30 +153,29 @@
     q1: 'What is the General Aptitude Test (GAT)?',
     a1: '<p>A standardized test from the National Center for Assessment (Qiyas) at the Education and Training Evaluation Commission, taken by secondary school students. Saudi universities use it for admission as part of the weighted score. It doesn’t measure what you memorized from the curriculum; it measures your ability to understand, analyze and infer through language and numbers, in two parts: verbal and quantitative. That’s why it improves with skill practice, not by memorizing answers.</p>',
     q2: 'Is the free plan really free forever?',
-    a2: '<p>Yes. The free plan is permanent: no trial that runs out, and no card to sign up. It gives you about a quarter of the platform: the diagnostic test, selected explainers, daily practice, the first two weeks of the plan and more. What’s free works fully, and locked items stay visible with their name and benefit so you can decide for yourself.</p>',
+    a2: '<p>Yes. The free plan is permanent: there’s no trial that runs out, and you don’t need a card to sign up. It includes the diagnostic test, selected explainers, daily practice questions, the first two weeks of your plan and more. Everything in it works fully, and subscriber features stay visible with their name and benefit, so you can decide for yourself.</p>',
     q3: 'What do I get when I subscribe?',
     a3: '<p>Everything: all 33 explainers in each language, the 30 model tests, section tests and full timed mocks, unlimited and targeted practice, all flashcards, vocabulary and techniques, the full plan up to your test date, spaced repetition and mistake-cause analysis, the estimated score, and review of any past attempt. A subscription ends when its period ends; it does not renew automatically.</p>',
     q4: 'Which payment methods can I use?',
-    a4: '<p>Payment goes through Tap’s secure gateway and accepts mada, Apple Pay, STC Pay, and Visa and Mastercard cards. We never store your card details.</p>',
+    a4: '<p>You pay through Tap’s secure checkout, which accepts mada, Apple Pay, STC Pay, Visa and Mastercard. We never store your card details.</p>',
     q5: 'Can I get a refund?',
-    a5: '<p>Yes. We offer a full refund within a set period from the start of your subscription, shown in the pricing section. If the platform isn’t right for you within that period, you get the full amount back to the same payment method. To request a refund, email <a href="mailto:info@gat.academy">info@gat.academy</a>.</p>',
+    a5: '<p>Yes. If your subscription isn’t right for you within the period shown in the pricing section, we refund the full amount to the same payment method. To request a refund, email <a href="mailto:info@gat.academy">info@gat.academy</a>.</p>',
     q6: 'Is it in Arabic and English?',
     a6: '<p>Yes. The interface, questions and narrated explainers are available in Arabic and in English, so you practice in the language of your test, and you can switch at any time with one tap.</p>',
     q7: 'Does it work on mobile?',
     a7: '<p>Yes. It runs in the browser on your phone, tablet or computer with nothing to install, and the design is made for small screens. Once you sign up, your progress is saved to your account and follows you to any device.</p>',
     q8: 'Is my data private?',
-    a8: '<p>We store only your email, your name and your practice progress (with your track, target score and test date if you enter them), only to follow your preparation. We never ask for a phone number or ID, and you can delete your account and all your data at any time from the account page.</p>',
+    a8: '<p>We keep only your email, your name and your practice progress (plus your track, target score and test date if you add them), and we use them only to support your preparation. We never ask for a phone number or ID, and you can delete your account and all your data at any time from the account page.</p>',
     finEyebrow: 'Five minutes is enough to start', finH: 'Find your level today. Start your plan tomorrow.',
     finP: 'Take the diagnostic for free, then watch the explainer for your weakest skill.',
     readGuide: 'Read the test guide',
     footD: 'A complete kit to prepare for the General Aptitude Test, in Arabic and English.', footAria: 'Links',
-    footApp: 'Open the app', footGuide: 'Test guide',
-    disc: 'An independent learning platform, not affiliated with the National Center for Assessment (Qiyas) or the Education and Training Evaluation Commission (ETEC).'
+    footApp: 'Open the app', footGuide: 'Test guide', footPrivacy: 'Privacy Policy', footTerms: 'Terms'
   };
   var META = {
     ar: { title: null, desc: null },
     en: { title: 'GAT Academy | Prepare for the General Aptitude Test with a daily plan and narrated explainers',
-          desc: 'Prepare for the Saudi General Aptitude Test (GAT / Qudurat) with a diagnostic, a daily plan to your test date, 33 narrated explainers, 30 model tests in the computerized format and a spaced-repetition mistake box. Arabic and English, with a free plan forever.' }
+          desc: 'Prepare for the Saudi General Aptitude Test (GAT / Qudurat) with a diagnostic, a daily plan up to your test date, 33 narrated explainers, 30 model tests in the computer-based format and a mistake box with spaced review. In Arabic and English, with a free plan that never expires.' }
   };
 
   /* ---------- the rest needs the DOM ---------- */
@@ -226,10 +225,10 @@
     if (f.diagnostic !== false) it.push(T('اختبار تشخيصي: ٢٠ سؤالًا في نحو ١٥ دقيقة', 'A diagnostic test: 20 questions in about 15 minutes'));
     if (nx) it.push(T(arCount(nx, ['شرح متحرك مسموع واحد', 'شرحان متحركان مسموعان', 'شروحات متحركة مسموعة', 'شرحًا متحركًا مسموعًا']) + ' بكل لغة', N(nx) + ' animated, narrated explainer' + (nx === 1 ? '' : 's') + ' per language'));
     if (dq) it.push(T(arCount(dq, ['سؤال تدريب واحد', 'سؤالا تدريب', 'أسئلة تدريب', 'سؤال تدريب']) + ' يوميًا', N(dq) + ' practice question' + (dq === 1 ? '' : 's') + ' a day'));
-    if (f.cardsFrac) it.push(T(pct(f.cardsFrac) + ' من البطاقات والمفردات، من كل المهارات', pct(f.cardsFrac) + ' of flashcards and vocabulary, across all skills'));
+    if (f.cardsFrac) it.push(T('مختارات من البطاقات والمفردات في كل المهارات', 'A selection of flashcards and vocabulary from every skill'));
     if (pw) it.push(T('أول ' + arCount(pw, ['أسبوع', 'أسبوعين', 'أسابيع', 'أسبوعًا']) + ' من الخطة اليومية', 'The first ' + (pw === 1 ? 'week' : N(pw) + ' weeks') + ' of the daily plan'));
     if (mm) it.push(T('صندوق أخطاء يحفظ آخر ' + arCount(mm, ['خطأ', 'خطأين', 'أخطاء', 'خطأً']), 'A mistake box that keeps your last ' + N(mm) + ' mistakes'));
-    if (f.techFrac) it.push(T(pct(f.techFrac) + ' من التقنيات والأنماط', pct(f.techFrac) + ' of techniques and patterns'));
+    if (f.techFrac) it.push(T('مختارات من التقنيات والأنماط', 'A selection of techniques and patterns'));
     it.push(T('خريطة الإتقان، وتحليل مفصّل لمهارتين', 'The mastery map, plus 2 skills in detail'));
     var ul = $('#lp-free-list');
     if (ul) ul.innerHTML = it.map(function (s) { return '<li>' + s + '</li>'; }).join('');
@@ -237,8 +236,8 @@
     function cell(id, html) { var c = D.getElementById(id); if (c) c.innerHTML = html; }
     if (nx) cell('cmp-xp', T(N(nx) + ' بكل لغة', N(nx) + ' per language'));
     if (dq) cell('cmp-daily', T(N(dq) + ' يوميًا', N(dq) + ' a day'));
-    if (f.cardsFrac) cell('cmp-cards', pct(f.cardsFrac));
-    if (f.techFrac) cell('cmp-tech', pct(f.techFrac));
+    if (f.cardsFrac) cell('cmp-cards', T('مختارات', 'A selection'));
+    if (f.techFrac) cell('cmp-tech', T('مختارات', 'A selection'));
     if (pw) cell('cmp-plan', T('أول ' + arCount(pw, ['أسبوع', 'أسبوعين', 'أسابيع', 'أسبوعًا']), 'First ' + (pw === 1 ? 'week' : N(pw) + ' weeks')));
     if (mm) cell('cmp-mist', T('آخر ' + arCount(mm, ['خطأ', 'خطأين', 'أخطاء', 'خطأً']), 'Last ' + N(mm)));
   }
@@ -273,8 +272,8 @@
     if (r && r.on && r.days) {
       $('#lp-refund-t').textContent = T('ضمان استرداد كامل خلال ' + days(+r.days) + ' من الاشتراك', 'Full refund within ' + days(+r.days) + ' of subscribing');
       el.hidden = false;
-      if (q5) q5.innerHTML = '<p>' + T('نعم. نقدم ضمان استرداد كامل خلال ' + days(+r.days) + ' من بدء الاشتراك. إن لم تناسبك المنصة خلال هذه المدة، يُعاد إليك المبلغ كاملًا إلى وسيلة الدفع نفسها. لطلب الاسترداد راسلنا على <a href="mailto:info@gat.academy" dir="ltr">info@gat.academy</a>.',
-        'Yes. We offer a full refund within ' + days(+r.days) + ' from the start of your subscription. If the platform isn’t right for you within that time, you get the full amount back to the same payment method. To request a refund, email <a href="mailto:info@gat.academy">info@gat.academy</a>.') + '</p>';
+      if (q5) q5.innerHTML = '<p>' + T('نعم. إن لم يناسبك الاشتراك خلال ' + days(+r.days) + ' من بدايته، نعيد إليك المبلغ كاملًا إلى وسيلة الدفع نفسها. لطلب الاسترداد راسلنا على <a href="mailto:info@gat.academy" dir="ltr">info@gat.academy</a>.',
+        'Yes. If your subscription isn’t right for you within ' + days(+r.days) + ' of starting it, we refund the full amount to the same payment method. To request a refund, email <a href="mailto:info@gat.academy">info@gat.academy</a>.') + '</p>';
     } else {
       el.hidden = true;
       if (CFG && q5) { var d = q5.closest('details'); if (d) d.hidden = true; }

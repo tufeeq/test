@@ -7,6 +7,7 @@ const crypto = require("crypto");
 const bcrypt = require("bcryptjs");
 const { Pool } = require("pg");
 const commerce = require("./commerce");
+const oauth = require("./oauth");
 
 const PORT = process.env.PORT || 3000;
 const SESSION_DAYS = Number(process.env.SESSION_DAYS || 60);
@@ -62,6 +63,7 @@ async function migrate() {
     ALTER TABLE users ADD COLUMN IF NOT EXISTS name TEXT;
   `);
   await C.migrate();
+  await O.migrate();
 }
 
 const app = express();
@@ -146,6 +148,7 @@ app.use("/api", (req, res, next) => { res.set("Cache-Control", "no-store"); next
 app.use("/api", wrap(auth));
 app.locals.auth = (req, res, next) => auth(req, res, next).catch(next);
 const C = commerce(app, { pool, wrap, fail, needUser, needAdmin, isAdminEmail, limited, cleanName });
+const O = oauth(app, { pool, wrap, createSession: (...a) => createSession(...a), cleanName, parseCookies, limited });
 
 // ---------- account ----------
 app.get("/api/me", wrap(async (req, res) => {
@@ -260,7 +263,7 @@ app.get("/robots.txt", (req, res) => {
 app.get("/sitemap.xml", (req, res) => {
   const base = "https://" + (CANONICAL_HOST || String(req.headers.host || ""));
   res.type("application/xml").set("Cache-Control", "public, max-age=86400")
-    .send(`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>${base}/</loc></url><url><loc>${base}/app</loc></url></urlset>\n`);
+    .send(`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>${base}/</loc></url><url><loc>${base}/app</loc></url><url><loc>${base}/privacy</loc></url><url><loc>${base}/terms</loc></url></urlset>\n`);
 });
 // ---------- explainer narration (public) ----------
 // Narration clips live in Postgres (table narration); data/tracks.json maps each explainer to its clips + beat timings.

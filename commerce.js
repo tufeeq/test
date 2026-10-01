@@ -70,7 +70,8 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
   const publicCfg = c => ({
     plans: c.plans.filter(p => p.active).map(({ id, ar, en, days, price, best }) => ({ id, ar, en, days, price, best: !!best })),
     currency: c.currency, refund: c.refund, free: c.free, banner: c.banner, trialReportDays: c.trialReportDays,
-    payments: !!process.env.TAP_SECRET_KEY
+    payments: !!process.env.TAP_SECRET_KEY,
+    social: require("./oauth").enabled()
   });
   const audit = (req, action, target, meta) => pool.query("INSERT INTO admin_audit(admin_email,action,target,meta) VALUES($1,$2,$3,$4)", [req.user.email, action, target || null, meta || null]).catch(e => console.error("audit", e.message));
 

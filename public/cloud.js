@@ -15,7 +15,33 @@ let user = null, timer = null, status = "idle", lastSync = null, retry = 0, pull
 const A = () => window.__app;
 const safe = f => { try { f(); } catch (e) {} };
 function reset() { clearTimeout(timer); timer = null; user = null; status = "idle"; lastSync = null; retry = 0; pulled = false; }
-function expired() { reset(); safe(() => A().render()); } // session gone (expired / password changed elsewhere / account deleted)
+/* ---------- plan, config, usage events ---------- */
+const PLAN_KEY = "masar100_plan"; // last known tier (cosmetic only, avoids a flash of locks; premium content is enforced by the server)
+const FREE_PLAN = { tier: "free", until: null, source: null };
+let plan = FREE_PLAN, config = null, xpKeys = null;
+function setPlan(p) { plan = p && p.tier ? p : FREE_PLAN; if (user && plan.tier === "pro") ls.set(PLAN_KEY, JSON.stringify({ email: user.email, tier: "pro" })); else ls.del(PLAN_KEY); }
+let evq = [], evTimer = null;
+function flush(keepalive) {
+  clearTimeout(evTimer); evTimer = null;
+  if (!user || !evq.length) return;
+  const events = evq.splice(0, 50);
+  fetch("/api/events", { method: "POST", headers: H, credentials: "same-origin", keepalive: !!keepalive, body: JSON.stringify({ events }) }).catch(() => {});
+  if (evq.length) evTimer = setTimeout(flush, 1000);
+}
+function track(type, k, v) {
+  if (!type) return;
+  const e = { type }; if (k != null) e.k = String(k).slice(0, 64); if (typeof v === "number" && isFinite(v)) e.v = v;
+  evq.push(e); if (evq.length > 200) evq = evq.slice(-200);
+  if (!user) return; // kept until sign-in; guests have no event stream
+  if (evq.length >= 20) flush(); else if (!evTimer) evTimer = setTimeout(flush, 5000);
+}
+function openOnce() { // one "open" per account per day
+  if (!user) return; const d = new Date().toISOString().slice(0, 10), key = "masar100_open", v = user.email + "|" + d;
+  if (ls.get(key) === v) return; ls.set(key, v); track("open");
+}
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden") flush(true); });
+window.addEventListener("pagehide", () => flush(true));
+function expired() { reset(); setPlan(null); safe(() => A().render()); } // session gone (expired / password changed elsewhere / account deleted)
 async function push() {
   clearTimeout(timer); timer = null;
   if (!user) return;
@@ -54,6 +80,9 @@ async function afterLogin(u) {
   if (owner && owner !== email) { ls.del("masar100_v1"); ls.del("masar100_details"); ls.set(OWNER, email); location.reload(); return new Promise(() => {}); }
   ls.set(OWNER, email);
   reset(); user = { email: u.email, name: u.name || "", emailVerified: true, isAdmin: !!u.isAdmin };
+  setPlan(u.isAdmin && (!u.plan || u.plan.tier !== "pro") ? { tier: "pro", until: null, source: "admin" } : u.plan);
+  openOnce(); flush();
+  if (!u.plan) { try { const r = await api("GET", "/api/me"); if (r.config) config = r.config; if (r.user) setPlan(r.user.isAdmin && (!r.user.plan || r.user.plan.tier !== "pro") ? { tier: "pro", until: null, source: "admin" } : r.user.plan); } catch (e) {} } // sign-in/sign-up responses carry no plan
   await pull();
 }
 let checked = false; // true once the first /api/me answer (or failure) has arrived
@@ -67,14 +96,31 @@ window.CLOUD = {
   async signOut() {
     if (user && pulled && status !== "ok") { try { await push(); } catch (e) {} } // flush unsynced changes first
     try { await api("POST", "/api/logout"); } catch (e) { if (e.code !== "unauthenticated") throw e; }
-    reset(); safe(() => A().render());
+    flush(true); reset(); setPlan(null); safe(() => A().render());
   },
   async reset() { const x = new Error("reset"); x.code = "reset-admin"; throw x; },
   async changePassword(current, next) { await api("POST", "/api/password", { current, next }); },
-  async deleteAccount() { await api("DELETE", "/api/me"); ls.del(OWNER); reset(); safe(() => A().render()); }
+  async deleteAccount() { await api("DELETE", "/api/me"); ls.del(OWNER); evq = []; reset(); setPlan(null); safe(() => A().render()); },
+  get plan() { return plan; }, get config() { return config; }, get xpKeys() { return xpKeys; },
+  isPro() { return !!(user && (user.isAdmin || plan.tier === "pro")); },
+  async refresh() { // re-read the session, plan and config (e.g. after a payment); never throws
+    try { const r = await api("GET", "/api/me"); if (r.config) config = r.config;
+      if (r.user) { if (!user) return afterLogin(r.user); setPlan(r.user.isAdmin && (!r.user.plan || r.user.plan.tier !== "pro") ? { tier: "pro", until: null, source: "admin" } : r.user.plan); }
+      else if (user) return expired();
+    } catch (e) {}
+    safe(() => A().render());
+  },
+  track, flush,
+  async quote(planId, coupon) { return api("POST", "/api/billing/quote", { plan: planId, coupon: coupon || undefined }); },
+  async checkout(planId, coupon) { const lang = (A() && A().getS && A().getS().lang) || "ar"; return api("POST", "/api/billing/checkout", { plan: planId, coupon: coupon || undefined, lang }); },
+  async planInfo() { return api("GET", "/api/plan"); }
 };
 // re-check the session when the tab comes back (e.g. after the password was changed on another device)
 document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible" && user) api("GET", "/api/me").then(r => { if (!r.user) expired(); }).catch(() => {}); });
 window.addEventListener("online", () => { if (user && status === "error") { retry = 0; pulled ? push() : pull(); } });
-api("GET", "/api/me").then(r => { checked = true; if (r.user) afterLogin(r.user); else A().render(); }).catch(() => { checked = true; A().render(); });
+api("GET", "/api/me").then(r => { config = r.config || null; checked = true;
+  if (r.user) afterLogin(r.user); else { setPlan(null); A().render(); }
+  if (!config) api("GET", "/api/config").then(c => { config = c.config; safe(() => A().render()); }).catch(() => {});
+}).catch(() => { checked = true; A().render(); api("GET", "/api/config").then(c => { config = c.config; safe(() => A().render()); }).catch(() => {}); });
+api("GET", "/api/xp/keys").then(k => { xpKeys = k; safe(() => A().render()); }).catch(() => {});
 })();

@@ -6,6 +6,7 @@ const zlib = require("zlib");
 const crypto = require("crypto");
 const bcrypt = require("bcryptjs");
 const { Pool } = require("pg");
+const commerce = require("./commerce");
 
 const PORT = process.env.PORT || 3000;
 const SESSION_DAYS = Number(process.env.SESSION_DAYS || 60);
@@ -60,6 +61,7 @@ async function migrate() {
     );
     ALTER TABLE users ADD COLUMN IF NOT EXISTS name TEXT;
   `);
+  await C.migrate();
 }
 
 const app = express();
@@ -136,13 +138,20 @@ async function auth(req, res, next) {
 const needUser = (req, res, next) => req.user ? next() : fail(res, 401, "unauthenticated");
 const needAdmin = (req, res, next) => !req.user ? fail(res, 401, "unauthenticated") : isAdminEmail(req.user.email) ? next() : fail(res, 403, "forbidden");
 // CSRF guard: state-changing API calls must carry our header (browsers block it cross-site without CORS)
-app.use("/api", (req, res, next) => (req.method === "GET" || req.get("X-Masar") === "1") ? next() : fail(res, 403, "bad-origin"));
+// (payment-provider webhooks are server-to-server and verified by signature instead)
+const WEBHOOKS = new Set(["/billing/webhook", "/billing/refund-webhook"]);
+app.use("/api", (req, res, next) => (req.method === "GET" || req.get("X-Masar") === "1" || WEBHOOKS.has(req.path)) ? next() : fail(res, 403, "bad-origin"));
 const wrap = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 app.use("/api", (req, res, next) => { res.set("Cache-Control", "no-store"); next(); }); // per-user data: never cache
 app.use("/api", wrap(auth));
+app.locals.auth = (req, res, next) => auth(req, res, next).catch(next);
+const C = commerce(app, { pool, wrap, fail, needUser, needAdmin, isAdminEmail, limited, cleanName });
 
 // ---------- account ----------
-app.get("/api/me", (req, res) => res.json({ user: req.user ? pub(req.user) : null }));
+app.get("/api/me", wrap(async (req, res) => {
+  const c = await C.loadCfg();
+  res.json({ user: req.user ? { ...pub(req.user), plan: await C.planOf(req.user) } : null, config: C.publicCfg(c) });
+}));
 
 app.post("/api/name", needUser, wrap(async (req, res) => {
   const name = cleanName(req.body.name);
@@ -163,7 +172,7 @@ app.post("/api/signup", wrap(async (req, res) => {
   try { await pool.query("INSERT INTO users(id,email,pass_hash,name) VALUES($1,$2,$3,$4)", [id, email, hash, name]); }
   catch (e) { if (e.code === "23505") return fail(res, 409, "email-already-in-use"); throw e; }
   await createSession(req, res, id);
-  res.json({ user: pub({ email, name }) });
+  res.json({ user: { ...pub({ email, name }), plan: await C.planOf({ id, email }) } });
 }));
 
 app.post("/api/login", wrap(async (req, res) => {
@@ -180,7 +189,7 @@ app.post("/api/login", wrap(async (req, res) => {
   if (!u || !ok) { hit(ek); hit(eg); return fail(res, 401, "invalid-credential"); }
   hits.delete(ek);
   await createSession(req, res, u.id);
-  res.json({ user: pub(u) });
+  res.json({ user: { ...pub(u), plan: await C.planOf(u) } });
 }));
 
 app.post("/api/logout", wrap(async (req, res) => {
@@ -229,13 +238,10 @@ app.put("/api/progress", needUser, wrap(async (req, res) => {
 }));
 
 // ---------- admin ----------
-app.get("/api/admin/users", needAdmin, wrap(async (req, res) => {
-  const r = await pool.query(`SELECT u.id,u.email,u.name,u.created_at,p.track,p.target,p.exam_date,p.summary,p.updated_at
-    FROM users u LEFT JOIN progress p ON p.user_id=u.id ORDER BY p.updated_at DESC NULLS LAST LIMIT 5000`);
-  res.json({ users: r.rows });
-}));
 app.delete("/api/admin/users/:id", needAdmin, wrap(async (req, res) => {
-  await pool.query("DELETE FROM users WHERE id=$1", [req.params.id]); res.json({ ok: true });
+  const r = await pool.query("DELETE FROM users WHERE id=$1 RETURNING email", [req.params.id]);
+  await pool.query("INSERT INTO admin_audit(admin_email,action,target) VALUES($1,'delete_user',$2)", [req.user.email, r.rows[0] ? r.rows[0].email : req.params.id]);
+  res.json({ ok: true });
 }));
 app.post("/api/admin/users/:id/reset-password", needAdmin, wrap(async (req, res) => {
   const AL = "abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // no 0/O, 1/l/I, -/_ : easy to read aloud
@@ -243,6 +249,7 @@ app.post("/api/admin/users/:id/reset-password", needAdmin, wrap(async (req, res)
   const r = await pool.query("UPDATE users SET pass_hash=$1 WHERE id=$2 RETURNING email", [await bcrypt.hash(temp, 11), req.params.id]);
   if (!r.rows[0]) return fail(res, 404, "not-found");
   await pool.query("DELETE FROM sessions WHERE user_id=$1", [req.params.id]);
+  await pool.query("INSERT INTO admin_audit(admin_email,action,target) VALUES($1,'reset_password',$2)", [req.user.email, r.rows[0].email]);
   res.json({ email: r.rows[0].email, tempPassword: temp });
 }));
 
@@ -253,7 +260,7 @@ app.get("/robots.txt", (req, res) => {
 app.get("/sitemap.xml", (req, res) => {
   const base = "https://" + (CANONICAL_HOST || String(req.headers.host || ""));
   res.type("application/xml").set("Cache-Control", "public, max-age=86400")
-    .send(`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>${base}/</loc></url></urlset>\n`);
+    .send(`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>${base}/</loc></url><url><loc>${base}/app</loc></url></urlset>\n`);
 });
 // ---------- explainer narration (public) ----------
 // Narration clips live in Postgres (table narration); data/tracks.json maps each explainer to its clips + beat timings.
@@ -302,9 +309,16 @@ app.get("/healthz", (req, res) => { res.set("Cache-Control", "no-store"); res.se
 const PUB = path.join(__dirname, "public");
 app.use((req, res, next) => { if (/^\/admin(\.html)?$/.test(req.path)) res.set("X-Robots-Tag", "noindex"); next(); });
 app.get("/favicon.ico", (req, res) => res.redirect(301, "/favicon.svg"));
+// "/" is the marketing page for visitors; signed-in students go straight to the app at /app
+app.get("/", wrap(async (req, res) => {
+  const tok = parseCookies(req)[COOKIE];
+  if (tok) { const r = await pool.query("SELECT 1 FROM sessions WHERE token_hash=$1 AND expires_at>now()", [sha(tok)]); if (r.rows[0]) return res.redirect(302, "/app"); }
+  res.set("Cache-Control", "no-cache").sendFile(path.join(PUB, "index.html"));
+}));
+app.get(["/app", "/app/"], (req, res) => res.set("Cache-Control", "no-cache").sendFile(path.join(PUB, "app.html")));
 // gzip the big text assets (app.js is ~380 KB) without an extra dependency; cached per file mtime
 const gzCache = new Map();
-app.get(/^\/(app\.js|app\.css|admin\.js|cloud\.js)$/, (req, res, next) => {
+app.get(/^\/(app\.js|app\.css|admin\.js|cloud\.js|xp-engine\.js|landing\.js|landing\.css)$/, (req, res, next) => {
   if (!/\bgzip\b/.test(req.get("Accept-Encoding") || "")) return next();
   const f = path.join(PUB, req.path.slice(1));
   fs.stat(f, (err, st) => {

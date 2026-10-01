@@ -1,44 +1,492 @@
 <!doctype html>
-<html lang="ar" dir="rtl">
+<html lang="ar" dir="rtl" class="no-js">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="description" content="أكاديمية القدرات (GAT Academy): حقيبة متكاملة للتحضير لاختبار القدرات العامة باللغتين العربية والإنجليزية.">
-<title>أكاديمية القدرات | GAT Academy</title>
+<title>أكاديمية القدرات | التحضير لاختبار القدرات العامة (GAT) بخطة يومية وشروحات مسموعة</title>
+<meta name="description" content="استعد لاختبار القدرات العامة (قدرات · GAT) باختبار تشخيصي وخطة يومية حتى موعد اختبارك، و٣٣ شرحًا متحركًا مسموعًا، و٣٠ نموذجًا محاكيًا بصيغة الاختبار المحوسب، وصندوق أخطاء بالتكرار المتباعد. بالعربية والإنجليزية، مع خطة مجانية دائمة.">
+<link rel="canonical" href="https://gat.academy/">
 <meta name="theme-color" content="#FCFBFF" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#15112A" media="(prefers-color-scheme: dark)">
 <meta name="color-scheme" content="light dark">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://gat.academy/">
-<link rel="canonical" href="https://gat.academy/">
 <meta property="og:site_name" content="أكاديمية القدرات | GAT Academy">
-<meta property="og:title" content="أكاديمية القدرات · حقيبة التحضير لاختبار القدرات العامة">
-<meta property="og:description" content="خطة يومية، دروس وبطاقات، تدريب ونماذج محاكية بصيغة الاختبار المحوسب، ومتابعة للتقدم. بالعربية والإنجليزية.">
+<meta property="og:title" content="أكاديمية القدرات · القدرات ليست حظًا، هي عشر مهارات تُتقن">
+<meta property="og:description" content="اختبار تشخيصي، خطة يومية حتى موعد اختبارك، شروحات متحركة مسموعة، ونماذج محاكية بصيغة الاختبار المحوسب. بالعربية والإنجليزية، وابدأ مجانًا.">
+<meta property="og:image" content="https://gat.academy/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="أكاديمية القدرات: خريطة إتقان المهارات العشر لاختبار القدرات العامة">
 <meta property="og:locale" content="ar_SA">
 <meta property="og:locale:alternate" content="en_US">
-<meta name="twitter:card" content="summary">
-<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="أكاديمية القدرات · التحضير لاختبار القدرات العامة">
+<meta name="twitter:description" content="اختبار تشخيصي، خطة يومية، شروحات مسموعة، ونماذج محاكية بصيغة المحوسب. ابدأ مجانًا.">
+<meta name="twitter:image" content="https://gat.academy/og.png">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Almarai:wght@400;700;800&family=Aref+Ruqaa:wght@400;700&family=Baloo+Bhaijaan+2:wght@500;600;700;800&family=Caveat:wght@600&family=IBM+Plex+Mono:wght@500;600&display=swap">
-<link rel="stylesheet" href="app.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Almarai:wght@400;700;800&family=Aref+Ruqaa:wght@400;700&family=Baloo+Bhaijaan+2:wght@500;600;700;800&family=Caveat:wght@600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<link rel="stylesheet" href="/app.css">
+<link rel="stylesheet" href="/landing.css">
+<!-- landing.js runs its first lines immediately (theme, language, old app links), the rest after the DOM is parsed -->
+<script src="/landing.js"></script>
+<!-- Structured data. Offer prices are the defaults in commerce.js (m1 = 49, m3 = 119 SAR); live prices come from /api/config, so update these if the plans change in the admin. -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "EducationalOrganization",
+      "@id": "https://gat.academy/#org",
+      "name": "أكاديمية القدرات",
+      "alternateName": "GAT Academy",
+      "url": "https://gat.academy/",
+      "logo": "https://gat.academy/favicon.svg",
+      "image": "https://gat.academy/og.png",
+      "description": "منصة للتحضير لاختبار القدرات العامة (GAT) بالعربية والإنجليزية: اختبار تشخيصي، خطة يومية، شروحات متحركة مسموعة، ونماذج محاكية بصيغة الاختبار المحوسب.",
+      "areaServed": "SA",
+      "knowsLanguage": ["ar", "en"]
+    },
+    {
+      "@type": "Product",
+      "@id": "https://gat.academy/#product",
+      "name": "أكاديمية القدرات · GAT Academy",
+      "description": "حقيبة التحضير لاختبار القدرات العامة: المهارات العشر، ٣٣ شرحًا متحركًا مسموعًا بكل لغة، ٣٠ نموذجًا محاكيًا، خطة يومية حتى موعد الاختبار، صندوق أخطاء بالتكرار المتباعد، وخريطة إتقان.",
+      "image": "https://gat.academy/og.png",
+      "brand": { "@id": "https://gat.academy/#org" },
+      "category": "Test preparation",
+      "offers": [
+        { "@type": "Offer", "name": "الخطة المجانية", "price": "0", "priceCurrency": "SAR", "availability": "https://schema.org/InStock", "url": "https://gat.academy/app" },
+        { "@type": "Offer", "name": "شهري", "price": "49", "priceCurrency": "SAR", "availability": "https://schema.org/InStock", "url": "https://gat.academy/app#upgrade" },
+        { "@type": "Offer", "name": "باقة حتى الاختبار (٣ أشهر)", "price": "119", "priceCurrency": "SAR", "availability": "https://schema.org/InStock", "url": "https://gat.academy/app#upgrade" }
+      ]
+    }
+  ]
+}
+</script>
 </head>
-<body>
-<header class="top"><div class="top-in">
-  <a class="brand" href="#today"><span class="logo">GAT</span><span><b id="brand-n">أكاديمية القدرات</b><small id="brand-t"></small></span></a><a href="#progress" class="save-dot" id="save-dot" aria-label="حالة الحفظ · Save status"></a>
-  <nav id="nav" aria-label="القائمة الرئيسية · Main menu"></nav>
-  <div class="theme-wrap lang"><button class="icon-btn" id="theme-btn" aria-haspopup="true" aria-expanded="false" aria-label="المظهر · Theme"><svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 0 18c1.2 0 1.8-.9 1.8-1.8 0-.5-.2-.9-.5-1.2-.3-.3-.5-.7-.5-1.2 0-1 .8-1.8 1.8-1.8H17a4 4 0 0 0 4-4c0-4.4-4-8-9-8z"/><circle cx="7.5" cy="11" r="1.2" class="f"/><circle cx="10.5" cy="7" r="1.2" class="f"/><circle cx="15" cy="7.5" r="1.2" class="f"/></svg></button><div class="theme-pop" id="theme-pop" hidden></div></div>
-  <button class="icon-btn" id="acct-btn" hidden aria-label="الحساب · Account"><svg viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="4"/><path d="M4.5 20c1.2-3.8 4.2-5.5 7.5-5.5s6.3 1.7 7.5 5.5"/></svg></button>
-  <button class="btn ghost sm" id="lang-btn">English</button>
-</div></header>
-<main id="main"></main>
-<footer><p id="foot"></p></footer>
-<nav id="tabbar" aria-label="التنقل · Navigation"></nav>
-<div id="exam" hidden></div>
-<div id="toast" role="status" hidden></div>
-<div id="acct" hidden></div>
-<script src="/vendor/gsap.min.js"></script>
-<script src="app.js"></script>
-<script src="cloud.js" defer></script>
+<body class="lp">
+<a class="lp-skip" href="#main" data-i="skip">تخطَّ إلى المحتوى</a>
+
+<div class="lp-banner" id="lp-banner" role="status" hidden><div class="lp-wrap"><p id="lp-banner-t"></p></div></div>
+
+<header class="lp-top" id="lp-top">
+  <div class="lp-wrap lp-top-in">
+    <a class="lp-brand" href="/" aria-label="أكاديمية القدرات" data-i-aria="brand">
+      <span class="logo" aria-hidden="true">GAT</span>
+      <span class="lp-brand-t"><b data-i="brand">أكاديمية القدرات</b><small data-i="brandSub">التحضير لاختبار القدرات العامة</small></span>
+    </a>
+    <nav class="lp-nav" aria-label="أقسام الصفحة" data-i-aria="navAria">
+      <a href="#how" data-i="navHow">كيف تعمل</a>
+      <a href="#features" data-i="navFeatures">المزايا</a>
+      <a href="#skills" data-i="navSkills">المهارات</a>
+      <a href="#pricing" data-i="navPricing">الأسعار</a>
+      <a href="#faq" data-i="navFaq">الأسئلة</a>
+    </nav>
+    <div class="lp-tools">
+      <button class="lp-ib lp-js" id="lp-theme" type="button" aria-label="الوضع الداكن" data-i-aria="themeAria" aria-pressed="false">
+        <svg class="lp-ic-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.2A8 8 0 0 1 9.8 4a8 8 0 1 0 10.2 10.2z"/></svg>
+        <svg class="lp-ic-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M4.6 4.6l1.4 1.4M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4L6 18M18 6l1.4-1.4"/></svg>
+      </button>
+      <a class="lp-ib lp-lang lp-js" id="lp-lang" href="?lang=en" lang="en" hreflang="en" aria-label="English">EN</a>
+      <a class="lp-signin" href="/app" data-app="" data-i="signIn">دخول</a>
+      <a class="btn primary sm lp-start" href="/app" data-app="" data-i="startFree">ابدأ مجانًا</a>
+    </div>
+  </div>
+</header>
+
+<main id="main" class="lp-main">
+
+<!-- ================= HERO ================= -->
+<section class="lp-hero" aria-labelledby="hero-h">
+  <div class="lp-wrap lp-hero-in">
+    <div class="lp-hero-txt">
+      <p class="lp-eyebrow" data-i="heroEyebrow">اختبار القدرات العامة · قدرات · GAT</p>
+      <h1 id="hero-h" data-i="heroH">القدرات ليست حظًا.<br>هي <span class="lp-mark">عشر مهارات<svg class="lp-scrib" viewBox="0 0 220 18" preserveAspectRatio="none" aria-hidden="true"><path d="M3 12c38-7 76-9 114-6s66 4 100-3"/></svg></span> تُتقن.</h1>
+      <p class="lp-lead" data-i="heroLead">ابدأ باختبار تشخيصي قصير يحدد مستواك، ثم تمشي معك خطة يومية حتى موعد اختبارك: شروحات متحركة مسموعة، وتدريب متجدد، ونماذج محاكية بصيغة الاختبار المحوسب، وصندوق أخطاء يعيد إليك ما أخطأت فيه قبل أن تنساه.</p>
+      <div class="lp-cta">
+        <a class="btn primary xl" href="/app" data-app="" data-i="startFree">ابدأ مجانًا</a>
+        <a class="btn ghost xl lp-watch" href="#demo" data-xp-hero="">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path class="f" d="M10 8.3v7.4l6-3.7z"/></svg>
+          <span data-i="watch">شاهد شرحًا</span>
+        </a>
+      </div>
+      <ul class="lp-proof" aria-label="ما تحصل عليه" data-i-aria="proofAria">
+        <li><b data-i="p1b">٣٣</b> <span data-i="p1">شرحًا مسموعًا بكل لغة</span></li>
+        <li><b data-i="p2b">٣٠</b> <span data-i="p2">نموذجًا محاكيًا</span></li>
+        <li><b data-i="p3b">١٠</b> <span data-i="p3">مهارات تُقاس وتُتابَع</span></li>
+      </ul>
+      <p class="lp-micro" data-i="heroMicro">خطة مجانية دائمة · بلا بطاقة دفع · عربي و <bdi>English</bdi></p>
+    </div>
+
+    <div class="lp-art" aria-hidden="true">
+      <div class="lp-book">
+        <div class="lp-rings"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+        <div class="lp-book-h">
+          <span class="lp-hand" data-i="artMap">خريطة الإتقان</span>
+          <span class="lp-sample" data-i="artSample">مثال توضيحي</span>
+        </div>
+        <div class="lp-mm">
+          <div class="lp-mm-col">
+            <span class="lp-mm-h" data-i="verbal">لفظي</span>
+            <span class="lp-tile l4"><span data-i="sk_analogy">التناظر اللفظي</span><span class="pips"><i class="on l4"></i><i class="on l4"></i><i class="on l4"></i><i class="on l4"></i></span></span>
+            <span class="lp-tile"><span data-i="sk_completion">إكمال الجمل</span><span class="pips"><i class="on l3"></i><i class="on l3"></i><i class="on l3"></i><i></i></span></span>
+            <span class="lp-tile"><span data-i="sk_context">الخطأ السياقي</span><span class="pips"><i class="on l2"></i><i class="on l2"></i><i></i><i></i></span></span>
+            <span class="lp-tile"><span data-i="sk_odd">المفردة الشاذة</span><span class="pips"><i class="on l3"></i><i class="on l3"></i><i class="on l3"></i><i></i></span></span>
+            <span class="lp-tile"><span data-i="sk_reading">استيعاب المقروء</span><span class="pips"><i class="on l2"></i><i class="on l2"></i><i></i><i></i></span></span>
+          </div>
+          <div class="lp-mm-col">
+            <span class="lp-mm-h" data-i="quant">كمي</span>
+            <span class="lp-tile"><span data-i="sk_arith">الحساب</span><span class="pips"><i class="on l3"></i><i class="on l3"></i><i class="on l3"></i><i></i></span></span>
+            <span class="lp-tile lp-weak"><span data-i="sk_algebra">الجبر</span><span class="pips"><i class="on l1"></i><i></i><i></i><i></i></span></span>
+            <span class="lp-tile"><span data-i="sk_geometry">الهندسة</span><span class="pips"><i class="on l2"></i><i class="on l2"></i><i></i><i></i></span></span>
+            <span class="lp-tile l4"><span data-i="sk_stats">التحليل والإحصاء</span><span class="pips"><i class="on l4"></i><i class="on l4"></i><i class="on l4"></i><i class="on l4"></i></span></span>
+            <span class="lp-tile"><span data-i="sk_comparison">المقارنات</span><span class="pips"><i class="on l3"></i><i class="on l3"></i><i class="on l3"></i><i></i></span></span>
+          </div>
+        </div>
+        <div class="lp-book-f">
+          <span data-i="artWeek">خطة الأسبوع</span>
+          <span class="lp-bar"><i></i></span>
+        </div>
+      </div>
+      <div class="lp-sticky lp-st-a">
+        <span class="lp-tape"></span>
+        <b class="lp-hand" data-i="artToday">جلسة اليوم</b>
+        <span class="lp-task done"><i></i><span data-i="artT1">مراجعة الأخطاء المستحقة</span></span>
+        <span class="lp-task done"><i></i><span data-i="artT2">شرح: المتغيرات</span></span>
+        <span class="lp-task"><i></i><span data-i="artT3">تدريب على الجبر</span></span>
+      </div>
+      <div class="lp-sticky lp-st-b">
+        <span class="lp-tape"></span>
+        <svg class="lp-ring" viewBox="0 0 80 80"><circle class="lp-ring-t" cx="40" cy="40" r="32"/><circle class="lp-ring-v" cx="40" cy="40" r="32"/></svg>
+        <span class="lp-ring-n" data-i="artScoreV">٨٤</span><span class="lp-ring-l" data-i="artScore">الدرجة التقديرية</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= DEMO ================= -->
+<section class="lp-sec lp-demo" id="demo" aria-labelledby="demo-h">
+  <div class="lp-wrap">
+    <div class="lp-sh">
+      <p class="lp-eyebrow" data-i="demoEyebrow">جرّبه الآن، بلا تسجيل</p>
+      <h2 id="demo-h" data-i="demoH">شرح متحرك مسموع، يتوقف لتجرّب بنفسك</h2>
+      <p data-i="demoP">كل مهارة تُشرح خطوة بخطوة على السبورة بصوت واضح، وتتوقف عند الوقفات التفاعلية لتجيب أنت، ثم اختبار قصير يثبّت الفكرة. هذه شروحات من الخطة المجانية، اختر واحدًا وشغّله:</p>
+    </div>
+    <div class="lp-demo-grid">
+      <div class="lp-stage" id="lp-stage" data-k="analogy">
+        <div class="lp-stage-top"><span class="lp-dots"><i></i><i></i><i></i></span><span class="lp-stage-t" id="lp-stage-t">التناظر اللفظي: ابنِ الجسر</span></div>
+        <div class="lp-board">
+          <svg class="lp-doodle" data-d="analogy" viewBox="0 0 320 170" aria-hidden="true">
+            <text class="d-h" x="160" y="30" text-anchor="middle" data-i="dA3">أداة لـ</text>
+            <path class="d-acc" d="M114 76c30-40 62-40 92 0"/>
+            <rect class="d-box" x="18" y="62" width="96" height="44" rx="10"/><rect class="d-box" x="206" y="62" width="96" height="44" rx="10"/>
+            <text class="d-t" x="66" y="91" text-anchor="middle" data-i="dA_l">كتابة</text><text class="d-t" x="254" y="91" text-anchor="middle" data-i="dA_r">قلم</text>
+            <path class="d-pk" d="M50 134h220" stroke-dasharray="2 9"/>
+            <text class="d-s" x="160" y="158" text-anchor="middle" data-i="dA4">مِشرط : جراحة</text>
+          </svg>
+          <svg class="lp-doodle" data-d="ar-order" viewBox="0 0 320 170" aria-hidden="true">
+            <text class="d-big" x="160" y="66" text-anchor="middle" data-i="dO1">٣ + ٤ × ٢</text>
+            <rect class="d-hl" x="70" y="88" width="180" height="32" rx="8"/>
+            <text class="d-h" x="160" y="111" text-anchor="middle" data-i="dO2">الضرب أولًا: ٤ × ٢ = ٨</text>
+            <text class="d-t acc" x="160" y="154" text-anchor="middle" data-i="dO3">٣ + ٨ = ١١</text>
+          </svg>
+          <svg class="lp-doodle" data-d="ge-angles" viewBox="0 0 320 170" aria-hidden="true">
+            <path class="d-ln" d="M30 60h260M30 124h260"/><path class="d-acc" d="M116 20l92 140"/>
+            <path class="d-pk" d="M157 60a16 16 0 0 0 -13 -18"/><path class="d-pk" d="M199 124a16 16 0 0 0 -13 -18"/>
+            <text class="d-h" x="104" y="48" text-anchor="middle" data-i="dG1">١١٠°</text><text class="d-h" x="232" y="112" text-anchor="middle">؟</text>
+          </svg>
+          <svg class="lp-doodle" data-d="co-signals" viewBox="0 0 320 170" aria-hidden="true">
+            <text class="d-t" x="160" y="52" text-anchor="middle" data-i="dS1">الطقس بارد، ــــــ الشمس ساطعة.</text>
+            <path class="d-acc" d="M160 64v22"/><path class="d-acc" d="M152 72l8-8 8 8"/>
+            <rect class="d-hl" x="118" y="94" width="84" height="36" rx="9"/>
+            <text class="d-t acc" x="160" y="119" text-anchor="middle" data-i="dS2">لكنّ</text>
+            <text class="d-h" x="160" y="158" text-anchor="middle" data-i="dS3">إشارة إلى عكس المتوقع</text>
+          </svg>
+          <button class="lp-play lp-js" id="lp-play" type="button" aria-label="شغّل الشرح" data-i-aria="playAria">
+            <span class="lp-play-c"><svg viewBox="0 0 24 24" aria-hidden="true"><path class="f" d="M8 5.5v13l11-6.5z"/></svg></span>
+            <b data-i="playL">شغّل الشرح</b>
+          </button>
+        </div>
+        <div class="lp-stage-cap"><span class="lp-cap-w" data-i="capDemo">يُفتح المشغّل بملء الشاشة، ويعمل بالصوت أو بالنص المكتوب.</span></div>
+        <noscript><p class="lp-nojs" data-i="noJsDemo">العرض التفاعلي يحتاج تفعيل JavaScript في المتصفح.</p></noscript>
+      </div>
+      <div class="lp-pick" role="group" aria-label="اختر شرحًا" data-i-aria="pickAria">
+        <button class="lp-pk on" type="button" data-xp="analogy" aria-pressed="true">
+          <span class="lp-pk-ic v"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="9" width="7" height="6" rx="1.5"/><rect x="14.5" y="9" width="7" height="6" rx="1.5"/><path d="M9.5 12c1.5-3 3.5-3 5 0"/></svg></span>
+          <span class="lp-pk-t"><small data-i="sk_analogy">التناظر اللفظي</small><b data-xt="analogy">التناظر اللفظي: ابنِ الجسر</b></span>
+          <span class="lp-pk-m" data-xm="analogy">٤ دقائق</span>
+        </button>
+        <button class="lp-pk" type="button" data-xp="ar-order" aria-pressed="false">
+          <span class="lp-pk-ic q"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h5M7.5 5.5v5M14 8h5M5 16.5l4-4M9 16.5l-4-4M14 15h5M14 18h5"/></svg></span>
+          <span class="lp-pk-t"><small data-i="sk_arith">الحساب</small><b data-xt="ar-order">ترتيب العمليات الحسابية</b></span>
+          <span class="lp-pk-m" data-xm="ar-order">٣ دقائق</span>
+        </button>
+        <button class="lp-pk" type="button" data-xp="ge-angles" aria-pressed="false">
+          <span class="lp-pk-ic q"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8h18M3 16h18M8 3l8 18"/></svg></span>
+          <span class="lp-pk-t"><small data-i="sk_geometry">الهندسة</small><b data-xt="ge-angles">الزوايا والمستقيمات المتوازية</b></span>
+          <span class="lp-pk-m" data-xm="ge-angles">٣ دقائق</span>
+        </button>
+        <button class="lp-pk" type="button" data-xp="co-signals" aria-pressed="false">
+          <span class="lp-pk-ic v"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h4M17 12h4"/><rect x="8" y="8.5" width="8" height="7" rx="2"/></svg></span>
+          <span class="lp-pk-t"><small data-i="sk_completion">إكمال الجمل</small><b data-xt="co-signals">كلمات الإشارة في إكمال الجمل</b></span>
+          <span class="lp-pk-m" data-xm="co-signals">٤ دقائق</span>
+        </button>
+        <p class="lp-pick-note" data-i="pickNote">في المنصة ٣٣ شرحًا بكل لغة، تغطي المهارات العشر.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= HOW IT WORKS ================= -->
+<section class="lp-sec" id="how" aria-labelledby="how-h">
+  <div class="lp-wrap">
+    <div class="lp-sh">
+      <p class="lp-eyebrow" data-i="howEyebrow">من أول يوم إلى يوم الاختبار</p>
+      <h2 id="how-h" data-i="howH">كيف تعمل أكاديمية القدرات؟</h2>
+      <p data-i="howP">خمس خطوات واضحة، تعرف في كل يوم منها ماذا تذاكر ولماذا.</p>
+    </div>
+    <ol class="lp-steps">
+      <li class="lp-step n0"><span class="lp-step-n" aria-hidden="true" data-i="n1">١</span><h3 data-i="s1h">اختبار تشخيصي</h3><p data-i="s1p">٢٠ سؤالًا في نحو ١٥ دقيقة، سؤالان من كل مهارة، تحدد مستواك في المهارات العشر من البداية.</p></li>
+      <li class="lp-step n1"><span class="lp-step-n" aria-hidden="true" data-i="n2">٢</span><h3 data-i="s2h">خطة شخصية</h3><p data-i="s2p">خطة يومية حتى موعد اختبارك، تبدأ بأضعف مهاراتك وتوزّع المراجعة على الأيام.</p></li>
+      <li class="lp-step n2"><span class="lp-step-n" aria-hidden="true" data-i="n3">٣</span><h3 data-i="s3h">تعلّم بالشروحات</h3><p data-i="s3p">شرح متحرك مسموع لكل فكرة، يليه اختبار قصير، ثم بطاقات وتقنيات وأنماط متكررة.</p></li>
+      <li class="lp-step n3"><span class="lp-step-n" aria-hidden="true" data-i="n4">٤</span><h3 data-i="s4h">تدرّب وحاكِ الاختبار</h3><p data-i="s4p">أسئلة تدريب متجددة، ثم نماذج محاكية بصيغة المحوسب: ٤ أقسام × ٢٤ سؤالًا × ٢٥ دقيقة.</p></li>
+      <li class="lp-step n0"><span class="lp-step-n" aria-hidden="true" data-i="n5">٥</span><h3 data-i="s5h">تابع تقدمك</h3><p data-i="s5p">خريطة إتقان ودرجة تقديرية، وصندوق أخطاء يعيد إليك كل سؤال أخطأت فيه حتى تتقنه.</p></li>
+    </ol>
+  </div>
+</section>
+
+<!-- ================= FEATURES ================= -->
+<section class="lp-sec lp-feat-sec" id="features" aria-labelledby="feat-h">
+  <div class="lp-wrap">
+    <div class="lp-sh">
+      <p class="lp-eyebrow" data-i="featEyebrow">كل ما تحتاجه في مكان واحد</p>
+      <h2 id="feat-h" data-i="featH">حقيبة كاملة، لا مجرد بنك أسئلة</h2>
+      <p data-i="featP">تتعلم الفكرة، وتتدرب عليها، وتختبر نفسك في ظروف الاختبار الحقيقي، وتعرف دائمًا أين تقف.</p>
+    </div>
+    <ul class="lp-feats">
+      <li class="lp-feat"><span class="lp-fi c-pri"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="4" width="19" height="13" rx="2.5"/><path d="M8 21h8M12 17v4"/><path class="f" d="M10 7.8v5.4l4.5-2.7z"/></svg></span><h3 data-i="f1h">٣٣ شرحًا متحركًا بكل لغة</h3><p data-i="f1p">شروحات مسموعة بالعربية وبالإنجليزية، تتوقف لتجرّب بنفسك، وبعدها اختبار قصير.</p></li>
+      <li class="lp-feat"><span class="lp-fi c-pink"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H6.5A1.5 1.5 0 0 0 5 4.5v15A1.5 1.5 0 0 0 6.5 21H11"/><path d="M14 3l4 4v3"/><path d="M8 8h4M8 12h3"/><circle cx="17" cy="17" r="4.5"/><path d="M17 15v2l1.3 1"/></svg></span><h3 data-i="f2h">٣٠ نموذجًا محاكيًا</h3><p data-i="f2p">بصيغة الاختبار المحوسب: ٤ أقسام × ٢٤ سؤالًا × ٢٥ دقيقة لكل قسم، مع مؤقت حقيقي.</p></li>
+      <li class="lp-feat"><span class="lp-fi c-sky"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h3.5c2 0 3 1 4.5 3.5S14.5 17 16.5 17H20"/><path d="M4 17h3.5c1.2 0 2-.4 2.8-1.3M13.7 8.3C14.5 7.4 15.3 7 16.5 7H20"/><path d="M18 5l2 2-2 2M18 15l2 2-2 2"/></svg></span><h3 data-i="f3h">أسئلة تدريب مولّدة</h3><p data-i="f3p">أسئلة جديدة بأرقام وصياغات متغيرة، فتتدرب على الفكرة لا على حفظ الإجابة.</p></li>
+      <li class="lp-feat"><span class="lp-fi c-butter"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="3.5" width="13" height="16" rx="2" transform="rotate(8 13.5 11.5)"/><rect x="3.5" y="5" width="13" height="16" rx="2"/><path d="M6.5 15l2.5-3 2 2 2-3 2 4"/><circle cx="8" cy="9" r="1.2" class="f"/></svg></span><h3 data-i="f4h">بطاقات مصوّرة</h3><p data-i="f4p">بطاقات تلخّص كل قاعدة برسم توضيحي، تقلبها وتراجعها في دقائق.</p></li>
+      <li class="lp-feat"><span class="lp-fi c-pri"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5"/><path d="M8.5 13l2.5-6 2.5 6M9.4 11h3.2"/></svg></span><h3 data-i="f5h">بطاقات المفردات</h3><p data-i="f5p">مفردات تتكرر في التناظر وإكمال الجمل والخطأ السياقي، بمعانيها.</p></li>
+      <li class="lp-feat"><span class="lp-fi c-pink"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.6 10.8c.7.5 1.1 1.3 1.1 2.2h5c0-.9.4-1.7 1.1-2.2A6 6 0 0 0 12 3z"/><path d="M12 7v3l2 1"/></svg></span><h3 data-i="f6h">تقنيات وأنماط متكررة</h3><p data-i="f6p">اختصارات الحل وأنماط الأسئلة التي تتكرر، مع مثال لكل نمط.</p></li>
+      <li class="lp-feat"><span class="lp-fi c-sky"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16.5" rx="2.5"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/><path d="M7.5 14.5l2 2 4-4"/><path d="M15.5 17h2"/></svg></span><h3 data-i="f7h">خطة يومية حتى موعد اختبارك</h3><p data-i="f7p">جلسة يومية جاهزة: مراجعة ما استحق، ثم أضعف مهارتين، ثم أسئلة مختلطة.</p></li>
+      <li class="lp-feat"><span class="lp-fi c-butter"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 8.5L12 4l8.5 4.5v9L12 22l-8.5-4.5z"/><path d="M3.5 8.5L12 13l8.5-4.5M12 13v9"/><path d="M15.5 2.5a3 3 0 0 1 4 1.2" /><path d="M19.7 1.8l-.2 1.9-1.9-.2"/></svg></span><h3 data-i="f8h">صندوق الأخطاء</h3><p data-i="f8p">يحفظ كل سؤال أخطأت فيه ويعيده إليك بالتكرار المتباعد، قبل أن تنسى.</p></li>
+      <li class="lp-feat"><span class="lp-fi c-pri"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2" class="f" opacity=".35"/><rect x="3" y="13" width="8" height="8" rx="2" class="f" opacity=".35"/><rect x="13" y="13" width="8" height="8" rx="2"/></svg></span><h3 data-i="f9h">خريطة الإتقان</h3><p data-i="f9p">مستواك في كل مهارة من العشر بنظرة واحدة، وأين تذهب دقائقك اليوم.</p></li>
+      <li class="lp-feat"><span class="lp-fi c-pink"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 17a8.5 8.5 0 1 1 17 0"/><path d="M12 17l4-5"/><circle cx="12" cy="17" r="1.6" class="f"/><path d="M6 13.5l1 .6M12 8.5v1.2M18 13.5l-1 .6"/></svg></span><h3 data-i="f10h">الدرجة التقديرية</h3><p data-i="f10p">تقدير لدرجتك من أدائك الفعلي، ومعه تحليل وقتك في كل مهارة.</p></li>
+      <li class="lp-feat"><span class="lp-fi c-sky"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M2.5 12h19M12 2.5c2.6 2.8 3.8 6 3.8 9.5s-1.2 6.7-3.8 9.5c-2.6-2.8-3.8-6-3.8-9.5S9.4 5.3 12 2.5z"/></svg></span><h3 data-i="f11h">عربي و English</h3><p data-i="f11p">الواجهة والأسئلة والشروحات بالعربية وبالإنجليزية، فتتدرب بلغة اختبارك.</p></li>
+      <li class="lp-feat"><span class="lp-fi c-butter"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M10.5 18.5h3"/><path d="M9 9.5l2 2 4-4"/></svg></span><h3 data-i="f12h">على جوالك وحاسوبك</h3><p data-i="f12p">من المتصفح بلا تثبيت، ويُحفظ تقدمك في حسابك ليتبعك على أي جهاز.</p></li>
+    </ul>
+  </div>
+</section>
+
+<!-- ================= SKILLS ================= -->
+<section class="lp-sec" id="skills" aria-labelledby="skills-h">
+  <div class="lp-wrap">
+    <div class="lp-sh">
+      <p class="lp-eyebrow" data-i="skEyebrow">ما يقيسه الاختبار</p>
+      <h2 id="skills-h" data-i="skH">المهارات العشر</h2>
+      <p data-i="skP">الاختبار لا يقيس ما حفظته من المنهج، بل فهمك وتحليلك. ولكل مهارة في المنصة درس وشروحات وتدريب ومتابعة.</p>
+    </div>
+    <div class="lp-skills">
+      <div class="lp-skcol v">
+        <h3 class="lp-skcol-h"><span class="lp-hand" data-i="verbalH">القسم اللفظي</span></h3>
+        <ul>
+          <li><b data-i="sk_analogy">التناظر اللفظي</b><span data-i="skd_analogy">اكتشف العلاقة بين كلمتين، واختر الزوج الذي تربطه العلاقة نفسها.</span></li>
+          <li><b data-i="sk_completion">إكمال الجمل</b><span data-i="skd_completion">اختر ما يكمل المعنى، مستعينًا بكلمات الإشارة وسياق الجملة.</span></li>
+          <li><b data-i="sk_context">الخطأ السياقي</b><span data-i="skd_context">حدد الكلمة التي لا تنسجم مع المعنى العام للجملة.</span></li>
+          <li><b data-i="sk_odd">المفردة الشاذة</b><span data-i="skd_odd">جد الكلمة التي لا تنتمي إلى بقية المجموعة.</span></li>
+          <li><b data-i="sk_reading">استيعاب المقروء</b><span data-i="skd_reading">الفكرة الرئيسة والتفاصيل والاستنتاج من نص قصير.</span></li>
+        </ul>
+      </div>
+      <div class="lp-skcol q">
+        <h3 class="lp-skcol-h"><span class="lp-hand" data-i="quantH">القسم الكمي</span></h3>
+        <ul>
+          <li><b data-i="sk_arith">الحساب</b><span data-i="skd_arith">الكسور والنسب والنسب المئوية وترتيب العمليات.</span></li>
+          <li><b data-i="sk_algebra">الجبر</b><span data-i="skd_algebra">المتغيرات والعبارات الجبرية والمعادلات.</span></li>
+          <li><b data-i="sk_geometry">الهندسة</b><span data-i="skd_geometry">الزوايا والمثلثات والدوائر والمساحات.</span></li>
+          <li><b data-i="sk_stats">التحليل والإحصاء</b><span data-i="skd_stats">المتوسط والوسيط والمنوال، وقراءة الجداول والرسوم.</span></li>
+          <li><b data-i="sk_comparison">المقارنات</b><span data-i="skd_comparison">قارن بين قيمتين واختر من الخيارات الأربعة الثابتة.</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!--
+  ================= STUDENT VOICES (hidden until real quotes exist) =================
+  Keep this section hidden until we have real, consented quotes from students.
+  To publish: remove the `hidden` attribute, add one <figure class="lp-voice"> per quote,
+  and add the English text for each quote to the EN dictionary in landing.js (data-i keys).
+  Never add invented quotes, names, scores or counts.
+  Markup per quote:
+    <figure class="lp-voice">
+      <blockquote data-i="v1q">…the student's words…</blockquote>
+      <figcaption data-i="v1c">…first name, city, year…</figcaption>
+    </figure>
+-->
+<section class="lp-sec lp-voices" id="voices" aria-labelledby="voices-h" hidden>
+  <div class="lp-wrap">
+    <div class="lp-sh"><p class="lp-eyebrow" data-i="vEyebrow">من طلابنا</p><h2 id="voices-h" data-i="vH">ماذا يقول الطلاب</h2></div>
+    <div class="lp-voice-grid"></div>
+  </div>
+</section>
+
+<!-- ================= PRICING ================= -->
+<section class="lp-sec lp-pricing" id="pricing" aria-labelledby="price-h">
+  <div class="lp-wrap">
+    <div class="lp-sh">
+      <p class="lp-eyebrow" data-i="prEyebrow">ابدأ مجانًا، وترقَّ حين تحتاج</p>
+      <h2 id="price-h" data-i="prH">خطط واضحة، بلا مفاجآت</h2>
+      <p data-i="prP">الخطة المجانية دائمة، بلا مدة ولا بطاقة دفع، وتعطيك نحو ربع المنصة، وكل ما فيها يعمل كاملًا. الاشتراك يفتح كل شيء حتى يوم اختبارك.</p>
+    </div>
+
+    <div class="lp-plans">
+      <article class="lp-plan lp-free" aria-labelledby="free-h">
+        <div class="lp-plan-h">
+          <h3 id="free-h" data-i="freeH">المجانية</h3>
+          <span class="lp-tag" data-i="freeTag">دائمة</span>
+        </div>
+        <p class="lp-price"><b data-i="freePrice">مجانًا</b> <span data-i="freeUnit">دائمًا، بلا مدة</span></p>
+        <p class="lp-plan-d" data-i="freeD">نحو ٢٥٪ من المنصة، تكفي لتعرف مستواك وتبدأ بجدية.</p>
+        <ul class="lp-list" id="lp-free-list">
+          <li data-i="fl1">اختبار تشخيصي: ٢٠ سؤالًا في نحو ١٥ دقيقة</li>
+          <li data-i="fl2">٨ شروحات متحركة مسموعة بكل لغة</li>
+          <li data-i="fl3">١٠ أسئلة تدريب يوميًا</li>
+          <li data-i="fl4">٢٥٪ من البطاقات والمفردات، من كل المهارات</li>
+          <li data-i="fl5">أول أسبوعين من الخطة اليومية</li>
+          <li data-i="fl6">صندوق أخطاء يحفظ آخر ١٥ خطأ</li>
+          <li data-i="fl7">٢٥٪ من التقنيات والأنماط</li>
+          <li data-i="fl8">خريطة الإتقان، وتحليل مفصّل لمهارتين</li>
+        </ul>
+        <a class="btn ghost block lp-plan-cta" href="/app" data-app="" data-i="freeCta">ابدأ مجانًا</a>
+      </article>
+
+      <article class="lp-plan lp-pro" aria-labelledby="pro-h">
+        <div class="lp-plan-h">
+          <h3 id="pro-h" data-i="proH">الاشتراك الكامل</h3>
+          <span class="lp-tag pro">Pro</span>
+        </div>
+        <p class="lp-plan-d" data-i="proD">كل ما في المجانية، بلا حدود، ومعه أدوات الوصول إلى الدرجة التي تستهدفها:</p>
+        <ul class="lp-list lp-list-pro">
+          <li data-i="pl1">الشروحات الـ ٣٣ كاملة بكل لغة</li>
+          <li data-i="pl2">النماذج المحاكية الثلاثون، واختبارات الأقسام، والمحاكاة الكاملة بالوقت</li>
+          <li data-i="pl3">تدريب يومي بلا حد، وتدريب موجّه على مهارة أو نمط تختاره</li>
+          <li data-i="pl4">كل البطاقات والمفردات والتقنيات والأنماط</li>
+          <li data-i="pl5">الخطة كاملة حتى موعد اختبارك، وتخصيص الموعد والدرجة المستهدفة</li>
+          <li data-i="pl6">تكرار متباعد ذكي للأخطاء والبطاقات، وتحليل سبب كل خطأ</li>
+          <li data-i="pl7">الدرجة التقديرية وتحليل الوقت لكل مهارة</li>
+          <li data-i="pl8">مراجعة أي محاولة سابقة سؤالًا سؤالًا</li>
+        </ul>
+        <div class="lp-opts" id="lp-opts" aria-live="polite">
+          <div class="lp-opt lp-opt-load">
+            <span class="lp-skel"></span><span class="lp-skel s"></span>
+            <p class="small" data-i="priceLoading">الأسعار الحالية تظهر هنا، وتجدها أيضًا داخل المنصة.</p>
+            <a class="btn primary block" href="/app#upgrade" data-app="#upgrade" data-i="seePlans">اعرض الخطط في المنصة</a>
+          </div>
+        </div>
+        <p class="lp-refund" id="lp-refund" hidden>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8l7.5 3v6c0 4.6-3.2 8.2-7.5 9.4-4.3-1.2-7.5-4.8-7.5-9.4v-6z"/><path d="M8.5 12l2.5 2.5 4.5-5"/></svg>
+          <span id="lp-refund-t"></span>
+        </p>
+        <p class="lp-pay" data-i="payLine">الدفع آمن عبر <bdi>Tap</bdi>: مدى، و <bdi>Apple Pay</bdi>، و <bdi>STC Pay</bdi>، و <bdi>Visa</bdi> و <bdi>Mastercard</bdi>.</p>
+      </article>
+    </div>
+
+    <div class="lp-cmp-wrap">
+      <h3 class="lp-cmp-h" data-i="cmpH">مقارنة تفصيلية</h3>
+      <div class="lp-cmp-scroll" tabindex="0" role="region" aria-label="مقارنة الخطط" data-i-aria="cmpAria">
+        <table class="lp-cmp">
+          <thead><tr><th scope="col" data-i="cmpFeat">الميزة</th><th scope="col" data-i="cmpFree">المجانية</th><th scope="col" class="pro" data-i="cmpPro">الاشتراك الكامل</th></tr></thead>
+          <tbody>
+            <tr><th scope="row" data-i="c1">الاختبار التشخيصي</th><td><span class="y" role="img" aria-label="متاح" data-i-aria="yes"></span></td><td><span class="y" role="img" aria-label="متاح" data-i-aria="yes"></span></td></tr>
+            <tr><th scope="row" data-i="c2">الشروحات المتحركة المسموعة</th><td id="cmp-xp" data-i="c2f">٨ بكل لغة</td><td data-i="c2p">٣٣ بكل لغة</td></tr>
+            <tr><th scope="row" data-i="c3">أسئلة التدريب</th><td id="cmp-daily" data-i="c3f">١٠ يوميًا</td><td data-i="c3p">بلا حد</td></tr>
+            <tr><th scope="row" data-i="c4">التدريب الموجّه على مهارة أو نمط</th><td><span class="n" role="img" aria-label="غير متاح" data-i-aria="no"></span></td><td><span class="y" role="img" aria-label="متاح" data-i-aria="yes"></span></td></tr>
+            <tr><th scope="row" data-i="c5">النماذج المحاكية الثلاثون</th><td><span class="n" role="img" aria-label="غير متاح" data-i-aria="no"></span></td><td><span class="y" role="img" aria-label="متاح" data-i-aria="yes"></span></td></tr>
+            <tr><th scope="row" data-i="c6">اختبارات الأقسام والمحاكاة الكاملة بالوقت</th><td><span class="n" role="img" aria-label="غير متاح" data-i-aria="no"></span></td><td><span class="y" role="img" aria-label="متاح" data-i-aria="yes"></span></td></tr>
+            <tr><th scope="row" data-i="c7">مراجعة المحاولات السابقة سؤالًا سؤالًا</th><td><span class="n" role="img" aria-label="غير متاح" data-i-aria="no"></span></td><td><span class="y" role="img" aria-label="متاح" data-i-aria="yes"></span></td></tr>
+            <tr><th scope="row" data-i="c8">البطاقات والمفردات</th><td id="cmp-cards" data-i="c8f">٢٥٪</td><td data-i="all">الكل</td></tr>
+            <tr><th scope="row" data-i="c9">التقنيات والأنماط المتكررة</th><td id="cmp-tech" data-i="c9f">٢٥٪</td><td data-i="all">الكل</td></tr>
+            <tr><th scope="row" data-i="c10">الخطة اليومية</th><td id="cmp-plan" data-i="c10f">أول أسبوعين</td><td data-i="c10p">حتى موعد اختبارك</td></tr>
+            <tr><th scope="row" data-i="c11">تخصيص موعد الاختبار والدرجة المستهدفة</th><td><span class="n" role="img" aria-label="غير متاح" data-i-aria="no"></span></td><td><span class="y" role="img" aria-label="متاح" data-i-aria="yes"></span></td></tr>
+            <tr><th scope="row" data-i="c12">صندوق الأخطاء</th><td id="cmp-mist" data-i="c12f">آخر ١٥ خطأ</td><td data-i="c12p">كامل</td></tr>
+            <tr><th scope="row" data-i="c13">التكرار المتباعد الذكي للأخطاء والبطاقات</th><td><span class="n" role="img" aria-label="غير متاح" data-i-aria="no"></span></td><td><span class="y" role="img" aria-label="متاح" data-i-aria="yes"></span></td></tr>
+            <tr><th scope="row" data-i="c14">تحليل سبب الخطأ (مفهوم، سهو، وقت، فخ)</th><td><span class="n" role="img" aria-label="غير متاح" data-i-aria="no"></span></td><td><span class="y" role="img" aria-label="متاح" data-i-aria="yes"></span></td></tr>
+            <tr><th scope="row" data-i="c15">خريطة الإتقان</th><td><span class="y" role="img" aria-label="متاح" data-i-aria="yes"></span></td><td><span class="y" role="img" aria-label="متاح" data-i-aria="yes"></span></td></tr>
+            <tr><th scope="row" data-i="c16">تحليل المهارات بالتفصيل</th><td data-i="c16f">مهارتان</td><td data-i="c16p">المهارات العشر</td></tr>
+            <tr><th scope="row" data-i="c17">الدرجة التقديرية وتحليل الوقت لكل مهارة</th><td><span class="n" role="img" aria-label="غير متاح" data-i-aria="no"></span></td><td><span class="y" role="img" aria-label="متاح" data-i-aria="yes"></span></td></tr>
+            <tr><th scope="row" data-i="c18">العربية والإنجليزية</th><td><span class="y" role="img" aria-label="متاح" data-i-aria="yes"></span></td><td><span class="y" role="img" aria-label="متاح" data-i-aria="yes"></span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FAQ ================= -->
+<section class="lp-sec" id="faq" aria-labelledby="faq-h">
+  <div class="lp-wrap lp-faq-in">
+    <div class="lp-sh">
+      <p class="lp-eyebrow" data-i="faqEyebrow">قبل أن تبدأ</p>
+      <h2 id="faq-h" data-i="faqH">أسئلة شائعة</h2>
+    </div>
+    <div class="lp-faqs">
+      <details class="lp-q"><summary data-i="q1">ما هو اختبار القدرات العامة؟</summary><div class="lp-a" data-i="a1"><p>اختبار معياري يقدمه المركز الوطني للقياس (قياس) التابع لهيئة تقويم التعليم والتدريب لطلاب المرحلة الثانوية، وتعتمد عليه الجامعات السعودية في القبول ضمن النسبة الموزونة. لا يقيس ما حفظته من المنهج، بل قدرتك على الفهم والتحليل والاستنتاج من خلال اللغة والأرقام، في قسمين: لفظي وكمي. لذلك يتحسن بالتدريب على المهارة، لا بحفظ الإجابات.</p></div></details>
+      <details class="lp-q"><summary data-i="q2">هل الخطة المجانية مجانية فعلًا وإلى الأبد؟</summary><div class="lp-a" data-i="a2"><p>نعم. الخطة المجانية دائمة، بلا مدة تجريبية تنتهي، ولا نطلب بطاقة دفع للتسجيل. تعطيك نحو ربع المنصة: الاختبار التشخيصي، وشروحات مختارة، وتدريبًا يوميًا، وأول أسبوعين من الخطة، وغيرها. ما هو مجاني يعمل كاملًا، والمقفل يظهر لك باسمه وفائدته لتقرر بنفسك.</p></div></details>
+      <details class="lp-q"><summary data-i="q3">ماذا أحصل عليه عند الاشتراك؟</summary><div class="lp-a" data-i="a3"><p>كل شيء: الشروحات الـ ٣٣ بكل لغة، والنماذج المحاكية الثلاثون واختبارات الأقسام والمحاكاة الكاملة بالوقت، وتدريبًا بلا حد مع تدريب موجّه، وكل البطاقات والمفردات والتقنيات، والخطة كاملة حتى موعد اختبارك، والتكرار المتباعد وتحليل أسباب الأخطاء، والدرجة التقديرية، ومراجعة أي محاولة سابقة. ينتهي الاشتراك بانتهاء مدته، دون تجديد تلقائي.</p></div></details>
+      <details class="lp-q"><summary data-i="q4">ما طرق الدفع المتاحة؟</summary><div class="lp-a" data-i="a4"><p>يتم الدفع عبر بوابة <bdi>Tap</bdi> الآمنة، وتقبل: مدى، و <bdi>Apple Pay</bdi>، و <bdi>STC Pay</bdi>، وبطاقات <bdi>Visa</bdi> و <bdi>Mastercard</bdi>. لا تُحفظ بيانات بطاقتك لدينا.</p></div></details>
+      <details class="lp-q"><summary data-i="q5">هل يمكنني استرداد المبلغ؟</summary><div class="lp-a" id="lp-a5" data-i="a5"><p>نعم. نقدم ضمان استرداد كامل خلال مدة محددة من بدء الاشتراك، تظهر في قسم الأسعار. إن لم تناسبك المنصة خلال هذه المدة، يُعاد إليك المبلغ كاملًا إلى وسيلة الدفع نفسها.</p></div></details>
+      <details class="lp-q"><summary data-i="q6">هل المنصة بالعربية والإنجليزية؟</summary><div class="lp-a" data-i="a6"><p>نعم. الواجهة والأسئلة والشروحات المسموعة متاحة بالعربية وبالإنجليزية، فتتدرب بلغة اختبارك، وتبدّل اللغة في أي وقت بضغطة واحدة.</p></div></details>
+      <details class="lp-q"><summary data-i="q7">هل تعمل على الجوال؟</summary><div class="lp-a" data-i="a7"><p>نعم. المنصة تعمل من متصفح الجوال أو الجهاز اللوحي أو الحاسوب بلا تثبيت، والتصميم مهيأ للشاشات الصغيرة. وعند التسجيل يُحفظ تقدمك في حسابك ليتبعك على أي جهاز.</p></div></details>
+      <details class="lp-q"><summary data-i="q8">هل بياناتي محفوظة وخاصة؟</summary><div class="lp-a" data-i="a8"><p>نحفظ فقط بريدك الإلكتروني واسمك وتقدمك في التدريب (ومعه مسارك ودرجتك المستهدفة وموعد اختبارك إن أدخلتها)، لغرض متابعة تحضيرك فقط. لا نطلب رقم جوال ولا هوية، ويمكنك حذف حسابك وكل بياناتك في أي وقت من صفحة الحساب.</p></div></details>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FINAL CTA ================= -->
+<section class="lp-sec lp-final" aria-labelledby="final-h">
+  <div class="lp-wrap">
+    <div class="lp-band">
+      <div class="lp-band-txt">
+        <p class="lp-eyebrow" data-i="finEyebrow">خمس دقائق تكفي للبداية</p>
+        <h2 id="final-h" data-i="finH">اعرف مستواك اليوم، وابدأ خطتك من الغد.</h2>
+        <p data-i="finP">ابدأ بالاختبار التشخيصي مجانًا، وشاهد بعده الشرح المناسب لأضعف مهاراتك.</p>
+      </div>
+      <div class="lp-band-cta">
+        <a class="btn sand xl" href="/app" data-app="" data-i="startFree">ابدأ مجانًا</a>
+        <a class="lp-band-link" href="/app#guide" data-app="#guide" data-i="readGuide">اقرأ دليل الاختبار</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="lp-foot">
+  <div class="lp-wrap lp-foot-in">
+    <div class="lp-foot-brand">
+      <a class="lp-brand" href="/"><span class="logo" aria-hidden="true">GAT</span><span class="lp-brand-t"><b data-i="brand">أكاديمية القدرات</b><small>GAT Academy</small></span></a>
+      <p class="lp-foot-d" data-i="footD">حقيبة متكاملة للتحضير لاختبار القدرات العامة باللغتين العربية والإنجليزية.</p>
+    </div>
+    <nav class="lp-foot-nav" aria-label="روابط" data-i-aria="footAria">
+      <a href="/app" data-app="" data-i="footApp">ادخل المنصة</a>
+      <a href="/app#guide" data-app="#guide" data-i="footGuide">دليل الاختبار</a>
+      <a href="#pricing" data-i="navPricing">الأسعار</a>
+      <a href="#faq" data-i="navFaq">الأسئلة</a>
+    </nav>
+  </div>
+  <div class="lp-wrap lp-foot-b">
+    <p>© <span id="lp-year">2026</span> <span data-i="brandFoot">أكاديمية القدرات · GAT Academy</span></p>
+    <p class="lp-disc" data-i="disc">منصة تعليمية مستقلة، غير تابعة للمركز الوطني للقياس (قياس) ولا لهيئة تقويم التعليم والتدريب.</p>
+  </div>
+</footer>
+
+<script src="/vendor/gsap.min.js" defer></script>
+<script src="/xp-engine.js" defer></script>
+<script src="/xp/free.js" defer></script>
 </body>
 </html>

@@ -14,7 +14,7 @@ async function send({ to, subject, html, text }) {
   return r.json();
 }
 // Ask Resend for the domain's state, request (re)verification if needed, and log each DNS record's status.
-let lastDiag = 0;
+let lastDiag = 0, verified = false;
 async function diagnose(reason) {
   if (!process.env.RESEND_API_KEY || Date.now() - lastDiag < 10 * 60e3) return; lastDiag = Date.now();
   const H = { Authorization: "Bearer " + process.env.RESEND_API_KEY };
@@ -26,6 +26,7 @@ async function diagnose(reason) {
       const full = await (await fetch("https://api.resend.com/domains/" + d.id, { headers: H })).json();
       console.log(`[mail] Resend domain ${d.name} status=${d.status} region=${d.region || full.region || "?"} (${reason})`);
       (full.records || []).forEach(r => console.log(`[mail]   ${r.record} ${r.type} ${r.name} -> ${String(r.value).slice(0, 70)} : ${r.status}`));
+      if (d.status === "verified") verified = true;
       if (d.status !== "verified") { const v = await fetch("https://api.resend.com/domains/" + d.id + "/verify", { method: "POST", headers: H }); console.log("[mail] verification requested:", v.status); }
     }
   } catch (e) { console.error("[mail] diagnose failed", e.message); }
@@ -47,3 +48,5 @@ function sendReset({ to, name, link, minutes, lang }) {
 }
 module.exports = { configured, send, sendReset, diagnose };
 setTimeout(() => diagnose("startup"), 5000).unref();
+// until Resend reports the domain verified, re-check every 10 minutes so the log shows when sending starts to work
+const recheck = setInterval(() => { if (verified) return clearInterval(recheck); diagnose("recheck"); }, 10 * 60e3 + 5e3); recheck.unref();

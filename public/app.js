@@ -307,12 +307,12 @@ function closeExam() { stopAudio(); clearInterval(EX && EX.timer); EX = null; co
 function renderStart() {
   const sp = EX.spec, L = sp.sections.some(s => s.skill === 'L'), Rd = sp.sections.some(s => s.skill === 'R');
   const nq = EX.secs.reduce((a, s) => a + s.data.groups.reduce((b, g) => b + (g.to - g.from + 1), 0), 0);
-  $('#exam').innerHTML = `<div class="ex-top"><span class="cand">IELTS Academy · ${esc(sp.title)}</span><button id="ex-x">${_('خروج', 'Exit')}</button></div>
-  <div class="ex-start"><h2>${esc(sp.title)}</h2>
+  $('#exam').innerHTML = `<div class="ex-top"><span class="cand"><span class="ex-logo">IELTS</span>${esc(sp.title)}</span><button id="ex-x">${_('خروج', 'Exit')}</button></div>
+  <div class="ex-start"><span class="eyebrow">IELTS Academy</span><h2>${esc(sp.title)}</h2>
   <ul><li>${nq} questions${Rd && sp.time ? ` · ${Math.round(sp.time / 60)} minutes` : ''}</li>${L ? `<li>${EX.mode === 'exam' ? 'You will hear each recording ONCE only. The test continues automatically.' : 'Practice mode: you can pause and replay the recording.'}</li>` : ''}<li>Answers are saved automatically. Use the bar at the bottom to move between questions and flag any you want to check.</li></ul>
   <div class="rtl" dir="rtl">${L ? (EX.mode === 'exam' ? 'وضع الاختبار الحقيقي: ستسمع التسجيل مرة واحدة فقط كما في الاختبار المحوسب. ' : 'وضع التدريب: يمكنك إيقاف التسجيل وإعادته. ') + 'شغّل السماعات وتأكد من مستوى الصوت. ' : ''}${Rd ? 'يمكنك تظليل أي جزء من النص بتحديده، والضغط على التظليل يزيله. ' : ''}بعد الانتهاء ترى درجتك وشرح كل إجابة بالعربية مع موضع الدليل.</div>
-  ${L ? `<div class="ex-audio"><button id="ex-test-snd" style="font:inherit;border:1px solid #999;border-radius:4px;padding:6px 12px;background:#fff;cursor:pointer">🔊 ${_('اختبر الصوت', 'Test sound')}</button> <label>Volume <input type="range" class="vol" id="ex-vol0" min="0" max="1" step="0.05" value="${S.vol ?? 0.9}"></label></div>` : ''}
-  <button class="go" id="ex-go">Start test</button></div>`;
+  ${L ? `<div class="ex-audio"><button id="ex-test-snd" class="btn sm ghost">🔊 ${_('اختبر الصوت', 'Test sound')}</button> <label class="vol-l">Volume <input type="range" class="vol" id="ex-vol0" min="0" max="1" step="0.05" value="${S.vol ?? 0.9}"></label></div>` : ''}
+  <button class="btn primary go" id="ex-go">Start test →</button></div>`;
   $('#ex-x').onclick = () => closeExam();
   const ts = $('#ex-test-snd'); if (ts) ts.onclick = () => { const a = new Audio('/audio/sp/p2stop.mp3'); a.volume = +($('#ex-vol0').value); a.play().catch(() => toast(_('تعذّر تشغيل الصوت', 'Audio could not play'))); };
   const v0 = $('#ex-vol0'); if (v0) v0.oninput = () => { S.vol = +v0.value; };
@@ -364,8 +364,8 @@ function renderExam(keepScroll) {
   const partLabel = sec.skill === 'L' ? `Part ${sec.data.part}` : `${sec.data.section ? 'Section ' + sec.data.section + ' · ' : ''}Reading Passage ${sec.pn}`;
   const audioUI = sec.skill === 'L' && !R ? `<span class="ex-audio">${EX.mode === 'practice' || EX.needTap ? `<button id="ex-pp">${EX.audioEl && !EX.audioEl.paused ? '❚❚' : '▶'}</button>` : ''}<span class="prog" id="ex-prog"><i></i></span><label>🔊 <input type="range" class="vol" id="ex-vol" min="0" max="1" step="0.05" value="${S.vol ?? .9}"></label></span>` : '';
   const passage = sec.skill === 'R' ? passageHTML(sec) : '';
-  const transcript = sec.skill === 'L' && R ? `<details class="qg" open><summary style="cursor:pointer;font-weight:700">Transcript · ${_('النص المسموع', 'what you heard')}</summary><div class="tscript" id="tscript">${sec.data.script.map((l, i) => l.t ? `<p data-li="${i}"><span class="sp">${esc(sec.data.speakers[l.s].name)}:</span>${esc(l.t)} <button data-ev-line="${sec.pi}:${i}" style="font-size:.75rem;border:1px solid #ccc;background:#fff;border-radius:3px;cursor:pointer">▶</button></p>` : l.break ? '<p style="color:#888">— — —</p>' : '').join('')}</div></details>` : '';
-  ex.innerHTML = `<div class="ex-top"><span class="cand">${esc(EX.spec.title)}${R ? ' · REVIEW' : ''}</span>
+  const transcript = sec.skill === 'L' && R ? `<details class="qg" open><summary style="cursor:pointer;font-weight:700">Transcript · ${_('النص المسموع', 'what you heard')}</summary><div class="tscript" id="tscript">${sec.data.script.map((l, i) => l.t ? `<p data-li="${i}"><span class="sp">${esc(sec.data.speakers[l.s].name)}:</span>${esc(l.t)} <button data-ev-line="${sec.pi}:${i}" class="ts-play">▶</button></p>` : l.break ? '<p class="muted">— — —</p>' : '').join('')}</div></details>` : '';
+  ex.innerHTML = `<div class="ex-top"><span class="cand"><span class="ex-logo">IELTS</span>${esc(EX.spec.title)}${R ? ' · REVIEW' : ''}</span>
     <span class="clock" id="ex-clock">${R ? '' : '⏱ <span></span>'}</span>${audioUI}
     <button id="ex-help" title="Arabic help">${S.helpAr !== false ? 'ع ✓' : 'ع'}</button><button id="ex-big" title="Text size">A+</button><button id="ex-con" title="Contrast">◐</button><button id="ex-x">${R ? _('إغلاق', 'Close') : _('خروج', 'Exit')}</button></div>
   <div class="ex-part"><b>${partLabel}</b>${sec.skill === 'L' ? esc(sec.data.intro) + ' ' : ''}Questions ${range}${sec.skill === 'R' ? ` · ${_('اقرأ النص وأجب عن الأسئلة', 'Read the text and answer the questions')}` : ''}</div>
@@ -373,7 +373,7 @@ function renderExam(keepScroll) {
   <div class="ex-body ${sec.skill === 'R' ? 'split' : ''}${EX.showQ ? ' show-q' : ''}">
     ${sec.skill === 'R' ? `<div class="ex-pane passage" id="ex-passage">${passage}</div><div class="ex-pane questions">` : '<div class="ex-pane full">'}
       ${sec.data.groups.map(g => groupHTML(g, sec)).join('')}${transcript}
-      ${R ? `<div style="padding:10px 0 30px"><button class="nb" id="ex-back-res" style="font:inherit;border:1px solid #888;border-radius:4px;padding:8px 14px;background:#fff;cursor:pointer">← ${_('ملخص النتيجة', 'Result summary')}</button></div>` : ''}
+      ${R ? `<div style="padding:10px 0 30px"><button class="btn sm" id="ex-back-res">← ${_('ملخص النتيجة', 'Result summary')}</button></div>` : ''}
     </div></div>
   <div class="ex-nav">${navHTML()}<div class="acts">${R ? '' : `<button id="ex-flag">⚑ Review</button>`}${EX.cur > 0 ? '<button id="ex-prev">◀</button>' : ''}${EX.cur < EX.secs.length - 1 && (R || EX.secs[EX.cur + 1].skill === sec.skill || EX.mode === 'practice') ? '<button id="ex-next">▶</button>' : ''}${R ? '' : '<button class="go" id="ex-submit">Submit</button>'}</div></div>`;
   bindExam();
@@ -517,11 +517,11 @@ function renderResult() {
   const rows = Object.entries(r.qt).sort((a, b) => a[1].c / a[1].t - b[1].c / b[1].t).map(([k, v]) => `<tr><td>${skName(k[0])}</td><td>${esc(qtName(k.slice(2)))}</td><td>${v.c}/${v.t}</td><td>${Math.round(100 * v.c / v.t)}%</td></tr>`).join('');
   const worst = Object.entries(r.qt).filter(([, v]) => v.t >= 2).sort((a, b) => a[1].c / a[1].t - b[1].c / b[1].t)[0];
   const lessonFor = worst ? examSkill(worst[0][0], worst[0].slice(2)) : null, lsk = lessonFor && (typeof SKL !== 'undefined' && SKL || []).find(x => x.id === lessonFor);
-  ex.innerHTML = `<div class="ex-top"><span class="cand">${esc(EX.spec.title)} · RESULT</span><span class="clock"></span><button id="ex-x">${_('إغلاق', 'Close')}</button></div>
+  ex.innerHTML = `<div class="ex-top"><span class="cand"><span class="ex-logo">IELTS</span>${esc(EX.spec.title)} · RESULT</span><span class="clock"></span><button id="ex-x">${_('إغلاق', 'Close')}</button></div>
   <div class="ex-pane full" style="overflow:auto"><div class="result-top">
-    <div style="display:flex;gap:30px;flex-wrap:wrap;justify-content:center">${r.made.map(a => `<div><div style="font-size:.85rem;color:#555">${skName(a.skill)}${a.full ? '' : ' · ' + _('تقدير', 'estimate')}</div><div class="big">${fmtBand(a.band)}</div><div>${a.raw} / ${a.of} ${_('صحيحة', 'correct')}</div></div>`).join('')}</div>
+    <div style="display:flex;gap:30px;flex-wrap:wrap;justify-content:center">${r.made.map(a => `<div><div class="small muted">${skName(a.skill)}${a.full ? '' : ' · ' + _('تقدير', 'estimate')}</div><div class="big">${fmtBand(a.band)}</div><div>${a.raw} / ${a.of} ${_('صحيحة', 'correct')}</div></div>`).join('')}</div>
     <div dir="${AR() ? 'rtl' : 'ltr'}" style="font-family:var(--f-body);max-width:560px">${r.made.some(a => !a.full) ? _('هذه درجة تقديرية لأنك أجبت عن جزء من الاختبار؛ الاختبار الكامل (٤٠ سؤالًا) يعطي درجة أدق.', 'This is an estimate because you answered part of a test; a full 40-question test gives a more reliable band.') + ' ' : ''}${worst ? _(`أضعف نوع أسئلة في هذه المحاولة: «${qtName(worst[0].slice(2))}». `, `Your weakest question type this time: “${qtName(worst[0].slice(2))}”. `) : ''}${_('أُضيفت أخطاؤك إلى صندوق الأخطاء لمراجعتها لاحقًا.', 'Your mistakes have been added to your mistake box for spaced review.')}</div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center"><button class="go" id="rv-go" style="font:inherit;font-weight:700;background:#1f5fa8;color:#fff;border:0;border-radius:4px;padding:10px 18px;cursor:pointer">${_('راجع الإجابات مع الشرح', 'Review answers with explanations')}</button>${lessonFor ? `<button id="rv-lesson" style="font:inherit;border:1px solid #888;background:#fff;border-radius:4px;padding:10px 18px;cursor:pointer">${_('ادرس المهارة', 'Study the skill')}${lsk ? ': ' + esc(L(lsk.title)) : ''}</button><button id="rv-drill" style="font:inherit;border:1px solid #888;background:#fff;border-radius:4px;padding:10px 18px;cursor:pointer">${_('تدرّب عليها: ١٠ أسئلة مع تلميحات', 'Drill it: 10 questions with hints')}</button>` : ''}</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center"><button class="btn primary" id="rv-go">${_('راجع الإجابات مع الشرح', 'Review answers with explanations')}</button>${lessonFor ? `<button class="btn" id="rv-lesson">${_('ادرس المهارة', 'Study the skill')}${lsk ? ': ' + esc(L(lsk.title)) : ''}</button><button class="btn teal" id="rv-drill">${_('تدرّب عليها: ١٠ أسئلة مع تلميحات', 'Drill it: 10 questions with hints')}</button>` : ''}</div>
     ${rows ? `<table class="qt-table"><tr><th>${_('المهارة', 'Skill')}</th><th>${_('نوع السؤال', 'Question type')}</th><th>${_('النتيجة', 'Score')}</th><th>%</th></tr>${rows}</table>` : ''}
   </div></div>`;
   ex.querySelector('#ex-x').onclick = () => closeExam();

@@ -570,3 +570,23 @@ body.xp-open{overflow:hidden}
 .xpc .xp-alt{font-size:.78rem;font-weight:700;color:var(--teal-t);justify-self:start;border-radius:8px;padding:2px 0;cursor:pointer}
 .xpc .xp-alt:hover{text-decoration:underline}
 @media (max-width:520px){.ex-top{gap:6px;padding:6px 10px}.ex-top button{padding:3px 8px;min-height:30px;font-size:.78rem}.ex-top .cand{font-size:.8rem}.ex-logo{inline-size:26px;block-size:26px;font-size:6.5px}}
+/* placement: writing + speaking stages */
+.pl{display:grid;gap:14px;align-content:start;padding-bottom:40px}
+.pl-steps{display:flex;gap:6px;flex-wrap:wrap}
+.pl-st{display:inline-flex;align-items:center;gap:6px;font-family:var(--f-head);font-size:.8rem;font-weight:600;color:var(--muted);padding:3px 10px 3px 4px;border-radius:99px;border:1.5px solid var(--ex-line);background:var(--ex-card)}
+.pl-st i{font-style:normal;inline-size:20px;block-size:20px;border-radius:50%;display:grid;place-items:center;background:var(--ex-soft);font-size:.72rem}
+.pl-st.done{color:var(--ok-t)} .pl-st.done i{background:var(--ok-soft)}
+.pl-st.on{color:var(--ink);border-color:var(--pri)} .pl-st.on i{background:var(--pri);color:var(--pri-ink)}
+.pl-ar{direction:rtl;text-align:right;font-family:var(--f-body);background:var(--teal-soft);border-radius:12px;padding:12px 14px;line-height:1.75}
+.pl-prompt{font-weight:600;line-height:1.7}
+.pl-ed{font:inherit;font-size:1rem;line-height:1.7;inline-size:100%;min-block-size:260px;resize:vertical;border:1.5px solid var(--ink2);border-radius:12px;padding:12px 14px;background:var(--ex-card);color:var(--ink)}
+.pl-ed:focus{outline:2px solid var(--ex-acc);outline-offset:1px}
+.pl-bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.pl-wc{font-family:var(--f-head);font-weight:600}
+.pl-sp{display:grid;gap:14px}
+.pl-act{display:grid;gap:10px;justify-items:center;text-align:center;padding:6px 0}
+.pl-act .transcript{inline-size:100%;text-align:left}
+.pl-can{display:grid;gap:10px}
+.pl-ov{display:grid;justify-items:center;gap:2px;padding:12px 26px;border:2px solid var(--edge);border-radius:var(--r);box-shadow:var(--pop);background:var(--pri-soft)}
+.pl-ov .big{font-size:3.4rem}
+.pl-notes{display:grid;gap:8px;max-width:620px;text-align:start;width:100%}

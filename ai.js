@@ -27,6 +27,15 @@ Reply with ONLY a JSON object, no markdown:
  "next":{"ar":"...","en":"..."},
  "upgrade":"the same answer as a band-8 speaker would say it, natural spoken English, similar length"}`;
 
+
+const PLACE_SYS = `You are a certified IELTS examiner giving a quick PLACEMENT estimate for a new Arabic-speaking learner. Be calibrated and do not inflate.
+WRITING: a short opinion response to a Task-2-style question (target 120+ words, 15 minutes). Mark TA, CC, LR, GRA as you would Task 2, but judge length against 120 words, not 250 (under 120 words: TA max 5; under 80: TA max 4).
+SPEAKING: speech-recognition transcripts (ignore punctuation and minor recognition errors) of short answers to Part 1 and Part 3 questions, with durations. Mark FC, LR, GRA and estimate P from clues only. Very short answers cannot score above 5 for fluency.
+If a section is not provided, return null for it.
+Reply with ONLY a JSON object, no markdown:
+{"W":{"bands":{"TA":6,"CC":6,"LR":6,"GRA":5.5},"summary":{"ar":"one or two sentences in simple Arabic","en":"..."},"next":{"ar":"the single most useful thing to work on","en":"..."}},
+ "S":{"bands":{"FC":6,"LR":6,"GRA":5.5,"P":6},"summary":{"ar":"...","en":"..."},"next":{"ar":"...","en":"..."}}}`;
+
 function extractJSON(t) {
   const s = String(t || ""); const a = s.indexOf("{"), b = s.lastIndexOf("}");
   if (a < 0 || b <= a) throw new Error("no json");
@@ -111,5 +120,28 @@ ${essay}`;
     catch (e) { console.error("ai speaking", e.message); return fail(res, 502, "ai-failed"); }
     await pool.query("INSERT INTO events(user_id,type,k,v) VALUES($1,'ai_speaking',$2,$3)", [req.user.id, "p" + part, out.overall]);
     res.json({ result: out, left: q.left });
+  }));
+
+  // placement test: writing + speaking marked together; one free marking per learner, separate from the free AI marking
+  app.post("/api/ai/placement", needUser, wrap(async (req, res) => {
+    if (!process.env.ANTHROPIC_API_KEY) return fail(res, 503, "ai-not-configured");
+    if (limited("aip:" + req.user.id, 6, 3600e3)) return fail(res, 429, "too-many-requests");
+    const plan = await C.planOf(req.user);
+    if (plan.source !== "admin") {
+      const pro = plan.tier === "pro";
+      const n = (await pool.query(`SELECT count(*)::int n FROM events WHERE user_id=$1 AND type='ai_placement'${pro ? " AND day=CURRENT_DATE" : ""}`, [req.user.id])).rows[0].n;
+      if (n >= (pro ? 3 : 1)) return fail(res, 402, pro ? "ai-daily-limit" : "ai-free-limit");
+    }
+    const b = req.body || {}, w = b.writing && words(b.writing.essay) >= 30 ? { prompt: clip(b.writing.prompt, 1500), essay: clip(b.writing.essay, 4000) } : null;
+    const sp = (Array.isArray(b.speaking) ? b.speaking : []).slice(0, 5).map(x => ({ part: [1, 2, 3].includes(Number(x.part)) ? Number(x.part) : 1, q: clip(x.question, 300), t: clip(x.transcript, 2000), s: Math.max(0, Math.min(300, Number(x.seconds) || 0)) })).filter(x => words(x.t) >= 3);
+    if (!w && !sp.length) return fail(res, 400, "too-short");
+    const user = `${w ? `WRITING\nQUESTION:\n${w.prompt}\nANSWER (${words(w.essay)} words):\n${w.essay}\n\n` : "WRITING: not provided\n\n"}${sp.length ? "SPEAKING\n" + sp.map((x, i) => `${i + 1}. Part ${x.part} question: ${x.q}\nDuration: ${Math.round(x.s)} seconds\nTranscript (${words(x.t)} words): ${x.t}`).join("\n\n") : "SPEAKING: not provided"}`;
+    let o;
+    try { o = extractJSON(await claude(PLACE_SYS, user, 1500)); }
+    catch (e) { console.error("ai placement", e.message); return fail(res, 502, "ai-failed"); }
+    const part = (x, keys) => { if (!x || !x.bands) return null; const c = clean(x, keys); return { bands: c.bands, overall: c.overall, summary: c.summary, next: c.next }; };
+    const out = { W: w ? part(o.W, ["TA", "CC", "LR", "GRA"]) : null, S: sp.length ? part(o.S, ["FC", "LR", "GRA", "P"]) : null };
+    await pool.query("INSERT INTO events(user_id,type,k,v) VALUES($1,'ai_placement',$2,$3)", [req.user.id, (out.W ? "W" : "") + (out.S ? "S" : ""), out.W ? out.W.overall : out.S && out.S.overall]);
+    res.json({ result: out });
   }));
 };

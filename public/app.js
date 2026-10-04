@@ -309,8 +309,8 @@ function renderStart() {
   const nq = EX.secs.reduce((a, s) => a + s.data.groups.reduce((b, g) => b + (g.to - g.from + 1), 0), 0);
   $('#exam').innerHTML = `<div class="ex-top"><span class="cand"><span class="ex-logo">IELTS</span>${esc(sp.title)}</span><button id="ex-x">${_('خروج', 'Exit')}</button></div>
   <div class="ex-start"><span class="eyebrow">IELTS Academy</span><h2>${esc(sp.title)}</h2>
-  <ul><li>${nq} questions${Rd && sp.time ? ` · ${Math.round(sp.time / 60)} minutes` : ''}</li>${L ? `<li>${EX.mode === 'exam' ? 'You will hear each recording ONCE only. The test continues automatically.' : 'Practice mode: you can pause and replay the recording.'}</li>` : ''}<li>Answers are saved automatically. Use the bar at the bottom to move between questions and flag any you want to check.</li></ul>
-  <div class="rtl" dir="rtl">${L ? (EX.mode === 'exam' ? 'وضع الاختبار الحقيقي: ستسمع التسجيل مرة واحدة فقط كما في الاختبار المحوسب. ' : 'وضع التدريب: يمكنك إيقاف التسجيل وإعادته. ') + 'شغّل السماعات وتأكد من مستوى الصوت. ' : ''}${Rd ? 'يمكنك تظليل أي جزء من النص بتحديده، والضغط على التظليل يزيله. ' : ''}بعد الانتهاء ترى درجتك وشرح كل إجابة بالعربية مع موضع الدليل.</div>
+  <ul>${sp.full4 ? `<li><b>4 parts:</b> Listening and Reading (${nq} questions), then a short Writing task (15 minutes) and 3 Speaking questions. About 55 minutes in total.</li><li>Speaking needs a microphone. If you cannot speak, you can describe your level instead.</li>` : `<li>${nq} questions${Rd && sp.time ? ` · ${Math.round(sp.time / 60)} minutes` : ''}</li>`}${L ? `<li>${EX.mode === 'exam' ? 'You will hear each recording ONCE only. The test continues automatically.' : 'Practice mode: you can pause and replay the recording.'}</li>` : ''}<li>Answers are saved automatically. Use the bar at the bottom to move between questions and flag any you want to check.</li></ul>
+  <div class="rtl" dir="rtl">${L ? (EX.mode === 'exam' ? 'وضع الاختبار الحقيقي: ستسمع التسجيل مرة واحدة فقط كما في الاختبار المحوسب. ' : 'وضع التدريب: يمكنك إيقاف التسجيل وإعادته. ') + 'شغّل السماعات وتأكد من مستوى الصوت. ' : ''}${Rd ? 'يمكنك تظليل أي جزء من النص بتحديده، والضغط على التظليل يزيله. ' : ''}${sp.full4 ? 'يقيس الاختبار المهارات الأربع: الاستماع ثم القراءة، ثم كتابة قصيرة، ثم ٣ أسئلة محادثة. ' : ''}بعد الانتهاء ترى درجتك في كل مهارة وشرح كل إجابة بالعربية مع موضع الدليل.</div>
   ${L ? `<div class="ex-audio"><button id="ex-test-snd" class="btn sm ghost">🔊 ${_('اختبر الصوت', 'Test sound')}</button> <label class="vol-l">Volume <input type="range" class="vol" id="ex-vol0" min="0" max="1" step="0.05" value="${S.vol ?? 0.9}"></label></div>` : ''}
   <button class="btn primary go" id="ex-go">Start test →</button></div>`;
   $('#ex-x').onclick = () => closeExam();
@@ -509,6 +509,7 @@ function finishTest(auto) {
   markDay(); save();
   EX.result = { bySkill, qt, made };
   made.forEach(a => track(sp.kind === 'diag' ? 'diag_done' : 'test_done', a.skill + ':' + a.test, a.band));
+  if (sp.kind === 'diag' && sp.full4) return placeStart();
   renderResult();
 }
 function renderResult() {
@@ -519,8 +520,8 @@ function renderResult() {
   const lessonFor = worst ? examSkill(worst[0][0], worst[0].slice(2)) : null, lsk = lessonFor && (typeof SKL !== 'undefined' && SKL || []).find(x => x.id === lessonFor);
   ex.innerHTML = `<div class="ex-top"><span class="cand"><span class="ex-logo">IELTS</span>${esc(EX.spec.title)} · RESULT</span><span class="clock"></span><button id="ex-x">${_('إغلاق', 'Close')}</button></div>
   <div class="ex-pane full" style="overflow:auto"><div class="result-top">
-    <div style="display:flex;gap:30px;flex-wrap:wrap;justify-content:center">${r.made.map(a => `<div><div class="small muted">${skName(a.skill)}${a.full ? '' : ' · ' + _('تقدير', 'estimate')}</div><div class="big">${fmtBand(a.band)}</div><div>${a.raw} / ${a.of} ${_('صحيحة', 'correct')}</div></div>`).join('')}</div>
-    <div dir="${AR() ? 'rtl' : 'ltr'}" style="font-family:var(--f-body);max-width:560px">${r.made.some(a => !a.full) ? _('هذه درجة تقديرية لأنك أجبت عن جزء من الاختبار؛ الاختبار الكامل (٤٠ سؤالًا) يعطي درجة أدق.', 'This is an estimate because you answered part of a test; a full 40-question test gives a more reliable band.') + ' ' : ''}${worst ? _(`أضعف نوع أسئلة في هذه المحاولة: «${qtName(worst[0].slice(2))}». `, `Your weakest question type this time: “${qtName(worst[0].slice(2))}”. `) : ''}${_('أُضيفت أخطاؤك إلى صندوق الأخطاء لمراجعتها لاحقًا.', 'Your mistakes have been added to your mistake box for spaced review.')}</div>
+    ${placeOverallHTML(r.made)}<div style="display:flex;gap:30px;flex-wrap:wrap;justify-content:center">${r.made.map(a => `<div><div class="small muted">${skName(a.skill)}${a.full ? '' : ' · ' + _('تقدير', 'estimate')}</div><div class="big">${fmtBand(a.band)}</div><div class="small">${a.raw == null ? (a.ai ? _('بالمصحح الذكي', 'AI examiner') : a.self ? _('وصف ذاتي', 'self-rating') : _('تقدير آلي', 'auto estimate')) : `${a.raw} / ${a.of} ${_('صحيحة', 'correct')}`}</div></div>`).join('')}</div>
+    <div dir="${AR() ? 'rtl' : 'ltr'}" style="font-family:var(--f-body);max-width:560px">${EX.spec.full4 ? _('هذا مستواك المبدئي في المهارات الأربع. درجتا الكتابة والمحادثة تقديريتان من مهمة قصيرة، وتتضحان أكثر مع تدريبك. ', 'This is your starting level in all four skills. Writing and speaking are estimates from short tasks and become more accurate as you practise. ') : r.made.some(a => !a.full) ? _('هذه درجة تقديرية لأنك أجبت عن جزء من الاختبار؛ الاختبار الكامل (٤٠ سؤالًا) يعطي درجة أدق.', 'This is an estimate because you answered part of a test; a full 40-question test gives a more reliable band.') + ' ' : ''}${worst ? _(`أضعف نوع أسئلة في هذه المحاولة: «${qtName(worst[0].slice(2))}». `, `Your weakest question type this time: “${qtName(worst[0].slice(2))}”. `) : ''}${_('أُضيفت أخطاؤك إلى صندوق الأخطاء لمراجعتها لاحقًا.', 'Your mistakes have been added to your mistake box for spaced review.')}</div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center"><button class="btn primary" id="rv-go">${_('راجع الإجابات مع الشرح', 'Review answers with explanations')}</button>${lessonFor ? `<button class="btn" id="rv-lesson">${_('ادرس المهارة', 'Study the skill')}${lsk ? ': ' + esc(L(lsk.title)) : ''}</button><button class="btn teal" id="rv-drill">${_('تدرّب عليها: ١٠ أسئلة مع تلميحات', 'Drill it: 10 questions with hints')}</button>` : ''}</div>
     ${rows ? `<table class="qt-table"><tr><th>${_('المهارة', 'Skill')}</th><th>${_('نوع السؤال', 'Question type')}</th><th>${_('النتيجة', 'Score')}</th><th>%</th></tr>${rows}</table>` : ''}
   </div></div>`;
@@ -538,6 +539,191 @@ async function reviewAttempt(id) {
   EX.ans = d.ans; EX.started = true;
   const res = {}; for (const s of EX.secs) for (const g of s.data.groups) scoreGroup(g, EX.ans, s.key).forEach(r => { res[s.key + ':' + r.n] = r; if (g.type === 'mcq2') res[s.key + ':g' + g.from + ':' + r.n] = r; });
   EX.res = res; EX.review = true; EX.result = { qt: {}, made: [a] }; EX.cur = Math.max(0, EX.secs.findIndex(s => s.skill === a.skill)); renderExam();
+}
+/* ============ Placement test: writing + speaking stages ============
+   After listening and reading are scored, the placement test continues inside the exam room with
+   a short writing task (15 min, 120+ words) and three spoken questions (examiner audio, speech recognition).
+   Marked by the AI examiner when available (one free placement marking), otherwise estimated on the device. */
+const PL_W = { prompt: 'Some people think that young people should spend a year working or travelling before they start university. Do you agree or disagree?\n\nGive reasons for your answer and include any relevant examples from your own knowledge or experience.', min: 120, secs: 900 };
+const PL_S = [
+  { part: 1, clip: 'S1-01-t', text: 'Let’s talk about your hometown.', info: true },
+  { part: 1, clip: 'S1-01-q0', text: 'Where is your hometown?', max: 35 },
+  { part: 1, clip: 'S1-01-q1', text: 'What do you like most about it?', max: 45 },
+  { part: 3, clip: 'S2-01-p3q2', text: 'Is it better to learn in a classroom or online?', max: 75 }
+];
+const PL_CAN = [
+  [4, 'أفهم الأسئلة البسيطة، وأجيب بكلمات أو جمل قصيرة جدًا.', 'I understand simple questions and answer with a few words or very short sentences.'],
+  [5, 'أجيب بجمل بسيطة عن نفسي، لكني أتوقف كثيرًا لأبحث عن الكلمات.', 'I answer about myself in simple sentences, but often stop to look for words.'],
+  [6, 'أتحدث عن مواضيع مألوفة دقيقة أو أكثر، مع بعض الأخطاء والتوقفات.', 'I can talk about familiar topics for a minute or more, with some errors and pauses.'],
+  [6.5, 'أناقش الآراء والأفكار العامة بطلاقة، وأخطائي قليلة.', 'I can discuss opinions and general ideas fluently with few errors.']
+];
+let PL = null;
+function plTop(clock) { return `<div class="ex-top"><span class="cand"><span class="ex-logo">IELTS</span>${esc(EX.spec.title)}</span>${clock ? `<span class="clock" id="pl-clock">⏱ <span>${fmtT(PL_W.secs)}</span></span>` : ''}<button id="ex-x">${_('خروج', 'Exit')}</button></div>`; }
+function plSteps(cur) {
+  const st = [['L', 'Listening'], ['R', 'Reading'], ['W', 'Writing'], ['S', 'Speaking']];
+  return `<div class="pl-steps" dir="ltr">${st.map(([k, n], i) => `<span class="pl-st ${i < cur ? 'done' : i === cur ? 'on' : ''}"><i>${i < cur ? '✓' : i + 1}</i>${n}</span>`).join('')}</div>`;
+}
+function plExit() {
+  $('#ex-x').onclick = () => { if (!confirm(_('إن خرجت الآن تُحفظ نتيجتا الاستماع والقراءة فقط. هل تريد الخروج؟', 'If you leave now only your listening and reading results are kept. Leave?'))) return; plCleanup(); closeExam(); };
+}
+function plCleanup() { if (!PL) return; clearInterval(PL.wt); clearInterval(PL.st); if (PL.sr) { PL.sr.onend = null; try { PL.sr.stop(); } catch (e) {} } if (PL.player) { PL.player.pause(); } }
+
+/* ---------- entry (called by finishTest for the placement test) ---------- */
+function placeStart() {
+  PL = { text: (S.notes || {})['w:placement'] || '', wleft: PL_W.secs, i: 0, ans: [], can: null };
+  track('diag_w_start'); errorsData().catch(() => {}); plWriting();
+}
+
+/* ---------- writing ---------- */
+function plWriting() {
+  const ex = $('#exam');
+  ex.innerHTML = `${plTop(true)}
+  <div class="ex-part"><b>Writing</b>Write at least ${PL_W.min} words · 15 minutes</div>
+  <div class="ex-wrap"><div class="ex-pane full pl">
+    ${plSteps(2)}
+    <div class="pl-ar" dir="rtl">${_('القسم الثالث: الكتابة. اكتب رأيك في السؤال التالي بفقرتين أو ثلاث (١٢٠ كلمة على الأقل). لا يهم الكمال؛ نريد أن نعرف مستواك الحالي. التدقيق الإملائي معطّل كما في الاختبار.', 'Part 3: Writing. Answer the question below in two or three paragraphs.')}</div>
+    <div class="qbox pl-prompt">${esc(PL_W.prompt).replace(/\n/g, '<br>')}</div>
+    <textarea class="pl-ed" id="pl-ed" spellcheck="false" autocapitalize="sentences" autocorrect="off" placeholder="Write your answer here…">${esc(PL.text)}</textarea>
+    <div class="pl-bar"><span class="pl-wc"><b id="pl-wc">0</b> words</span><span style="flex:1"></span><button class="btn ghost sm" id="pl-wskip">${_('تخطَّ الكتابة', 'Skip writing')}</button><button class="btn primary" id="pl-wnext">Continue → Speaking</button></div>
+  </div></div>`;
+  plExit();
+  const ed = $('#pl-ed'), wc = () => (ed.value.match(/[A-Za-z'’-]+/g) || []).length;
+  const upd = () => { $('#pl-wc').textContent = wc(); PL.text = ed.value; S.notes = S.notes || {}; S.notes['w:placement'] = ed.value; clearTimeout(upd._s); upd._s = setTimeout(save, 2000); };
+  ed.addEventListener('input', upd); upd(); setTimeout(() => ed.focus({ preventScroll: true }), 50);
+  const end = Date.now() + PL.wleft * 1000;
+  PL.wt = setInterval(() => { const el = $('#pl-clock span'); if (!el) return clearInterval(PL.wt); const l = Math.round((end - Date.now()) / 1000); PL.wleft = l; el.textContent = fmtT(l); $('#pl-clock').classList.toggle('low', l < 120); if (l <= 0) { clearInterval(PL.wt); toast(_('انتهى وقت الكتابة. ننتقل إلى المحادثة.', 'Writing time is over. Moving on to speaking.'), 3500); plGoSpeak(); } }, 1000);
+  $('#pl-wnext').onclick = () => { const n = wc(); if (n < 30 && !confirm(_('كتبت أقل من ٣٠ كلمة، فلن نستطيع تقدير مستواك في الكتابة. هل تريد المتابعة؟', 'You wrote under 30 words, so we cannot estimate your writing. Continue?'))) return; if (n >= 30 && n < PL_W.min && !confirm(_(`كتبت ${n} كلمة من ${PL_W.min}. النص القصير يخفض الدرجة. هل تريد المتابعة؟`, `You wrote ${n} of ${PL_W.min} words. A short answer lowers the band. Continue?`))) return; plGoSpeak(); };
+  $('#pl-wskip').onclick = () => { if (!confirm(_('تخطّي الكتابة يعني أن خطتك لن تعرف مستواك فيها. هل أنت متأكد؟', 'Skipping means your plan will not know your writing level. Are you sure?'))) return; PL.text = ''; plGoSpeak(); };
+}
+function plGoSpeak() { clearInterval(PL.wt); PL.text = ($('#pl-ed') || {}).value ?? PL.text; save(); track('diag_s_start'); plSpeak(); }
+
+/* ---------- speaking ---------- */
+function plSpeak() {
+  const ex = $('#exam');
+  if (PL.i >= PL_S.length) return placeFinish();
+  const s = PL_S[PL.i], qs = PL_S.filter(x => !x.info), k = PL_S.slice(0, PL.i).filter(x => !x.info).length;
+  ex.innerHTML = `${plTop(false)}
+  <div class="ex-part"><b>Speaking</b>Answer ${qs.length} short questions out loud · about 3 minutes</div>
+  <div class="ex-wrap"><div class="ex-pane full pl">
+    ${plSteps(3)}
+    ${PL.i <= 1 ? `<div class="pl-ar" dir="rtl">${_('القسم الرابع والأخير: المحادثة. سيطرح عليك الممتحن ٣ أسئلة. بعد سماع السؤال اضغط زر الميكروفون وأجب بصوت واضح بالإنجليزية، ثم اضغط «التالي». نحتاج إذن الميكروفون.', 'Part 4: Speaking. The examiner asks 3 questions. Tap the microphone and answer out loud.')}</div>` : ''}
+    <div class="qbox pl-sp"><div class="spread"><span class="chip teal">Part ${s.part}</span><span class="small muted">${Math.min(k + 1, qs.length)} / ${qs.length}</span></div>
+      <div class="examiner"><span class="av">EX</span><div class="say">${esc(s.text)}</div></div>
+      <div id="pl-act" class="pl-act"><p class="small muted">${_('استمع إلى السؤال…', 'Listen to the question…')}</p><button class="btn ghost sm" id="pl-replay">▶ ${_('شغّل السؤال', 'Play question')}</button></div></div>
+    <div class="pl-bar"><span style="flex:1"></span><button class="btn ghost sm" id="pl-sno">${_('لا أستطيع التحدث الآن', 'I can’t speak right now')}</button></div>
+  </div></div>`;
+  plExit();
+  $('#pl-sno').onclick = () => plCanDo();
+  const play = () => new Promise(res => { if (PL.player) PL.player.pause(); const a = new Audio('/audio/sp/' + s.clip + '.mp3'); a.volume = S.vol ?? .9; PL.player = a; a.onended = res; a.onerror = res; a.play().catch(res); });
+  $('#pl-replay').onclick = () => play().then(() => s.info ? next() : plReady(s));
+  const next = () => { PL.i++; plSpeak(); };
+  play().then(() => { if (!PL || PL_S[PL.i] !== s) return; if (s.info) return setTimeout(next, 400); plReady(s); });
+}
+function plReady(s) {
+  const act = $('#pl-act'); if (!act || act.dataset.ready) return; act.dataset.ready = '1';
+  if (!SR_API) return plCanDo(true);
+  act.innerHTML = `<button class="mic" id="pl-mic" aria-label="Record">${ic('S', 'i20')}</button><div class="timer" id="pl-t">0:00</div><p class="small muted">${_('اضغط وتحدث، ثم اضغط مرة أخرى عند الانتهاء.', 'Tap and speak, then tap again when you finish.')} (${s.max}s)</p><div class="transcript" id="pl-live" hidden></div><div class="row" style="justify-content:center"><button class="btn ghost sm" id="pl-skipq">${_('تخطَّ السؤال', 'Skip question')}</button></div>`;
+  $('#pl-mic').onclick = () => PL.rec ? plStop() : plRec(s);
+  $('#pl-skipq').onclick = () => { plStop(true); PL.i++; plSpeak(); };
+}
+function plRec(s) {
+  const r = new SR_API(); r.lang = 'en-GB'; r.continuous = true; r.interimResults = true;
+  const rec = { s, t0: Date.now(), base: '', text: '', interim: '' }; PL.rec = rec; PL.sr = r;
+  r.onresult = e => { let fin = '', int = ''; for (let i = 0; i < e.results.length; i++) { const x = e.results[i]; if (x.isFinal) fin += x[0].transcript + ' '; else int += x[0].transcript; } rec.text = rec.base + fin; rec.interim = int; const el = $('#pl-live'); if (el) { el.hidden = false; el.textContent = (rec.text + int).trim(); } };
+  r.onerror = e => { if (e.error === 'not-allowed' || e.error === 'service-not-allowed') { PL.rec = null; clearInterval(PL.st); toast(_('لم نتمكن من استخدام الميكروفون. اختر وصفًا لمستواك بدلًا من ذلك.', 'The microphone is not available. Choose a description of your level instead.'), 4500); plCanDo(true); } };
+  r.onend = () => { rec.base = rec.text; if (PL && PL.rec === rec) try { r.start(); } catch (e) {} };
+  try { r.start(); } catch (e) { return plCanDo(true); }
+  const mic = $('#pl-mic'); mic.classList.add('rec');
+  PL.st = setInterval(() => { const sec = (Date.now() - rec.t0) / 1000, el = $('#pl-t'); if (el) el.textContent = fmtT(sec); if (sec >= s.max) plStop(); }, 300);
+}
+function plStop(discard) {
+  const rec = PL && PL.rec; if (!rec) return; PL.rec = null; clearInterval(PL.st);
+  if (PL.sr) { PL.sr.onend = null; try { PL.sr.stop(); } catch (e) {} }
+  if (discard) return;
+  setTimeout(() => { // let the final result arrive
+    const secs = (Date.now() - rec.t0) / 1000, text = (rec.text + ' ' + rec.interim).trim();
+    const act = $('#pl-act'); if (!act) return;
+    const m = metrics(text, secs);
+    if (m.words < 3) { act.innerHTML = `<p class="small">${_('لم نلتقط كلامك بوضوح. اقترب من الميكروفون وتحدث بصوت أعلى.', 'We could not hear you clearly. Move closer to the microphone and speak louder.')}</p><div class="row" style="justify-content:center"><button class="btn primary sm" id="pl-again">${_('أعد المحاولة', 'Try again')}</button><button class="btn ghost sm" id="pl-skipq">${_('تخطَّ', 'Skip')}</button></div>`; $('#pl-again').onclick = () => { delete act.dataset.ready; plReady(rec.s); }; $('#pl-skipq').onclick = () => { PL.i++; plSpeak(); }; return; }
+    PL.ans.push({ part: rec.s.part, q: rec.s.text, text, secs, m });
+    act.innerHTML = `<div class="transcript">${esc(text)}</div><p class="small muted">${m.words} words · ${Math.round(secs)}s</p><div class="row" style="justify-content:center"><button class="btn ghost sm" id="pl-again">${_('أعد الإجابة', 'Answer again')}</button><button class="btn primary" id="pl-next">${PL.i + 1 >= PL_S.length ? _('أنهِ الاختبار', 'Finish the test') : _('التالي', 'Next')} →</button></div>`;
+    $('#pl-again').onclick = () => { PL.ans.pop(); delete act.dataset.ready; plReady(rec.s); };
+    $('#pl-next').onclick = () => { PL.i++; plSpeak(); };
+  }, 600);
+}
+/* no microphone / speech recognition: a short can-do self-rating keeps the placement complete */
+function plCanDo(auto) {
+  plStop(true); if (PL.player) PL.player.pause();
+  const ex = $('#exam');
+  ex.innerHTML = `${plTop(false)}
+  <div class="ex-part"><b>Speaking</b>${_('وصف ذاتي لمستوى المحادثة', 'Self-rating of your speaking')}</div>
+  <div class="ex-wrap"><div class="ex-pane full pl" dir="${AR() ? 'rtl' : 'ltr'}" style="text-align:start">
+    ${plSteps(3)}
+    <div class="pl-ar" dir="rtl">${auto ? _('متصفحك لا يدعم تحويل الكلام إلى نص، أو لم يُسمح بالميكروفون. ', 'Your browser cannot transcribe speech, or the microphone is blocked. ') : ''}${_('اختر العبارة الأقرب لحالك عندما تتحدث بالإنجليزية. هذا تقدير مبدئي، وتستطيع لاحقًا قياس محادثتك بدقة في «غرفة المحادثة».', 'Choose the statement closest to how you speak English. You can measure your speaking accurately later in the speaking room.')}</div>
+    <div class="pl-can">${PL_CAN.map((c, i) => `<button class="xl-opt" data-can="${i}"><b>${_(c[1], c[2])}</b></button>`).join('')}</div>
+  </div></div>`;
+  plExit();
+  ex.querySelectorAll('[data-can]').forEach(b => b.onclick = () => { PL.can = PL_CAN[+b.dataset.can][0]; PL.ans = []; placeFinish(); });
+}
+
+/* ---------- scoring ---------- */
+function plEstW(text) {
+  const a = analyse(text, 't2'); if (a.wc < 30) return null;
+  const cx = (text.match(/\b(because|although|though|which|while|whereas|unless|if|who|whose|since|so that|in order to)\b/gi) || []).length / Math.max(1, a.wc / 100);
+  let b = 4 + Math.min(1, a.wc / PL_W.min * .8) + (a.lexd >= .6 ? .5 : a.lexd >= .5 ? .25 : 0) + Math.min(.75, a.used.length * .25) + Math.min(.75, cx * .2) - Math.min(1.5, a.hits.length * .3);
+  if (a.wc < PL_W.min) b -= a.wc < 80 ? 1 : .5;
+  return half(Math.max(3.5, Math.min(6.5, b)));
+}
+function plEstS() {
+  if (PL.can != null) return PL.can;
+  const A = PL.ans; if (!A.length) return null;
+  const t = A.reduce((x, y) => ({ w: x.w + y.m.words, s: x.s + y.m.secs, f: x.f + y.m.fill }), { w: 0, s: 0, f: 0 }), wpm = t.s ? t.w / (t.s / 60) : 0;
+  const p3 = A.find(a => a.part === 3);
+  let b = 4 + Math.min(1.5, wpm / 80) + Math.min(1, (t.w / A.length) / 35) - Math.min(1, t.f / Math.max(1, t.w) * 20) + (p3 && p3.m.words >= 40 ? .5 : 0);
+  if (A.length < 2) b -= .5;
+  return half(Math.max(3.5, Math.min(6.5, b)));
+}
+async function placeFinish() {
+  plCleanup();
+  const ex = $('#exam'), text = (PL.text || '').trim(), wc = (text.match(/[A-Za-z'’-]+/g) || []).length;
+  ex.innerHTML = `${plTop(false)}<div class="ex-wrap"><div class="ex-start" style="text-align:center;justify-items:center"><span class="eyebrow">IELTS Academy</span><h2>${_('نحسب مستواك…', 'Working out your level…')}</h2><p class="muted" dir="${AR() ? 'rtl' : 'ltr'}">${_('نقيّم كتابتك ومحادثتك ونجمعها مع نتيجتي الاستماع والقراءة.', 'We are marking your writing and speaking and combining them with your listening and reading.')}</p><div class="meter" style="inline-size:220px"><i style="width:40%"></i></div></div></div>`;
+  $('#ex-x').onclick = () => {};
+  const cfg = window.CLOUD && CLOUD.config; let ai = null;
+  const sp = PL.ans.filter(a => a.m.words >= 3);
+  if (cfg && cfg.ai && (wc >= 30 || sp.length)) {
+    try {
+      const r = await fetch('/api/ai/placement', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Masar': '1' }, credentials: 'same-origin', body: JSON.stringify({ writing: wc >= 30 ? { prompt: PL_W.prompt, essay: text } : null, speaking: sp.map(a => ({ part: a.part, question: a.q, transcript: a.text, seconds: Math.round(a.secs) })) }) });
+      if (r.ok) ai = (await r.json()).result;
+    } catch (e) {}
+  }
+  const date = todayStr(), made = EX.result.made;
+  const wB = ai && ai.W && ai.W.overall != null ? ai.W.overall : plEstW(text);
+  if (wB != null) {
+    const id = uid(), byAI = !!(ai && ai.W && ai.W.overall != null);
+    S.writing.push({ id, pid: 'placement', task: 'diag', date, words: wc, band: wB, crit: byAI ? ai.W.bands : null, ai: byAI });
+    const a = { id, kind: 'diag', skill: 'W', test: 'placement', band: wB, raw: null, of: null, full: false, est: !byAI, ai: byAI, date, note: byAI ? ai.W : null };
+    S.attempts.push(a); made.push(a);
+  }
+  const sB = ai && ai.S && ai.S.overall != null ? ai.S.overall : plEstS();
+  if (sB != null) {
+    const id = uid(), byAI = !!(ai && ai.S && ai.S.overall != null), t = sp.reduce((x, y) => ({ w: x.w + y.m.words, s: x.s + y.m.secs }), { w: 0, s: 0 });
+    S.speaking.push({ id, part: 0, date, secs: Math.round(t.s), words: t.w, wpm: t.s ? Math.round(t.w / (t.s / 60)) : 0, band: sB, est: !byAI, ai: byAI, diag: true });
+    const a = { id, kind: 'diag', skill: 'S', test: 'placement', band: sB, raw: null, of: null, full: false, est: !byAI, ai: byAI, self: PL.can != null, date, note: byAI ? ai.S : null };
+    S.attempts.push(a); made.push(a);
+  }
+  if (S.notes) delete S.notes['w:placement'];
+  markDay(); save();
+  made.filter(a => a.skill === 'W' || a.skill === 'S').forEach(a => track('diag_done', a.skill + ':placement', a.band));
+  PL = null;
+  renderResult();
+}
+
+function placeOverallHTML(made) {
+  const last = {}; made.forEach(a => last[a.skill] = a.band);
+  const notes = made.filter(a => a.note && a.note.summary && L(a.note.summary));
+  const k4 = ['L', 'R', 'W', 'S'], all = k4.every(k => last[k] != null);
+  const ov = all ? roundOverall(k4.reduce((x, k) => x + last[k], 0) / 4) : null;
+  return `${ov != null ? `<div class="pl-ov"><span class="small muted">${_('مستواك المبدئي الكلي', 'Your overall starting band')}</span><div class="big">${fmtBand(ov)}</div></div>` : ''}${notes.length ? `<div class="pl-notes" dir="${AR() ? 'rtl' : 'ltr'}">${notes.map(a => `<div class="rv"><b>${skName(a.skill)}</b><span>${esc(L(a.note.summary))}</span>${a.note.next && L(a.note.next) ? `<span><b>${_('الخطوة التالية', 'Next step')}:</b> ${esc(L(a.note.next))}</span>` : ''}</div>`).join('')}</div>` : ''}`;
 }
 /* ============ Writing: charts, studio, error radar, AI examiner, self-assessment ============ */
 const PAL = ['#3E7CB1', '#E4572E', '#1B8A8F', '#F2B33D', '#8C5CC7', '#6B7390'];
@@ -1003,7 +1189,7 @@ async function mrRender() {
 /* ============ Pages: onboarding, today, plan, tests, lessons, progress, upgrade, account, router ============ */
 function bandOpts(sel) { const o = []; for (let b = 50; b <= 85; b += 5) o.push(`<option value="${b}" ${b === sel ? 'selected' : ''}>${numL((b / 10).toFixed(1))}</option>`); return o.join(''); }
 function pageOnboard() {
-  return `<div class="hero"><div class="grid" style="gap:12px"><span class="eyebrow" style="color:var(--gold)">${_('أهلًا بك', 'Welcome')}</span><h1>${_('لنبنِ خطتك نحو درجتك المستهدفة', 'Let’s build your plan to your target band')}</h1><p class="muted">${_('ثلاثة أسئلة فقط، ثم اختبار تحديد مستوى قصير يقيس الاستماع والقراءة، لنعرف من أين نبدأ.', 'Three quick questions, then a short placement test for Listening and Reading, so we know where to start.')}</p></div><div class="stamp lg"><b>${bandL(targetBand())}</b><small>${_('الهدف', 'target')}</small></div></div>
+  return `<div class="hero"><div class="grid" style="gap:12px"><span class="eyebrow" style="color:var(--gold)">${_('أهلًا بك', 'Welcome')}</span><h1>${_('لنبنِ خطتك نحو درجتك المستهدفة', 'Let’s build your plan to your target band')}</h1><p class="muted">${_('ثلاثة أسئلة فقط، ثم اختبار تحديد مستوى يقيس المهارات الأربع، لنعرف من أين نبدأ.', 'Three quick questions, then a placement test covering all four skills, so we know where to start.')}</p></div><div class="stamp lg"><b>${bandL(targetBand())}</b><small>${_('الهدف', 'target')}</small></div></div>
   <div class="card" style="max-width:640px"><form id="ob" class="grid">
     <div class="fld">${_('أي نوع من الاختبار ستقدّم؟', 'Which test will you take?')}<div class="seg" id="ob-mod"><button type="button" data-m="ac" class="${S.module === 'ac' ? 'on' : ''}">${_('الأكاديمي (للجامعة والابتعاث)', 'Academic (university, scholarships)')}</button><button type="button" data-m="gt" class="${S.module === 'gt' ? 'on' : ''}">${_('العام (للعمل والهجرة)', 'General Training (work, migration)')}</button></div></div>
     <label class="fld">${_('الدرجة المستهدفة', 'Target band')}<select id="ob-t">${bandOpts(S.target)}</select><span class="hint">${_('معظم الجامعات تطلب 6.0–7.0، والابتعاث غالبًا 6.5.', 'Most universities ask for 6.0–7.0.')}</span></label>
@@ -1019,7 +1205,7 @@ function bindOnboard() {
 /* ---------- adaptive daily plan ---------- */
 function planFor(date) {
   const dayN = daysBetween(S.planStart || todayStr(), date), t = [];
-  if (!diagTaken() && date === todayStr()) t.push({ id: 'diag', k: 'L', t: _('اختبار تحديد المستوى', 'Placement test'), s: _('٣٣ سؤالًا · نحو ٣٥ دقيقة', '33 questions · about 35 minutes'), href: '#diag' });
+  if (!diagTaken() && date === todayStr()) t.push({ id: 'diag', k: 'L', t: _('اختبار تحديد المستوى', 'Placement test'), s: _('المهارات الأربع · نحو ٥٥ دقيقة', 'All four skills · about 55 minutes'), href: '#diag' });
   const ranked = SKL ? rankSkills() : [], focus = ranked.length ? ranked[dayN % Math.min(3, ranked.length)] : null;
   if (focus) { const sk = SKL.find(x => x.id === focus.id);
     if (XPT['xp-' + focus.id] && !(S.xp || {})[xpKey('xp-' + focus.id)]) t.push({ id: 'xp:' + focus.id, k: sk.sec, t: _('شاهد الشرح المرئي', 'Watch the video explainer') + ': ' + L(sk.title), s: _('شرح متحرك تفاعلي · ٥ دقائق', 'interactive animated lesson · 5 min'), href: '#skill/' + focus.id });
@@ -1066,7 +1252,7 @@ async function pageToday() {
     <p class="muted">${_('تتعلم كل مهارة بالعربية، وتتدرّب عليها بالإنجليزية، ثم تختبر نفسك في نماذج كاملة بصيغة الاختبار المحوسب.', 'Learn each skill in Arabic, practise it in English, then test yourself in full computer-delivered model exams.')}</p>
     <div class="row">${days != null ? `<span class="pill"><b>${numL(Math.max(0, days))}</b> ${_('يومًا حتى اختبارك', 'days to your test')}</span>` : `<a class="pill" href="#settings">${_('أضف موعد اختبارك', 'Add your test date')}</a>`}<span class="pill">${_('الدرجة التقديرية', 'Estimated band')} <b>${b.O == null ? '—' : bandL(b.O)}</b></span><a class="pill" href="#settings">${_('الإعدادات', 'Settings')}</a></div></div>
     <div class="skills4">${['L', 'R', 'W', 'S'].map(sk).join('')}</div></div>
-  ${!diagTaken() ? `<div class="card session-card"><div><span class="eyebrow">${_('ابدأ من هنا', 'Start here')}</span><h2>${_('اختبار تحديد المستوى', 'Placement test')}</h2><p class="small muted">${_('٢٠ سؤال استماع و١٣ سؤال قراءة بالصيغة المحوسبة. نحدد منه نقطة بدايتك ومهاراتك الأضعف.', '20 listening + 13 reading questions in the computer format. It finds your starting point and weakest skills.')}</p></div><a class="btn primary" href="#diag">${_('ابدأ الاختبار', 'Start the test')}</a></div>` : ''}
+  ${!diagTaken() ? `<div class="card session-card"><div><span class="eyebrow">${_('ابدأ من هنا', 'Start here')}</span><h2>${_('اختبار تحديد المستوى', 'Placement test')}</h2><p class="small muted">${_('يقيس المهارات الأربع: ٢٠ سؤال استماع، و١٣ سؤال قراءة، وكتابة قصيرة، و٣ أسئلة محادثة. نحدد منه مستواك في كل مهارة ونقاط ضعفك.', 'Measures all four skills: 20 listening and 13 reading questions, a short writing task and 3 speaking questions. It finds your level in each skill and your weak points.')}</p></div><a class="btn primary" href="#diag">${_('ابدأ الاختبار', 'Start the test')}</a></div>` : ''}
   ${xlSuggestCard()}
   <div class="card session-card"><div><span class="eyebrow">${_('جلسة اليوم', 'Today’s session')}</span><h2>${sessDone ? _('أنهيت جلسة اليوم — أحسنت! يمكنك جلسة إضافية.', 'Today’s session done — well done! Fancy another?') : _('١٥ سؤالًا مختارة لك، مع تلميح وشرح لكل سؤال', '15 questions picked for you, each with a hint and explanation')}</h2>
     <p class="small muted">${_('أخطاؤك المستحقة + أضعف مهارتين', 'Your due mistakes + your two weakest skills')}</p><div class="chips">${weak.map(w => `<span class="chip">${esc(L(SKL.find(s => s.id === w.id).title))}</span>`).join('')}</div></div><button class="btn primary" id="td-sess">${_('ابدأ الجلسة', 'Start session')}</button></div>
@@ -1104,7 +1290,7 @@ async function pageTests(skill) {
   const desc = skill === 'L' ? _('أربعة أجزاء، ٤٠ سؤالًا، نحو ٣٠ دقيقة. تسجيلات بأصوات بريطانية وأمريكية، بصيغة الاختبار المحوسب. بعد الانتهاء تسمع موضع كل إجابة في التسجيل.', 'Four parts, 40 questions, about 30 minutes. British and American voices in the computer-delivered format. Afterwards, replay the exact moment each answer was said.') : S.module === 'ac' ? _('ثلاثة نصوص أكاديمية، ٤٠ سؤالًا، ٦٠ دقيقة. شاشة مقسومة مع تظليل النص كما في الاختبار المحوسب، وبعد الانتهاء نُظلّل لك دليل كل إجابة.', 'Three academic passages, 40 questions, 60 minutes. Split screen with highlighting, like the real computer test; afterwards we highlight the evidence for each answer.') : _('خمسة نصوص من الحياة اليومية والعمل، ٤٠ سؤالًا، ٦٠ دقيقة.', 'Five everyday and workplace texts, 40 questions, 60 minutes.');
   return `<div class="page-h"><span class="eyebrow">${skName(skill)}${skill === 'R' ? ' · ' + (S.module === 'ac' ? 'Academic' : 'General Training') : ''}</span><h1>${skill === 'L' ? _('اختبارات الاستماع', 'Listening tests') : _('اختبارات القراءة', 'Reading tests')}</h1><p>${desc}</p></div>
   ${skill === 'R' ? `<div class="seg">${['ac', 'gt'].map(m => `<button data-mod="${m}" class="${S.module === m ? 'on' : ''}">${m === 'ac' ? 'Academic' : 'General Training'}</button>`).join('')}</div>` : ''}
-  ${!diagTaken() ? `<a class="card tile" href="#diag" style="background:var(--teal-soft);border-color:transparent"><b>${_('ابدأ باختبار تحديد المستوى المجاني', 'Start with the free placement test')}</b><span class="small">${_('٢٠ سؤال استماع + ١٣ سؤال قراءة، ونقدّر لك درجتك فورًا.', '20 listening + 13 reading questions, with an instant band estimate.')}</span></a>` : ''}
+  ${!diagTaken() ? `<a class="card tile" href="#diag" style="background:var(--teal-soft);border-color:transparent"><b>${_('ابدأ باختبار تحديد المستوى المجاني', 'Start with the free placement test')}</b><span class="small">${_('المهارات الأربع: استماع وقراءة وكتابة قصيرة ومحادثة، ونقدّر لك درجة كل مهارة.', 'All four skills: listening, reading, short writing and speaking, with a band for each.')}</span></a>` : ''}
   <div class="grid">${list.map(t => { const a = att(t.id); return `<div class="card"><div class="spread"><div><h2><bdi class="ltr">${skill === 'L' ? 'Listening' : S.module === 'ac' ? 'Academic Reading' : 'General Training Reading'} · Test ${t.n}</bdi></h2><p class="small muted">${a ? _(`آخر محاولة: ${bandL(a.band)} (${numL(a.raw)}/${numL(a.of)})`, `Last attempt: band ${fmtBand(a.band)} (${a.raw}/${a.of})`) : _('لم تحاول بعد', 'Not attempted yet')}</p></div>${lockedPro ? `<span class="lock-b">${ic('lock')}${_('برو', 'Pro')}</span>` : ''}</div>
     <div class="row"><button class="btn primary sm" data-full="${t.id}">${_('اختبار كامل', 'Full test')}</button>${skill === 'L' ? `<button class="btn sm" data-full="${t.id}" data-practice="1">${_('وضع التدريب', 'Practice mode')}</button>` : ''}<span class="small muted">${_('أو جزء واحد:', 'or one part:')}</span>${(skill === 'L' ? [0, 1, 2, 3] : (t.id[0] === 'G' ? [0, 1, 2, 3, 4] : [0, 1, 2])).map(i => `<button class="btn ghost sm" data-part="${t.id}:${i}">${skill === 'L' ? 'Part ' + (i + 1) : (t.id[0] === 'G' ? 'Text ' : 'Passage ') + (i + 1)}</button>`).join('')}</div></div>`; }).join('')}</div>
   <div class="card"><h2>${_('دروس استراتيجية', 'Strategy lessons')}</h2><div class="list">${lessons.map(l => `<a class="li" href="#lesson/${l.id}"><span class="li-t"><b>${esc(L(l.title))}</b><small class="muted">${numL(l.min)} ${_('دقائق', 'min')}</small></span>${S.lessons[l.id] ? `<span class="chip ok">${ic('check')}</span>` : ic('arrow')}</a>`).join('')}</div></div>`;
@@ -1125,7 +1311,7 @@ function bindTests(skill) {
 function startDiag() {
   if (diagTaken() && !PRO()) { track('limit_hit', 'test'); return openUpgrade('test'); }
   const gt = S.module === 'gt';
-  startTest({ kind: 'diag', title: _('اختبار تحديد المستوى', 'Placement test'), mode: 'exam', readTime: gt ? 1200 : 1200, time: 1200,
+  startTest({ kind: 'diag', full4: true, title: _('اختبار تحديد المستوى', 'Placement test'), mode: 'exam', readTime: gt ? 1200 : 1200, time: 1200,
     sections: [{ skill: 'L', test: 'L01', idx: 0 }, { skill: 'L', test: 'L01', idx: 3 }, ...(gt ? [{ skill: 'R', test: 'G01', idx: 0 }, { skill: 'R', test: 'G01', idx: 1 }] : [{ skill: 'R', test: 'A01', idx: 0 }])] });
   track('diag_start');
 }
@@ -1175,8 +1361,8 @@ async function pageProgress() {
   <p class="small muted">${_('التقدير يعتمد على آخر ثلاث نتائج في كل مهارة، والاختبارات الكاملة لها وزن أكبر.', 'Estimates use your last three results in each skill; full tests weigh more.')}</p></div>
   <div class="g2">${['L', 'R'].map((k, i) => `<div class="card"><h2>${skName(k)}</h2>${series[i].length > 1 ? spark(series[i], k) : `<p class="empty">${_('تحتاج محاولتين على الأقل لرسم المنحنى.', 'Two attempts needed to draw the trend.')}</p>`}</div>`).join('')}</div>
   <div class="card"><h2>${_('أداؤك حسب نوع السؤال', 'Accuracy by question type')}</h2>${qtRows.length ? `<div class="bars">${qtRows.map(r => `<div class="bar-row"><span>${skName(r.sk)[0] === 'ا' ? '' : ''}${esc(qtName(r.t))} <small class="muted">${r.sk}</small></span><span class="meter"><i style="inline-size:${Math.round(r.p * 100)}%;background:${r.p < .6 ? 'var(--bad)' : r.p < .8 ? 'var(--gold)' : 'var(--ok)'}"></i></span><b class="num">${numL(Math.round(r.p * 100))}%</b></div>`).join('')}</div><p class="small">${qtRows[0].p < .7 ? `${_('ابدأ بدرس', 'Start with the lesson on')} <a href="#lesson/${LESSON_FOR[qtRows[0].t] || 'R-tfng'}">${esc(qtName(qtRows[0].t))}</a>.` : ''}</p>` : `<p class="empty">${_('حل اختبارًا لترى نقاط قوتك وضعفك.', 'Take a test to see your strengths and weaknesses.')}</p>`}</div>
-  <div class="card"><h2>${_('سجل المحاولات', 'Attempt history')}</h2>${hist.length ? `<div class="list">${hist.slice(0, 30).map(a => `<div class="li"><span class="li-t"><b>${skName(a.skill)} · ${esc(a.test)}${a.kind === 'diag' ? ' · ' + _('تحديد مستوى', 'placement') : ''}</b><small class="muted">${numL(a.date)} · ${numL(a.raw)}/${numL(a.of)}</small></span><span class="chip ${a.band >= tg ? 'ok' : ''}">${bandL(a.band)}</span>${S.details[a.id] ? `<button class="btn ghost sm" data-rv="${a.id}">${_('مراجعة', 'Review')}</button>` : ''}</div>`).join('')}</div>` : `<p class="empty">${_('لا محاولات بعد.', 'No attempts yet.')}</p>`}</div>
-  <div class="card"><h2>${_('الكتابة والمحادثة', 'Writing & speaking')}</h2><div class="list">${S.writing.slice().reverse().slice(0, 10).map(w => `<div class="li"><span class="li-t"><b>${w.task === 't2' ? 'Task 2' : 'Task 1'} · ${esc(w.pid)}</b><small class="muted">${numL(w.date)} · ${numL(w.words)} ${_('كلمة', 'words')} · ${w.ai ? _('مصحح ذكي', 'AI marked') : _('تقييم ذاتي', 'self-assessed')}</small></span><span class="chip">${bandL(w.band)}</span></div>`).join('') || `<p class="empty">${_('لا كتابات بعد.', 'Nothing written yet.')}</p>`}</div></div>
+  <div class="card"><h2>${_('سجل المحاولات', 'Attempt history')}</h2>${hist.length ? `<div class="list">${hist.slice(0, 30).map(a => `<div class="li"><span class="li-t"><b>${skName(a.skill)} · ${esc(a.test)}${a.kind === 'diag' ? ' · ' + _('تحديد مستوى', 'placement') : ''}</b><small class="muted">${numL(a.date)} · ${a.raw == null ? (a.ai ? _('مصحح ذكي', 'AI marked') : _('تقدير', 'estimate')) : numL(a.raw) + '/' + numL(a.of)}</small></span><span class="chip ${a.band >= tg ? 'ok' : ''}">${bandL(a.band)}</span>${S.details[a.id] ? `<button class="btn ghost sm" data-rv="${a.id}">${_('مراجعة', 'Review')}</button>` : ''}</div>`).join('')}</div>` : `<p class="empty">${_('لا محاولات بعد.', 'No attempts yet.')}</p>`}</div>
+  <div class="card"><h2>${_('الكتابة والمحادثة', 'Writing & speaking')}</h2><div class="list">${S.writing.slice().reverse().slice(0, 10).map(w => `<div class="li"><span class="li-t"><b>${w.task === 'diag' ? _('كتابة تحديد المستوى', 'Placement writing') : (w.task === 't2' ? 'Task 2' : 'Task 1') + ' · ' + esc(w.pid)}</b><small class="muted">${numL(w.date)} · ${numL(w.words)} ${_('كلمة', 'words')} · ${w.ai ? _('مصحح ذكي', 'AI marked') : _('تقييم ذاتي', 'self-assessed')}</small></span><span class="chip">${bandL(w.band)}</span></div>`).join('') || `<p class="empty">${_('لا كتابات بعد.', 'Nothing written yet.')}</p>`}</div></div>
   <div class="row"><button class="btn ghost sm" id="pg-export">${_('تنزيل نسخة من تقدمي', 'Download my progress')}</button><a class="btn ghost sm" href="#settings">${_('الإعدادات', 'Settings')}</a></div>`;
 }
 function bindProgress() {
@@ -1635,7 +1821,7 @@ async function pageTestsHub() {
   }).join('');
   return `<div class="page-h"><span class="eyebrow">${_('النماذج', 'Model tests')}</span><h1>${_('نماذج كاملة بصيغة الاختبار المحوسب', 'Full models in the computer-delivered format')}</h1><p>${_('كل نموذج اختبار كامل بأقسامه الأربعة. بعد كل قسم ترى درجتك، وشرح كل إجابة بالعربية، وموضعها في التسجيل أو النص، وأي مهارة تحتاج تدريبًا.', 'Each model is a complete four-section test. After each section you get your band, every answer explained in Arabic with its location, and which skills need work.')}</p></div>
   <div class="seg">${['ac', 'gt'].map(m => `<button data-mod="${m}" class="${S.module === m ? 'on' : ''}">${m === 'ac' ? 'Academic' : 'General Training'}</button>`).join('')}</div>
-  ${!diagTaken() ? `<a class="card tile" href="#diag" style="background:var(--teal-soft);border-color:transparent"><b>${_('اختبار تحديد المستوى (مجاني)', 'Placement test (free)')}</b><span class="small">${_('٢٠ سؤال استماع + ١٣ سؤال قراءة', '20 listening + 13 reading questions')}</span></a>` : ''}
+  ${!diagTaken() ? `<a class="card tile" href="#diag" style="background:var(--teal-soft);border-color:transparent"><b>${_('اختبار تحديد المستوى (مجاني)', 'Placement test (free)')}</b><span class="small">${_('المهارات الأربع · نحو ٥٥ دقيقة', 'All four skills · about 55 minutes')}</span></a>` : ''}
   <div class="grid">${models}</div>
   <div class="card"><h2>${_('تدريب بالأجزاء', 'Practise by part')}</h2><p class="small muted">${_('جزء واحد من أي نموذج، في وضع التدريب.', 'One part of any model, in practice mode.')}</p>
     <div class="list">${Ls.map(t => `<div class="li"><b>Listening ${t.n}</b>${[0, 1, 2, 3].map(i => `<button class="btn ghost sm" data-part="L:${t.id}:${i}">Part ${i + 1}</button>`).join('')}</div>`).join('')}${Rs.map(t => `<div class="li"><b>Reading ${t.n}</b>${(t.id[0] === 'G' ? [0, 1, 2, 3, 4] : [0, 1, 2]).map(i => `<button class="btn ghost sm" data-part="R:${t.id}:${i}">${t.id[0] === 'G' ? 'Text' : 'Passage'} ${i + 1}</button>`).join('')}</div>`).join('')}</div></div>

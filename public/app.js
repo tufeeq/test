@@ -5,7 +5,7 @@ const todayStr = () => { const d = new Date(); return d.getFullYear() + '-' + St
 const addDays = (d, n) => { const x = new Date(d + 'T12:00:00'); x.setDate(x.getDate() + n); return x.getFullYear() + '-' + String(x.getMonth() + 1).padStart(2, '0') + '-' + String(x.getDate()).padStart(2, '0'); };
 const daysBetween = (a, b) => Math.round((new Date(b + 'T12:00:00') - new Date(a + 'T12:00:00')) / 864e5);
 const DEF = () => ({ lang: 'ar', module: 'ac', target: 65, examDate: '', planStart: todayStr(), since: todayStr(), onboarded: false,
-  attempts: [], mistakes: [], writing: [], speaking: [], vocab: {}, para: {}, drills: {}, lessons: {}, days: [], qt: {}, dq: null, details: {}, notes: {} });
+  attempts: [], mistakes: [], writing: [], speaking: [], vocab: {}, para: {}, drills: {}, lessons: {}, days: [], qt: {}, dq: null, details: {}, notes: {}, recent: [], dr: {}, xp: {}, skillSeen: {}, sessionDays: [] });
 let S = (() => { try { const r = localStorage.getItem(KEY); if (r) return Object.assign(DEF(), JSON.parse(r)); } catch (e) {} return DEF(); })();
 { try { const u = new URL(location.href), q = u.searchParams.get('lang'); if (q === 'en' || q === 'ar') { S.lang = q; u.searchParams.delete('lang'); history.replaceState(null, '', u.pathname + (u.search || '') + u.hash); } } catch (e) {} }
 let STORE_OK = true;
@@ -122,6 +122,8 @@ function syncFree() { const c = window.CLOUD && CLOUD.config && CLOUD.config.fre
 const PRO = () => !!(window.CLOUD && CLOUD.isPro && CLOUD.isPro());
 const signedIn = () => !!(window.CLOUD && CLOUD.user);
 const track = (type, k, v) => { try { window.CLOUD && CLOUD.track && CLOUD.track(type, k, v); } catch (e) {} };
+/* Arabic count noun: 1 سؤال, 2 سؤالان, 3–10 أسئلة, 11+ سؤالًا */
+function qWord(n) { return n === 1 ? 'سؤال' : n === 2 ? 'سؤالان' : n >= 3 && n <= 10 ? 'أسئلة' : 'سؤالًا'; }
 function dailyUsed() { return S.dq && S.dq.d === todayStr() ? S.dq.n : 0; }
 function useDaily(n) { const d = todayStr(); if (!S.dq || S.dq.d !== d) S.dq = { d, n: 0 }; S.dq.n += n; }
 const dailyLeft = () => PRO() ? Infinity : Math.max(0, (+FREE.dailyQuestions || 0) - dailyUsed());
@@ -351,7 +353,7 @@ function playPart(i) {
     } else { EX.checking = true; EX.left = 120; toast('You now have 2 minutes to check your answers.', 4000); renderExam(); }
   };
   a.onerror = () => toast(_('تعذّر تحميل التسجيل الصوتي.', 'The recording could not be loaded.'), 4000);
-  a.play().catch(() => { toast(_('اضغط تشغيل لبدء التسجيل', 'Press play to start the recording'), 4000); EX.needTap = true; renderExam(); });
+  a.play().catch(e => { if (e && e.name === 'NotAllowedError') { toast(_('اضغط تشغيل لبدء التسجيل', 'Press play to start the recording'), 4000); EX.needTap = true; renderExam(); } else toast(_('تعذّر تحميل التسجيل. تحقق من اتصالك ثم أعد المحاولة.', 'The recording could not be loaded. Check your connection and try again.'), 5000); });
 }
 
 /* ---------- main exam screen ---------- */
@@ -367,13 +369,16 @@ function renderExam(keepScroll) {
     <span class="clock" id="ex-clock">${R ? '' : '⏱ <span></span>'}</span>${audioUI}
     <button id="ex-help" title="Arabic help">${S.helpAr !== false ? 'ع ✓' : 'ع'}</button><button id="ex-big" title="Text size">A+</button><button id="ex-con" title="Contrast">◐</button><button id="ex-x">${R ? _('إغلاق', 'Close') : _('خروج', 'Exit')}</button></div>
   <div class="ex-part"><b>${partLabel}</b>${sec.skill === 'L' ? esc(sec.data.intro) + ' ' : ''}Questions ${range}${sec.skill === 'R' ? ` · ${_('اقرأ النص وأجب عن الأسئلة', 'Read the text and answer the questions')}` : ''}</div>
-  <div class="ex-body ${sec.skill === 'R' ? 'split' : ''}">
+  ${sec.skill === 'R' ? `<div class="ex-tg"><button data-tg="p" class="${EX.showQ ? '' : 'on'}">Passage</button><button data-tg="q" class="${EX.showQ ? 'on' : ''}">Questions</button></div>` : ''}
+  <div class="ex-body ${sec.skill === 'R' ? 'split' : ''}${EX.showQ ? ' show-q' : ''}">
     ${sec.skill === 'R' ? `<div class="ex-pane passage" id="ex-passage">${passage}</div><div class="ex-pane questions">` : '<div class="ex-pane full">'}
       ${sec.data.groups.map(g => groupHTML(g, sec)).join('')}${transcript}
       ${R ? `<div style="padding:10px 0 30px"><button class="nb" id="ex-back-res" style="font:inherit;border:1px solid #888;border-radius:4px;padding:8px 14px;background:#fff;cursor:pointer">← ${_('ملخص النتيجة', 'Result summary')}</button></div>` : ''}
     </div></div>
   <div class="ex-nav">${navHTML()}<div class="acts">${R ? '' : `<button id="ex-flag">⚑ Review</button>`}${EX.cur > 0 ? '<button id="ex-prev">◀</button>' : ''}${EX.cur < EX.secs.length - 1 && (R || EX.secs[EX.cur + 1].skill === sec.skill || EX.mode === 'practice') ? '<button id="ex-next">▶</button>' : ''}${R ? '' : '<button class="go" id="ex-submit">Submit</button>'}</div></div>`;
   bindExam();
+  ex.querySelectorAll('[data-tg]').forEach(b => b.onclick = () => { EX.showQ = b.dataset.tg === 'q'; ex.querySelector('.ex-body').classList.toggle('show-q', EX.showQ); ex.querySelectorAll('[data-tg]').forEach(x => x.classList.toggle('on', x === b)); window.scrollTo(0, 0); });
+  { const h = ex.querySelector('.ex-nav .pg.here'); if (h) try { h.scrollIntoView({ inline: 'center', block: 'nearest' }); } catch (e) {} }
   const q2 = ex.querySelector('.ex-pane.questions, .ex-pane.full'); if (q2 && y) q2.scrollTop = y;
   drawClock();
 }
@@ -386,7 +391,7 @@ function navHTML() {
   return EX.secs.map((s, si) => {
     const nums = []; for (const g of s.data.groups) for (let n = g.from; n <= g.to; n++) nums.push(n);
     const lab = s.skill === 'L' ? 'Part ' + s.data.part : 'Passage ' + s.pn;
-    return `<div class="pg"><span>${lab}</span>${nums.map(n => { const k = s.key + ':' + n; let cls = '';
+    return `<div class="pg${si === EX.cur ? ' here' : ''}"><span>${lab}</span>${nums.map(n => { const k = s.key + ':' + n; let cls = '';
       if (EX.review) { const r = EX.res[k] || EX.res[Object.keys(EX.res).find(x => x.startsWith(s.key + ':g') && x.endsWith(':' + n))]; cls = r && r.ok ? 'ok' : 'no'; }
       else { const g = s.data.groups.find(g => n >= g.from && n <= g.to); const v = g.type === 'mcq2' ? (EX.ans[s.key + ':g' + g.from] || []).length > n - g.from : EX.ans[k]; if (v) cls = 'ans'; if (EX.flags.has(k)) cls += ' flag'; }
       return `<button class="nb ${cls} ${si === EX.cur && EX.focus === n ? 'cur' : ''}" data-go="${si}:${n}">${n}</button>`; }).join('')}</div>`;
@@ -415,7 +420,7 @@ function bindExam() {
   const sb = ex.querySelector('#ex-submit'); if (sb) sb.onclick = () => { const un = unanswered(); if (confirm(un ? `${un} question(s) unanswered. Submit anyway?` : 'Submit your answers and see your result?')) finishTest(false); };
   const br = ex.querySelector('#ex-back-res'); if (br) br.onclick = () => renderResult();
   ex.querySelectorAll('[data-ev-line]').forEach(b => b.onclick = () => { const [pi, li] = b.dataset.evLine.split(':').map(Number); playLine(pi, li); });
-  ex.querySelectorAll('[data-ev-quote]').forEach(b => b.onclick = () => showEvidence(b.dataset.evQuote));
+  ex.querySelectorAll('[data-ev-quote]').forEach(b => b.onclick = () => { if (EX.showQ && matchMedia('(max-width:820px)').matches) { EX.showQ = false; ex.querySelector('.ex-body').classList.remove('show-q'); ex.querySelectorAll('[data-tg]').forEach(x => x.classList.toggle('on', x.dataset.tg === 'p')); } showEvidence(b.dataset.evQuote); });
   ex.querySelectorAll('.q, .gapw').forEach(q => q.addEventListener('click', () => { const m = /q-[^-]+-(\d+)/.exec(q.id || ''); if (m) { EX.focus = +m[1]; } }, true));
   const ps = ex.querySelector('#ex-passage');
   if (ps && !EX.review) {
@@ -437,6 +442,7 @@ function goQ(si, n) {
     if (!EX.review && EX.mode === 'exam' && a.skill !== b.skill) return toast(_('لا يمكن العودة إلى قسم آخر أثناء الاختبار.', 'You cannot move to another section during the test.'));
     saveHL(); EX.cur = si; renderExam();
   }
+  if (EX.secs[si].skill === 'R' && !EX.showQ && matchMedia('(max-width:820px)').matches) { EX.showQ = true; const bd = $('#exam .ex-body'); if (bd) bd.classList.add('show-q'); $$('#exam [data-tg]').forEach(x => x.classList.toggle('on', x.dataset.tg === 'q')); }
   EX.focus = n; const el = document.getElementById(`q-${EX.secs[si].key}-${n}`) || $(`#exam [data-from="${n}"]`);
   if (el) { el.scrollIntoView({ block: 'center', behavior: 'smooth' }); const inp = el.querySelector('input,select'); if (inp && !EX.review) inp.focus({ preventScroll: true }); }
   updNav();
@@ -611,6 +617,7 @@ let WS = null;
 async function pageWrite(task, id) {
   const file = task === 't1a' ? 'task1_academic' : task === 't1g' ? 'task1_gt' : 'task2';
   const d = await content(file); const it = d.items.find(x => x.id === id); if (!it) return `<p class="empty">${_('غير موجود', 'Not found')}</p>`;
+  if (d.items.indexOf(it) >= freeCount(d.items.length)) { setTimeout(() => openUpgrade('writing'), 0); return pageWriting(); }
   await errorsData();
   const draftKey = 'w:' + id, draft = (S.notes || {})[draftKey] || '';
   WS = { task, it, start: null, secs: task === 't2' ? 2400 : 1200 };
@@ -653,6 +660,7 @@ async function submitWriting(text) {
     toast(_('تعذّر الوصول إلى المصحح الذكي؛ إليك التقييم الذاتي.', 'The AI examiner is unavailable; here is the guided self-assessment.'));
   }
   selfAssess(text, a);
+  if (!(cfg && cfg.ai)) { const n = document.createElement('div'); n.className = 'notice gold'; n.textContent = _('المصحح الذكي غير متاح مؤقتًا؛ استخدم التقييم الذاتي الموجّه الآن، وستعود الخدمة قريبًا.', 'The AI examiner is temporarily unavailable. Use the guided self-assessment for now; it will be back soon.'); box.prepend(n); }
 }
 function saveWriting(text, band, crit, ai) {
   S.writing.push({ id: uid(), pid: WS.it.id, task: WS.task, date: todayStr(), words: analyse(text, WS.task).wc, band, crit, ai: !!ai });
@@ -661,7 +669,7 @@ function saveWriting(text, band, crit, ai) {
 }
 const CRIT = { TA: ['إنجاز المهمة', 'Task Achievement / Response'], CC: ['التماسك والترابط', 'Coherence & Cohesion'], LR: ['الثروة اللغوية', 'Lexical Resource'], GRA: ['القواعد ودقتها', 'Grammatical Range & Accuracy'], FC: ['الطلاقة والتماسك', 'Fluency & Coherence'], P: ['النطق (تقديري)', 'Pronunciation (estimated)'] };
 function aiResultHTML(r, keys, task) {
-  return `<div class="card"><div class="spread"><h2>${ic('spark', 'i20')} ${_('تقييم المصحح الذكي', 'AI examiner’s report')}</h2><div class="stamp sm c-W"><b>${fmtBand(r.overall)}</b><small>band</small></div></div>
+  return `<div class="card"><div class="spread"><h2>${ic('spark', 'i20')} ${_('تقييم المصحح الذكي', 'AI examiner’s report')}</h2><div class="stamp sm c-W"><b>${fmtBand(r.overall)}</b><small>${_('الدرجة', 'band')}</small></div></div>
     <div class="grid" style="gap:8px">${keys.map(k => `<div class="crit"><span class="cb">${fmtBand(r.bands[k])}</span><span><b>${_(CRIT[k][0], CRIT[k][1])}</b></span><span class="bandline" style="inline-size:120px"><i class="bg-W" style="inline-size:${(r.bands[k] || 0) / 9 * 100}%"></i></span></div>`).join('')}</div>
     <p>${esc(L(r.summary))}</p>
     ${r.strengths.length ? `<div><b>${_('نقاط القوة', 'Strengths')}</b><ul>${r.strengths.map(s => `<li>${esc(L(s))}</li>`).join('')}</ul></div>` : ''}
@@ -689,14 +697,17 @@ function selfAssess(text, a) {
   $('#sa-go').onclick = () => {
     if (Object.keys(ansv).length < Q.length) return toast(_('أجب عن كل الأسئلة.', 'Answer every question.'));
     const crit = { TA: [], CC: [], LR: [], GRA: [] }; Q.forEach((q, i) => crit[q[0]].push(ansv[i]));
-    const base = v => 4.5 + v.reduce((x, y) => x + y, 0) / (2 * v.length) * 3; // 4.5 … 7.5 (self-assessment cannot prove more)
+    const base = v => 4 + v.reduce((x, y) => x + y, 0) / (2 * v.length) * 2.5; // 4 … 6.5: self-assessment alone cannot prove more
     const b = {}; for (const k in crit) b[k] = base(crit[k]);
-    const min = WS.task === 't2' ? 250 : 150; if (a.wc < min) b.TA -= 1;
-    b.GRA -= Math.min(1.5, a.hits.length * .25); b.LR -= a.flags.some(f => /Repeated|تكرار/.test(f.en + f.ar)) ? .5 : 0; b.CC -= a.paras < 3 ? 1 : 0;
-    for (const k in b) b[k] = half(Math.max(3, Math.min(7.5, b[k])));
+    const min = WS.task === 't2' ? 250 : 150; if (a.wc < min) b.TA -= a.wc < min * .8 ? 1.5 : 1;
+    if (WS.task === 't1a' && !/\b(overall|in general|it is clear that|generally)\b/i.test(text)) b.TA = Math.min(b.TA, 5);
+    const per100 = a.hits.length / Math.max(1, a.wc / 100);
+    b.GRA -= Math.min(2.5, a.hits.length * .35 + (per100 > 3 ? .5 : 0)); b.LR -= a.flags.some(f => /Repeated|تكرار/.test(f.en + f.ar)) ? .5 : 0; b.CC -= a.paras < 3 ? 1 : 0;
+    if (a.hits.length >= 4) b.LR -= .5;
+    for (const k in b) b[k] = half(Math.max(3, Math.min(6.5, b[k])));
     const ov = half((b.TA + b.CC + b.LR + b.GRA) / 4);
     saveWriting(text, ov, b, false);
-    $('#sa-out').innerHTML = `<div class="spread" style="margin-top:10px"><div class="grid" style="gap:6px;flex:1">${Object.keys(b).map(k => `<div class="crit"><span class="cb">${fmtBand(b[k])}</span><b>${_(CRIT[k][0], CRIT[k][1])}</b><span></span></div>`).join('')}</div><div class="stamp c-W"><b>${fmtBand(ov)}</b><small>estimate</small></div></div><p class="tiny muted">${_('التقييم الذاتي محدود بـ 7.5؛ للحصول على تقييم دقيق استخدم المصحح الذكي.', 'Self-assessment is capped at 7.5; use the AI examiner for an accurate mark.')}</p>`;
+    $('#sa-out').innerHTML = `<div class="spread" style="margin-top:10px"><div class="grid" style="gap:6px;flex:1">${Object.keys(b).map(k => `<div class="crit"><span class="cb">${fmtBand(b[k])}</span><b>${_(CRIT[k][0], CRIT[k][1])}</b><span></span></div>`).join('')}</div><div class="stamp c-W"><b>${fmtBand(ov)}</b><small>${_('تقدير', 'estimate')}</small></div></div><p class="tiny muted">${_('التقييم الذاتي محدود بـ 7.5؛ للحصول على تقييم دقيق استخدم المصحح الذكي.', 'Self-assessment is capped at 7.5; use the AI examiner for an accurate mark.')}</p>`;
     box.insertAdjacentHTML('beforeend', modelHTML()); bindModel();
   };
 }
@@ -724,6 +735,7 @@ let SP = null;
 async function pageSpeak(mode, id) {
   const [p1, p2] = await Promise.all([content('part1'), content('part23')]);
   let steps = [], title = '';
+  if ((mode === 'p1' && p1.items.findIndex(x => x.id === id) >= freeCount(p1.items.length)) || (mode === 'p2' && p2.items.findIndex(x => x.id === id) >= freeCount(p2.items.length))) { setTimeout(() => openUpgrade('speaking'), 0); return pageSpeaking(); }
   if (mode === 'p1') { const t = p1.items.find(x => x.id === id); if (!t) return ''; title = L(t.topic); steps = t.qs.map((q, i) => ({ part: 1, clip: `${t.id}-q${i}`, text: q.q, model: q.model, tip: q.tip, max: 45 })); steps.unshift({ part: 1, clip: `${t.id}-t`, text: `Let’s talk about ${t.topic.en.toLowerCase()}.`, info: true }); }
   else if (mode === 'p2') { const t = p2.items.find(x => x.id === id); if (!t) return ''; title = t.card.title; steps = [{ part: 2, clip: 'p2intro', text: 'Now I’m going to give you a topic…', info: true }, { part: 2, card: t.card, notes: t.notes, clip: `${t.id}-card`, text: t.card.title, model: t.model, prep: 60, max: 120 }, { part: 3, clip: 'p3intro', text: 'We’ve been talking about this topic…', info: true }, ...t.p3.map((q, i) => ({ part: 3, clip: `${t.id}-p3q${i}`, text: q.q, model: q.model, max: 75 }))]; }
   else if (mode === 'mock') {
@@ -812,6 +824,7 @@ function spReview(ans) {
     ${metricsHTML(ans.m, s.part)}
     <details><summary style="cursor:pointer;font-weight:600">${_('إجابة نموذجية (Band 8)', 'Model answer (band 8)')}</summary><div class="model" style="margin-top:6px">${esc(s.model || '')}</div>${s.tip ? `<p class="small">${esc(L(s.tip))}</p>` : ''}</details>
     <div id="sp-ai"></div>
+    ${cfg && !cfg.ai ? `<p class="small muted">${_('التقييم الذكي للمحادثة غير متاح مؤقتًا؛ قارن إجابتك بالإجابة النموذجية والمقاييس أعلاه.', 'AI speaking feedback is temporarily unavailable; compare with the model answer and the metrics above.')}</p>` : ''}
     <div class="row">${cfg && cfg.ai && ans.text ? `<button class="btn sm" id="sp-mark">${ic('spark')} ${_('قيّم إجابتي بالذكاء الاصطناعي', 'AI feedback')}</button>` : ''}<button class="btn ghost sm" id="sp-again">${ic('refresh')} ${_('أعد المحاولة', 'Try again')}</button><button class="btn primary sm" id="sp-next">${_('التالي', 'Next')} ${ic('arrow')}</button></div>`;
   $('#sp-again').onclick = () => { SP.answers.pop(); spReady(s); };
   $('#sp-next').onclick = () => { SP.i++; spRender(); };
@@ -914,7 +927,7 @@ async function pagePara() {
 }
 function ptRender() {
   const el = $('#pt'); if (!el) return;
-  if (PT.i >= PT.list.length) { el.innerHTML = `<div class="center grid"><div class="stamp c-R" style="margin:auto"><b>${numL(PT.score)}/${numL(PT.list.length)}</b><small>score</small></div><a class="btn primary" href="#para">${_('جولة جديدة', 'New round')}</a></div>`; return; }
+  if (PT.i >= PT.list.length) { el.innerHTML = `<div class="center grid"><div class="stamp c-R" style="margin:auto"><b>${numL(PT.score)}/${numL(PT.list.length)}</b><small>${_('النتيجة', 'score')}</small></div><a class="btn primary" href="#para">${_('جولة جديدة', 'New round')}</a></div>`; return; }
   if (!PRO() && dailyLeft() <= 0) { el.innerHTML = `<div class="notice gold">${_('أنهيت أسئلتك المجانية لليوم. اشترك لتمارين غير محدودة.', 'You have used today’s free questions. Subscribe for unlimited practice.')} <a href="#upgrade">${_('الباقات', 'Plans')}</a></div>`; return; }
   const p = PT.list[PT.i], opts = shuffle([p.t, ...p.d]);
   el.innerHTML = `<p class="small muted">${numL(PT.i + 1)} / ${numL(PT.list.length)}</p><div class="src">${esc(p.q)}</div><p class="small">${_('أي عبارة تعني الشيء نفسه؟', 'Which sentence means the same?')}</p><div class="opt-btns ltr-text">${opts.map((o, i) => `<button class="opt-btn" data-o="${esc(o)}"><span class="L">${LET[i]}</span>${esc(o)}</button>`).join('')}</div><div id="pt-fb"></div>`;
@@ -952,6 +965,7 @@ async function pageMistakes() {
   return `<div class="page-h"><span class="eyebrow">${_('التكرار المتباعد', 'Spaced repetition')}</span><h1>${_('صندوق الأخطاء', 'Mistake box')}</h1><p>${_('كل سؤال أخطأت فيه يعود إليك بعد يوم، ثم ثلاثة، ثم أسبوع، حتى تتقنه. هذا ما يحوّل الأخطاء إلى درجات.', 'Every question you miss comes back after a day, then three, then a week, until you master it. This turns mistakes into marks.')}</p></div>
   ${Object.keys(byType).length ? `<div class="card"><h2>${_('أين تخطئ أكثر؟', 'Where do you lose marks?')}</h2><div class="chips">${Object.entries(byType).sort((a, b) => b[1] - a[1]).map(([t, n]) => `<span class="chip pri">${esc(qtName(t))} · ${numL(n)}</span>`).join('')}</div></div>` : ''}
   ${hidden > 0 ? `<div class="notice gold">${_(`يعرض الصندوق المجاني آخر ${numL(lim)} أخطاء. اشترك لحفظ كل أخطائك ومراجعتها بالتكرار المتباعد.`, `The free box keeps your last ${lim} mistakes. Subscribe to keep them all.`)} <a href="#upgrade">${_('الباقات', 'Plans')}</a></div>` : ''}
+  ${(() => { const dw = Object.values(S.dr || {}).filter(v => !v.ok).length; return dw ? `<div class="card"><div class="spread"><h2>${_('أخطاء التمارين', 'Drill mistakes')} <span class="chip">${numL(dw)}</span></h2><button class="btn sm" id="mx-sess">${_('راجعها في جلسة اليوم', 'Review them in today’s session')}</button></div><p class="small muted">${_('الأسئلة التي أخطأت فيها في التمارين تعود إليك تلقائيًا في جلسة اليوم بعد يوم.', 'Drill questions you got wrong come back automatically in today’s session after a day.')}</p></div>` : ''; })()}
   <div class="card"><div class="spread"><h2>${_('للمراجعة اليوم', 'Due today')} <span class="chip">${numL(due.length)}</span></h2>${due.length ? `<a class="btn primary sm" href="#mreview">${_('ابدأ المراجعة', 'Start review')}</a>` : ''}</div>
   ${shown.length ? `<div class="list">${shown.slice().reverse().slice(0, 40).map(m => `<div class="li"><span class="li-t"><b>${skName(m.skill)} · ${esc(m.test)} · Q${m.n}</b><small class="muted">${esc(qtName(m.type))} · ${_('الصندوق', 'box')} ${numL(m.box)} · ${m.due <= now ? _('مستحق', 'due') : numL(m.due)}</small></span></div>`).join('')}</div>` : `<p class="empty">${_('لا أخطاء بعد. حل اختبارًا وستظهر أخطاؤك هنا تلقائيًا.', 'No mistakes yet. Take a test and they will appear here automatically.')}</p>`}</div>`;
 }
@@ -989,7 +1003,7 @@ async function mrRender() {
 /* ============ Pages: onboarding, today, plan, tests, lessons, progress, upgrade, account, router ============ */
 function bandOpts(sel) { const o = []; for (let b = 50; b <= 85; b += 5) o.push(`<option value="${b}" ${b === sel ? 'selected' : ''}>${numL((b / 10).toFixed(1))}</option>`); return o.join(''); }
 function pageOnboard() {
-  return `<div class="hero"><div class="grid" style="gap:12px"><span class="eyebrow" style="color:var(--gold)">${_('أهلًا بك', 'Welcome')}</span><h1>${_('لنبنِ خطتك نحو درجتك المستهدفة', 'Let’s build your plan to your target band')}</h1><p class="muted">${_('ثلاثة أسئلة فقط، ثم اختبار تحديد مستوى قصير يقيس الاستماع والقراءة، لنعرف من أين نبدأ.', 'Three quick questions, then a short placement test for Listening and Reading, so we know where to start.')}</p></div><div class="stamp lg"><b>${bandL(targetBand())}</b><small>target</small></div></div>
+  return `<div class="hero"><div class="grid" style="gap:12px"><span class="eyebrow" style="color:var(--gold)">${_('أهلًا بك', 'Welcome')}</span><h1>${_('لنبنِ خطتك نحو درجتك المستهدفة', 'Let’s build your plan to your target band')}</h1><p class="muted">${_('ثلاثة أسئلة فقط، ثم اختبار تحديد مستوى قصير يقيس الاستماع والقراءة، لنعرف من أين نبدأ.', 'Three quick questions, then a short placement test for Listening and Reading, so we know where to start.')}</p></div><div class="stamp lg"><b>${bandL(targetBand())}</b><small>${_('الهدف', 'target')}</small></div></div>
   <div class="card" style="max-width:640px"><form id="ob" class="grid">
     <div class="fld">${_('أي نوع من الاختبار ستقدّم؟', 'Which test will you take?')}<div class="seg" id="ob-mod"><button type="button" data-m="ac" class="${S.module === 'ac' ? 'on' : ''}">${_('الأكاديمي (للجامعة والابتعاث)', 'Academic (university, scholarships)')}</button><button type="button" data-m="gt" class="${S.module === 'gt' ? 'on' : ''}">${_('العام (للعمل والهجرة)', 'General Training (work, migration)')}</button></div></div>
     <label class="fld">${_('الدرجة المستهدفة', 'Target band')}<select id="ob-t">${bandOpts(S.target)}</select><span class="hint">${_('معظم الجامعات تطلب 6.0–7.0، والابتعاث غالبًا 6.5.', 'Most universities ask for 6.0–7.0.')}</span></label>
@@ -1005,7 +1019,7 @@ function bindOnboard() {
 /* ---------- adaptive daily plan ---------- */
 function planFor(date) {
   const dayN = daysBetween(S.planStart || todayStr(), date), t = [];
-  if (!diagTaken()) t.push({ id: 'diag', k: 'L', t: _('اختبار تحديد المستوى', 'Placement test'), s: _('٣٣ سؤالًا · نحو ٣٥ دقيقة', '33 questions · about 35 minutes'), href: '#diag' });
+  if (!diagTaken() && date === todayStr()) t.push({ id: 'diag', k: 'L', t: _('اختبار تحديد المستوى', 'Placement test'), s: _('٣٣ سؤالًا · نحو ٣٥ دقيقة', '33 questions · about 35 minutes'), href: '#diag' });
   const ranked = SKL ? rankSkills() : [], focus = ranked.length ? ranked[dayN % Math.min(3, ranked.length)] : null;
   if (focus) { const sk = SKL.find(x => x.id === focus.id);
     if (XPT['xp-' + focus.id] && !(S.xp || {})[xpKey('xp-' + focus.id)]) t.push({ id: 'xp:' + focus.id, k: sk.sec, t: _('شاهد الشرح المرئي', 'Watch the video explainer') + ': ' + L(sk.title), s: _('شرح متحرك تفاعلي · ٥ دقائق', 'interactive animated lesson · 5 min'), href: '#skill/' + focus.id });
@@ -1156,7 +1170,7 @@ async function pageProgress() {
   const series = ['L', 'R'].map(k => S.attempts.filter(a => a.skill === k).slice(-10));
   const spark = (arr, k) => { if (arr.length < 2) return ''; const W = 260, H = 70, x = i => 10 + (W - 20) * i / (arr.length - 1), y = v => H - 10 - (H - 20) * (v - 3) / 6; return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;max-width:300px;direction:ltr"><line x1="10" x2="${W - 10}" y1="${y(tg)}" y2="${y(tg)}" stroke="var(--ink)" stroke-dasharray="3 3" stroke-width="1"/><polyline fill="none" stroke="var(--c${k})" stroke-width="2.5" points="${arr.map((a, i) => x(i) + ',' + y(a.band)).join(' ')}"/>${arr.map((a, i) => `<circle cx="${x(i)}" cy="${y(a.band)}" r="3.5" fill="var(--c${k})"/>`).join('')}</svg>`; };
   return `<div class="page-h"><span class="eyebrow">${_('تقدّمك', 'Your progress')}</span><h1>${_('أين أنت الآن؟', 'Where are you now?')}</h1></div>
-  <div class="card"><div class="spread"><div class="skills4" style="flex:1">${['L', 'R', 'W', 'S'].map(k => `<div class="sk"><span class="stamp ${b[k] == null ? 'none' : 'c-' + k}"><b>${b[k] == null ? '?' : fmtBand(b[k])}</b><small>${k}</small></span><span class="lab">${skName(k)}</span></div>`).join('')}</div><div class="sk"><span class="stamp lg" style="color:var(--pri)"><b>${b.O == null ? '?' : fmtBand(b.O)}</b><small>overall</small></span><span class="lab">${_('الكلية', 'Overall')} · ${_('الهدف', 'target')} ${bandL(tg)}</span></div></div>
+  <div class="card"><div class="spread"><div class="skills4" style="flex:1">${['L', 'R', 'W', 'S'].map(k => `<div class="sk"><span class="stamp ${b[k] == null ? 'none' : 'c-' + k}"><b>${b[k] == null ? '?' : fmtBand(b[k])}</b><small>${k}</small></span><span class="lab">${skName(k)}</span></div>`).join('')}</div><div class="sk"><span class="stamp lg" style="color:var(--pri)"><b>${b.O == null ? '?' : fmtBand(b.O)}</b><small>${_('الكلية', 'overall')}</small></span><span class="lab">${_('الكلية', 'Overall')} · ${_('الهدف', 'target')} ${bandL(tg)}</span></div></div>
   <p class="small muted">${_('التقدير يعتمد على آخر ثلاث نتائج في كل مهارة، والاختبارات الكاملة لها وزن أكبر.', 'Estimates use your last three results in each skill; full tests weigh more.')}</p></div>
   <div class="g2">${['L', 'R'].map((k, i) => `<div class="card"><h2>${skName(k)}</h2>${series[i].length > 1 ? spark(series[i], k) : `<p class="empty">${_('تحتاج محاولتين على الأقل لرسم المنحنى.', 'Two attempts needed to draw the trend.')}</p>`}</div>`).join('')}</div>
   <div class="card"><h2>${_('أداؤك حسب نوع السؤال', 'Accuracy by question type')}</h2>${qtRows.length ? `<div class="bars">${qtRows.map(r => `<div class="bar-row"><span>${skName(r.sk)[0] === 'ا' ? '' : ''}${esc(qtName(r.t))} <small class="muted">${r.sk}</small></span><span class="meter"><i style="inline-size:${Math.round(r.p * 100)}%;background:${r.p < .6 ? 'var(--bad)' : r.p < .8 ? 'var(--gold)' : 'var(--ok)'}"></i></span><b class="num">${numL(Math.round(r.p * 100))}%</b></div>`).join('')}</div><p class="small">${qtRows[0].p < .7 ? `${_('ابدأ بدرس', 'Start with the lesson on')} <a href="#lesson/${LESSON_FOR[qtRows[0].t] || 'R-tfng'}">${esc(qtName(qtRows[0].t))}</a>.` : ''}</p>` : `<p class="empty">${_('حل اختبارًا لترى نقاط قوتك وضعفك.', 'Take a test to see your strengths and weaknesses.')}</p>`}</div>
@@ -1183,31 +1197,37 @@ function pageSettings() {
 
 /* ---------- upgrade ---------- */
 const BENEFITS = () => [
+  _('كل الشروحات المرئية التفاعلية للمهارات الـ١٦', 'All 16 interactive video explainers'),
   _('كل اختبارات الاستماع والقراءة الكاملة بصيغة الاختبار المحوسب، مع شرح كل إجابة بالعربية وموضعها في التسجيل أو النص', 'Every full Listening and Reading test in the computer-delivered format, each answer explained in Arabic with its exact location'),
   _('المصحح الذكي للكتابة والمحادثة: درجة لكل معيار وتصحيحات مرتّبة حسب أثرها', 'AI examiner for Writing and Speaking: a band for each criterion and fixes ordered by impact'),
   _('كل الدروس والإجابات النموذجية وبطاقات المفردات', 'All lessons, model answers and vocabulary cards'),
   _('خطة كاملة حتى يوم اختبارك، وصندوق أخطاء غير محدود بالتكرار المتباعد', 'A full plan to test day and an unlimited spaced-repetition mistake box'),
   _('اختبار محادثة كامل بممتحن صوتي', 'Full speaking mock with a voiced examiner')
 ];
-function openUpgrade(reason) { track('upgrade_view', reason); location.hash = '#upgrade'; }
+var UPG = { reason: null, plan: null, code: null };
+const UPG_WHY = { daily: ['أنهيت أسئلتك المجانية لهذا اليوم.', 'You have used today’s free questions.'], test: ['النماذج الكاملة متاحة في برو.', 'Full model tests are part of Pro.'], xp: ['هذا الشرح المرئي متاح في برو.', 'This video explainer is part of Pro.'], writing: ['هذه المهمة متاحة في برو.', 'This writing task is part of Pro.'], speaking: ['هذا الموضوع متاح في برو.', 'This speaking topic is part of Pro.'], lesson: ['هذا الدرس متاح في برو.', 'This lesson is part of Pro.'] };
+const PROMO = () => todayStr() <= '2026-11-15' ? 'LAUNCH30' : '';
+function openUpgrade(reason) { UPG.reason = reason; track('upgrade_view', reason); location.hash = '#upgrade'; }
 function pageUpgrade() {
   const c = window.CLOUD && CLOUD.config, plans = c ? c.plans : [], cur = c ? c.currency : 'SAR';
   if (PRO()) { const p = CLOUD.plan; return `<div class="card" style="max-width:620px"><h1>${_('أنت مشترك', 'You are subscribed')} ✓</h1><p>${p.until ? _('اشتراكك ساري حتى ', 'Your subscription runs until ') + numL(String(p.until).slice(0, 10)) : _('حساب مشرف', 'Admin account')}</p><a class="btn primary" href="#today">${_('إلى خطة اليوم', 'Go to today')}</a></div>`; }
   const q = new URLSearchParams(location.hash.split('?')[1] || '');
   setTimeout(bindUpgrade, 0);
-  return `${q.get('paid') ? `<div class="notice teal">${_('تمت عملية الدفع، جارٍ تفعيل اشتراكك…', 'Payment complete, activating your subscription…')}</div>` : q.get('failed') ? `<div class="notice pri">${_('لم تكتمل عملية الدفع. لم يُخصم أي مبلغ؛ حاول مرة أخرى.', 'The payment did not go through. You were not charged; please try again.')}</div>` : ''}
+  const why = UPG.reason && UPG_WHY[UPG.reason];
+  return `${why ? `<div class="notice gold">${ic('lock', 'i16')} ${_(why[0], why[1])} ${_('اشترك مرة واحدة دون تجديد تلقائي، وتابع من حيث توقفت.', 'Pay once, no auto-renewal, and carry on where you stopped.')}</div>` : ''}${q.get('paid') ? `<div class="notice teal">${_('تمت عملية الدفع، جارٍ تفعيل اشتراكك…', 'Payment complete, activating your subscription…')}</div>` : q.get('failed') ? `<div class="notice pri">${_('لم تكتمل عملية الدفع. لم يُخصم أي مبلغ؛ حاول مرة أخرى.', 'The payment did not go through. You were not charged; please try again.')}</div>` : ''}
   <div class="page-h"><span class="eyebrow">${_('أكاديمية الآيلتس برو', 'IELTS Academy Pro')}</span><h1>${_('كل ما تحتاجه لدرجتك، بسعر أقل من حصة خصوصية واحدة', 'Everything you need for your band, for less than one private lesson')}</h1><p>${_('رسوم اختبار الآيلتس في السعودية نحو ١٬٦٠٠ ريال؛ إعادة الاختبار بسبب نصف درجة هي الخسارة الحقيقية.', 'The IELTS fee in Saudi Arabia is about SAR 1,600; retaking for half a band is the real cost.')}</p></div>
   <div class="g2"><div class="card"><ul class="benefits">${BENEFITS().map(b => `<li>${ic('check', 'i20')}<span>${b}</span></li>`).join('')}</ul></div>
-  <div class="card"><div class="plans">${plans.map((p, i) => `<button class="plan-c ${i === plans.findIndex(x => x.best) || (i === 0 && !plans.some(x => x.best)) ? 'on' : ''}" data-plan="${p.id}"><span class="spread"><b>${esc(AR() ? p.ar : p.en)}</b>${p.best ? `<span class="chip pri">${_('الأوفر', 'Best value')}</span>` : ''}</span><span class="price">${numL(p.price)} <small style="font-size:.9rem">${cur === 'SAR' ? _('ريال', 'SAR') : cur}</small></span><span class="small muted">${_('دفعة واحدة · بدون تجديد تلقائي', 'One payment · no auto-renewal')} · ${numL(p.days)} ${_('يومًا', 'days')}</span></button>`).join('') || `<p class="empty">${_('جارٍ تحميل الباقات…', 'Loading plans…')}</p>`}</div>
-    <label class="fld">${_('رمز خصم (اختياري)', 'Discount code (optional)')}<input id="up-cp" class="ltr-text" autocomplete="off"></label><div id="up-q" class="small"></div>
+  <div class="card"><div class="plans">${plans.map((p, i) => `<button class="plan-c ${i === plans.findIndex(x => x.best) || (i === 0 && !plans.some(x => x.best)) ? 'on' : ''}" data-plan="${p.id}"><span class="spread"><b>${esc(AR() ? p.ar : p.en)}</b>${p.best ? `<span class="chip pri">${_('الأوفر', 'Best value')}</span>` : ''}</span><span class="price">${numL(p.price)} <small style="font-size:.9rem">${cur === 'SAR' ? _('ريال', 'SAR') : cur}</small></span>${p.days > 31 ? `<span class="small" style="color:var(--teal-t);font-weight:700">≈ ${numL(Math.round(p.price / (p.days / 30)))} ${_('ريال شهريًا', 'SAR / month')}</span>` : ''}<span class="small muted">${_('دفعة واحدة · بدون تجديد تلقائي', 'One payment · no auto-renewal')} · ${numL(p.days)} ${_('يومًا', 'days')}</span></button>`).join('') || `<p class="empty">${_('جارٍ تحميل الباقات…', 'Loading plans…')}</p>`}</div>
+    <label class="fld">${_('رمز خصم (اختياري)', 'Discount code (optional)')}<input id="up-cp" class="ltr-text" autocomplete="off" value="${esc(UPG.code != null ? UPG.code : PROMO())}"></label><div id="up-q" class="small"></div>
     <button class="btn primary block" id="up-go">${_('ادفع واشترك', 'Pay and subscribe')}</button>
     <p class="tiny muted center">${_('مدى · Apple Pay · STC Pay · فيزا/ماستركارد عبر Tap. استرداد كامل خلال ', 'mada · Apple Pay · STC Pay · Visa/Mastercard via Tap. Full refund within ')}${numL(c && c.refund ? c.refund.days : 7)} ${_('أيام.', 'days.')}</p></div></div>`;
 }
 function bindUpgrade() {
+  if (UPG.plan && $(`.plan-c[data-plan="${UPG.plan}"]`)) { $$('.plan-c').forEach(x => x.classList.toggle('on', x.dataset.plan === UPG.plan)); }
   let sel = ($('.plan-c.on') || {}).dataset; sel = sel ? sel.plan : null;
-  $$('.plan-c').forEach(b => b.onclick = () => { $$('.plan-c').forEach(x => x.classList.remove('on')); b.classList.add('on'); sel = b.dataset.plan; quote(); });
+  $$('.plan-c').forEach(b => b.onclick = () => { $$('.plan-c').forEach(x => x.classList.remove('on')); b.classList.add('on'); sel = UPG.plan = b.dataset.plan; quote(); });
   const cp = $('#up-cp'); let qt; if (cp) cp.oninput = () => { clearTimeout(qt); qt = setTimeout(quote, 500); };
-  async function quote() { const code = cp.value.trim(); if (!code || !signedIn()) { $('#up-q').textContent = ''; return; } try { const r = await CLOUD.quote(sel, code); $('#up-q').innerHTML = `<span style="color:var(--ok-t)">${_('خصم', 'Discount')} ${numL(r.pct)}% → <b>${numL(r.amount)}</b></span>`; } catch (e) { $('#up-q').innerHTML = `<span class="err">${_('الرمز غير صالح', 'Invalid code')}</span>`; } }
+  async function quote() { const code = cp.value.trim(); UPG.code = code; if (!code) { $('#up-q').textContent = ''; return; } if (!signedIn()) { $('#up-q').textContent = _('سيُطبَّق الرمز بعد إنشاء حسابك.', 'The code is applied after you create your account.'); return; } try { const r = await CLOUD.quote(sel, code); $('#up-q').innerHTML = `<span style="color:var(--ok-t)">${_('خصم', 'Discount')} ${numL(r.pct)}% → <b>${numL(r.amount)} ${_('ريال', 'SAR')}</b></span>`; } catch (e) { $('#up-q').innerHTML = `<span class="err">${_('الرمز غير صالح', 'Invalid code')}</span>`; } }
   const go = $('#up-go'); if (go) go.onclick = async () => {
     if (!signedIn()) return openAuth('signup', () => renderRoute());
     go.disabled = true;
@@ -1216,6 +1236,7 @@ function bindUpgrade() {
     go.disabled = false;
   };
   if (location.hash.includes('paid=1') && window.CLOUD) CLOUD.refresh();
+  if (cp && cp.value) quote();
 }
 
 /* ---------- account / auth ---------- */
@@ -1246,6 +1267,7 @@ function openAuth(mode = 'signup', after) {
   setTimeout(() => { const i = $('#au-n') || $('#au-e'); if (i) i.focus(); }, 50);
 }
 function closeModal() { const m = $('#acct'); m.hidden = true; m.innerHTML = ''; }
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#acct').hidden && !document.body.classList.contains('xp-open')) closeModal(); });
 async function openAccount() {
   if (!signedIn()) return openAuth('signin');
   const u = CLOUD.user, p = CLOUD.plan, m = $('#acct'); m.hidden = false; m.className = 'modal';
@@ -1324,6 +1346,7 @@ async function renderRoute() {
   if (r === 'progress') bindProgress();
   if (r === 'practice') bindPractice();
   if (r === 'tests') bindTestsHub();
+  if (r === 'mistakes') { const b = $('#mx-sess'); if (b) b.onclick = startSession; }
   if ((!r || r === 'today') && S.onboarded) { const b = $('#td-sess'); if (b) b.onclick = startSession; }
   $$('[data-lock]').forEach(x => { if (x.dataset.lock) x.addEventListener('click', () => track('limit_hit', x.dataset.lock)); });
   if (!window._noScroll) window.scrollTo(0, 0);
@@ -1344,8 +1367,17 @@ function mergeCloud(c) {
   out.days = [...new Set([...(c.days || []), ...(local.days || [])])].sort();
   out.vocab = Object.assign({}, c.vocab, local.vocab); out.para = Object.assign({}, c.para, local.para); out.lessons = Object.assign({}, c.lessons, local.lessons); out.details = Object.assign({}, c.details, local.details); out.drills = Object.assign({}, c.drills, local.drills);
   out.qt = local.attempts.length >= (c.attempts || []).length ? local.qt : c.qt;
-  if (!local.onboarded && c.onboarded) { out.onboarded = true; out.target = c.target; out.examDate = c.examDate; out.module = c.module; }
   out.since = [c.since, local.since].filter(Boolean).sort()[0] || todayStr();
+  // practice history: entries carry ts; older ones without ts come from whichever side has more of them
+  { const a = c.recent || [], b = local.recent || [], m = new Map(); [...a, ...b].filter(x => x && x.ts).forEach(x => m.set(x.ts, x));
+    const la = a.filter(x => x && !x.ts), lb = b.filter(x => x && !x.ts);
+    out.recent = [...(la.length >= lb.length ? la : lb), ...[...m.values()].sort((x, y) => x.ts - y.ts)].slice(-1500); }
+  out.dr = Object.assign({}, c.dr); for (const [k, v] of Object.entries(local.dr || {})) { const w = out.dr[k]; if (!w || (v.t || 0) >= (w.t || 0)) out.dr[k] = v; }
+  out.xp = Object.assign({}, c.xp); for (const [k, v] of Object.entries(local.xp || {})) { const w = out.xp[k]; if (!w || (v.score || 0) >= (w.score || 0)) out.xp[k] = v; }
+  out.skillSeen = Object.assign({}, c.skillSeen); for (const [k, v] of Object.entries(local.skillSeen || {})) if (!out.skillSeen[k] || v > out.skillSeen[k]) out.skillSeen[k] = v;
+  out.sessionDays = [...new Set([...(c.sessionDays || []), ...(local.sessionDays || [])])].sort();
+  { const d = todayStr(), n = x => x && x.d === d ? x.n : 0; out.dq = { d, n: Math.max(n(c.dq), n(local.dq)) }; }
+  if (c.onboarded) { out.onboarded = true; out.target = c.target; out.examDate = c.examDate; out.module = c.module; }
   S = out; try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {}
 }
 window.__app = { getS: () => S, summary, mergeCloud, render: () => { window._noScroll = true; renderRoute().finally(() => window._noScroll = false); }, cloudStatus };
@@ -1370,7 +1402,7 @@ function skillInfo(id) {
 }
 const pips = lv => `<span class="pips" aria-label="${LEVELS()[lv]}">${[1, 2, 3, 4].map(i => `<i class="${i <= lv ? 'on' : ''}"></i>`).join('')}</span>`;
 function recordAns(skill, ok, secs, id) {
-  S.recent.push({ s: skill, ok: !!ok, t: secs == null ? null : Math.round(secs), d: todayStr(), id: id || null });
+  S.recent.push({ s: skill, ok: !!ok, t: secs == null ? null : Math.round(secs), d: todayStr(), id: id || null, ts: Date.now() + Math.random() });
   if (S.recent.length > 1500) S.recent = S.recent.slice(-1500);
 }
 /* exam question types feed the matching skill */
@@ -1486,7 +1518,8 @@ async function startDrill({ skills, n = 10, title, session }) {
   else { const per = Math.ceil(n / skills.length); for (const s of skills) { const pool = await poolFor(s); let got = pickItems(pool, per); if (GEN[s]) while (got.length < per) got.push(GEN[s]()); if (GEN[s] && got.length >= per && Math.random() < .3) got[got.length - 1] = GEN[s](); items.push(...got); } items = items.slice(0, n); }
   if (!PRO()) items = items.slice(0, Math.max(1, dailyLeft()));
   if (!items.length) return toast(_('لا توجد تمارين لهذه المهارة بعد.', 'No drills for this skill yet.'));
-  DS = { title: title || _('جلسة تدريب', 'Practice session'), items, i: 0, res: [], t0: Date.now(), plays: 0, hint: false, done: false };
+  if (session && !PRO() && items.length < session.length) toast(_(`الجلسة اختُصرت إلى ${numL(items.length)} أسئلة حسب حدّك اليومي المجاني.`, `Session shortened to ${items.length} questions (your free daily limit).`));
+  DS = { sess: !!session, title: title || _('جلسة تدريب', 'Practice session'), items, i: 0, res: [], t0: Date.now(), plays: 0, hint: false, done: false };
   location.hash = '#drill';
 }
 function pageDrillRun() {
@@ -1521,7 +1554,8 @@ function drRender() {
 function drAnswer(it, val, btn) {
   if (DS.answered) return; DS.answered = true;
   const secs = (Date.now() - DS.qt0) / 1000;
-  const ok = it.kind === 'mcq' ? val === it.a : (it.a || []).some(a => nrm(a).replace(/[.!?]$/, '') === nrm(val).replace(/[.!?]$/, ''));
+  const cmp = x => nrm(x).replace(/[.,;:!?"“”()]/g, ' ').replace(/\s+/g, ' ').trim();
+  const ok = it.kind === 'mcq' ? val === it.a : (it.a || []).some(a => cmp(a) === cmp(val));
   if (it.kind === 'mcq') $$('#drill-stage .opt-btn').forEach(b => { b.disabled = true; if (b.dataset.k === it.a) b.classList.add('ok'); }), btn && !ok && btn.classList.add('bad');
   else { $('#dr-in').disabled = true; $('#dr-check').disabled = true; }
   DS.res.push({ it, ok, secs, hint: DS.hint });
@@ -1539,11 +1573,12 @@ function drAnswer(it, val, btn) {
   setTimeout(() => $('#dr-next') && $('#dr-next').focus({ preventScroll: true }), 50);
 }
 function drSummary() {
+  if (DS && DS.sess) { const d = todayStr(); S.sessionDays = S.sessionDays || []; if (!S.sessionDays.includes(d)) { S.sessionDays.push(d); save(); } }
   const el = $('#drill-stage'), R = DS.res, c = R.filter(r => r.ok).length, avg = R.length ? Math.round(R.reduce((a, r) => a + r.secs, 0) / R.length) : 0;
   const missedTech = [...new Set(R.filter(r => !r.ok).map(r => r.it.tech))].map(techOf).filter(Boolean);
   const skills = [...new Set(R.map(r => r.it.sk))];
   track('test_done', 'drill:' + skills.join(','), Math.round(100 * c / Math.max(1, R.length)));
-  el.innerHTML = `<div class="card center grid"><h2>${_('انتهت الجلسة', 'Session complete')}</h2><div class="stamp lg" style="margin:auto;color:var(--pri)"><b>${numL(c)}/${numL(R.length)}</b><small>score</small></div>
+  el.innerHTML = `<div class="card center grid"><h2>${_('انتهت الجلسة', 'Session complete')}</h2><div class="stamp lg" style="margin:auto;color:var(--pri)"><b>${numL(c)}/${numL(R.length)}</b><small>${_('النتيجة', 'score')}</small></div>
     <p class="muted">${_('متوسط الوقت', 'Average time')}: ${numL(avg)} ${_('ثانية', 's')} · ${_('تلميحات مستخدمة', 'hints used')}: ${numL(R.filter(r => r.hint).length)}</p>
     <div class="list" style="text-align:start">${skills.map(s => { const i = skillInfo(s), sk = SKL.find(x => x.id === s); return `<a class="li" href="#skill/${s}"><span class="li-t"><b>${esc(sk ? L(sk.title) : s)}</b><small class="muted">${LEVELS()[i.level]} · ${i.acc != null ? numL(Math.round(i.acc * 100)) + '%' : ''}</small></span>${pips(i.level)}</a>`; }).join('')}</div>
     ${missedTech.length ? `<div class="notice gold" style="text-align:start"><b>${_('راجع هذه التقنيات', 'Review these techniques')}:</b><ul>${missedTech.map(t => `<li><b>${esc(L(t.t))}</b> — ${esc(L(t.d))}</li>`).join('')}</ul></div>` : ''}
@@ -1561,7 +1596,6 @@ async function startSession() {
   for (const s of weak) { const pool = (await poolFor(s)).filter(d => !items.includes(d)); items.push(...pickItems(pool, 4)); if (GEN[s]) items.push(GEN[s]()); }
   const others = shuffle(SKL.map(s => s.id).filter(s => !weak.includes(s))).slice(0, 4);
   for (const s of others) { const pool = (await poolFor(s)).filter(d => !items.includes(d)); items.push(...pickItems(pool, 1)); }
-  S.sessionDays = S.sessionDays || []; if (!S.sessionDays.includes(now)) S.sessionDays.push(now); save();
   startDrill({ session: items.slice(0, 15), title: _('جلسة اليوم', 'Today’s session') });
 }
 
@@ -1570,7 +1604,7 @@ async function pagePractice() {
   await skillsData();
   const dl = dailyLeft();
   return `<div class="page-h"><span class="eyebrow">${_('التدريب', 'Practice')}</span><h1>${_('تدرّب على كل مهارة حتى تتقنها', 'Practise every skill until you master it')}</h1><p>${_('أسئلة قصيرة بالإنجليزية، ولكل سؤال تلميح بالعربية وتقنية واضحة وشرح للحيلة بعد الإجابة. أخطاؤك تعود إليك تلقائيًا حتى تتقنها.', 'Short English questions, each with an Arabic hint, a named technique and an explanation of the trick. Your mistakes come back automatically until you master them.')}</p></div>
-  <div class="card session-card"><div><span class="eyebrow">${_('جلسة اليوم', 'Today’s session')}</span><h2>${_('١٥ سؤالًا مختارة لك', '15 questions picked for you')}</h2><p class="small muted">${_('أخطاء مستحقة + أضعف مهارتين + أسئلة منوّعة', 'Due mistakes + your two weakest skills + a mix')}</p>${dl !== Infinity && signedIn() ? `<p class="small">${_(`متبقٍ لك اليوم ${numL(dl)} سؤالًا مجانيًا`, `${dl} free questions left today`)}</p>` : ''}</div><button class="btn primary" id="pr-sess">${_('ابدأ الجلسة', 'Start session')}</button></div>
+  <div class="card session-card"><div><span class="eyebrow">${_('جلسة اليوم', 'Today’s session')}</span><h2>${_('١٥ سؤالًا مختارة لك', '15 questions picked for you')}</h2><p class="small muted">${_('أخطاء مستحقة + أضعف مهارتين + أسئلة منوّعة', 'Due mistakes + your two weakest skills + a mix')}</p>${dl !== Infinity && signedIn() ? `<p class="small">${_(`متبقٍ لك اليوم ${numL(dl)} ${dl >= 3 && dl <= 10 ? 'أسئلة مجانية' : 'سؤالًا مجانيًا'}`, `${dl} free questions left today`)}</p>` : ''}</div><button class="btn primary" id="pr-sess">${_('ابدأ الجلسة', 'Start session')}</button></div>
   ${SEC_ORDER.map(sec => `<div class="card"><h2 class="c-${sec}">${ic(sec, 'i20')} ${skName(sec)}</h2><div class="list">${SKL.filter(s => s.sec === sec).map(s => { const i = skillInfo(s.id); return `<div class="li"><span class="li-t"><b>${esc(L(s.title))}</b><small class="muted">${LEVELS()[i.level]}${i.acc != null ? ' · ' + numL(Math.round(i.acc * 100)) + '%' : ''}</small></span>${pips(i.level)}<a class="btn ghost sm" href="#skill/${s.id}">${_('الدرس', 'Lesson')}</a><button class="btn sm" data-drill="${s.id}">${_('تدرّب', 'Practise')}</button></div>`; }).join('')}</div>
     ${sec === 'W' ? `<a class="btn ghost sm" href="#writing">${ic('W')} ${_('استوديو الكتابة: اكتب مقالة كاملة', 'Writing studio: write a full task')}</a>` : sec === 'S' ? `<a class="btn ghost sm" href="#speaking">${ic('S')} ${_('غرفة المحادثة: تحدّث وسجّل', 'Speaking room: speak and record')}</a>` : ''}</div>`).join('')}
   <div class="g3"><a class="card tile" href="#mistakes"><h3>${ic('box')} ${_('صندوق الأخطاء', 'Mistake box')}</h3><p class="small muted">${_('أسئلة الاختبارات التي أخطأت فيها', 'Test questions you got wrong')}</p></a><a class="card tile" href="#para"><h3>${ic('globe')} ${_('مدرّب إعادة الصياغة', 'Paraphrase trainer')}</h3></a><a class="card tile" href="#words"><h3>${ic('words')} ${_('بطاقات المفردات', 'Vocabulary cards')}</h3></a></div>`;

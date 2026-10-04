@@ -88,13 +88,13 @@ B({ key:'xp-L-detail', sk:'L-detail', ord:10, title:['الأرقام والته�
       g1:{type:'text',x:200,y:162,s:24,text:'cot'}, k1:{type:'check',x:290,y:156,s:.8},
       g2:{type:'text',x:430,y:162,s:24,text:'a cot'}, k2:{type:'cross',x:530,y:156,s:.8},
       g3:{type:'text',x:200,y:226,s:24,text:'£45'}, k3:{type:'check',x:290,y:220,s:.8},
-      g4:{type:'text',x:430,y:226,s:24,text:'14th August'}, k4:{type:'cross',x:560,y:220,s:.8},
+      g4:{type:'text',x:430,y:226,s:24,text:'14th August'}, k4:{type:'cross',x:560,y:220,s:.8}, r4:{type:'text',x:450,y:258,s:16,cls:'t-ink2',text:['لا تكرّر كلمة مطبوعة','don’t repeat printed words']},
       tip:{type:'note',x:320,y:302,w:470,h:60,c:'n2',size:21,rot:-1,text:['تجاوز الحدّ = خطأ، حتى لو كانت الكلمة صحيحة','Over the limit = wrong, even if the word is right']},
     },
     beats:[
-      { say:['اقرأ التعليمات قبل الاستماع: كلمة واحدة و، أو رقم.','Read the instructions first: one word and, or a number.'], show:['ins'] },
+      { say:['اقرأ التعليمات قبل الاستماع: كلمة واحدة، أو رقم، أو كلاهما.','Read the instructions first: one word, a number, or both.'], show:['ins'] },
       { say:['cot كلمة واحدة، صحيحة. أما a cot فكلمتان، فتُحسب خطأ.','“Cot” is one word: correct. “A cot” is two words: wrong.'], show:['g1','k1','g2','k2'], gap:.25 },
-      { say:['ورمز الجنيه مع الرقم يُحسب رقمًا واحدًا. لكن إذا كان August مكتوبًا في النموذج فلا تكرّره.','A currency sign with a number counts as one number. But if “August” is already printed, do not write it again.'], show:['g3','k3','g4','k4'], gap:.25 },
+      { say:['ورمز الجنيه مع الرقم يُحسب رقمًا واحدًا. لكن إذا كان August مكتوبًا في النموذج فلا تكرّره.','A currency sign with a number counts as one number. But if “August” is already printed, do not write it again.'], show:['g3','k3','g4','k4','r4'], gap:.25 },
       { say:['تذكّر: تجاوز عدد الكلمات خطأ كامل، حتى لو كانت المعلومة صحيحة.','Remember: going over the limit loses the mark, even if the information is right.'], show:['tip'] },
     ]},
   ],
@@ -248,13 +248,13 @@ B({ key:'xp-L-notes', sk:'L-notes', ord:10, title:['المحاضرة: اتبع �
     items:{
       g:{type:'text',x:320,y:96,s:23,text:'made glass ______ and everyday'},
       p:{type:'note',x:320,y:166,w:380,h:56,c:'n0',size:21,rot:-1,text:['بعد made glass نحتاج صفة','After “made glass” we need an adjective']},
-      h:{type:'text',x:320,y:236,s:21,text:'“…vessels could be made quickly and cheaply…”'},
+      h:{type:'text',x:320,y:236,s:21,text:'“…glass became cheap, and it was soon an everyday material…”'},
       a:{type:'note',x:320,y:300,w:200,h:54,c:'n3',size:26,rot:2,text:'cheap'},
     },
     beats:[
       { say:['قبل الاستماع، اسأل: أي نوع من الكلمات يناسب الفراغ؟ هنا: made glass ثم فراغ ثم and everyday.','Before you listen, ask what kind of word fits. Here: “made glass”, a gap, “and everyday”.'], show:['g'] },
       { say:['القواعد تقول: نحتاج صفة، مثل everyday.','Grammar says we need an adjective, like “everyday”.'], show:['p'] },
-      { say:['المحاضر يقول: quickly and cheaply. لكن الفراغ يحتاج صفة، فنكتب cheap. انتبه أن الكلمة قد تتغير قليلًا لتناسب الجملة.','The lecturer says “quickly and cheaply”, but the gap needs an adjective, so we write “cheap”. Check the word fits the sentence.'], show:['h','a'] },
+      { say:['المحاضر يقول: glass became cheap. والفراغ يحتاج صفة، فنكتب cheap. والقاعدة: الجواب هو الكلمة نفسها التي تسمعها، دون تغيير صيغتها.','The lecturer says “glass became cheap”, and the gap needs an adjective: cheap. The answer is always the exact word you hear.'], show:['h','a'] },
     ]},
   { t:['دورك','Your turn'],
     items:{

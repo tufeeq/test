@@ -139,7 +139,7 @@ B({ key:'xp-S-p3', sk:'S-p3', ord:10, title:['الجزء الثالث: رأي ث
     beats:[
       { say:['ابدأ برأيك: I think people read less nowadays.','Start with your opinion: “I think people read less nowadays.”'], show:['o'] },
       { say:['ثم السبب: mainly because phones offer quicker entertainment. ثم مثال.','Then a reason, “mainly because phones offer quicker entertainment”, then an example.'], show:['r','e'], gap:.4 },
-      { say:['ولإجابة بمستوى سبعة، أضف الوجهة الأخرى: Having said that, audiobooks are becoming popular.','For band 7, add the other side: “Having said that, audiobooks are becoming popular.”'], show:['c','tip'] },
+      { say:['ولتطوّر إجابتك أكثر، يمكنك أن تضيف الوجهة الأخرى: Having said that, audiobooks are becoming popular.','To develop your answer further, you can add the other side: “Having said that, audiobooks are becoming popular.”'], show:['c','tip'] },
     ]},
   { t:['لغة الاحتمال','Language of possibility'],
     items:(()=>{ const o={}; ['It’s likely that…','It might be because…','I’d say that…','It depends on…'].forEach((w,i)=>{ o['w'+i]={type:'note',x:[180,460][i%2],y:i<2?120:200,w:250,h:54,c:['n0','n2','n3','n1'][i],size:19,rot:i%2?2:-2,text:w}; });

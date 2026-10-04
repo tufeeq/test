@@ -1,3 +1,4 @@
+html{scroll-padding-top:80px}
 .lp{padding-bottom:0}
 .wrap{max-width:1180px;margin:0 auto;padding-inline:var(--gut)}
 .lp-nav{display:none;gap:4px;flex:1;justify-content:center}

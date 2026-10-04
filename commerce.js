@@ -10,13 +10,14 @@ const EVENT_TYPES = new Set(["open", "diag_start", "diag_done", "xp_start", "xp_
 // Defaults: every value here can be changed from the admin dashboard (settings table).
 const DEFAULTS = {
   plans: [
-    { id: "m1", ar: "شهري", en: "Monthly", days: 30, price: 59, active: true },
-    { id: "m3", ar: "باقة حتى الاختبار (٣ أشهر)", en: "Until test day (3 months)", days: 90, price: 139, active: true, best: true }
+    { id: "m1", ar: "شهر واحد", en: "1 month", days: 30, price: 69, active: true },
+    { id: "m3", ar: "٣ أشهر", en: "3 months", days: 90, price: 149, active: true, best: true },
+    { id: "m6", ar: "٦ أشهر (حتى الاختبار)", en: "6 months (to test day)", days: 180, price: 199, active: true }
   ],
   currency: "SAR",
   refund: { on: true, days: 7 },
   free: {
-    xp: [],                  // lessons open to everyone (ids); empty = the first 4 lessons
+    xp: FREE_XP_DEFAULT.slice(), // explainers open to everyone (ids); one per section by default
     dailyQuestions: 15,      // practice questions per day
     cardsFrac: 0.25,         // share of vocabulary cards
     planWeeks: 2,            // weeks of the study plan
@@ -27,7 +28,7 @@ const DEFAULTS = {
     aiSpeaking: 1            // AI-marked speaking answers for free users (lifetime)
   },
   pro: { aiWritingDaily: 5, aiSpeakingDaily: 10 },
-  banner: { on: false, ar: "", en: "", tone: "info" },
+  banner: { on: true, ar: "عرض الإطلاق: خصم ٣٠٪ على كل الباقات بالرمز LAUNCH30 حتى ١٥ نوفمبر", en: "Launch offer: 30% off every plan with code LAUNCH30 until 15 November", tone: "info" },
   trialReportDays: 14
 };
 
@@ -56,6 +57,7 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
       CREATE INDEX IF NOT EXISTS events_type_idx ON events(type, day);
       CREATE INDEX IF NOT EXISTS events_user_idx ON events(user_id);
       CREATE UNIQUE INDEX IF NOT EXISTS events_open_once ON events(user_id, day) WHERE type='open';
+      INSERT INTO coupons(code,pct,expires_at,note) VALUES ('LAUNCH30',30,'2026-11-15T23:59:59+03:00','launch offer') ON CONFLICT (code) DO NOTHING;
       CREATE TABLE IF NOT EXISTS admin_audit (
         id BIGSERIAL PRIMARY KEY, admin_email TEXT NOT NULL, action TEXT NOT NULL, target TEXT, meta JSONB, at TIMESTAMPTZ NOT NULL DEFAULT now());
     `);
@@ -67,7 +69,11 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
   async function loadCfg(force) {
     if (!force && Date.now() - cfgAt < 30e3) return CFG;
     const r = await pool.query("SELECT value FROM settings WHERE key='config'");
-    CFG = merge(JSON.parse(JSON.stringify(DEFAULTS)), r.rows[0] ? r.rows[0].value : {}); cfgAt = Date.now();
+    const stored = r.rows[0] ? JSON.parse(JSON.stringify(r.rows[0].value)) : {};
+    // configs saved before the October 2026 repricing still carry the old default plans/banner: let the new defaults apply
+    if (Array.isArray(stored.plans) && stored.plans.map(p => p.id + ':' + p.price).join(',') === "m1:59,m3:139") delete stored.plans;
+    if (stored.banner && !stored.banner.on && !stored.banner.ar && !stored.banner.en) delete stored.banner;
+    CFG = merge(JSON.parse(JSON.stringify(DEFAULTS)), stored); cfgAt = Date.now();
     return CFG;
   }
   const publicCfg = c => ({
@@ -359,7 +365,7 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
     audit(req, "coupon_delete", req.params.code); res.json({ ok: true });
   });
 
-  A("get", "/settings", async (req, res) => { const c = await loadCfg(true); res.json({ config: c, defaults: DEFAULTS, xpKeys: [], tap: !!process.env.TAP_SECRET_KEY }); });
+  A("get", "/settings", async (req, res) => { const c = await loadCfg(true); res.json({ config: c, defaults: DEFAULTS, xpKeys: xpbundle.allKeys(), tap: !!process.env.TAP_SECRET_KEY }); });
   A("put", "/settings", async (req, res) => {
     const v = req.body && req.body.config; if (!v || typeof v !== "object") return fail(res, 400, "bad-config");
     const c = merge(JSON.parse(JSON.stringify(DEFAULTS)), v);

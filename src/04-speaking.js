@@ -20,6 +20,7 @@ let SP = null;
 async function pageSpeak(mode, id) {
   const [p1, p2] = await Promise.all([content('part1'), content('part23')]);
   let steps = [], title = '';
+  if ((mode === 'p1' && p1.items.findIndex(x => x.id === id) >= freeCount(p1.items.length)) || (mode === 'p2' && p2.items.findIndex(x => x.id === id) >= freeCount(p2.items.length))) { setTimeout(() => openUpgrade('speaking'), 0); return pageSpeaking(); }
   if (mode === 'p1') { const t = p1.items.find(x => x.id === id); if (!t) return ''; title = L(t.topic); steps = t.qs.map((q, i) => ({ part: 1, clip: `${t.id}-q${i}`, text: q.q, model: q.model, tip: q.tip, max: 45 })); steps.unshift({ part: 1, clip: `${t.id}-t`, text: `Let’s talk about ${t.topic.en.toLowerCase()}.`, info: true }); }
   else if (mode === 'p2') { const t = p2.items.find(x => x.id === id); if (!t) return ''; title = t.card.title; steps = [{ part: 2, clip: 'p2intro', text: 'Now I’m going to give you a topic…', info: true }, { part: 2, card: t.card, notes: t.notes, clip: `${t.id}-card`, text: t.card.title, model: t.model, prep: 60, max: 120 }, { part: 3, clip: 'p3intro', text: 'We’ve been talking about this topic…', info: true }, ...t.p3.map((q, i) => ({ part: 3, clip: `${t.id}-p3q${i}`, text: q.q, model: q.model, max: 75 }))]; }
   else if (mode === 'mock') {
@@ -108,6 +109,7 @@ function spReview(ans) {
     ${metricsHTML(ans.m, s.part)}
     <details><summary style="cursor:pointer;font-weight:600">${_('إجابة نموذجية (Band 8)', 'Model answer (band 8)')}</summary><div class="model" style="margin-top:6px">${esc(s.model || '')}</div>${s.tip ? `<p class="small">${esc(L(s.tip))}</p>` : ''}</details>
     <div id="sp-ai"></div>
+    ${cfg && !cfg.ai ? `<p class="small muted">${_('التقييم الذكي للمحادثة غير متاح مؤقتًا؛ قارن إجابتك بالإجابة النموذجية والمقاييس أعلاه.', 'AI speaking feedback is temporarily unavailable; compare with the model answer and the metrics above.')}</p>` : ''}
     <div class="row">${cfg && cfg.ai && ans.text ? `<button class="btn sm" id="sp-mark">${ic('spark')} ${_('قيّم إجابتي بالذكاء الاصطناعي', 'AI feedback')}</button>` : ''}<button class="btn ghost sm" id="sp-again">${ic('refresh')} ${_('أعد المحاولة', 'Try again')}</button><button class="btn primary sm" id="sp-next">${_('التالي', 'Next')} ${ic('arrow')}</button></div>`;
   $('#sp-again').onclick = () => { SP.answers.pop(); spReady(s); };
   $('#sp-next').onclick = () => { SP.i++; spRender(); };

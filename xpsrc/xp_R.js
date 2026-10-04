@@ -46,7 +46,7 @@ B({ key:'xp-R-tfng', sk:'R-tfng', ord:10, title:['صح / خطأ / غير مذك�
       w2:{type:'note',x:280,y:110,w:140,h:52,c:'n1',size:22,rot:2,text:'always'},
       w3:{type:'note',x:430,y:110,w:140,h:52,c:'n1',size:22,rot:-1,text:'only'},
       w4:{type:'note',x:560,y:110,w:110,h:52,c:'n1',size:22,rot:2,text:'never'},
-      t:{type:'text',x:320,y:200,s:20,text:'Text: “Some species can survive the winter.”'},
+      t:{type:'text',x:320,y:200,s:20,text:'Text: “Only some species can survive the winter.”'},
       st:{type:'text',x:320,y:244,s:20,text:'Statement: “All species survive the winter.”'},
       a:{type:'note',x:320,y:306,w:170,h:52,c:'n1',size:22,rot:-1,text:'FALSE'},
     },
@@ -94,7 +94,7 @@ B({ key:'xp-R-locate', sk:'R-locate', ord:10, title:['المسح السريع: �
     ]},
   { t:['اختر الكلمة التي تلمع','Pick the word that stands out'],
     items:{
-      q:{type:'text',x:320,y:84,s:21,text:'In which year did Kramer use mirrors in his experiment?'},
+      q:{type:'text',x:320,y:84,s:21,text:'In which decade did Kramer use mirrors in his experiment?'},
       k1:{type:'note',x:220,y:150,w:150,h:50,c:'n0',size:22,rot:-2,text:'Kramer'},
       k2:{type:'note',x:420,y:150,w:150,h:50,c:'n0',size:22,rot:2,text:'mirrors'},
       k3:{type:'note',x:320,y:220,w:220,h:50,c:'surface2',size:20,rot:0,text:'experiment'},

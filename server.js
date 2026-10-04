@@ -284,9 +284,9 @@ app.get("/audio/index.json", wrap(async (req, res) => {
   const r = await pool.query("SELECT id FROM narration ORDER BY id");
   res.set("Cache-Control", "no-cache").json(r.rows.map(x => x.id));
 }));
-app.get("/audio/:id.mp3", wrap(async (req, res) => {
+app.get("/audio/:id.mp3", wrap(async (req, res, next) => {
   const r = await pool.query("SELECT mime, data, updated_at FROM narration WHERE id=$1", [req.params.id]);
-  const row = r.rows[0]; if (!row) return res.status(404).end();
+  const row = r.rows[0]; if (!row) return next();   // not a narration clip: let static files (test audio) answer
   const buf = row.data, total = buf.length;
   res.set({ "Content-Type": row.mime, "Accept-Ranges": "bytes", "Cache-Control": "public, max-age=604800, immutable", "Last-Modified": new Date(row.updated_at).toUTCString() });
   const m = /^bytes=(\d*)-(\d*)$/.exec(req.get("Range") || "");   // Safari/iOS need range requests for audio

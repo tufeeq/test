@@ -5,7 +5,7 @@ const todayStr = () => { const d = new Date(); return d.getFullYear() + '-' + St
 const addDays = (d, n) => { const x = new Date(d + 'T12:00:00'); x.setDate(x.getDate() + n); return x.getFullYear() + '-' + String(x.getMonth() + 1).padStart(2, '0') + '-' + String(x.getDate()).padStart(2, '0'); };
 const daysBetween = (a, b) => Math.round((new Date(b + 'T12:00:00') - new Date(a + 'T12:00:00')) / 864e5);
 const DEF = () => ({ lang: 'ar', module: 'ac', target: 65, examDate: '', planStart: todayStr(), since: todayStr(), onboarded: false,
-  attempts: [], mistakes: [], writing: [], speaking: [], vocab: {}, para: {}, drills: {}, lessons: {}, days: [], qt: {}, dq: null, details: {}, notes: {} });
+  attempts: [], mistakes: [], writing: [], speaking: [], vocab: {}, para: {}, drills: {}, lessons: {}, days: [], qt: {}, dq: null, details: {}, notes: {}, recent: [], dr: {}, xp: {}, skillSeen: {}, sessionDays: [] });
 let S = (() => { try { const r = localStorage.getItem(KEY); if (r) return Object.assign(DEF(), JSON.parse(r)); } catch (e) {} return DEF(); })();
 { try { const u = new URL(location.href), q = u.searchParams.get('lang'); if (q === 'en' || q === 'ar') { S.lang = q; u.searchParams.delete('lang'); history.replaceState(null, '', u.pathname + (u.search || '') + u.hash); } } catch (e) {} }
 let STORE_OK = true;
@@ -122,6 +122,8 @@ function syncFree() { const c = window.CLOUD && CLOUD.config && CLOUD.config.fre
 const PRO = () => !!(window.CLOUD && CLOUD.isPro && CLOUD.isPro());
 const signedIn = () => !!(window.CLOUD && CLOUD.user);
 const track = (type, k, v) => { try { window.CLOUD && CLOUD.track && CLOUD.track(type, k, v); } catch (e) {} };
+/* Arabic count noun: 1 سؤال, 2 سؤالان, 3–10 أسئلة, 11+ سؤالًا */
+function qWord(n) { return n === 1 ? 'سؤال' : n === 2 ? 'سؤالان' : n >= 3 && n <= 10 ? 'أسئلة' : 'سؤالًا'; }
 function dailyUsed() { return S.dq && S.dq.d === todayStr() ? S.dq.n : 0; }
 function useDaily(n) { const d = todayStr(); if (!S.dq || S.dq.d !== d) S.dq = { d, n: 0 }; S.dq.n += n; }
 const dailyLeft = () => PRO() ? Infinity : Math.max(0, (+FREE.dailyQuestions || 0) - dailyUsed());

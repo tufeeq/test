@@ -213,7 +213,7 @@ function playPart(i) {
     } else { EX.checking = true; EX.left = 120; toast('You now have 2 minutes to check your answers.', 4000); renderExam(); }
   };
   a.onerror = () => toast(_('تعذّر تحميل التسجيل الصوتي.', 'The recording could not be loaded.'), 4000);
-  a.play().catch(() => { toast(_('اضغط تشغيل لبدء التسجيل', 'Press play to start the recording'), 4000); EX.needTap = true; renderExam(); });
+  a.play().catch(e => { if (e && e.name === 'NotAllowedError') { toast(_('اضغط تشغيل لبدء التسجيل', 'Press play to start the recording'), 4000); EX.needTap = true; renderExam(); } else toast(_('تعذّر تحميل التسجيل. تحقق من اتصالك ثم أعد المحاولة.', 'The recording could not be loaded. Check your connection and try again.'), 5000); });
 }
 
 /* ---------- main exam screen ---------- */
@@ -229,13 +229,16 @@ function renderExam(keepScroll) {
     <span class="clock" id="ex-clock">${R ? '' : '⏱ <span></span>'}</span>${audioUI}
     <button id="ex-help" title="Arabic help">${S.helpAr !== false ? 'ع ✓' : 'ع'}</button><button id="ex-big" title="Text size">A+</button><button id="ex-con" title="Contrast">◐</button><button id="ex-x">${R ? _('إغلاق', 'Close') : _('خروج', 'Exit')}</button></div>
   <div class="ex-part"><b>${partLabel}</b>${sec.skill === 'L' ? esc(sec.data.intro) + ' ' : ''}Questions ${range}${sec.skill === 'R' ? ` · ${_('اقرأ النص وأجب عن الأسئلة', 'Read the text and answer the questions')}` : ''}</div>
-  <div class="ex-body ${sec.skill === 'R' ? 'split' : ''}">
+  ${sec.skill === 'R' ? `<div class="ex-tg"><button data-tg="p" class="${EX.showQ ? '' : 'on'}">Passage</button><button data-tg="q" class="${EX.showQ ? 'on' : ''}">Questions</button></div>` : ''}
+  <div class="ex-body ${sec.skill === 'R' ? 'split' : ''}${EX.showQ ? ' show-q' : ''}">
     ${sec.skill === 'R' ? `<div class="ex-pane passage" id="ex-passage">${passage}</div><div class="ex-pane questions">` : '<div class="ex-pane full">'}
       ${sec.data.groups.map(g => groupHTML(g, sec)).join('')}${transcript}
       ${R ? `<div style="padding:10px 0 30px"><button class="nb" id="ex-back-res" style="font:inherit;border:1px solid #888;border-radius:4px;padding:8px 14px;background:#fff;cursor:pointer">← ${_('ملخص النتيجة', 'Result summary')}</button></div>` : ''}
     </div></div>
   <div class="ex-nav">${navHTML()}<div class="acts">${R ? '' : `<button id="ex-flag">⚑ Review</button>`}${EX.cur > 0 ? '<button id="ex-prev">◀</button>' : ''}${EX.cur < EX.secs.length - 1 && (R || EX.secs[EX.cur + 1].skill === sec.skill || EX.mode === 'practice') ? '<button id="ex-next">▶</button>' : ''}${R ? '' : '<button class="go" id="ex-submit">Submit</button>'}</div></div>`;
   bindExam();
+  ex.querySelectorAll('[data-tg]').forEach(b => b.onclick = () => { EX.showQ = b.dataset.tg === 'q'; ex.querySelector('.ex-body').classList.toggle('show-q', EX.showQ); ex.querySelectorAll('[data-tg]').forEach(x => x.classList.toggle('on', x === b)); window.scrollTo(0, 0); });
+  { const h = ex.querySelector('.ex-nav .pg.here'); if (h) try { h.scrollIntoView({ inline: 'center', block: 'nearest' }); } catch (e) {} }
   const q2 = ex.querySelector('.ex-pane.questions, .ex-pane.full'); if (q2 && y) q2.scrollTop = y;
   drawClock();
 }
@@ -248,7 +251,7 @@ function navHTML() {
   return EX.secs.map((s, si) => {
     const nums = []; for (const g of s.data.groups) for (let n = g.from; n <= g.to; n++) nums.push(n);
     const lab = s.skill === 'L' ? 'Part ' + s.data.part : 'Passage ' + s.pn;
-    return `<div class="pg"><span>${lab}</span>${nums.map(n => { const k = s.key + ':' + n; let cls = '';
+    return `<div class="pg${si === EX.cur ? ' here' : ''}"><span>${lab}</span>${nums.map(n => { const k = s.key + ':' + n; let cls = '';
       if (EX.review) { const r = EX.res[k] || EX.res[Object.keys(EX.res).find(x => x.startsWith(s.key + ':g') && x.endsWith(':' + n))]; cls = r && r.ok ? 'ok' : 'no'; }
       else { const g = s.data.groups.find(g => n >= g.from && n <= g.to); const v = g.type === 'mcq2' ? (EX.ans[s.key + ':g' + g.from] || []).length > n - g.from : EX.ans[k]; if (v) cls = 'ans'; if (EX.flags.has(k)) cls += ' flag'; }
       return `<button class="nb ${cls} ${si === EX.cur && EX.focus === n ? 'cur' : ''}" data-go="${si}:${n}">${n}</button>`; }).join('')}</div>`;
@@ -277,7 +280,7 @@ function bindExam() {
   const sb = ex.querySelector('#ex-submit'); if (sb) sb.onclick = () => { const un = unanswered(); if (confirm(un ? `${un} question(s) unanswered. Submit anyway?` : 'Submit your answers and see your result?')) finishTest(false); };
   const br = ex.querySelector('#ex-back-res'); if (br) br.onclick = () => renderResult();
   ex.querySelectorAll('[data-ev-line]').forEach(b => b.onclick = () => { const [pi, li] = b.dataset.evLine.split(':').map(Number); playLine(pi, li); });
-  ex.querySelectorAll('[data-ev-quote]').forEach(b => b.onclick = () => showEvidence(b.dataset.evQuote));
+  ex.querySelectorAll('[data-ev-quote]').forEach(b => b.onclick = () => { if (EX.showQ && matchMedia('(max-width:820px)').matches) { EX.showQ = false; ex.querySelector('.ex-body').classList.remove('show-q'); ex.querySelectorAll('[data-tg]').forEach(x => x.classList.toggle('on', x.dataset.tg === 'p')); } showEvidence(b.dataset.evQuote); });
   ex.querySelectorAll('.q, .gapw').forEach(q => q.addEventListener('click', () => { const m = /q-[^-]+-(\d+)/.exec(q.id || ''); if (m) { EX.focus = +m[1]; } }, true));
   const ps = ex.querySelector('#ex-passage');
   if (ps && !EX.review) {
@@ -299,6 +302,7 @@ function goQ(si, n) {
     if (!EX.review && EX.mode === 'exam' && a.skill !== b.skill) return toast(_('لا يمكن العودة إلى قسم آخر أثناء الاختبار.', 'You cannot move to another section during the test.'));
     saveHL(); EX.cur = si; renderExam();
   }
+  if (EX.secs[si].skill === 'R' && !EX.showQ && matchMedia('(max-width:820px)').matches) { EX.showQ = true; const bd = $('#exam .ex-body'); if (bd) bd.classList.add('show-q'); $$('#exam [data-tg]').forEach(x => x.classList.toggle('on', x.dataset.tg === 'q')); }
   EX.focus = n; const el = document.getElementById(`q-${EX.secs[si].key}-${n}`) || $(`#exam [data-from="${n}"]`);
   if (el) { el.scrollIntoView({ block: 'center', behavior: 'smooth' }); const inp = el.querySelector('input,select'); if (inp && !EX.review) inp.focus({ preventScroll: true }); }
   updNav();

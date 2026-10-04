@@ -76,6 +76,7 @@ let WS = null;
 async function pageWrite(task, id) {
   const file = task === 't1a' ? 'task1_academic' : task === 't1g' ? 'task1_gt' : 'task2';
   const d = await content(file); const it = d.items.find(x => x.id === id); if (!it) return `<p class="empty">${_('غير موجود', 'Not found')}</p>`;
+  if (d.items.indexOf(it) >= freeCount(d.items.length)) { setTimeout(() => openUpgrade('writing'), 0); return pageWriting(); }
   await errorsData();
   const draftKey = 'w:' + id, draft = (S.notes || {})[draftKey] || '';
   WS = { task, it, start: null, secs: task === 't2' ? 2400 : 1200 };
@@ -118,6 +119,7 @@ async function submitWriting(text) {
     toast(_('تعذّر الوصول إلى المصحح الذكي؛ إليك التقييم الذاتي.', 'The AI examiner is unavailable; here is the guided self-assessment.'));
   }
   selfAssess(text, a);
+  if (!(cfg && cfg.ai)) { const n = document.createElement('div'); n.className = 'notice gold'; n.textContent = _('المصحح الذكي غير متاح مؤقتًا؛ استخدم التقييم الذاتي الموجّه الآن، وستعود الخدمة قريبًا.', 'The AI examiner is temporarily unavailable. Use the guided self-assessment for now; it will be back soon.'); box.prepend(n); }
 }
 function saveWriting(text, band, crit, ai) {
   S.writing.push({ id: uid(), pid: WS.it.id, task: WS.task, date: todayStr(), words: analyse(text, WS.task).wc, band, crit, ai: !!ai });
@@ -126,7 +128,7 @@ function saveWriting(text, band, crit, ai) {
 }
 const CRIT = { TA: ['إنجاز المهمة', 'Task Achievement / Response'], CC: ['التماسك والترابط', 'Coherence & Cohesion'], LR: ['الثروة اللغوية', 'Lexical Resource'], GRA: ['القواعد ودقتها', 'Grammatical Range & Accuracy'], FC: ['الطلاقة والتماسك', 'Fluency & Coherence'], P: ['النطق (تقديري)', 'Pronunciation (estimated)'] };
 function aiResultHTML(r, keys, task) {
-  return `<div class="card"><div class="spread"><h2>${ic('spark', 'i20')} ${_('تقييم المصحح الذكي', 'AI examiner’s report')}</h2><div class="stamp sm c-W"><b>${fmtBand(r.overall)}</b><small>band</small></div></div>
+  return `<div class="card"><div class="spread"><h2>${ic('spark', 'i20')} ${_('تقييم المصحح الذكي', 'AI examiner’s report')}</h2><div class="stamp sm c-W"><b>${fmtBand(r.overall)}</b><small>${_('الدرجة', 'band')}</small></div></div>
     <div class="grid" style="gap:8px">${keys.map(k => `<div class="crit"><span class="cb">${fmtBand(r.bands[k])}</span><span><b>${_(CRIT[k][0], CRIT[k][1])}</b></span><span class="bandline" style="inline-size:120px"><i class="bg-W" style="inline-size:${(r.bands[k] || 0) / 9 * 100}%"></i></span></div>`).join('')}</div>
     <p>${esc(L(r.summary))}</p>
     ${r.strengths.length ? `<div><b>${_('نقاط القوة', 'Strengths')}</b><ul>${r.strengths.map(s => `<li>${esc(L(s))}</li>`).join('')}</ul></div>` : ''}
@@ -154,14 +156,17 @@ function selfAssess(text, a) {
   $('#sa-go').onclick = () => {
     if (Object.keys(ansv).length < Q.length) return toast(_('أجب عن كل الأسئلة.', 'Answer every question.'));
     const crit = { TA: [], CC: [], LR: [], GRA: [] }; Q.forEach((q, i) => crit[q[0]].push(ansv[i]));
-    const base = v => 4.5 + v.reduce((x, y) => x + y, 0) / (2 * v.length) * 3; // 4.5 … 7.5 (self-assessment cannot prove more)
+    const base = v => 4 + v.reduce((x, y) => x + y, 0) / (2 * v.length) * 2.5; // 4 … 6.5: self-assessment alone cannot prove more
     const b = {}; for (const k in crit) b[k] = base(crit[k]);
-    const min = WS.task === 't2' ? 250 : 150; if (a.wc < min) b.TA -= 1;
-    b.GRA -= Math.min(1.5, a.hits.length * .25); b.LR -= a.flags.some(f => /Repeated|تكرار/.test(f.en + f.ar)) ? .5 : 0; b.CC -= a.paras < 3 ? 1 : 0;
-    for (const k in b) b[k] = half(Math.max(3, Math.min(7.5, b[k])));
+    const min = WS.task === 't2' ? 250 : 150; if (a.wc < min) b.TA -= a.wc < min * .8 ? 1.5 : 1;
+    if (WS.task === 't1a' && !/\b(overall|in general|it is clear that|generally)\b/i.test(text)) b.TA = Math.min(b.TA, 5);
+    const per100 = a.hits.length / Math.max(1, a.wc / 100);
+    b.GRA -= Math.min(2.5, a.hits.length * .35 + (per100 > 3 ? .5 : 0)); b.LR -= a.flags.some(f => /Repeated|تكرار/.test(f.en + f.ar)) ? .5 : 0; b.CC -= a.paras < 3 ? 1 : 0;
+    if (a.hits.length >= 4) b.LR -= .5;
+    for (const k in b) b[k] = half(Math.max(3, Math.min(6.5, b[k])));
     const ov = half((b.TA + b.CC + b.LR + b.GRA) / 4);
     saveWriting(text, ov, b, false);
-    $('#sa-out').innerHTML = `<div class="spread" style="margin-top:10px"><div class="grid" style="gap:6px;flex:1">${Object.keys(b).map(k => `<div class="crit"><span class="cb">${fmtBand(b[k])}</span><b>${_(CRIT[k][0], CRIT[k][1])}</b><span></span></div>`).join('')}</div><div class="stamp c-W"><b>${fmtBand(ov)}</b><small>estimate</small></div></div><p class="tiny muted">${_('التقييم الذاتي محدود بـ 7.5؛ للحصول على تقييم دقيق استخدم المصحح الذكي.', 'Self-assessment is capped at 7.5; use the AI examiner for an accurate mark.')}</p>`;
+    $('#sa-out').innerHTML = `<div class="spread" style="margin-top:10px"><div class="grid" style="gap:6px;flex:1">${Object.keys(b).map(k => `<div class="crit"><span class="cb">${fmtBand(b[k])}</span><b>${_(CRIT[k][0], CRIT[k][1])}</b><span></span></div>`).join('')}</div><div class="stamp c-W"><b>${fmtBand(ov)}</b><small>${_('تقدير', 'estimate')}</small></div></div><p class="tiny muted">${_('التقييم الذاتي محدود بـ 7.5؛ للحصول على تقييم دقيق استخدم المصحح الذكي.', 'Self-assessment is capped at 7.5; use the AI examiner for an accurate mark.')}</p>`;
     box.insertAdjacentHTML('beforeend', modelHTML()); bindModel();
   };
 }

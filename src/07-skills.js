@@ -18,7 +18,7 @@ function skillInfo(id) {
 }
 const pips = lv => `<span class="pips" aria-label="${LEVELS()[lv]}">${[1, 2, 3, 4].map(i => `<i class="${i <= lv ? 'on' : ''}"></i>`).join('')}</span>`;
 function recordAns(skill, ok, secs, id) {
-  S.recent.push({ s: skill, ok: !!ok, t: secs == null ? null : Math.round(secs), d: todayStr(), id: id || null });
+  S.recent.push({ s: skill, ok: !!ok, t: secs == null ? null : Math.round(secs), d: todayStr(), id: id || null, ts: Date.now() + Math.random() });
   if (S.recent.length > 1500) S.recent = S.recent.slice(-1500);
 }
 /* exam question types feed the matching skill */
@@ -134,7 +134,8 @@ async function startDrill({ skills, n = 10, title, session }) {
   else { const per = Math.ceil(n / skills.length); for (const s of skills) { const pool = await poolFor(s); let got = pickItems(pool, per); if (GEN[s]) while (got.length < per) got.push(GEN[s]()); if (GEN[s] && got.length >= per && Math.random() < .3) got[got.length - 1] = GEN[s](); items.push(...got); } items = items.slice(0, n); }
   if (!PRO()) items = items.slice(0, Math.max(1, dailyLeft()));
   if (!items.length) return toast(_('لا توجد تمارين لهذه المهارة بعد.', 'No drills for this skill yet.'));
-  DS = { title: title || _('جلسة تدريب', 'Practice session'), items, i: 0, res: [], t0: Date.now(), plays: 0, hint: false, done: false };
+  if (session && !PRO() && items.length < session.length) toast(_(`الجلسة اختُصرت إلى ${numL(items.length)} أسئلة حسب حدّك اليومي المجاني.`, `Session shortened to ${items.length} questions (your free daily limit).`));
+  DS = { sess: !!session, title: title || _('جلسة تدريب', 'Practice session'), items, i: 0, res: [], t0: Date.now(), plays: 0, hint: false, done: false };
   location.hash = '#drill';
 }
 function pageDrillRun() {
@@ -169,7 +170,8 @@ function drRender() {
 function drAnswer(it, val, btn) {
   if (DS.answered) return; DS.answered = true;
   const secs = (Date.now() - DS.qt0) / 1000;
-  const ok = it.kind === 'mcq' ? val === it.a : (it.a || []).some(a => nrm(a).replace(/[.!?]$/, '') === nrm(val).replace(/[.!?]$/, ''));
+  const cmp = x => nrm(x).replace(/[.,;:!?"“”()]/g, ' ').replace(/\s+/g, ' ').trim();
+  const ok = it.kind === 'mcq' ? val === it.a : (it.a || []).some(a => cmp(a) === cmp(val));
   if (it.kind === 'mcq') $$('#drill-stage .opt-btn').forEach(b => { b.disabled = true; if (b.dataset.k === it.a) b.classList.add('ok'); }), btn && !ok && btn.classList.add('bad');
   else { $('#dr-in').disabled = true; $('#dr-check').disabled = true; }
   DS.res.push({ it, ok, secs, hint: DS.hint });
@@ -187,11 +189,12 @@ function drAnswer(it, val, btn) {
   setTimeout(() => $('#dr-next') && $('#dr-next').focus({ preventScroll: true }), 50);
 }
 function drSummary() {
+  if (DS && DS.sess) { const d = todayStr(); S.sessionDays = S.sessionDays || []; if (!S.sessionDays.includes(d)) { S.sessionDays.push(d); save(); } }
   const el = $('#drill-stage'), R = DS.res, c = R.filter(r => r.ok).length, avg = R.length ? Math.round(R.reduce((a, r) => a + r.secs, 0) / R.length) : 0;
   const missedTech = [...new Set(R.filter(r => !r.ok).map(r => r.it.tech))].map(techOf).filter(Boolean);
   const skills = [...new Set(R.map(r => r.it.sk))];
   track('test_done', 'drill:' + skills.join(','), Math.round(100 * c / Math.max(1, R.length)));
-  el.innerHTML = `<div class="card center grid"><h2>${_('انتهت الجلسة', 'Session complete')}</h2><div class="stamp lg" style="margin:auto;color:var(--pri)"><b>${numL(c)}/${numL(R.length)}</b><small>score</small></div>
+  el.innerHTML = `<div class="card center grid"><h2>${_('انتهت الجلسة', 'Session complete')}</h2><div class="stamp lg" style="margin:auto;color:var(--pri)"><b>${numL(c)}/${numL(R.length)}</b><small>${_('النتيجة', 'score')}</small></div>
     <p class="muted">${_('متوسط الوقت', 'Average time')}: ${numL(avg)} ${_('ثانية', 's')} · ${_('تلميحات مستخدمة', 'hints used')}: ${numL(R.filter(r => r.hint).length)}</p>
     <div class="list" style="text-align:start">${skills.map(s => { const i = skillInfo(s), sk = SKL.find(x => x.id === s); return `<a class="li" href="#skill/${s}"><span class="li-t"><b>${esc(sk ? L(sk.title) : s)}</b><small class="muted">${LEVELS()[i.level]} · ${i.acc != null ? numL(Math.round(i.acc * 100)) + '%' : ''}</small></span>${pips(i.level)}</a>`; }).join('')}</div>
     ${missedTech.length ? `<div class="notice gold" style="text-align:start"><b>${_('راجع هذه التقنيات', 'Review these techniques')}:</b><ul>${missedTech.map(t => `<li><b>${esc(L(t.t))}</b> — ${esc(L(t.d))}</li>`).join('')}</ul></div>` : ''}
@@ -209,7 +212,6 @@ async function startSession() {
   for (const s of weak) { const pool = (await poolFor(s)).filter(d => !items.includes(d)); items.push(...pickItems(pool, 4)); if (GEN[s]) items.push(GEN[s]()); }
   const others = shuffle(SKL.map(s => s.id).filter(s => !weak.includes(s))).slice(0, 4);
   for (const s of others) { const pool = (await poolFor(s)).filter(d => !items.includes(d)); items.push(...pickItems(pool, 1)); }
-  S.sessionDays = S.sessionDays || []; if (!S.sessionDays.includes(now)) S.sessionDays.push(now); save();
   startDrill({ session: items.slice(0, 15), title: _('جلسة اليوم', 'Today’s session') });
 }
 
@@ -218,7 +220,7 @@ async function pagePractice() {
   await skillsData();
   const dl = dailyLeft();
   return `<div class="page-h"><span class="eyebrow">${_('التدريب', 'Practice')}</span><h1>${_('تدرّب على كل مهارة حتى تتقنها', 'Practise every skill until you master it')}</h1><p>${_('أسئلة قصيرة بالإنجليزية، ولكل سؤال تلميح بالعربية وتقنية واضحة وشرح للحيلة بعد الإجابة. أخطاؤك تعود إليك تلقائيًا حتى تتقنها.', 'Short English questions, each with an Arabic hint, a named technique and an explanation of the trick. Your mistakes come back automatically until you master them.')}</p></div>
-  <div class="card session-card"><div><span class="eyebrow">${_('جلسة اليوم', 'Today’s session')}</span><h2>${_('١٥ سؤالًا مختارة لك', '15 questions picked for you')}</h2><p class="small muted">${_('أخطاء مستحقة + أضعف مهارتين + أسئلة منوّعة', 'Due mistakes + your two weakest skills + a mix')}</p>${dl !== Infinity && signedIn() ? `<p class="small">${_(`متبقٍ لك اليوم ${numL(dl)} سؤالًا مجانيًا`, `${dl} free questions left today`)}</p>` : ''}</div><button class="btn primary" id="pr-sess">${_('ابدأ الجلسة', 'Start session')}</button></div>
+  <div class="card session-card"><div><span class="eyebrow">${_('جلسة اليوم', 'Today’s session')}</span><h2>${_('١٥ سؤالًا مختارة لك', '15 questions picked for you')}</h2><p class="small muted">${_('أخطاء مستحقة + أضعف مهارتين + أسئلة منوّعة', 'Due mistakes + your two weakest skills + a mix')}</p>${dl !== Infinity && signedIn() ? `<p class="small">${_(`متبقٍ لك اليوم ${numL(dl)} ${dl >= 3 && dl <= 10 ? 'أسئلة مجانية' : 'سؤالًا مجانيًا'}`, `${dl} free questions left today`)}</p>` : ''}</div><button class="btn primary" id="pr-sess">${_('ابدأ الجلسة', 'Start session')}</button></div>
   ${SEC_ORDER.map(sec => `<div class="card"><h2 class="c-${sec}">${ic(sec, 'i20')} ${skName(sec)}</h2><div class="list">${SKL.filter(s => s.sec === sec).map(s => { const i = skillInfo(s.id); return `<div class="li"><span class="li-t"><b>${esc(L(s.title))}</b><small class="muted">${LEVELS()[i.level]}${i.acc != null ? ' · ' + numL(Math.round(i.acc * 100)) + '%' : ''}</small></span>${pips(i.level)}<a class="btn ghost sm" href="#skill/${s.id}">${_('الدرس', 'Lesson')}</a><button class="btn sm" data-drill="${s.id}">${_('تدرّب', 'Practise')}</button></div>`; }).join('')}</div>
     ${sec === 'W' ? `<a class="btn ghost sm" href="#writing">${ic('W')} ${_('استوديو الكتابة: اكتب مقالة كاملة', 'Writing studio: write a full task')}</a>` : sec === 'S' ? `<a class="btn ghost sm" href="#speaking">${ic('S')} ${_('غرفة المحادثة: تحدّث وسجّل', 'Speaking room: speak and record')}</a>` : ''}</div>`).join('')}
   <div class="g3"><a class="card tile" href="#mistakes"><h3>${ic('box')} ${_('صندوق الأخطاء', 'Mistake box')}</h3><p class="small muted">${_('أسئلة الاختبارات التي أخطأت فيها', 'Test questions you got wrong')}</p></a><a class="card tile" href="#para"><h3>${ic('globe')} ${_('مدرّب إعادة الصياغة', 'Paraphrase trainer')}</h3></a><a class="card tile" href="#words"><h3>${ic('words')} ${_('بطاقات المفردات', 'Vocabulary cards')}</h3></a></div>`;

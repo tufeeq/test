@@ -1008,6 +1008,7 @@ function planFor(date) {
   if (!diagTaken()) t.push({ id: 'diag', k: 'L', t: _('اختبار تحديد المستوى', 'Placement test'), s: _('٣٣ سؤالًا · نحو ٣٥ دقيقة', '33 questions · about 35 minutes'), href: '#diag' });
   const ranked = SKL ? rankSkills() : [], focus = ranked.length ? ranked[dayN % Math.min(3, ranked.length)] : null;
   if (focus) { const sk = SKL.find(x => x.id === focus.id);
+    if (XPT['xp-' + focus.id] && !(S.xp || {})[xpKey('xp-' + focus.id)]) t.push({ id: 'xp:' + focus.id, k: sk.sec, t: _('شاهد الشرح المرئي', 'Watch the video explainer') + ': ' + L(sk.title), s: _('شرح متحرك تفاعلي · ٥ دقائق', 'interactive animated lesson · 5 min'), href: '#skill/' + focus.id });
     t.push({ id: 'les:' + focus.id, k: sk.sec, t: _('ادرس مهارة', 'Study a skill') + ': ' + L(sk.title), s: _('درس قصير بالعربية مع أمثلة', 'a short lesson with examples'), href: '#skill/' + focus.id });
     t.push({ id: 'drill:' + focus.id, k: sk.sec, t: _('تدرّب عليها: ١٠ أسئلة', 'Practise it: 10 questions'), s: _('مع تلميحات وشرح', 'with hints and explanations'), href: '#skill/' + focus.id }); }
   t.push({ id: 'sess', k: 'R', t: _('جلسة اليوم', 'Today’s session'), s: _('١٥ سؤالًا منوّعة', '15 mixed questions'), href: '#practice' });
@@ -1020,6 +1021,7 @@ function planFor(date) {
 function taskDone(task, date = todayStr()) {
   const d = date;
   if (task.id === 'diag') return diagTaken();
+  if (task.id.startsWith('xp:')) { const w = (S.xp || {})[xpKey('xp-' + task.id.slice(3))]; return !!w && w.date === d; }
   if (task.id.startsWith('les:')) return (S.skillSeen || {})[task.id.slice(4)] === d;
   if (task.id.startsWith('drill:')) return S.recent.filter(x => x.d === d && x.s === task.id.slice(6)).length >= 5;
   if (task.id === 'sess') return (S.sessionDays || []).includes(d);
@@ -1281,7 +1283,7 @@ function renderShell() {
 function cloudStatus() { const d = $('#save-dot'); if (!d) return; const st = window.CLOUD && CLOUD.user ? CLOUD.status : null; d.className = 'save-dot ' + (!STORE_OK || st === 'error' ? 'bad' : st === 'saving' ? 'wait' : ''); d.title = !STORE_OK ? _('تعذّر الحفظ على الجهاز', 'Could not save on this device') : st === 'ok' ? _('محفوظ في حسابك', 'Saved to your account') : _('محفوظ على هذا الجهاز', 'Saved on this device'); }
 let ROUTE_N = 0;
 async function renderRoute() {
-  syncFree(); renderShell();
+  syncFree(); renderShell(); hookXp(); loadPremiumXp();
   const [r, a, b] = location.hash.slice(1).split('?')[0].split('/'); const n = ++ROUTE_N, main = $('#main');
   let html = '';
   try {
@@ -1298,7 +1300,7 @@ async function renderRoute() {
       case 'cards': html = await pageCards(a); break;
       case 'para': html = await pagePara(); break;
       case 'drill': html = a ? await pageDrill(a) : pageDrillRun(); break;
-      case 'learn': html = await pageLearn(a || 'skills'); break;
+      case 'learn': html = await pageLearn(a || 'xp'); break;
       case 'skill': html = await pageSkill(a); S.skillSeen = S.skillSeen || {}; S.skillSeen[a] = todayStr(); save(); break;
       case 'practice': html = await pagePractice(); break;
       case 'tests': html = await pageTestsHub(); break;
@@ -1315,7 +1317,7 @@ async function renderRoute() {
   } catch (e) { console.error(e); html = `<div class="card"><p>${_('تعذّر تحميل هذه الصفحة. تحقق من اتصالك ثم أعد المحاولة.', 'This page could not load. Check your connection and try again.')}</p><button class="btn sm" onclick="renderRoute()">${_('إعادة المحاولة', 'Retry')}</button></div>`; }
   if (n !== ROUTE_N) return;
   if (r !== 'speak' && SP) { try { if (SP.rec) spStop(true); if (SP.stream) SP.stream.getTracks().forEach(t => t.stop()); if (SP.player) SP.player.pause(); } catch (e) {} SP = null; }
-  main.innerHTML = html;
+  main.innerHTML = html; bindXp();
   if (!S.onboarded && (!r || r === 'today')) bindOnboard();
   if (r === 'listening') bindTests('L'); if (r === 'reading') bindTests('R');
   if (r === 'writing') $$('[data-wtab]').forEach(x => x.onclick = () => { S.wTab = x.dataset.wtab; save(); renderRoute(); });
@@ -1388,12 +1390,13 @@ function masteryMap() {
 }
 
 /* ---------- learn hub ---------- */
-async function pageLearn(tab = 'skills') {
+async function pageLearn(tab = 'xp') {
   await skillsData();
-  const tabs = [['skills', _('المهارات', 'Skills')], ['tech', _('التقنيات والحيل', 'Techniques & tricks')], ['words', _('الكلمات', 'Words')], ['strategy', _('دروس الأسئلة', 'Question-type lessons')]];
+  const tabs = [['xp', _('الشروحات المرئية', 'Video explainers')], ['skills', _('المهارات', 'Skills')], ['tech', _('التقنيات والحيل', 'Techniques & tricks')], ['words', _('الكلمات', 'Words')], ['strategy', _('دروس الأسئلة', 'Question-type lessons')]];
   let body = '';
-  if (tab === 'skills') {
-    body = SEC_ORDER.map(sec => `<h2 class="sec-h c-${sec}">${ic(sec, 'i20')} ${skName(sec)}</h2><div class="lgrid">${SKL.filter(s => s.sec === sec).map(s => { const i = skillInfo(s.id), n = DRL.filter(d => d.sk === s.id).length; return `<a class="card lcard" href="#skill/${s.id}"><div class="spread"><h3>${esc(L(s.title))}</h3>${pips(i.level)}</div><p class="small muted">${esc(L(s.tag))}</p><div class="chips"><span class="chip">${numL(n)}+ ${_('تمرين', 'drills')}</span><span class="chip teal">${LEVELS()[i.level]}</span></div></a>`; }).join('')}</div>`).join('');
+  if (tab === 'xp') body = xpLearnBody();
+  else if (tab === 'skills') {
+    body = SEC_ORDER.map(sec => `<h2 class="sec-h c-${sec}">${ic(sec, 'i20')} ${skName(sec)}</h2><div class="lgrid">${SKL.filter(s => s.sec === sec).map(s => { const i = skillInfo(s.id), n = DRL.filter(d => d.sk === s.id).length; return `<a class="card lcard" href="#skill/${s.id}"><div class="spread"><h3>${esc(L(s.title))}</h3>${pips(i.level)}</div><p class="small muted">${esc(L(s.tag))}</p><div class="chips">${XPT['xp-' + s.id] ? `<span class="chip gold">${ic('play', 'i16')} ${_('شرح مرئي', 'video')}</span>` : ''}<span class="chip">${numL(n)}+ ${_('تمرين', 'drills')}</span><span class="chip teal">${LEVELS()[i.level]}</span></div></a>`; }).join('')}</div>`).join('');
   } else if (tab === 'tech') {
     const open = freeCount(TECH.length);
     body = `<p class="lead">${_('حيل مختصرة تحفظها وتستخدمها في كل سؤال. كل تمرين في الموقع مربوط بإحدى هذه التقنيات.', 'Short tricks you memorise and use on every question. Every drill on the site is linked to one of them.')}</p>
@@ -1420,6 +1423,7 @@ async function pageSkill(id) {
   <div class="page-h"><h1>${esc(L(s.title))}</h1><p>${esc(L(s.tag))}</p></div>
   <div class="lesson2">
     <div class="lesson-main grid">
+      ${xpSection(id)}
       <section class="card"><h2>${_('الفكرة', 'The idea')}</h2>${L(s.concept).map(p => `<p>${md(p)}</p>`).join('')}${AR() ? `<details class="en-v"><summary>English</summary>${s.concept.en.map(p => `<p class="ltr-text">${md(p)}</p>`).join('')}</details>` : ''}</section>
       <aside class="callout"><span class="eyebrow">${_('العقلية الصحيحة', 'Mindset')}</span>${both(s.mind)}</aside>
       <section class="card"><h2>${_('خطوات الحل', 'Step by step')}</h2>${list(s.steps, 'nsteps')}</section>
@@ -1611,3 +1615,55 @@ function bindTestsHub() {
     startTest({ kind: sk, title: `${sk === 'L' ? 'Listening' : 'Reading'} ${+id.slice(1)} · ${b.textContent}`, mode: 'practice', time: sk === 'R' ? (id[0] === 'G' && +i < 4 ? 600 : 1200) : 0, sections: [{ skill: sk, test: id, idx: +i }] });
   });
 }
+/* generated by tools/xpmeta.js — explainer titles (do not edit) */
+var XPT = {"xp-L-detail":{"sk":"L-detail","ord":10,"t":["الأرقام والتهجئة وفخ التصحيح","Numbers, spelling and the correction trap"],"m":["٤ دقائق","4 min"],"g":["تكتب الإجابة التي تأتي بعد التصحيح","Write the answer that comes after a correction"],"n":6,"q":3},"xp-L-mcq":{"sk":"L-mcq","ord":10,"t":["المشتّتات في الاختيار من متعدد","Distractors in multiple choice"],"m":["٤ دقائق","4 min"],"g":["تعرف لماذا يُذكر كل خيار في التسجيل","Know why every option is mentioned"],"n":4,"q":3},"xp-L-map":{"sk":"L-map","ord":10,"t":["الخريطة: أين أنت وإلى أين تتجه؟","Maps: where are you and which way?"],"m":["٤ دقائق","4 min"],"g":["تحدد نقطة البداية واتجاهها","Find the start point and facing direction"],"n":3,"q":3},"xp-L-notes":{"sk":"L-notes","ord":10,"t":["المحاضرة: اتبع إشارات المحاضر","Lectures: follow the signposts"],"m":["٤ دقائق","4 min"],"g":["تستخدم العناوين خريطة للمحاضرة","Use the headings as a map"],"n":4,"q":3},"xp-R-tfng":{"sk":"R-tfng","ord":10,"t":["صح / خطأ / غير مذكور","True / False / Not Given"],"m":["٥ دقائق","5 min"],"g":["تفرّق بين FALSE وNOT GIVEN","Tell FALSE from NOT GIVEN"],"n":4,"q":3},"xp-R-locate":{"sk":"R-locate","ord":10,"t":["المسح السريع: اعثر على الجواب دون أن تقرأ كل شيء","Scanning: find the answer without reading everything"],"m":["٤ دقائق","4 min"],"g":["تفرّق بين skimming وscanning","Tell skimming from scanning"],"n":4,"q":3},"xp-R-heading":{"sk":"R-heading","ord":10,"t":["العناوين: الفكرة الرئيسية لا التفصيل","Headings: the main idea, not a detail"],"m":["٤ دقائق","4 min"],"g":["تلخّص الفقرة في جملة","Sum up a paragraph in one line"],"n":3,"q":3},"xp-R-complete":{"sk":"R-complete","ord":10,"t":["إكمال الجمل: القواعد تدلّك على الجواب","Completion: grammar points to the answer"],"m":["٤ دقائق","4 min"],"g":["تتوقع نوع الكلمة","Predict the word type"],"n":3,"q":3},"xp-R-para":{"sk":"R-para","ord":10,"t":["إعادة الصياغة: السؤال لا يكرر كلمات النص","Paraphrase: questions don’t repeat the text"],"m":["٤ دقائق","4 min"],"g":["تتعرف على المرادفات","Recognise synonyms"],"n":3,"q":3},"xp-S-p1":{"sk":"S-p1","ord":10,"t":["الجزء الأول: لا تجب بكلمة واحدة","Part 1: never answer in one word"],"m":["٤ دقائق","4 min"],"g":["توسّع الإجابة بطريقة A-R-E","Extend answers with A-R-E"],"n":3,"q":3},"xp-S-p2":{"sk":"S-p2","ord":10,"t":["الجزء الثاني: دقيقة تخطيط، دقيقتا كلام","Part 2: one minute to plan, two to speak"],"m":["٥ دقائق","5 min"],"g":["تخطط في دقيقة بكلمات مفتاحية","Plan in one minute with key words"],"n":4,"q":3},"xp-S-p3":{"sk":"S-p3","ord":10,"t":["الجزء الثالث: رأي ثم تبرير ثم مثال","Part 3: opinion, reason, example"],"m":["٤ دقائق","4 min"],"g":["تبني إجابة من رأي وسبب ومثال","Build opinion + reason + example"],"n":4,"q":3},"xp-W-t1":{"sk":"W-t1","ord":10,"t":["المهمة الأولى: النظرة العامة أولًا","Task 1: the overview comes first"],"m":["٥ دقائق","5 min"],"g":["تكتب نظرة عامة بلا أرقام","Write an overview without numbers"],"n":4,"q":3},"xp-W-t2":{"sk":"W-t2","ord":10,"t":["المهمة الثانية: هيكل مقالة الـ٧","Task 2: the band-7 essay plan"],"m":["٥ دقائق","5 min"],"g":["تحدد نوع السؤال","Identify the question type"],"n":4,"q":3},"xp-W-grammar":{"sk":"W-grammar","ord":10,"t":["أخطاء القواعد التي يقع فيها المتعلم العربي","Grammar errors Arabic speakers make"],"m":["٥ دقائق","5 min"],"g":["لا تحذف فعل الكينونة","Never drop the verb “to be”"],"n":5,"q":3},"xp-W-cohesion":{"sk":"W-cohesion","ord":10,"t":["أدوات الربط: المعنى قبل الكثرة","Linking words: meaning before quantity"],"m":["٤ دقائق","4 min"],"g":["تعرف عائلات أدوات الربط","Know the linker families"],"n":4,"q":3}};
+/* ============ Video explainers (الشروحات المرئية) ============
+   Animated, narrated lessons played by /xp-engine.js. Free lessons come from /xp/free.js; subscribers
+   also receive /api/xp/premium.js. XPT (generated) lists every lesson so locked ones can still be shown. */
+var XP_PREM = 0, XP_HOOKED = false, XP_BACK = null;
+function xpOK() { return !!(window.XP && XP.ready); }
+function xpKey(base, lang) { return ((lang || S.lang) === 'en' ? 'en-' : '') + base; }
+function xpItems(sk) {
+  return Object.entries(XPT).filter(([, m]) => !sk || m.sk === sk).sort((a, b) => a[1].ord - b[1].ord).map(([base, m]) => {
+    const key = xpKey(base), i = AR() ? 0 : 1;
+    return { base, key, sk: m.sk, title: m.t[i], min: m.m[i], goal: m.g ? m.g[i] : '', n: m.n, ready: xpOK() && !!XP.get(key), done: !!(S.xp || {})[key] };
+  });
+}
+function xpCard(x, k) {
+  const play = '<svg viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z" fill="currentColor" stroke="none"/></svg>';
+  if (!x.ready) return `<button type="button" class="xpc locked" data-xplock="${x.base}"><span class="xpn"><span class="pl">${ic('lock', 'i16')}</span><span>${_('شرح مرئي', 'Video')}${k != null ? ' ' + numL(k + 1) : ''}</span><span class="xpm">${esc(x.min)}</span></span><b>${esc(x.title)}</b><small>${PRO() ? _('جارٍ التحميل…', 'Loading…') : _('متاح في برو', 'Available in Pro')}</small></button>`;
+  return `<button type="button" class="xpc" data-xp="${x.key}"><span class="xpn"><span class="pl">${play}</span><span>${_('شرح مرئي', 'Video')}${k != null ? ' ' + numL(k + 1) : ''}</span><span class="xpm">${esc(x.min)}</span>${x.done ? `<span class="dn">✓ ${_('أتممته', 'Done')}</span>` : ''}</span><b>${esc(x.title)}</b>${x.goal ? `<small>${esc(x.goal)}</small>` : ''}</button>`;
+}
+function xpSection(sk) {
+  const xs = xpItems(sk); if (!xs.length) return '';
+  return `<section class="card xp-sec"><div class="xp-sec-h"><h2>${ic('play', 'i20')} ${_('ابدأ بالشرح المرئي', 'Start with the video explainer')}</h2><span class="chip num">${numL(xs.filter(x => x.done).length)} / ${numL(xs.length)}</span></div>
+    <p class="muted small">${_('شرح متحرك بصوت معلّم: يبني المهارة خطوة خطوة، ويتوقف لتجرّب بنفسك، وينتهي بتحدٍّ قصير. الشرح بالعربية والأمثلة بالإنجليزية.', 'An animated lesson narrated by a teacher: it builds the skill step by step, pauses for you to try, and ends with a short challenge.')}</p>
+    <div class="xpl">${xs.map((x) => xpCard(x)).join('')}</div></section>`;
+}
+function xpLearnBody() {
+  const all = xpItems(), done = all.filter(x => x.done).length;
+  return `<p class="lead">${_('لكل مهارة شرح مرئي تفاعلي: مشاهد متحركة بصوت معلّم، ووقفات تجرّب فيها بنفسك، وتحدٍّ ختامي. شاهد الشرح، ثم اقرأ الدرس، ثم تدرّب.', 'Every skill has an interactive video explainer: animated scenes narrated by a teacher, stops where you try it yourself, and a final challenge. Watch, read the lesson, then practise.')}</p>
+    <div class="chips"><span class="chip teal">${numL(done)} / ${numL(all.length)} ${_('أتممت', 'completed')}</span></div>
+    ${SEC_ORDER.map(sec => { const xs = all.filter(x => x.sk[0] === sec); return xs.length ? `<h2 class="sec-h c-${sec}">${ic(sec, 'i20')} ${skName(sec)}</h2><div class="xpl">${xs.map((x, k) => xpCard(x, k)).join('')}</div>` : ''; }).join('')}`;
+}
+function xpOpen(key) { if (!xpOK() || !XP.get(key)) return; XP_BACK = key; track('xp_start', key); XP.open(key); }
+function bindXp() {
+  $$('[data-xp]').forEach(b => b.onclick = () => xpOpen(b.dataset.xp));
+  $$('[data-xplock]').forEach(b => b.onclick = () => { if (PRO()) { loadPremiumXp(); return; } track('limit_hit', 'xp'); openUpgrade('xp'); });
+}
+function hookXp() {
+  if (XP_HOOKED || !xpOK()) return; XP_HOOKED = true;
+  XP.setHooks({
+    onDone: (k, sc, n) => { S.xp = S.xp || {}; const w = S.xp[k]; if (!w || sc >= (w.score || 0)) S.xp[k] = { score: sc, n, date: todayStr() }; markDay(); save(); track('xp_done', k, sc); },
+    onClose: () => { window._noScroll = true; renderRoute().finally(() => { window._noScroll = false; const b = XP_BACK && document.querySelector(`[data-xp="${XP_BACK}"]`); if (b) b.focus({ preventScroll: true }); }); }
+  });
+  try { XP.loadTracks(); } catch (e) {}
+}
+function loadPremiumXp() {
+  if (XP_PREM || !PRO() || !xpOK()) return; XP_PREM = 1;
+  const s = document.createElement('script'); s.src = '/api/xp/premium.js';
+  s.onload = () => { XP_PREM = 2; try { XP.loadTracks(); } catch (e) {} renderRoute(); };
+  s.onerror = () => { XP_PREM = 0; s.remove(); };
+  document.head.appendChild(s);
+}
+window.addEventListener('hashchange', () => { if (document.body.classList.contains('xp-open') && xpOK()) XP.close(); });

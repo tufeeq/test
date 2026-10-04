@@ -38,12 +38,13 @@ function masteryMap() {
 }
 
 /* ---------- learn hub ---------- */
-async function pageLearn(tab = 'skills') {
+async function pageLearn(tab = 'xp') {
   await skillsData();
-  const tabs = [['skills', _('المهارات', 'Skills')], ['tech', _('التقنيات والحيل', 'Techniques & tricks')], ['words', _('الكلمات', 'Words')], ['strategy', _('دروس الأسئلة', 'Question-type lessons')]];
+  const tabs = [['xp', _('الشروحات المرئية', 'Video explainers')], ['skills', _('المهارات', 'Skills')], ['tech', _('التقنيات والحيل', 'Techniques & tricks')], ['words', _('الكلمات', 'Words')], ['strategy', _('دروس الأسئلة', 'Question-type lessons')]];
   let body = '';
-  if (tab === 'skills') {
-    body = SEC_ORDER.map(sec => `<h2 class="sec-h c-${sec}">${ic(sec, 'i20')} ${skName(sec)}</h2><div class="lgrid">${SKL.filter(s => s.sec === sec).map(s => { const i = skillInfo(s.id), n = DRL.filter(d => d.sk === s.id).length; return `<a class="card lcard" href="#skill/${s.id}"><div class="spread"><h3>${esc(L(s.title))}</h3>${pips(i.level)}</div><p class="small muted">${esc(L(s.tag))}</p><div class="chips"><span class="chip">${numL(n)}+ ${_('تمرين', 'drills')}</span><span class="chip teal">${LEVELS()[i.level]}</span></div></a>`; }).join('')}</div>`).join('');
+  if (tab === 'xp') body = xpLearnBody();
+  else if (tab === 'skills') {
+    body = SEC_ORDER.map(sec => `<h2 class="sec-h c-${sec}">${ic(sec, 'i20')} ${skName(sec)}</h2><div class="lgrid">${SKL.filter(s => s.sec === sec).map(s => { const i = skillInfo(s.id), n = DRL.filter(d => d.sk === s.id).length; return `<a class="card lcard" href="#skill/${s.id}"><div class="spread"><h3>${esc(L(s.title))}</h3>${pips(i.level)}</div><p class="small muted">${esc(L(s.tag))}</p><div class="chips">${XPT['xp-' + s.id] ? `<span class="chip gold">${ic('play', 'i16')} ${_('شرح مرئي', 'video')}</span>` : ''}<span class="chip">${numL(n)}+ ${_('تمرين', 'drills')}</span><span class="chip teal">${LEVELS()[i.level]}</span></div></a>`; }).join('')}</div>`).join('');
   } else if (tab === 'tech') {
     const open = freeCount(TECH.length);
     body = `<p class="lead">${_('حيل مختصرة تحفظها وتستخدمها في كل سؤال. كل تمرين في الموقع مربوط بإحدى هذه التقنيات.', 'Short tricks you memorise and use on every question. Every drill on the site is linked to one of them.')}</p>
@@ -70,6 +71,7 @@ async function pageSkill(id) {
   <div class="page-h"><h1>${esc(L(s.title))}</h1><p>${esc(L(s.tag))}</p></div>
   <div class="lesson2">
     <div class="lesson-main grid">
+      ${xpSection(id)}
       <section class="card"><h2>${_('الفكرة', 'The idea')}</h2>${L(s.concept).map(p => `<p>${md(p)}</p>`).join('')}${AR() ? `<details class="en-v"><summary>English</summary>${s.concept.en.map(p => `<p class="ltr-text">${md(p)}</p>`).join('')}</details>` : ''}</section>
       <aside class="callout"><span class="eyebrow">${_('العقلية الصحيحة', 'Mindset')}</span>${both(s.mind)}</aside>
       <section class="card"><h2>${_('خطوات الحل', 'Step by step')}</h2>${list(s.steps, 'nsteps')}</section>

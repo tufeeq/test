@@ -54,6 +54,12 @@ async function migrate() {
       expires_at TIMESTAMPTZ NOT NULL
     );
     CREATE INDEX IF NOT EXISTS sessions_user_idx ON sessions(user_id);
+    CREATE TABLE IF NOT EXISTS narration (
+      id TEXT PRIMARY KEY,
+      mime TEXT NOT NULL,
+      data BYTEA NOT NULL,
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+    );
     ALTER TABLE users ADD COLUMN IF NOT EXISTS name TEXT;
   `);
   await C.migrate();
@@ -269,6 +275,47 @@ app.get("/api/content/:name", needUser, wrap(async (req, res) => {
   const f = path.join(CONTENT_PRO, req.params.name + ".json"); if (!fs.existsSync(f)) return fail(res, 404, "not-found");
   res.set("Cache-Control", "private, no-store").type("application/json").sendFile(f);
 }));
+// ---------- explainer narration (public) ----------
+// Narration clips live in Postgres (table narration); data/tracks.json maps each explainer to its clips + beat timings.
+// data/clip_urls.json, when present, lists freshly generated clips ({id,url}) that are imported once at startup.
+const TRACKS_FILE = path.join(__dirname, "data", "tracks.json");
+app.get("/audio/tracks.json", (req, res) => { res.set("Cache-Control", "no-cache"); if (!fs.existsSync(TRACKS_FILE)) return res.json({}); res.type("application/json").sendFile(TRACKS_FILE); });
+app.get("/audio/index.json", wrap(async (req, res) => {
+  const r = await pool.query("SELECT id FROM narration ORDER BY id");
+  res.set("Cache-Control", "no-cache").json(r.rows.map(x => x.id));
+}));
+app.get("/audio/:id.mp3", wrap(async (req, res) => {
+  const r = await pool.query("SELECT mime, data, updated_at FROM narration WHERE id=$1", [req.params.id]);
+  const row = r.rows[0]; if (!row) return res.status(404).end();
+  const buf = row.data, total = buf.length;
+  res.set({ "Content-Type": row.mime, "Accept-Ranges": "bytes", "Cache-Control": "public, max-age=604800, immutable", "Last-Modified": new Date(row.updated_at).toUTCString() });
+  const m = /^bytes=(\d*)-(\d*)$/.exec(req.get("Range") || "");   // Safari/iOS need range requests for audio
+  if (m) {
+    let start = m[1] === "" ? total - Number(m[2]) : Number(m[1]);
+    let end = m[1] !== "" && m[2] !== "" ? Math.min(Number(m[2]), total - 1) : total - 1;
+    if (!(start >= 0 && start <= end)) return res.status(416).set("Content-Range", `bytes */${total}`).end();
+    return res.status(206).set({ "Content-Range": `bytes ${start}-${end}/${total}`, "Content-Length": end - start + 1 }).end(buf.subarray(start, end + 1));
+  }
+  res.set("Content-Length", total).end(buf);
+}));
+async function importNarration() {
+  const f = path.join(__dirname, "data", "clip_urls.json");
+  if (!fs.existsSync(f)) return;
+  let list; try { list = JSON.parse(fs.readFileSync(f, "utf8")); } catch (e) { return console.error("clip_urls.json unreadable"); }
+  const have = new Set((await pool.query("SELECT id FROM narration")).rows.map(x => x.id));
+  let ok = 0, skip = 0, bad = 0;
+  for (const c of list) {
+    if (!c || !/^[\w-]{1,64}$/.test(c.id || "") || !/^https:\/\//.test(c.url || "")) { bad++; continue; }
+    if (have.has(c.id) && !c.replace) { skip++; continue; }
+    try {
+      const r = await fetch(c.url); if (!r.ok) throw new Error("HTTP " + r.status);
+      const buf = Buffer.from(await r.arrayBuffer()); if (buf.length < 500 || buf.length > 5e6) throw new Error("size " + buf.length);
+      await pool.query("INSERT INTO narration(id,mime,data,updated_at) VALUES($1,'audio/mpeg',$2,now()) ON CONFLICT (id) DO UPDATE SET data=EXCLUDED.data, updated_at=now()", [c.id, buf]);
+      ok++;
+    } catch (e) { bad++; console.error("narration import failed", c.id, e.message); }
+  }
+  console.log(`narration import: ${ok} stored, ${skip} already present, ${bad} failed`);
+}
 app.get("/healthz", (req, res) => { res.set("Cache-Control", "no-store"); res.send("ok"); });
 
 // ---------- static site ----------
@@ -284,7 +331,7 @@ app.get("/", wrap(async (req, res) => {
 app.get(["/app", "/app/"], (req, res) => res.set("Cache-Control", "no-cache").sendFile(path.join(PUB, "app.html")));
 // gzip the big text assets (app.js is ~380 KB) without an extra dependency; cached per file mtime
 const gzCache = new Map();
-app.get(/^\/(app\.js|app\.css|admin\.js|cloud\.js|landing\.js|landing\.css|content\/[\w-]+\.json)$/, (req, res, next) => {
+app.get(/^\/(app\.js|app\.css|admin\.js|cloud\.js|xp-engine\.js|landing\.js|landing\.css|content\/[\w-]+\.json)$/, (req, res, next) => {
   if (!/\bgzip\b/.test(req.get("Accept-Encoding") || "")) return next();
   const f = path.join(PUB, req.path.slice(1));
   fs.stat(f, (err, st) => {
@@ -323,6 +370,7 @@ setInterval(() => pool.query("DELETE FROM sessions WHERE expires_at<now()").catc
 
 migrate().then(() => {
   const srv = app.listen(PORT, () => console.log(`IELTS Academy running on :${PORT}`));
+  importNarration().catch(e => console.error("narration import", e.message));
   const bye = () => { srv.close(() => pool.end().finally(() => process.exit(0))); setTimeout(() => process.exit(0), 8000).unref(); };
   process.on("SIGTERM", bye); process.on("SIGINT", bye);
 }).catch(e => { console.error("Migration failed", e); process.exit(1); });

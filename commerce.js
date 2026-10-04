@@ -3,6 +3,8 @@
 const crypto = require("crypto");
 
 const TAP_API = process.env.TAP_API_BASE || "https://api.tap.company/v2"; // overridable for local testing
+const xpbundle = require("./xpbundle");
+const FREE_XP_DEFAULT = ["xp-L-detail", "xp-R-tfng", "xp-W-t1", "xp-S-p1"];
 const EVENT_TYPES = new Set(["open", "diag_start", "diag_done", "xp_start", "xp_done", "limit_hit", "upgrade_view", "checkout_start", "test_start", "test_done", "report_view", "ai_writing", "ai_speaking", "lesson_done"]);
 
 // Defaults: every value here can be changed from the admin dashboard (settings table).
@@ -96,6 +98,11 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
   }
 
   // ---------- public config + plan ----------
+  // explainers: lesson sources are split so premium lessons are only sent to subscribers
+  async function bundles() { const c = await loadCfg(); const fx = (c.free.xp && c.free.xp.length) ? c.free.xp : FREE_XP_DEFAULT; return xpbundle.build(fx); }
+  app.get("/xp/free.js", wrap(async (req, res) => { const b = await bundles(); res.set({ "Cache-Control": "no-cache" }).type("application/javascript").send(b.free); }));
+  app.get("/api/xp/premium.js", needUser, needPro, wrap(async (req, res) => { const b = await bundles(); res.set({ "Cache-Control": "private, no-store" }).type("application/javascript").send(b.premium); }));
+  app.get("/api/xp/keys", wrap(async (req, res) => { const b = await bundles(); res.json(b.keys); }));
   app.get("/api/config", wrap(async (req, res) => { const c = await loadCfg(); res.json({ config: publicCfg(c), plan: await planOf(req.user) }); }));
   app.get("/api/plan", needUser, wrap(async (req, res) => {
     const plan = await planOf(req.user);

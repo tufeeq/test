@@ -20,6 +20,7 @@ function planFor(date) {
   if (!diagTaken()) t.push({ id: 'diag', k: 'L', t: _('اختبار تحديد المستوى', 'Placement test'), s: _('٣٣ سؤالًا · نحو ٣٥ دقيقة', '33 questions · about 35 minutes'), href: '#diag' });
   const ranked = SKL ? rankSkills() : [], focus = ranked.length ? ranked[dayN % Math.min(3, ranked.length)] : null;
   if (focus) { const sk = SKL.find(x => x.id === focus.id);
+    if (XPT['xp-' + focus.id] && !(S.xp || {})[xpKey('xp-' + focus.id)]) t.push({ id: 'xp:' + focus.id, k: sk.sec, t: _('شاهد الشرح المرئي', 'Watch the video explainer') + ': ' + L(sk.title), s: _('شرح متحرك تفاعلي · ٥ دقائق', 'interactive animated lesson · 5 min'), href: '#skill/' + focus.id });
     t.push({ id: 'les:' + focus.id, k: sk.sec, t: _('ادرس مهارة', 'Study a skill') + ': ' + L(sk.title), s: _('درس قصير بالعربية مع أمثلة', 'a short lesson with examples'), href: '#skill/' + focus.id });
     t.push({ id: 'drill:' + focus.id, k: sk.sec, t: _('تدرّب عليها: ١٠ أسئلة', 'Practise it: 10 questions'), s: _('مع تلميحات وشرح', 'with hints and explanations'), href: '#skill/' + focus.id }); }
   t.push({ id: 'sess', k: 'R', t: _('جلسة اليوم', 'Today’s session'), s: _('١٥ سؤالًا منوّعة', '15 mixed questions'), href: '#practice' });
@@ -32,6 +33,7 @@ function planFor(date) {
 function taskDone(task, date = todayStr()) {
   const d = date;
   if (task.id === 'diag') return diagTaken();
+  if (task.id.startsWith('xp:')) { const w = (S.xp || {})[xpKey('xp-' + task.id.slice(3))]; return !!w && w.date === d; }
   if (task.id.startsWith('les:')) return (S.skillSeen || {})[task.id.slice(4)] === d;
   if (task.id.startsWith('drill:')) return S.recent.filter(x => x.d === d && x.s === task.id.slice(6)).length >= 5;
   if (task.id === 'sess') return (S.sessionDays || []).includes(d);
@@ -293,7 +295,7 @@ function renderShell() {
 function cloudStatus() { const d = $('#save-dot'); if (!d) return; const st = window.CLOUD && CLOUD.user ? CLOUD.status : null; d.className = 'save-dot ' + (!STORE_OK || st === 'error' ? 'bad' : st === 'saving' ? 'wait' : ''); d.title = !STORE_OK ? _('تعذّر الحفظ على الجهاز', 'Could not save on this device') : st === 'ok' ? _('محفوظ في حسابك', 'Saved to your account') : _('محفوظ على هذا الجهاز', 'Saved on this device'); }
 let ROUTE_N = 0;
 async function renderRoute() {
-  syncFree(); renderShell();
+  syncFree(); renderShell(); hookXp(); loadPremiumXp();
   const [r, a, b] = location.hash.slice(1).split('?')[0].split('/'); const n = ++ROUTE_N, main = $('#main');
   let html = '';
   try {
@@ -310,7 +312,7 @@ async function renderRoute() {
       case 'cards': html = await pageCards(a); break;
       case 'para': html = await pagePara(); break;
       case 'drill': html = a ? await pageDrill(a) : pageDrillRun(); break;
-      case 'learn': html = await pageLearn(a || 'skills'); break;
+      case 'learn': html = await pageLearn(a || 'xp'); break;
       case 'skill': html = await pageSkill(a); S.skillSeen = S.skillSeen || {}; S.skillSeen[a] = todayStr(); save(); break;
       case 'practice': html = await pagePractice(); break;
       case 'tests': html = await pageTestsHub(); break;
@@ -327,7 +329,7 @@ async function renderRoute() {
   } catch (e) { console.error(e); html = `<div class="card"><p>${_('تعذّر تحميل هذه الصفحة. تحقق من اتصالك ثم أعد المحاولة.', 'This page could not load. Check your connection and try again.')}</p><button class="btn sm" onclick="renderRoute()">${_('إعادة المحاولة', 'Retry')}</button></div>`; }
   if (n !== ROUTE_N) return;
   if (r !== 'speak' && SP) { try { if (SP.rec) spStop(true); if (SP.stream) SP.stream.getTracks().forEach(t => t.stop()); if (SP.player) SP.player.pause(); } catch (e) {} SP = null; }
-  main.innerHTML = html;
+  main.innerHTML = html; bindXp();
   if (!S.onboarded && (!r || r === 'today')) bindOnboard();
   if (r === 'listening') bindTests('L'); if (r === 'reading') bindTests('R');
   if (r === 'writing') $$('[data-wtab]').forEach(x => x.onclick = () => { S.wTab = x.dataset.wtab; save(); renderRoute(); });

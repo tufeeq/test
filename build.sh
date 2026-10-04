@@ -2,6 +2,8 @@
 # assemble the app and copy content/audio from the content workspace
 set -e
 cd "$(dirname "$0")"
+node tools/xpmeta.js > src/09a-xpmeta.js
+for f in xpsrc/*.js; do node --check "$f"; done
 cat src/*.js > public/app.js
 node --check public/app.js
 mkdir -p public/content content-pro public/audio/sp

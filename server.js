@@ -54,6 +54,14 @@ async function migrate() {
       expires_at TIMESTAMPTZ NOT NULL
     );
     CREATE INDEX IF NOT EXISTS sessions_user_idx ON sessions(user_id);
+    CREATE TABLE IF NOT EXISTS password_resets (
+      token_hash TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      expires_at TIMESTAMPTZ NOT NULL,
+      used_at TIMESTAMPTZ,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+    );
+    CREATE INDEX IF NOT EXISTS password_resets_user_idx ON password_resets(user_id);
     CREATE TABLE IF NOT EXISTS narration (
       id TEXT PRIMARY KEY,
       mime TEXT NOT NULL,
@@ -211,6 +219,49 @@ app.post("/api/password", needUser, wrap(async (req, res) => {
   await pool.query("DELETE FROM sessions WHERE user_id=$1 AND token_hash<>$2", [req.user.id, sha(tok || "")]);
   res.json({ ok: true });
 }));
+
+// ---------- password reset by email link ----------
+// The link carries a random one-time token (only its hash is stored), valid for 60 minutes.
+// Replies never reveal whether an email is registered.
+const mail = require("./mail");
+const RESET_MIN = 60;
+app.post("/api/password/forgot", wrap(async (req, res) => {
+  const email = String(req.body.email || "").trim().toLowerCase();
+  if (!validEmail(email)) return fail(res, 400, "invalid-email");
+  if (limited("fp:" + req.ip, 20, 3600e3) || limited("fpe:" + email, 3, 3600e3)) return fail(res, 429, "too-many-requests");
+  if (!mail.configured()) { console.warn("password reset requested but no mail service is configured"); return res.json({ ok: true, mail: false }); }
+  const u = (await pool.query("SELECT id,name,email FROM users WHERE email=$1", [email])).rows[0];
+  if (u) {
+    const token = crypto.randomBytes(32).toString("base64url");
+    await pool.query("UPDATE password_resets SET used_at=now() WHERE user_id=$1 AND used_at IS NULL", [u.id]); // only the newest link works
+    await pool.query("INSERT INTO password_resets(token_hash,user_id,expires_at) VALUES($1,$2,now() + ($3 || ' minutes')::interval)", [sha(token), u.id, String(RESET_MIN)]);
+    const host = process.env.CANONICAL_HOST || req.headers.host, link = `https://${host}/app#reset/${token}`;
+    mail.sendReset({ to: u.email, name: u.name, link, minutes: RESET_MIN, lang: req.body.lang === "en" ? "en" : "ar" }).catch(e => console.error("reset mail", e.message));
+  }
+  res.json({ ok: true, mail: true });
+}));
+app.post("/api/password/check", wrap(async (req, res) => {
+  const token = String(req.body.token || "");
+  if (limited("rc:" + req.ip, 60, 3600e3)) return fail(res, 429, "too-many-requests");
+  const r = await pool.query("SELECT u.email FROM password_resets p JOIN users u ON u.id=p.user_id WHERE p.token_hash=$1 AND p.used_at IS NULL AND p.expires_at>now()", [sha(token)]);
+  if (!r.rows[0]) return fail(res, 400, "reset-invalid");
+  const e = r.rows[0].email, i = e.indexOf("@");
+  res.json({ email: e.slice(0, Math.min(2, i)) + "•••" + e.slice(i) });
+}));
+app.post("/api/password/reset", wrap(async (req, res) => {
+  const token = String(req.body.token || ""), pw = String(req.body.password || "");
+  if (limited("rs:" + req.ip, 30, 3600e3)) return fail(res, 429, "too-many-requests");
+  if (pw.length < 8 || pw.length > 200) return fail(res, 400, "weak-password");
+  const r = await pool.query("UPDATE password_resets SET used_at=now() WHERE token_hash=$1 AND used_at IS NULL AND expires_at>now() RETURNING user_id", [sha(token)]);
+  if (!r.rows[0]) return fail(res, 400, "reset-invalid");
+  const uid = r.rows[0].user_id;
+  await pool.query("UPDATE users SET pass_hash=$1 WHERE id=$2", [await bcrypt.hash(pw, 11), uid]);
+  await pool.query("DELETE FROM sessions WHERE user_id=$1", [uid]); // sign out every other device
+  await createSession(req, res, uid);
+  const u = (await pool.query("SELECT id,email,name FROM users WHERE id=$1", [uid])).rows[0];
+  res.json({ user: { ...pub(u), plan: await C.planOf(u) } });
+}));
+setInterval(() => pool.query("DELETE FROM password_resets WHERE created_at<now()-interval '2 days'").catch(() => {}), 3600e3).unref();
 
 app.delete("/api/me", needUser, wrap(async (req, res) => {
   await pool.query("DELETE FROM users WHERE id=$1", [req.user.id]);

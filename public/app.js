@@ -1443,9 +1443,10 @@ function openAuth(mode = 'signup', after) {
     <label class="fld">${_('كلمة المرور', 'Password')}<input id="au-p" type="password" class="ltr-text" autocomplete="${mode === 'signup' ? 'new-password' : 'current-password'}" minlength="8" required></label>
     ${mode === 'signup' ? `<label class="small" style="display:flex;gap:8px;align-items:flex-start"><input type="checkbox" id="au-c" required style="margin-top:6px"> <span>${_('أوافق على <a href="/terms" target="_blank">الشروط</a> و<a href="/privacy" target="_blank">سياسة الخصوصية</a>.', 'I agree to the <a href="/terms" target="_blank">Terms</a> and <a href="/privacy" target="_blank">Privacy Policy</a>.')}</span></label>` : ''}
     <div class="err" id="au-err" role="alert"></div><button class="btn primary" id="au-go">${mode === 'signup' ? _('أنشئ الحساب', 'Create account') : _('دخول', 'Sign in')}</button></form>
-  <p class="small center">${mode === 'signup' ? _('لديك حساب؟', 'Have an account?') + ` <a href="#" id="au-sw">${_('سجّل الدخول', 'Sign in')}</a>` : _('جديد هنا؟', 'New here?') + ` <a href="#" id="au-sw">${_('أنشئ حسابًا', 'Create an account')}</a>`}${mode === 'signin' ? `<br><span class="tiny muted">${_('نسيت كلمة المرور؟ راسلنا على info@myielts.academy', 'Forgot your password? Email info@myielts.academy')}</span>` : ''}</p></div>`;
+  <p class="small center">${mode === 'signup' ? _('لديك حساب؟', 'Have an account?') + ` <a href="#" id="au-sw">${_('سجّل الدخول', 'Sign in')}</a>` : _('جديد هنا؟', 'New here?') + ` <a href="#" id="au-sw">${_('أنشئ حسابًا', 'Create an account')}</a>`}${mode === 'signin' ? `<br><a href="#" id="au-fp">${_('نسيت كلمة المرور؟', 'Forgot your password?')}</a>` : ''}</p></div>`;
   $('#au-x').onclick = closeModal; m.onclick = e => { if (e.target === m) closeModal(); };
   $('#au-sw').onclick = e => { e.preventDefault(); openAuth(mode === 'signup' ? 'signin' : 'signup'); };
+  const fp = $('#au-fp'); if (fp) fp.onclick = e => { e.preventDefault(); openForgot(($('#au-e') || {}).value); };
   $('#au-f').onsubmit = async e => {
     e.preventDefault(); const btn = $('#au-go'); btn.disabled = true; $('#au-err').textContent = '';
     try { if (mode === 'signup') await CLOUD.signUp($('#au-e').value.trim(), $('#au-p').value, $('#au-n').value.trim()); else await CLOUD.signIn($('#au-e').value.trim(), $('#au-p').value);
@@ -1453,6 +1454,53 @@ function openAuth(mode = 'signup', after) {
     catch (er) { $('#au-err').textContent = errMsg(er.code); btn.disabled = false; }
   };
   setTimeout(() => { const i = $('#au-n') || $('#au-e'); if (i) i.focus(); }, 50);
+}
+/* ---------- forgotten password: email a one-time link ---------- */
+function openForgot(email) {
+  const m = $('#acct'); m.hidden = false; m.className = 'modal';
+  m.innerHTML = `<div class="modal-in" role="dialog" aria-modal="true"><div class="modal-h"><h2>${_('استعادة كلمة المرور', 'Reset your password')}</h2><button class="icon-btn" id="fp-x" aria-label="close">${ic('x')}</button></div>
+  <div id="fp-body"><p class="small muted">${_('اكتب بريدك المسجّل، وسنرسل لك رابطًا لتعيين كلمة مرور جديدة. الرابط صالح لمدة ساعة ولمرة واحدة.', 'Enter the email you signed up with and we will send you a link to set a new password. The link works once, for one hour.')}</p>
+  <form id="fp-f" class="grid"><label class="fld">${_('البريد الإلكتروني', 'Email')}<input id="fp-e" type="email" class="ltr-text" autocomplete="email" required value="${esc(email || '')}"></label>
+  <div class="err" id="fp-err" role="alert"></div><button class="btn primary" id="fp-go">${_('أرسل الرابط', 'Send the link')}</button></form>
+  <p class="small center"><a href="#" id="fp-back">${_('العودة لتسجيل الدخول', 'Back to sign in')}</a></p></div></div>`;
+  $('#fp-x').onclick = closeModal; m.onclick = e => { if (e.target === m) closeModal(); };
+  $('#fp-back').onclick = e => { e.preventDefault(); openAuth('signin'); };
+  $('#fp-f').onsubmit = async e => {
+    e.preventDefault(); const btn = $('#fp-go'), em = $('#fp-e').value.trim(); btn.disabled = true; $('#fp-err').textContent = '';
+    try {
+      const r = await CLOUD.forgotPassword(em, S.lang); track('pw_forgot');
+      $('#fp-body').innerHTML = r.mail === false
+        ? `<div class="notice gold">${_('خدمة البريد غير مفعّلة حاليًا. راسلنا على <b class="ltr-text">info@myielts.academy</b> من بريدك المسجّل وسنساعدك في استعادة حسابك.', 'Email is not available right now. Write to <b>info@myielts.academy</b> from your registered address and we will help you get back in.')}</div>`
+        : `<div class="notice teal"><b>${_('تحقق من بريدك', 'Check your inbox')}</b><p class="small" style="margin:6px 0 0">${_(`إن كان <b class="ltr-text">${esc(em)}</b> مسجّلًا لدينا فستصلك رسالة خلال دقيقة تحتوي رابط تعيين كلمة المرور. تفقّد مجلد الرسائل غير المرغوب فيها إن لم تجدها.`, `If <b>${esc(em)}</b> has an account, an email with a reset link will arrive within a minute. Check your spam folder if you cannot find it.`)}</p></div><p class="small center"><a href="#" id="fp-back2">${_('العودة لتسجيل الدخول', 'Back to sign in')}</a></p>`;
+      const b2 = $('#fp-back2'); if (b2) b2.onclick = ev => { ev.preventDefault(); openAuth('signin'); };
+    } catch (er) { $('#fp-err').textContent = errMsg(er.code); btn.disabled = false; }
+  };
+  setTimeout(() => { const i = $('#fp-e'); if (i) i.focus(); }, 50);
+}
+/* opened from the emailed link: /app#reset/<token> */
+async function openReset(token) {
+  history.replaceState(null, '', '#today'); // keep the token out of the address bar and history
+  const m = $('#acct'); m.hidden = false; m.className = 'modal';
+  m.innerHTML = `<div class="modal-in" role="dialog" aria-modal="true"><div class="modal-h"><h2>${_('كلمة مرور جديدة', 'New password')}</h2><button class="icon-btn" id="rs-x" aria-label="close">${ic('x')}</button></div><div id="rs-body"><p class="small muted">${_('نتحقق من الرابط…', 'Checking your link…')}</p></div></div>`;
+  $('#rs-x').onclick = closeModal;
+  let who;
+  try { who = await CLOUD.checkReset(token); }
+  catch (er) {
+    $('#rs-body').innerHTML = `<div class="notice gold">${er.code === 'reset-invalid' ? _('انتهت صلاحية هذا الرابط أو استُخدم من قبل. اطلب رابطًا جديدًا.', 'This link has expired or was already used. Ask for a new one.') : errMsg(er.code)}</div><button class="btn primary" id="rs-new">${_('اطلب رابطًا جديدًا', 'Request a new link')}</button>`;
+    $('#rs-new').onclick = () => openForgot(); return;
+  }
+  $('#rs-body').innerHTML = `<p class="small muted">${_('الحساب', 'Account')}: <b class="ltr-text">${esc(who.email)}</b></p>
+  <form id="rs-f" class="grid"><label class="fld">${_('كلمة المرور الجديدة', 'New password')}<input id="rs-p" type="password" class="ltr-text" autocomplete="new-password" minlength="8" required></label>
+  <label class="fld">${_('أعد كتابتها', 'Type it again')}<input id="rs-p2" type="password" class="ltr-text" autocomplete="new-password" minlength="8" required></label>
+  <div class="err" id="rs-err" role="alert"></div><button class="btn primary" id="rs-go">${_('احفظ وادخل', 'Save and sign in')}</button></form>`;
+  setTimeout(() => { const i = $('#rs-p'); if (i) i.focus(); }, 50);
+  $('#rs-f').onsubmit = async e => {
+    e.preventDefault(); const p1 = $('#rs-p').value, p2 = $('#rs-p2').value, btn = $('#rs-go'); $('#rs-err').textContent = '';
+    if (p1 !== p2) { $('#rs-err').textContent = _('كلمتا المرور غير متطابقتين.', 'The passwords do not match.'); return; }
+    btn.disabled = true;
+    try { await CLOUD.resetPassword(token, p1); track('pw_reset'); closeModal(); toast(_('تم تعيين كلمة المرور الجديدة، وأنت الآن داخل حسابك.', 'Your new password is set and you are signed in.'), 4000); renderRoute(); }
+    catch (er) { $('#rs-err').textContent = er.code === 'reset-invalid' ? _('انتهت صلاحية الرابط. اطلب رابطًا جديدًا.', 'The link has expired. Ask for a new one.') : errMsg(er.code); btn.disabled = false; }
+  };
 }
 function closeModal() { const m = $('#acct'); m.hidden = true; m.innerHTML = ''; }
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#acct').hidden && !document.body.classList.contains('xp-open')) closeModal(); });
@@ -1521,6 +1569,7 @@ async function renderRoute() {
       case 'progress': html = await pageProgress(); break;
       case 'settings': html = pageSettings(); break;
       case 'upgrade': html = pageUpgrade(); break;
+      case 'reset': html = await pageToday(); { const tk = a; setTimeout(() => openReset(tk), 0); } break;
       case 'diag': html = await pageToday(); setTimeout(() => { history.replaceState(null, '', '#today'); startDiag(); }, 0); break;
       default: html = await pageToday();
     }

@@ -255,7 +255,7 @@ function openAuth(mode = 'signup', after) {
     <label class="fld">${_('كلمة المرور', 'Password')}<input id="au-p" type="password" class="ltr-text" autocomplete="${mode === 'signup' ? 'new-password' : 'current-password'}" minlength="8" required></label>
     ${mode === 'signup' ? `<label class="small" style="display:flex;gap:8px;align-items:flex-start"><input type="checkbox" id="au-c" required style="margin-top:6px"> <span>${_('أوافق على <a href="/terms" target="_blank">الشروط</a> و<a href="/privacy" target="_blank">سياسة الخصوصية</a>.', 'I agree to the <a href="/terms" target="_blank">Terms</a> and <a href="/privacy" target="_blank">Privacy Policy</a>.')}</span></label>` : ''}
     <div class="err" id="au-err" role="alert"></div><button class="btn primary" id="au-go">${mode === 'signup' ? _('أنشئ الحساب', 'Create account') : _('دخول', 'Sign in')}</button></form>
-  <p class="small center">${mode === 'signup' ? _('لديك حساب؟', 'Have an account?') + ` <a href="#" id="au-sw">${_('سجّل الدخول', 'Sign in')}</a>` : _('جديد هنا؟', 'New here?') + ` <a href="#" id="au-sw">${_('أنشئ حسابًا', 'Create an account')}</a>`}${mode === 'signin' ? `<br><span class="tiny muted">${_('نسيت كلمة المرور؟ راسلنا على info@gat.academy', 'Forgot your password? Email info@gat.academy')}</span>` : ''}</p></div>`;
+  <p class="small center">${mode === 'signup' ? _('لديك حساب؟', 'Have an account?') + ` <a href="#" id="au-sw">${_('سجّل الدخول', 'Sign in')}</a>` : _('جديد هنا؟', 'New here?') + ` <a href="#" id="au-sw">${_('أنشئ حسابًا', 'Create an account')}</a>`}${mode === 'signin' ? `<br><span class="tiny muted">${_('نسيت كلمة المرور؟ راسلنا على info@myielts.academy', 'Forgot your password? Email info@myielts.academy')}</span>` : ''}</p></div>`;
   $('#au-x').onclick = closeModal; m.onclick = e => { if (e.target === m) closeModal(); };
   $('#au-sw').onclick = e => { e.preventDefault(); openAuth(mode === 'signup' ? 'signin' : 'signup'); };
   $('#au-f').onsubmit = async e => {
@@ -298,7 +298,7 @@ function renderShell() {
   $('#tabbar').innerHTML = NAV.filter(n => TABS.includes(n[0])).map(([k, i, l]) => `<a href="#${k}" class="${on === k ? 'on' : ''}">${ic(i, 'i20')}<span>${_(l[0], l[1])}</span></a>`).join('');
   $('#lang-btn').textContent = AR() ? 'English' : 'العربية';
   $('#acct-btn').hidden = !window.CLOUD; $('#acct-btn').setAttribute('aria-label', _('الحساب', 'Account'));
-  $('#foot').innerHTML = `<span>© ${new Date().getFullYear()} ${_('أكاديمية الآيلتس', 'IELTS Academy')}</span><span><a href="#lessons">${_('الدروس', 'Lessons')}</a> · <a href="#plan">${_('الخطة', 'Plan')}</a> · <a href="/privacy">${_('الخصوصية', 'Privacy')}</a> · <a href="/terms">${_('الشروط', 'Terms')}</a> · <a href="mailto:info@gat.academy">info@gat.academy</a></span>`;
+  $('#foot').innerHTML = `<span>© ${new Date().getFullYear()} ${_('أكاديمية الآيلتس', 'IELTS Academy')}</span><span><a href="#lessons">${_('الدروس', 'Lessons')}</a> · <a href="#plan">${_('الخطة', 'Plan')}</a> · <a href="/privacy">${_('الخصوصية', 'Privacy')}</a> · <a href="/terms">${_('الشروط', 'Terms')}</a> · <a href="mailto:info@myielts.academy">info@myielts.academy</a></span>`;
   const bn = window.CLOUD && CLOUD.config && CLOUD.config.banner, b = $('#banner'); if (bn && bn.on && (bn.ar || bn.en)) { b.hidden = false; b.className = bn.tone || ''; b.textContent = AR() ? bn.ar : bn.en; } else b.hidden = true;
   cloudStatus();
 }

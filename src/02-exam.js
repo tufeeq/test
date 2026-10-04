@@ -84,7 +84,7 @@ function rvBlock(g, q, sec) {
   if (sec.skill === 'L' && Number.isInteger(q.ev)) evBtn = `<button data-ev-line="${sec.pi}:${q.ev}">▶ ${_('اسمع موضع الإجابة', 'Play where the answer is')}</button>`;
   else if (sec.skill === 'R' && q.ev) evBtn = `<button data-ev-quote="${esc(q.ev)}">${_('أرني الدليل في النص', 'Show the evidence in the text')}</button>`;
   return `<div class="rv"><div dir="${AR() ? 'rtl' : 'ltr'}" style="text-align:start">${_('إجابتك', 'Your answer')}: <bdi class="yours ${r.ok ? 'ok' : 'no'}">${esc(r.given || '—')} ${r.ok ? '✓' : '✗'}</bdi> · ${_('الصحيحة', 'Correct')}: <bdi><b>${esc(right)}</b></bdi>${Array.isArray(q.a) && q.a.length > 1 ? ` <span style="color:#666">(${_('مقبول أيضًا', 'also accepted')}: <bdi>${esc(q.a.slice(1).join(' / '))}</bdi>)</span>` : ''}</div>
-    ${why.ar ? `<div class="why">${esc(why.ar)}</div>` : ''}${why.en ? `<div class="why en">${esc(why.en)}</div>` : ''}${evBtn}</div>`;
+    ${xlEnFirst() && why.en ? `<div class="why en">${esc(why.en)}</div>${why.ar ? `<button type="button" class="ar-show" data-ar-show>اشرح بالعربية</button><div class="why ar-more" dir="rtl" hidden>${esc(why.ar)}</div>` : ''}` : `${why.ar ? `<div class="why">${esc(why.ar)}</div>` : ''}${why.en ? `<div class="why en">${esc(why.en)}</div>` : ''}`}${evBtn}</div>`;
 }
 function groupHTML(g, sec) {
   const sk = sec.key, R = EX.review;

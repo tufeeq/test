@@ -547,3 +547,17 @@ body.xp-open{overflow:hidden}
 .ex-tg{display:none}
 @media (max-width:820px){.ex-tg{display:flex;gap:0;padding:6px 10px;background:#fafafa;border-bottom:1px solid var(--ex-line)}.ex-tg button{flex:1;font:inherit;font-size:.85rem;font-weight:700;padding:7px;border:1px solid #888;background:#fff;color:#1a1a1a;cursor:pointer}.ex-tg button.on{background:#1f5fa8;color:#fff;border-color:#1f5fa8}
 .ex-body.split:not(.show-q) .ex-pane.questions{display:none}.ex-body.split.show-q .ex-pane.passage{display:none}}
+
+/* explanation language */
+.xl-sw{display:grid;gap:6px;margin-block:4px 14px}
+.xl-sw .seg{justify-self:start}
+.xl-card .xl-opts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-block:10px}
+@media (max-width:640px){.xl-card .xl-opts{grid-template-columns:1fr}}
+.xl-opt{font:inherit;text-align:start;display:grid;gap:4px;padding:12px;border:1.5px solid var(--line);border-radius:14px;background:var(--surface);color:var(--ink);cursor:pointer}
+.xl-opt small{color:var(--ink2);line-height:1.6}
+.xl-opt.rec{border-color:var(--pri);box-shadow:var(--pop)}
+.xl-opt:hover{border-color:var(--pri)}
+.ar-show{font:inherit;font-size:.82rem;font-weight:700;background:none;border:0;color:var(--teal-t);cursor:pointer;padding:4px 0;text-decoration:underline}
+.ar-more{direction:rtl;text-align:start;margin-top:4px}
+.xpc .xp-alt{font-size:.78rem;font-weight:700;color:var(--teal-t);justify-self:start;border-radius:8px;padding:2px 0;cursor:pointer}
+.xpc .xp-alt:hover{text-decoration:underline}

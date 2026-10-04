@@ -60,8 +60,10 @@ async function pageSkill(id) {
   await skillsData();
   const s = SKL.find(x => x.id === id); if (!s) return pageLearn();
   const i = skillInfo(id), techs = TECH.filter(t => t.sk === id), n = DRL.filter(d => d.sk === id).length + (GEN[id] ? 1 : 0);
-  const both = (o) => `<p>${md(L(o))}</p>${AR() ? `<details class="en-v"><summary>English</summary><p class="ltr-text">${md(o.en)}</p></details>` : ''}`;
-  const list = (o, cls = 'bul') => `<${cls === 'nsteps' ? 'ol' : 'ul'} class="${cls}">${L(o).map(x => `<li>${md(x)}</li>`).join('')}</${cls === 'nsteps' ? 'ol' : 'ul'}>${AR() ? `<details class="en-v"><summary>English</summary><${cls === 'nsteps' ? 'ol' : 'ul'} class="${cls} ltr-text">${o.en.map(x => `<li>${md(x)}</li>`).join('')}</${cls === 'nsteps' ? 'ol' : 'ul'}></details>` : ''}`;
+  // explanation language: in Arabic UI the learner may choose English-first lessons (Arabic one tap away)
+  const EN = AR() && xlang() === 'en', P = o => EN ? o.en : L(o), OT = o => EN ? o.ar : o.en, pc = EN ? ' class="ltr-text"' : '', oc = EN ? ' dir="rtl"' : ' class="ltr-text"', sum = EN ? 'بالعربية' : 'English';
+  const both = (o) => `<p${pc}>${md(P(o))}</p>${AR() ? `<details class="en-v"><summary>${sum}</summary><p${oc}>${md(OT(o))}</p></details>` : ''}`;
+  const list = (o, cls = 'bul') => { const tg = cls === 'nsteps' ? 'ol' : 'ul'; return `<${tg} class="${cls}${EN ? ' ltr-text' : ''}">${P(o).map(x => `<li>${md(x)}</li>`).join('')}</${tg}>${AR() ? `<details class="en-v"><summary>${sum}</summary><${tg} class="${cls}${EN ? '' : ' ltr-text'}"${EN ? ' dir="rtl"' : ''}>${OT(o).map(x => `<li>${md(x)}</li>`).join('')}</${tg}></details>` : ''}`; };
   const side = `<div class="card side-card"><span class="eyebrow">${_('مستوى الإتقان', 'Mastery')}</span><div class="spread">${pips(i.level)}<b>${LEVELS()[i.level]}</b></div>
     <div class="meter"><i style="inline-size:${Math.round((i.acc || 0) * 100)}%"></i></div><p class="small muted">${i.n ? `${numL(i.n)} ${_('إجابة', 'answers')} · ${numL(Math.round(i.acc * 100))}%` : _('لا إجابات بعد', 'No answers yet')}</p>
     <ul class="lvl-rules small">${[[1, _('ابدأ التمرين', 'Start practising')], [2, _('٥ إجابات بدقة ٦٠٪+', '5 answers at 60%+')], [3, _('١٠ إجابات بدقة ٨٠٪+', '10 answers at 80%+')], [4, _('٢٠ إجابة بدقة ٩٠٪+', '20 answers at 90%+')]].map(([k, t]) => `<li class="${i.level >= k ? 'on' : ''}"><b>${LEVELS()[k]}</b> ${t}</li>`).join('')}</ul>
@@ -72,14 +74,14 @@ async function pageSkill(id) {
   <div class="lesson2">
     <div class="lesson-main grid">
       ${xpSection(id)}
-      <section class="card"><h2>${_('الفكرة', 'The idea')}</h2>${L(s.concept).map(p => `<p>${md(p)}</p>`).join('')}${AR() ? `<details class="en-v"><summary>English</summary>${s.concept.en.map(p => `<p class="ltr-text">${md(p)}</p>`).join('')}</details>` : ''}</section>
+      <section class="card"><h2>${_('الفكرة', 'The idea')}</h2>${P(s.concept).map(p => `<p${pc}>${md(p)}</p>`).join('')}${AR() ? `<details class="en-v"><summary>${sum}</summary>${OT(s.concept).map(p => `<p${oc}>${md(p)}</p>`).join('')}</details>` : ''}</section>
       <aside class="callout"><span class="eyebrow">${_('العقلية الصحيحة', 'Mindset')}</span>${both(s.mind)}</aside>
       <section class="card"><h2>${_('خطوات الحل', 'Step by step')}</h2>${list(s.steps, 'nsteps')}</section>
       <section><h2 class="h2s">${_('أشكال الأسئلة', 'What it looks like in the test')}</h2><div class="tgrid2">${s.forms.map(f => `<div class="tcell"><b class="ltr-text" style="text-align:start">${esc(f.en)}</b><span>${AR() ? `<b>${esc(f.ar)}</b> · ` : ''}${esc(L(f.d))}</span></div>`).join('')}</div></section>
       ${s.rules ? `<section class="card"><h2>${_('قواعد وعبارات تحفظها', 'Rules & phrases to know')}</h2>${list(s.rules)}</section>` : ''}
       <section class="card warn-card"><h2>${_('الفخاخ', 'Traps')}</h2>${list(s.traps)}</section>
-      <section><h2 class="h2s">${_('أمثلة محلولة', 'Worked examples')}</h2><div class="grid">${s.examples.map(e => `<details class="card excard"><summary><div class="src">${esc(e.src)}</div><b class="ltr-text" style="display:block;margin-top:8px">${esc(e.q)}</b><span class="reveal">${_('اضغط لإظهار الحل والشرح', 'Tap to reveal the answer and walk-through')}</span></summary><div class="walk"><b class="ltr-text">${esc(e.a)}</b><br>${esc(L(e.walk))}</div></details>`).join('')}</div></section>
-      ${techs.length ? `<section><h2 class="h2s">${_('تقنيات هذه المهارة', 'Techniques for this skill')}</h2><div class="notes">${techs.map((t, k) => `<article class="note-card c${k % 4}"><h3>${esc(L(t.t))}</h3><p>${esc(L(t.d))}</p>${t.ex ? `<p class="ex ltr-text">${esc(t.ex)}</p>` : ''}</article>`).join('')}</div></section>` : ''}
+      <section><h2 class="h2s">${_('أمثلة محلولة', 'Worked examples')}</h2><div class="grid">${s.examples.map(e => `<details class="card excard"><summary><div class="src">${esc(e.src)}</div><b class="ltr-text" style="display:block;margin-top:8px">${esc(e.q)}</b><span class="reveal">${_('اضغط لإظهار الحل والشرح', 'Tap to reveal the answer and walk-through')}</span></summary><div class="walk"><b class="ltr-text">${esc(e.a)}</b><br><span${pc}>${esc(P(e.walk))}</span></div></details>`).join('')}</div></section>
+      ${techs.length ? `<section><h2 class="h2s">${_('تقنيات هذه المهارة', 'Techniques for this skill')}</h2><div class="notes">${techs.map((t, k) => `<article class="note-card c${k % 4}"${EN ? ' dir="ltr"' : ''}><h3>${esc(P(t.t))}</h3><p>${esc(P(t.d))}</p>${t.ex ? `<p class="ex ltr-text">${esc(t.ex)}</p>` : ''}</article>`).join('')}</div></section>` : ''}
       <section class="card accent-card"><h2>${_('للسرعة', 'Speed tips')}</h2>${list(s.speed)}</section>
       <aside class="callout arab"><span class="eyebrow">${_('للمتعلم العربي', 'For Arabic speakers')}</span>${both(s.arab)}</aside>
       <div class="mobile-cta"><button class="btn primary block" data-drill="${id}">${_('تدرّب: ١٠ أسئلة', 'Practise: 10 questions')}</button></div>
@@ -163,7 +165,7 @@ function drRender() {
     <div id="dr-fb"></div>
   </div>`;
   if (isL) { $('#dr-play').onclick = () => { if (DS.plays >= 2 && !DS.answered) return toast(_('استمعت مرتين. أجب الآن.', 'You’ve listened twice. Answer now.')); drPlay(it); }; setTimeout(() => { if (DS && DS.items[DS.i] === it) drPlay(it); }, 400); }
-  $('#dr-hint').onclick = () => { DS.hint = true; const b = $('#dr-hint-b'); b.hidden = false; b.innerHTML = `<b>💡 ${esc(L(it.hint))}</b>${tech ? `<div class="small" style="margin-top:6px">${_('التقنية', 'Technique')}: <b>${esc(L(tech.t))}</b> — ${esc(L(tech.d))}</div>` : ''}${AR() ? `<div class="small ltr-text muted" style="margin-top:6px">${esc(it.hint.en)}</div>` : ''}`; };
+  $('#dr-hint').onclick = () => { DS.hint = true; const b = $('#dr-hint-b'); b.hidden = false; b.innerHTML = `<div><b>💡</b> ${xlBi(it.hint, true)}</div>${tech ? `<div class="small" style="margin-top:6px">${_('التقنية', 'Technique')}: <b${xlEnFirst() ? ' class="ltr-text"' : ''}>${esc(xlT(tech.t))}</b> — <span${xlEnFirst() ? ' class="ltr-text"' : ''}>${esc(xlT(tech.d))}</span></div>` : ''}`; };
   if (it.kind === 'mcq') el.querySelectorAll('.opt-btn').forEach(b => b.onclick = () => drAnswer(it, b.dataset.k, b));
   else { const go = () => drAnswer(it, $('#dr-in').value); $('#dr-check').onclick = go; $('#dr-in').onkeydown = e => { if (e.key === 'Enter') go(); }; $('#dr-skip').onclick = () => drAnswer(it, ''); setTimeout(() => { const i = $('#dr-in'); if (i && !isL) i.focus(); }, 50); }
 }
@@ -181,9 +183,9 @@ function drAnswer(it, val, btn) {
   const tech = techOf(it.tech), right = it.kind === 'mcq' ? `${it.a}. ${it.opts[LET.indexOf(it.a)]}` : (it.a || []).join(' / ');
   const transcript = it.lines ? it.lines.map(l => l.t).join(' ') : it.tts || '';
   $('#dr-fb').innerHTML = `<div class="fb ${ok ? 'ok' : 'no'}"><b>${ok ? '✓ ' + _('إجابة صحيحة', 'Correct') + (DS.hint ? ' ' + _('(بمساعدة التلميح)', '(with a hint)') : '') : '✗ ' + _('الإجابة الصحيحة', 'Correct answer') + ': <span class="ltr-text">' + esc(right) + '</span>'}</b>
-    <p>${esc(L(it.why))}</p>${AR() ? `<p class="small ltr-text muted">${esc(it.why.en)}</p>` : ''}
+    ${xlBi(it.why)}
     ${transcript ? `<details><summary class="small">${_('النص المسموع', 'Transcript')}</summary><div class="src">${esc(transcript)}</div></details>` : ''}
-    ${!ok && tech ? `<div class="tech-tip">${ic('spark')} ${_('تذكّر التقنية', 'Remember the technique')}: <b>${esc(L(tech.t))}</b> — ${esc(L(tech.d))}</div>` : ''}</div>
+    ${!ok && tech ? `<div class="tech-tip">${ic('spark')} ${_('تذكّر التقنية', 'Remember the technique')}: <b>${esc(xlT(tech.t))}</b> — ${esc(xlT(tech.d))}</div>` : ''}</div>
     <button class="btn primary" id="dr-next">${DS.i + 1 < DS.items.length ? _('التالي', 'Next') : _('النتيجة', 'See result')} ${ic('arrow')}</button>`;
   $('#dr-next').onclick = () => { if (DS.audio) DS.audio.pause(); DS.i++; drRender(); };
   setTimeout(() => $('#dr-next') && $('#dr-next').focus({ preventScroll: true }), 50);

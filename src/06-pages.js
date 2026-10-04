@@ -65,6 +65,7 @@ async function pageToday() {
     <div class="row">${days != null ? `<span class="pill"><b>${numL(Math.max(0, days))}</b> ${_('يومًا حتى اختبارك', 'days to your test')}</span>` : `<a class="pill" href="#settings">${_('أضف موعد اختبارك', 'Add your test date')}</a>`}<span class="pill">${_('الدرجة التقديرية', 'Estimated band')} <b>${b.O == null ? '—' : bandL(b.O)}</b></span><a class="pill" href="#settings">${_('الإعدادات', 'Settings')}</a></div></div>
     <div class="skills4">${['L', 'R', 'W', 'S'].map(sk).join('')}</div></div>
   ${!diagTaken() ? `<div class="card session-card"><div><span class="eyebrow">${_('ابدأ من هنا', 'Start here')}</span><h2>${_('اختبار تحديد المستوى', 'Placement test')}</h2><p class="small muted">${_('٢٠ سؤال استماع و١٣ سؤال قراءة بالصيغة المحوسبة. نحدد منه نقطة بدايتك ومهاراتك الأضعف.', '20 listening + 13 reading questions in the computer format. It finds your starting point and weakest skills.')}</p></div><a class="btn primary" href="#diag">${_('ابدأ الاختبار', 'Start the test')}</a></div>` : ''}
+  ${xlSuggestCard()}
   <div class="card session-card"><div><span class="eyebrow">${_('جلسة اليوم', 'Today’s session')}</span><h2>${sessDone ? _('أنهيت جلسة اليوم — أحسنت! يمكنك جلسة إضافية.', 'Today’s session done — well done! Fancy another?') : _('١٥ سؤالًا مختارة لك، مع تلميح وشرح لكل سؤال', '15 questions picked for you, each with a hint and explanation')}</h2>
     <p class="small muted">${_('أخطاؤك المستحقة + أضعف مهارتين', 'Your due mistakes + your two weakest skills')}</p><div class="chips">${weak.map(w => `<span class="chip">${esc(L(SKL.find(s => s.id === w.id).title))}</span>`).join('')}</div></div><button class="btn primary" id="td-sess">${_('ابدأ الجلسة', 'Start session')}</button></div>
   <section class="grid"><div class="spread"><h2>${_('خريطة الإتقان', 'Mastery map')}</h2><span class="small muted">${_('اضغط أي مهارة لدرسها وتمارينها', 'Tap any skill for its lesson and drills')}</span></div>${masteryMap()}</section>
@@ -190,6 +191,7 @@ function pageSettings() {
     <label class="fld">${_('نوع الاختبار', 'Test type')}<select id="st-m"><option value="ac" ${S.module === 'ac' ? 'selected' : ''}>Academic</option><option value="gt" ${S.module === 'gt' ? 'selected' : ''}>General Training</option></select></label>
     <label class="fld">${_('الدرجة المستهدفة', 'Target band')}<select id="st-t">${bandOpts(S.target)}</select></label>
     <label class="fld">${_('موعد الاختبار', 'Test date')}<input type="date" id="st-d" value="${esc(S.examDate)}"></label>
+    ${AR() ? `<div class="fld">${xlSwitch()}</div>` : ''}
     <button class="btn primary">${_('حفظ', 'Save')}</button></form><hr class="sep"><button class="btn ghost sm" id="st-reset" style="color:var(--bad-t)">${_('مسح كل التقدم', 'Erase all progress')}</button></div>`;
 }
 
@@ -375,6 +377,7 @@ function mergeCloud(c) {
   out.skillSeen = Object.assign({}, c.skillSeen); for (const [k, v] of Object.entries(local.skillSeen || {})) if (!out.skillSeen[k] || v > out.skillSeen[k]) out.skillSeen[k] = v;
   out.sessionDays = [...new Set([...(c.sessionDays || []), ...(local.sessionDays || [])])].sort();
   { const d = todayStr(), n = x => x && x.d === d ? x.n : 0; out.dq = { d, n: Math.max(n(c.dq), n(local.dq)) }; }
+  if (c.xlangSet && !local.xlangSet) { out.xlang = c.xlang; out.xlangSet = true; }
   if (c.onboarded) { out.onboarded = true; out.target = c.target; out.examDate = c.examDate; out.module = c.module; }
   S = out; try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {}
 }

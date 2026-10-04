@@ -10,8 +10,25 @@ async function send({ to, subject, html, text }) {
     headers: { Authorization: "Bearer " + process.env.RESEND_API_KEY, "Content-Type": "application/json" },
     body: JSON.stringify({ from: from(), to: [to], subject, html, text, reply_to: process.env.MAIL_REPLY_TO || `info@${process.env.CANONICAL_HOST || "myielts.academy"}` })
   });
-  if (!r.ok) throw new Error("resend " + r.status + " " + (await r.text()).slice(0, 300));
+  if (!r.ok) { const t = (await r.text()).slice(0, 300); if (r.status === 403) diagnose("send rejected"); throw new Error("resend " + r.status + " " + t); }
   return r.json();
+}
+// Ask Resend for the domain's state, request (re)verification if needed, and log each DNS record's status.
+let lastDiag = 0;
+async function diagnose(reason) {
+  if (!process.env.RESEND_API_KEY || Date.now() - lastDiag < 10 * 60e3) return; lastDiag = Date.now();
+  const H = { Authorization: "Bearer " + process.env.RESEND_API_KEY };
+  try {
+    const list = await (await fetch("https://api.resend.com/domains", { headers: H })).json();
+    const ds = list.data || [];
+    if (!ds.length) { console.error("[mail] Resend account behind RESEND_API_KEY has NO domains. Add myielts.academy in the same Resend account (" + reason + ")"); return; }
+    for (const d of ds) {
+      const full = await (await fetch("https://api.resend.com/domains/" + d.id, { headers: H })).json();
+      console.log(`[mail] Resend domain ${d.name} status=${d.status} region=${d.region || full.region || "?"} (${reason})`);
+      (full.records || []).forEach(r => console.log(`[mail]   ${r.record} ${r.type} ${r.name} -> ${String(r.value).slice(0, 70)} : ${r.status}`));
+      if (d.status !== "verified") { const v = await fetch("https://api.resend.com/domains/" + d.id + "/verify", { method: "POST", headers: H }); console.log("[mail] verification requested:", v.status); }
+    }
+  } catch (e) { console.error("[mail] diagnose failed", e.message); }
 }
 function sendReset({ to, name, link, minutes, lang }) {
   const ar = lang !== "en", n = esc(name || "");
@@ -28,4 +45,5 @@ function sendReset({ to, name, link, minutes, lang }) {
   const text = ar ? `مرحبًا ${name || ""}\nلإعادة تعيين كلمة المرور افتح الرابط (صالح ${minutes} دقيقة ولمرة واحدة):\n${link}\nإن لم تطلب ذلك فتجاهل الرسالة.` : `Hi ${name || ""}\nOpen this link to reset your password (one use, ${minutes} minutes):\n${link}\nIf you did not ask for this, ignore this email.`;
   return send({ to, subject, html, text });
 }
-module.exports = { configured, send, sendReset };
+module.exports = { configured, send, sendReset, diagnose };
+setTimeout(() => diagnose("startup"), 5000).unref();

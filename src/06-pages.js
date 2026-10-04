@@ -16,25 +16,25 @@ function bindOnboard() {
 
 /* ---------- adaptive daily plan ---------- */
 function planFor(date) {
-  const b = bands(), weak = weakest(), dayN = daysBetween(S.planStart || todayStr(), date), t = [];
-  if (!diagTaken()) return [{ id: 'diag', k: 'L', t: _('اختبار تحديد المستوى', 'Placement test'), s: _('٣٣ سؤالًا · نحو ٣٥ دقيقة', '33 questions · about 35 minutes'), href: '#diag' }];
-  const focus = weak[dayN % 2 === 0 ? 0 : 1].k;
-  const lessonsL = ['L-form', 'L-mcq', 'L-map', 'L-notes'], lessonsR = ['R-tfng', 'R-headings', 'R-completion'], lessonsW = ['W-t1', 'W-t2', 'W-cc'], lessonsS = ['S-p2', 'S-flu'];
-  const L2 = { L: lessonsL, R: lessonsR, W: lessonsW, S: lessonsS }[focus], nextLesson = L2.find(id => !S.lessons[id]);
-  if (nextLesson) t.push({ id: 'les:' + nextLesson, k: focus, t: _('درس', 'Lesson') + ': ' + (LESSON_TITLES[nextLesson] ? L(LESSON_TITLES[nextLesson]) : nextLesson), s: _('٧ دقائق', '7 minutes'), href: '#lesson/' + nextLesson });
-  const act = { L: { t: _('تدريب استماع: جزء واحد', 'Listening practice: one part'), href: '#listening' }, R: { t: _('تدريب قراءة: نص واحد', 'Reading practice: one passage'), href: '#reading' }, W: { t: S.module === 'gt' ? _('اكتب رسالة (المهمة ١)', 'Write a letter (Task 1)') : _('اكتب وصف رسم (المهمة ١)', 'Describe a chart (Task 1)'), href: '#writing' }, S: { t: _('محادثة: الجزء الأول', 'Speaking: Part 1 topic'), href: '#speaking' } };
-  t.push({ id: 'act:' + focus, k: focus, ...act[focus], s: _('نقطة ضعفك الحالية', 'your current weak spot') });
+  const dayN = daysBetween(S.planStart || todayStr(), date), t = [];
+  if (!diagTaken()) t.push({ id: 'diag', k: 'L', t: _('اختبار تحديد المستوى', 'Placement test'), s: _('٣٣ سؤالًا · نحو ٣٥ دقيقة', '33 questions · about 35 minutes'), href: '#diag' });
+  const ranked = SKL ? rankSkills() : [], focus = ranked.length ? ranked[dayN % Math.min(3, ranked.length)] : null;
+  if (focus) { const sk = SKL.find(x => x.id === focus.id);
+    t.push({ id: 'les:' + focus.id, k: sk.sec, t: _('ادرس مهارة', 'Study a skill') + ': ' + L(sk.title), s: _('درس قصير بالعربية مع أمثلة', 'a short lesson with examples'), href: '#skill/' + focus.id });
+    t.push({ id: 'drill:' + focus.id, k: sk.sec, t: _('تدرّب عليها: ١٠ أسئلة', 'Practise it: 10 questions'), s: _('مع تلميحات وشرح', 'with hints and explanations'), href: '#skill/' + focus.id }); }
+  t.push({ id: 'sess', k: 'R', t: _('جلسة اليوم', 'Today’s session'), s: _('١٥ سؤالًا منوّعة', '15 mixed questions'), href: '#practice' });
   if (dayN % 3 === 2) t.push({ id: 'act:W2', k: 'W', t: _('اكتب مقالة (المهمة ٢)', 'Write an essay (Task 2)'), s: _('٤٠ دقيقة', '40 minutes'), href: '#writing' });
-  else t.push({ id: 'para', k: 'R', t: _('مدرّب إعادة الصياغة', 'Paraphrase trainer'), s: _('١٠ أسئلة · ٥ دقائق', '10 questions · 5 minutes'), href: '#para' });
-  t.push({ id: 'cards', k: 'S', t: _('بطاقات المفردات', 'Vocabulary cards'), s: _('١٠ دقائق', '10 minutes'), href: '#cards/due' });
-  if (S.mistakes.some(m => m.due <= date)) t.push({ id: 'mis', k: 'W', t: _('راجع صندوق الأخطاء', 'Review your mistake box'), s: _('أخطاء مستحقة اليوم', 'mistakes due today'), href: '#mreview' });
-  if (S.examDate && daysBetween(date, S.examDate) <= 10 && daysBetween(date, S.examDate) >= 0) t.unshift({ id: 'mock', k: 'L', t: _('اختبار كامل تحت الوقت', 'A full timed test'), s: _('أيام قليلة قبل الاختبار', 'final days before your test'), href: '#listening' });
+  else if (dayN % 3 === 1) t.push({ id: 'act:S', k: 'S', t: _('محادثة: موضوع من الجزء الأول', 'Speaking: a Part 1 topic'), s: _('سجّل إجاباتك', 'record your answers'), href: '#speaking' });
+  else t.push({ id: 'cards', k: 'S', t: _('بطاقات المفردات', 'Vocabulary cards'), s: _('١٠ دقائق', '10 minutes'), href: '#cards/due' });
+  if (S.examDate && daysBetween(date, S.examDate) <= 14 && daysBetween(date, S.examDate) >= 0 && dayN % 2 === 0) t.unshift({ id: 'mock', k: 'L', t: _('نموذج كامل تحت الوقت', 'A full timed model exam'), s: _('الأسبوعان الأخيران', 'final two weeks'), href: '#tests' });
   return t;
 }
 function taskDone(task, date = todayStr()) {
   const d = date;
   if (task.id === 'diag') return diagTaken();
-  if (task.id.startsWith('les:')) return S.lessons[task.id.slice(4)] === d;
+  if (task.id.startsWith('les:')) return (S.skillSeen || {})[task.id.slice(4)] === d;
+  if (task.id.startsWith('drill:')) return S.recent.filter(x => x.d === d && x.s === task.id.slice(6)).length >= 5;
+  if (task.id === 'sess') return (S.sessionDays || []).includes(d);
   if (task.id === 'act:L' || task.id === 'mock') return S.attempts.some(a => a.date === d && a.skill === 'L');
   if (task.id === 'act:R') return S.attempts.some(a => a.date === d && a.skill === 'R');
   if (task.id === 'act:W') return S.writing.some(w => w.date === d);
@@ -48,28 +48,37 @@ function taskDone(task, date = todayStr()) {
 let LESSON_TITLES = {};
 async function pageToday() {
   if (!S.onboarded) return pageOnboard();
+  await skillsData();
   try { (await content('lessons')).items.forEach(l => LESSON_TITLES[l.id] = l.title); } catch (e) {}
   const b = bands(), tg = targetBand(), plan = planFor(todayStr()), done = plan.filter(t => taskDone(t)).length;
   const days = S.examDate ? daysBetween(todayStr(), S.examDate) : null;
   const name = window.CLOUD && CLOUD.user && CLOUD.user.name ? CLOUD.user.name.split(' ')[0] : '';
-  const sk = k => `<a class="sk" href="#${({ L: 'listening', R: 'reading', W: 'writing', S: 'speaking' })[k]}"><span class="stamp sm ${b[k] == null ? 'none' : 'c-' + k}"><b>${b[k] == null ? '?' : fmtBand(b[k])}</b><small>${k}</small></span><span class="lab">${skName(k)}</span></a>`;
-  return `<div class="hero"><div class="grid" style="gap:10px"><span class="eyebrow" style="color:var(--gold)">${name ? _('مرحبًا ', 'Hi ') + esc(name) : _('خطة اليوم', 'Today')}</span>
-    <h1>${b.O != null ? _(`درجتك التقديرية ${bandL(b.O)} — الهدف ${bandL(tg)}`, `Estimated band ${fmtBand(b.O)} — target ${fmtBand(tg)}`) : _(`هدفك: ${bandL(tg)}`, `Your target: ${fmtBand(tg)}`)}</h1>
-    <p class="muted">${b.O == null ? _('نحتاج نتيجة في كل مهارة لحساب درجتك الكلية. كل نشاط تنجزه يحدّث التقدير.', 'We need a result in every skill to estimate your overall band. Every activity updates it.') : b.O >= tg ? _('أنت في مستوى هدفك أو أعلى. حافظ عليه باختبارات كاملة تحت الوقت.', 'You are at or above your target. Keep it with full timed tests.') : _(`تحتاج ${bandL(half(tg - b.O))} درجة. ركّز على ${skName(weakest()[0].k)}.`, `You need ${fmtBand(half(tg - b.O))} more. Focus on ${skName(weakest()[0].k)}.`)}</p>
-    ${days != null ? `<div class="countdown"><b>${numL(Math.max(0, days))}</b><span>${_('يومًا حتى اختبارك', 'days to your test')}</span></div>` : `<a href="#settings" class="small" style="color:var(--gold)">${_('أضف موعد اختبارك لنضبط الخطة', 'Add your test date to pace your plan')}</a>`}</div>
+  const sessDone = (S.sessionDays || []).includes(todayStr()), weak = rankSkills().slice(0, 2);
+  const mastered = SKL.filter(x => skillInfo(x.id).level >= 3).length;
+  const checks = [[diagTaken(), _('أنهيت اختبار تحديد المستوى', 'Placement test done')], [mastered >= 8, _('نصف المهارات في مستوى «ثبات» أو أعلى', 'Half the skills at “Secure” or above')], [mastered >= 14, _('كل المهارات تقريبًا متقنة', 'Almost every skill secure')], [S.attempts.filter(a => a.full).length >= 2, _('اختباران كاملان تحت الوقت', 'Two full timed tests')], [S.writing.filter(w => w.task === 't2').length >= 3, _('ثلاث مقالات مقيّمة', 'Three marked essays')], [b.O != null && b.O >= tg, _('درجتك التقديرية بلغت هدفك', 'Estimated band at target')]];
+  const sk = k => `<a class="sk" href="#${({ L: 'tests', R: 'tests', W: 'writing', S: 'speaking' })[k]}"><span class="stamp sm ${b[k] == null ? 'none' : 'c-' + k}"><b>${b[k] == null ? '?' : fmtBand(b[k])}</b><small>${k}</small></span><span class="lab">${skName(k)}</span></a>`;
+  return `<div class="hero"><div class="grid" style="gap:10px"><span class="eyebrow" style="color:var(--gold)">${name ? _('مرحبًا ', 'Hi ') + esc(name) + ' · ' : ''}${_('هدفك', 'Your target')} ${bandL(tg)}</span>
+    <h1>${_('الآيلتس ليس حظًا.<br>هو ١٦ مهارة تُتقن.', 'IELTS is not luck.<br>It is 16 skills, mastered.')}</h1>
+    <p class="muted">${_('تتعلم كل مهارة بالعربية، وتتدرّب عليها بالإنجليزية، ثم تختبر نفسك في نماذج كاملة بصيغة الاختبار المحوسب.', 'Learn each skill in Arabic, practise it in English, then test yourself in full computer-delivered model exams.')}</p>
+    <div class="row">${days != null ? `<span class="pill"><b>${numL(Math.max(0, days))}</b> ${_('يومًا حتى اختبارك', 'days to your test')}</span>` : `<a class="pill" href="#settings">${_('أضف موعد اختبارك', 'Add your test date')}</a>`}<span class="pill">${_('الدرجة التقديرية', 'Estimated band')} <b>${b.O == null ? '—' : bandL(b.O)}</b></span><a class="pill" href="#settings">${_('الإعدادات', 'Settings')}</a></div></div>
     <div class="skills4">${['L', 'R', 'W', 'S'].map(sk).join('')}</div></div>
+  ${!diagTaken() ? `<div class="card session-card"><div><span class="eyebrow">${_('ابدأ من هنا', 'Start here')}</span><h2>${_('اختبار تحديد المستوى', 'Placement test')}</h2><p class="small muted">${_('٢٠ سؤال استماع و١٣ سؤال قراءة بالصيغة المحوسبة. نحدد منه نقطة بدايتك ومهاراتك الأضعف.', '20 listening + 13 reading questions in the computer format. It finds your starting point and weakest skills.')}</p></div><a class="btn primary" href="#diag">${_('ابدأ الاختبار', 'Start the test')}</a></div>` : ''}
+  <div class="card session-card"><div><span class="eyebrow">${_('جلسة اليوم', 'Today’s session')}</span><h2>${sessDone ? _('أنهيت جلسة اليوم — أحسنت! يمكنك جلسة إضافية.', 'Today’s session done — well done! Fancy another?') : _('١٥ سؤالًا مختارة لك، مع تلميح وشرح لكل سؤال', '15 questions picked for you, each with a hint and explanation')}</h2>
+    <p class="small muted">${_('أخطاؤك المستحقة + أضعف مهارتين', 'Your due mistakes + your two weakest skills')}</p><div class="chips">${weak.map(w => `<span class="chip">${esc(L(SKL.find(s => s.id === w.id).title))}</span>`).join('')}</div></div><button class="btn primary" id="td-sess">${_('ابدأ الجلسة', 'Start session')}</button></div>
+  <section class="grid"><div class="spread"><h2>${_('خريطة الإتقان', 'Mastery map')}</h2><span class="small muted">${_('اضغط أي مهارة لدرسها وتمارينها', 'Tap any skill for its lesson and drills')}</span></div>${masteryMap()}</section>
   <div class="g2">
     <div class="card"><div class="spread"><h2>${_('مهام اليوم', 'Today’s tasks')}</h2><span class="chip ${done === plan.length ? 'ok' : ''}">${numL(done)}/${numL(plan.length)}</span></div>
       <ul class="tasks">${plan.map(t => { const d = taskDone(t); return `<li><a class="task ${d ? 'done' : ''}" href="${t.href}"><span class="tk">${d ? ic('check') : ''}</span><span class="tt"><b>${esc(t.t)}</b><small>${esc(t.s || '')}</small></span><span class="dot bg-${t.k}"></span></a></li>`; }).join('')}</ul>
-      <a href="#plan" class="small">${_('الخطة الأسبوعية كاملة', 'See the full weekly plan')} →</a></div>
-    <div class="grid">
-      <div class="card"><h2>${_('المسافة إلى الهدف', 'Distance to target')}</h2><div class="bars">${['L', 'R', 'W', 'S'].map(k => `<div class="bar-row"><span>${skName(k)}</span><span class="bandline"><i class="bg-${k}" style="inline-size:${(b[k] || 0) / 9 * 100}%"></i><span class="tgt" style="inset-inline-start:${tg / 9 * 100}%"></span></span><b class="num">${bandL(b[k])}</b></div>`).join('')}</div><p class="tiny muted">${_('الخط الأسود = درجتك المستهدفة.', 'Black line = your target band.')}</p></div>
-      <div class="card tight"><div class="spread"><span>${_('أيام متتالية', 'Day streak')}: <b>${numL(streak())}</b> 🔥</span><span>${_('أخطاء للمراجعة', 'Mistakes due')}: <b>${numL(S.mistakes.filter(m => m.due <= todayStr()).length)}</b></span></div></div>
-      ${PRO() ? '' : `<a class="card tile" href="#upgrade" style="background:var(--gold-soft);border-color:transparent"><b>${_('افتح كل الاختبارات والمصحح الذكي', 'Unlock every test and the AI examiner')}</b><span class="small">${_('أقل من عُشر رسوم إعادة اختبار واحد.', 'Less than a tenth of one test retake fee.')}</span></a>`}
-    </div></div>`;
+      <a href="#plan" class="small">${_('الخطة كاملة حتى يوم الاختبار', 'The full plan to test day')} →</a></div>
+    <div class="card"><h2>${_('طريقك إلى يوم الاختبار', 'Your road to test day')}</h2><ul class="checks">${checks.map(([ok, t]) => `<li class="${ok ? 'ok' : ''}"><span class="ck">${ok ? ic('check') : ''}</span>${t}</li>`).join('')}</ul>
+      <div class="small muted">${_('أيام متتالية', 'Day streak')}: <b>${numL(streak())}</b> 🔥 · ${_('أخطاء للمراجعة', 'Mistakes due')}: <b>${numL(S.mistakes.filter(m => m.due <= todayStr()).length + Object.values(S.dr).filter(v => !v.ok && v.due <= todayStr()).length)}</b></div></div>
+  </div>
+  <section class="grid"><h2>${_('المنهجية', 'The method')}</h2><div class="method">${[[_('افهم بالعربية', 'Understand in Arabic'), _('كل مهارة مشروحة بالعربية: الفكرة، والخطوات، والفخاخ، وأمثلة محلولة.', 'Every skill explained in Arabic: the idea, steps, traps and worked examples.'), '1'], [_('تدرّب بالإنجليزية', 'Practise in English'), _('أسئلة قصيرة مع تلميح وتقنية مسماة وشرح للحيلة.', 'Short questions with a hint, a named technique and the trick explained.'), '2'], [_('أتقن قبل أن تنتقل', 'Master before moving on'), _('مستويات الإتقان الأربعة تخبرك متى تنتقل للمهارة التالية.', 'Four mastery levels tell you when to move on.'), '3'], [_('اختبر نفسك كاملًا', 'Test yourself fully'), _('نماذج كاملة بالصيغة المحوسبة مع شرح كل إجابة وموضعها.', 'Full computer-format models with every answer explained and located.'), '4']].map(m => `<div class="mcard"><span class="mnum">${m[2]}</span><h3>${m[0]}</h3><p class="small">${m[1]}</p></div>`).join('')}</div></section>
+  ${PRO() ? '' : `<a class="card tile" href="#upgrade" style="background:var(--gold-soft);border-color:transparent"><b>${_('افتح كل المهارات والنماذج والمصحح الذكي', 'Unlock every skill, model exam and the AI examiner')}</b><span class="small">${_('أقل من عُشر رسوم إعادة اختبار واحد.', 'Less than a tenth of one test retake fee.')}</span></a>`}`;
 }
 async function pagePlan() {
   if (!S.onboarded) return pageOnboard();
+  await skillsData();
   const weeks = S.examDate ? Math.max(1, Math.ceil(daysBetween(todayStr(), S.examDate) / 7)) : 6;
   const lim = PRO() ? weeks : Math.min(weeks, +FREE.planWeeks || 2);
   let h = '';
@@ -264,14 +273,14 @@ async function openAccount() {
 }
 
 /* ---------- shell + router ---------- */
-const NAV = [['today', 'today', ['اليوم', 'Today']], ['listening', 'L', ['الاستماع', 'Listening']], ['reading', 'R', ['القراءة', 'Reading']], ['writing', 'W', ['الكتابة', 'Writing']], ['speaking', 'S', ['المحادثة', 'Speaking']], ['words', 'words', ['الكلمات', 'Words']], ['progress', 'prog', ['التقدم', 'Progress']]];
-const TABS = ['today', 'listening', 'writing', 'speaking', 'words'];
+const NAV = [['today', 'today', ['اليوم', 'Today']], ['learn', 'book', ['تعلّم', 'Learn']], ['practice', 'target', ['تدرّب', 'Practise']], ['tests', 'flag', ['النماذج', 'Model tests']], ['words', 'words', ['الكلمات', 'Words']], ['progress', 'prog', ['التقدم', 'Progress']]];
+const TABS = ['today', 'learn', 'practice', 'tests', 'progress'];
 function renderShell() {
   document.documentElement.lang = S.lang; document.documentElement.dir = AR() ? 'rtl' : 'ltr';
   document.title = AR() ? 'أكاديمية الآيلتس | IELTS Academy' : 'IELTS Academy | أكاديمية الآيلتس';
   $('#brand-n').textContent = _('أكاديمية الآيلتس', 'IELTS Academy'); $('#brand-t').textContent = AR() ? 'IELTS Academy' : 'أكاديمية الآيلتس';
   const cur = (location.hash.slice(1).split(/[/?]/)[0]) || 'today';
-  const map = { lesson: 'reading', lessons: 'reading', write: 'writing', speak: 'speaking', cards: 'words', para: 'words', drill: 'words', mistakes: 'words', mreview: 'words', plan: 'today', settings: 'progress', diag: 'today', upgrade: 'today' };
+  const map = { lesson: 'learn', lessons: 'learn', skill: 'learn', write: 'practice', writing: 'practice', speak: 'practice', speaking: 'practice', listening: 'tests', reading: 'tests', cards: 'words', para: 'words', drill: 'practice', drills: 'practice', mistakes: 'practice', mreview: 'practice', plan: 'today', settings: 'progress', diag: 'today', upgrade: 'today' };
   const on = map[cur] || cur;
   $('#nav').innerHTML = NAV.map(([k, i, l]) => `<a href="#${k}" class="${on === k ? 'on' : ''}">${ic(i, 'i20')}<span>${_(l[0], l[1])}</span></a>`).join('');
   $('#tabbar').innerHTML = NAV.filter(n => TABS.includes(n[0])).map(([k, i, l]) => `<a href="#${k}" class="${on === k ? 'on' : ''}">${ic(i, 'i20')}<span>${_(l[0], l[1])}</span></a>`).join('');
@@ -300,7 +309,11 @@ async function renderRoute() {
       case 'words': html = await pageWords(); break;
       case 'cards': html = await pageCards(a); break;
       case 'para': html = await pagePara(); break;
-      case 'drill': html = await pageDrill(a); break;
+      case 'drill': html = a ? await pageDrill(a) : pageDrillRun(); break;
+      case 'learn': html = await pageLearn(a || 'skills'); break;
+      case 'skill': html = await pageSkill(a); S.skillSeen = S.skillSeen || {}; S.skillSeen[a] = todayStr(); save(); break;
+      case 'practice': html = await pagePractice(); break;
+      case 'tests': html = await pageTestsHub(); break;
       case 'mistakes': html = await pageMistakes(); break;
       case 'mreview': html = await pageMReview(); break;
       case 'lessons': html = await pageLessons(); break;
@@ -319,6 +332,9 @@ async function renderRoute() {
   if (r === 'listening') bindTests('L'); if (r === 'reading') bindTests('R');
   if (r === 'writing') $$('[data-wtab]').forEach(x => x.onclick = () => { S.wTab = x.dataset.wtab; save(); renderRoute(); });
   if (r === 'progress') bindProgress();
+  if (r === 'practice') bindPractice();
+  if (r === 'tests') bindTestsHub();
+  if ((!r || r === 'today') && S.onboarded) { const b = $('#td-sess'); if (b) b.onclick = startSession; }
   $$('[data-lock]').forEach(x => { if (x.dataset.lock) x.addEventListener('click', () => track('limit_hit', x.dataset.lock)); });
   if (!window._noScroll) window.scrollTo(0, 0);
 }

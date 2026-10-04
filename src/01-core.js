@@ -66,10 +66,10 @@ const SK = { L: ['الاستماع', 'Listening'], R: ['القراءة', 'Readin
 const skName = k => _(SK[k][0], SK[k][1]);
 
 /* ---------- content (lazy JSON; premium files come through the authenticated API) ---------- */
-const FREE_FILES = new Set(['L01', 'A01', 'G01', 'task1_academic', 'task1_gt', 'task2', 'part1', 'part23', 'academic', 'topics', 'paraphrase', 'lessons', 'arab_errors']);
+const FREE_FILES = new Set(['skills', 'techniques', 'drills', 'L01', 'A01', 'G01', 'task1_academic', 'task1_gt', 'task2', 'part1', 'part23', 'academic', 'topics', 'paraphrase', 'lessons', 'arab_errors']);
 const CATALOG = {
-  listening: [{ id: 'L01', n: 1 }, { id: 'L02', n: 2 }],
-  reading: { ac: [{ id: 'A01', n: 1 }, { id: 'A02', n: 2 }], gt: [{ id: 'G01', n: 1 }] }
+  listening: [{ id: 'L01', n: 1 }, { id: 'L02', n: 2 }, { id: 'L03', n: 3 }, { id: 'L04', n: 4 }],
+  reading: { ac: [{ id: 'A01', n: 1 }, { id: 'A02', n: 2 }, { id: 'A03', n: 3 }, { id: 'A04', n: 4 }], gt: [{ id: 'G01', n: 1 }, { id: 'G02', n: 2 }] }
 };
 const CC = {};
 async function content(name) {

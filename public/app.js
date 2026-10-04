@@ -66,10 +66,10 @@ const SK = { L: ['الاستماع', 'Listening'], R: ['القراءة', 'Readin
 const skName = k => _(SK[k][0], SK[k][1]);
 
 /* ---------- content (lazy JSON; premium files come through the authenticated API) ---------- */
-const FREE_FILES = new Set(['L01', 'A01', 'G01', 'task1_academic', 'task1_gt', 'task2', 'part1', 'part23', 'academic', 'topics', 'paraphrase', 'lessons', 'arab_errors']);
+const FREE_FILES = new Set(['skills', 'techniques', 'drills', 'L01', 'A01', 'G01', 'task1_academic', 'task1_gt', 'task2', 'part1', 'part23', 'academic', 'topics', 'paraphrase', 'lessons', 'arab_errors']);
 const CATALOG = {
-  listening: [{ id: 'L01', n: 1 }, { id: 'L02', n: 2 }],
-  reading: { ac: [{ id: 'A01', n: 1 }, { id: 'A02', n: 2 }], gt: [{ id: 'G01', n: 1 }] }
+  listening: [{ id: 'L01', n: 1 }, { id: 'L02', n: 2 }, { id: 'L03', n: 3 }, { id: 'L04', n: 4 }],
+  reading: { ac: [{ id: 'A01', n: 1 }, { id: 'A02', n: 2 }, { id: 'A03', n: 3 }, { id: 'A04', n: 4 }], gt: [{ id: 'G01', n: 1 }, { id: 'G02', n: 2 }] }
 };
 const CC = {};
 async function content(name) {
@@ -483,6 +483,7 @@ function finishTest(auto) {
       bySkill[s.skill].t++; if (r.ok) bySkill[s.skill].c++;
       const tk = s.skill + ':' + g.type; (qt[tk] = qt[tk] || { c: 0, t: 0 }).t++; if (r.ok) qt[tk].c++;
       qtAdd(s.skill, g.type, r.ok);
+      recordAns(examSkill(s.skill, g.type), r.ok, null);
       if (!r.ok) wrong.push({ test: s.test, skill: s.skill, pi: s.pi, n: r.n, type: g.type });
     });
   }
@@ -509,17 +510,18 @@ function renderResult() {
   EX.review = true;
   const rows = Object.entries(r.qt).sort((a, b) => a[1].c / a[1].t - b[1].c / b[1].t).map(([k, v]) => `<tr><td>${skName(k[0])}</td><td>${esc(qtName(k.slice(2)))}</td><td>${v.c}/${v.t}</td><td>${Math.round(100 * v.c / v.t)}%</td></tr>`).join('');
   const worst = Object.entries(r.qt).filter(([, v]) => v.t >= 2).sort((a, b) => a[1].c / a[1].t - b[1].c / b[1].t)[0];
-  const lessonFor = worst ? LESSON_FOR[worst[0].slice(2)] : null;
+  const lessonFor = worst ? examSkill(worst[0][0], worst[0].slice(2)) : null, lsk = lessonFor && (typeof SKL !== 'undefined' && SKL || []).find(x => x.id === lessonFor);
   ex.innerHTML = `<div class="ex-top"><span class="cand">${esc(EX.spec.title)} · RESULT</span><span class="clock"></span><button id="ex-x">${_('إغلاق', 'Close')}</button></div>
   <div class="ex-pane full" style="overflow:auto"><div class="result-top">
     <div style="display:flex;gap:30px;flex-wrap:wrap;justify-content:center">${r.made.map(a => `<div><div style="font-size:.85rem;color:#555">${skName(a.skill)}${a.full ? '' : ' · ' + _('تقدير', 'estimate')}</div><div class="big">${fmtBand(a.band)}</div><div>${a.raw} / ${a.of} ${_('صحيحة', 'correct')}</div></div>`).join('')}</div>
     <div dir="${AR() ? 'rtl' : 'ltr'}" style="font-family:var(--f-body);max-width:560px">${r.made.some(a => !a.full) ? _('هذه درجة تقديرية لأنك أجبت عن جزء من الاختبار؛ الاختبار الكامل (٤٠ سؤالًا) يعطي درجة أدق.', 'This is an estimate because you answered part of a test; a full 40-question test gives a more reliable band.') + ' ' : ''}${worst ? _(`أضعف نوع أسئلة في هذه المحاولة: «${qtName(worst[0].slice(2))}». `, `Your weakest question type this time: “${qtName(worst[0].slice(2))}”. `) : ''}${_('أُضيفت أخطاؤك إلى صندوق الأخطاء لمراجعتها لاحقًا.', 'Your mistakes have been added to your mistake box for spaced review.')}</div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center"><button class="go" id="rv-go" style="font:inherit;font-weight:700;background:#1f5fa8;color:#fff;border:0;border-radius:4px;padding:10px 18px;cursor:pointer">${_('راجع الإجابات مع الشرح', 'Review answers with explanations')}</button>${lessonFor ? `<button id="rv-lesson" style="font:inherit;border:1px solid #888;background:#fff;border-radius:4px;padding:10px 18px;cursor:pointer">${_('درس هذا النوع', 'Lesson for this type')}</button>` : ''}</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center"><button class="go" id="rv-go" style="font:inherit;font-weight:700;background:#1f5fa8;color:#fff;border:0;border-radius:4px;padding:10px 18px;cursor:pointer">${_('راجع الإجابات مع الشرح', 'Review answers with explanations')}</button>${lessonFor ? `<button id="rv-lesson" style="font:inherit;border:1px solid #888;background:#fff;border-radius:4px;padding:10px 18px;cursor:pointer">${_('ادرس المهارة', 'Study the skill')}${lsk ? ': ' + esc(L(lsk.title)) : ''}</button><button id="rv-drill" style="font:inherit;border:1px solid #888;background:#fff;border-radius:4px;padding:10px 18px;cursor:pointer">${_('تدرّب عليها: ١٠ أسئلة مع تلميحات', 'Drill it: 10 questions with hints')}</button>` : ''}</div>
     ${rows ? `<table class="qt-table"><tr><th>${_('المهارة', 'Skill')}</th><th>${_('نوع السؤال', 'Question type')}</th><th>${_('النتيجة', 'Score')}</th><th>%</th></tr>${rows}</table>` : ''}
   </div></div>`;
   ex.querySelector('#ex-x').onclick = () => closeExam();
   ex.querySelector('#rv-go').onclick = () => { EX.cur = 0; renderExam(); };
-  const rl = ex.querySelector('#rv-lesson'); if (rl) rl.onclick = () => { const id = lessonFor; closeExam(); location.hash = '#lesson/' + id; };
+  const rl = ex.querySelector('#rv-lesson'); if (rl) rl.onclick = () => { const id = lessonFor; closeExam(); location.hash = '#skill/' + id; };
+  const rd = ex.querySelector('#rv-drill'); if (rd) rd.onclick = () => { const id = lessonFor; closeExam(); startDrill({ skills: [id] }); };
 }
 const LESSON_FOR = { tfng: 'R-tfng', ynng: 'R-tfng', headings: 'R-headings', info: 'R-headings', summary: 'R-completion', summary_bank: 'R-completion', sentence: 'R-completion', short: 'R-completion', table: 'R-completion', form: 'L-form', notes: 'L-notes', mcq: 'L-mcq', mcq2: 'L-mcq', map: 'L-map', matching: 'L-mcq', features: 'R-headings', endings: 'R-completion', flow: 'R-completion' };
 
@@ -1002,25 +1004,25 @@ function bindOnboard() {
 
 /* ---------- adaptive daily plan ---------- */
 function planFor(date) {
-  const b = bands(), weak = weakest(), dayN = daysBetween(S.planStart || todayStr(), date), t = [];
-  if (!diagTaken()) return [{ id: 'diag', k: 'L', t: _('اختبار تحديد المستوى', 'Placement test'), s: _('٣٣ سؤالًا · نحو ٣٥ دقيقة', '33 questions · about 35 minutes'), href: '#diag' }];
-  const focus = weak[dayN % 2 === 0 ? 0 : 1].k;
-  const lessonsL = ['L-form', 'L-mcq', 'L-map', 'L-notes'], lessonsR = ['R-tfng', 'R-headings', 'R-completion'], lessonsW = ['W-t1', 'W-t2', 'W-cc'], lessonsS = ['S-p2', 'S-flu'];
-  const L2 = { L: lessonsL, R: lessonsR, W: lessonsW, S: lessonsS }[focus], nextLesson = L2.find(id => !S.lessons[id]);
-  if (nextLesson) t.push({ id: 'les:' + nextLesson, k: focus, t: _('درس', 'Lesson') + ': ' + (LESSON_TITLES[nextLesson] ? L(LESSON_TITLES[nextLesson]) : nextLesson), s: _('٧ دقائق', '7 minutes'), href: '#lesson/' + nextLesson });
-  const act = { L: { t: _('تدريب استماع: جزء واحد', 'Listening practice: one part'), href: '#listening' }, R: { t: _('تدريب قراءة: نص واحد', 'Reading practice: one passage'), href: '#reading' }, W: { t: S.module === 'gt' ? _('اكتب رسالة (المهمة ١)', 'Write a letter (Task 1)') : _('اكتب وصف رسم (المهمة ١)', 'Describe a chart (Task 1)'), href: '#writing' }, S: { t: _('محادثة: الجزء الأول', 'Speaking: Part 1 topic'), href: '#speaking' } };
-  t.push({ id: 'act:' + focus, k: focus, ...act[focus], s: _('نقطة ضعفك الحالية', 'your current weak spot') });
+  const dayN = daysBetween(S.planStart || todayStr(), date), t = [];
+  if (!diagTaken()) t.push({ id: 'diag', k: 'L', t: _('اختبار تحديد المستوى', 'Placement test'), s: _('٣٣ سؤالًا · نحو ٣٥ دقيقة', '33 questions · about 35 minutes'), href: '#diag' });
+  const ranked = SKL ? rankSkills() : [], focus = ranked.length ? ranked[dayN % Math.min(3, ranked.length)] : null;
+  if (focus) { const sk = SKL.find(x => x.id === focus.id);
+    t.push({ id: 'les:' + focus.id, k: sk.sec, t: _('ادرس مهارة', 'Study a skill') + ': ' + L(sk.title), s: _('درس قصير بالعربية مع أمثلة', 'a short lesson with examples'), href: '#skill/' + focus.id });
+    t.push({ id: 'drill:' + focus.id, k: sk.sec, t: _('تدرّب عليها: ١٠ أسئلة', 'Practise it: 10 questions'), s: _('مع تلميحات وشرح', 'with hints and explanations'), href: '#skill/' + focus.id }); }
+  t.push({ id: 'sess', k: 'R', t: _('جلسة اليوم', 'Today’s session'), s: _('١٥ سؤالًا منوّعة', '15 mixed questions'), href: '#practice' });
   if (dayN % 3 === 2) t.push({ id: 'act:W2', k: 'W', t: _('اكتب مقالة (المهمة ٢)', 'Write an essay (Task 2)'), s: _('٤٠ دقيقة', '40 minutes'), href: '#writing' });
-  else t.push({ id: 'para', k: 'R', t: _('مدرّب إعادة الصياغة', 'Paraphrase trainer'), s: _('١٠ أسئلة · ٥ دقائق', '10 questions · 5 minutes'), href: '#para' });
-  t.push({ id: 'cards', k: 'S', t: _('بطاقات المفردات', 'Vocabulary cards'), s: _('١٠ دقائق', '10 minutes'), href: '#cards/due' });
-  if (S.mistakes.some(m => m.due <= date)) t.push({ id: 'mis', k: 'W', t: _('راجع صندوق الأخطاء', 'Review your mistake box'), s: _('أخطاء مستحقة اليوم', 'mistakes due today'), href: '#mreview' });
-  if (S.examDate && daysBetween(date, S.examDate) <= 10 && daysBetween(date, S.examDate) >= 0) t.unshift({ id: 'mock', k: 'L', t: _('اختبار كامل تحت الوقت', 'A full timed test'), s: _('أيام قليلة قبل الاختبار', 'final days before your test'), href: '#listening' });
+  else if (dayN % 3 === 1) t.push({ id: 'act:S', k: 'S', t: _('محادثة: موضوع من الجزء الأول', 'Speaking: a Part 1 topic'), s: _('سجّل إجاباتك', 'record your answers'), href: '#speaking' });
+  else t.push({ id: 'cards', k: 'S', t: _('بطاقات المفردات', 'Vocabulary cards'), s: _('١٠ دقائق', '10 minutes'), href: '#cards/due' });
+  if (S.examDate && daysBetween(date, S.examDate) <= 14 && daysBetween(date, S.examDate) >= 0 && dayN % 2 === 0) t.unshift({ id: 'mock', k: 'L', t: _('نموذج كامل تحت الوقت', 'A full timed model exam'), s: _('الأسبوعان الأخيران', 'final two weeks'), href: '#tests' });
   return t;
 }
 function taskDone(task, date = todayStr()) {
   const d = date;
   if (task.id === 'diag') return diagTaken();
-  if (task.id.startsWith('les:')) return S.lessons[task.id.slice(4)] === d;
+  if (task.id.startsWith('les:')) return (S.skillSeen || {})[task.id.slice(4)] === d;
+  if (task.id.startsWith('drill:')) return S.recent.filter(x => x.d === d && x.s === task.id.slice(6)).length >= 5;
+  if (task.id === 'sess') return (S.sessionDays || []).includes(d);
   if (task.id === 'act:L' || task.id === 'mock') return S.attempts.some(a => a.date === d && a.skill === 'L');
   if (task.id === 'act:R') return S.attempts.some(a => a.date === d && a.skill === 'R');
   if (task.id === 'act:W') return S.writing.some(w => w.date === d);
@@ -1034,28 +1036,37 @@ function taskDone(task, date = todayStr()) {
 let LESSON_TITLES = {};
 async function pageToday() {
   if (!S.onboarded) return pageOnboard();
+  await skillsData();
   try { (await content('lessons')).items.forEach(l => LESSON_TITLES[l.id] = l.title); } catch (e) {}
   const b = bands(), tg = targetBand(), plan = planFor(todayStr()), done = plan.filter(t => taskDone(t)).length;
   const days = S.examDate ? daysBetween(todayStr(), S.examDate) : null;
   const name = window.CLOUD && CLOUD.user && CLOUD.user.name ? CLOUD.user.name.split(' ')[0] : '';
-  const sk = k => `<a class="sk" href="#${({ L: 'listening', R: 'reading', W: 'writing', S: 'speaking' })[k]}"><span class="stamp sm ${b[k] == null ? 'none' : 'c-' + k}"><b>${b[k] == null ? '?' : fmtBand(b[k])}</b><small>${k}</small></span><span class="lab">${skName(k)}</span></a>`;
-  return `<div class="hero"><div class="grid" style="gap:10px"><span class="eyebrow" style="color:var(--gold)">${name ? _('مرحبًا ', 'Hi ') + esc(name) : _('خطة اليوم', 'Today')}</span>
-    <h1>${b.O != null ? _(`درجتك التقديرية ${bandL(b.O)} — الهدف ${bandL(tg)}`, `Estimated band ${fmtBand(b.O)} — target ${fmtBand(tg)}`) : _(`هدفك: ${bandL(tg)}`, `Your target: ${fmtBand(tg)}`)}</h1>
-    <p class="muted">${b.O == null ? _('نحتاج نتيجة في كل مهارة لحساب درجتك الكلية. كل نشاط تنجزه يحدّث التقدير.', 'We need a result in every skill to estimate your overall band. Every activity updates it.') : b.O >= tg ? _('أنت في مستوى هدفك أو أعلى. حافظ عليه باختبارات كاملة تحت الوقت.', 'You are at or above your target. Keep it with full timed tests.') : _(`تحتاج ${bandL(half(tg - b.O))} درجة. ركّز على ${skName(weakest()[0].k)}.`, `You need ${fmtBand(half(tg - b.O))} more. Focus on ${skName(weakest()[0].k)}.`)}</p>
-    ${days != null ? `<div class="countdown"><b>${numL(Math.max(0, days))}</b><span>${_('يومًا حتى اختبارك', 'days to your test')}</span></div>` : `<a href="#settings" class="small" style="color:var(--gold)">${_('أضف موعد اختبارك لنضبط الخطة', 'Add your test date to pace your plan')}</a>`}</div>
+  const sessDone = (S.sessionDays || []).includes(todayStr()), weak = rankSkills().slice(0, 2);
+  const mastered = SKL.filter(x => skillInfo(x.id).level >= 3).length;
+  const checks = [[diagTaken(), _('أنهيت اختبار تحديد المستوى', 'Placement test done')], [mastered >= 8, _('نصف المهارات في مستوى «ثبات» أو أعلى', 'Half the skills at “Secure” or above')], [mastered >= 14, _('كل المهارات تقريبًا متقنة', 'Almost every skill secure')], [S.attempts.filter(a => a.full).length >= 2, _('اختباران كاملان تحت الوقت', 'Two full timed tests')], [S.writing.filter(w => w.task === 't2').length >= 3, _('ثلاث مقالات مقيّمة', 'Three marked essays')], [b.O != null && b.O >= tg, _('درجتك التقديرية بلغت هدفك', 'Estimated band at target')]];
+  const sk = k => `<a class="sk" href="#${({ L: 'tests', R: 'tests', W: 'writing', S: 'speaking' })[k]}"><span class="stamp sm ${b[k] == null ? 'none' : 'c-' + k}"><b>${b[k] == null ? '?' : fmtBand(b[k])}</b><small>${k}</small></span><span class="lab">${skName(k)}</span></a>`;
+  return `<div class="hero"><div class="grid" style="gap:10px"><span class="eyebrow" style="color:var(--gold)">${name ? _('مرحبًا ', 'Hi ') + esc(name) + ' · ' : ''}${_('هدفك', 'Your target')} ${bandL(tg)}</span>
+    <h1>${_('الآيلتس ليس حظًا.<br>هو ١٦ مهارة تُتقن.', 'IELTS is not luck.<br>It is 16 skills, mastered.')}</h1>
+    <p class="muted">${_('تتعلم كل مهارة بالعربية، وتتدرّب عليها بالإنجليزية، ثم تختبر نفسك في نماذج كاملة بصيغة الاختبار المحوسب.', 'Learn each skill in Arabic, practise it in English, then test yourself in full computer-delivered model exams.')}</p>
+    <div class="row">${days != null ? `<span class="pill"><b>${numL(Math.max(0, days))}</b> ${_('يومًا حتى اختبارك', 'days to your test')}</span>` : `<a class="pill" href="#settings">${_('أضف موعد اختبارك', 'Add your test date')}</a>`}<span class="pill">${_('الدرجة التقديرية', 'Estimated band')} <b>${b.O == null ? '—' : bandL(b.O)}</b></span><a class="pill" href="#settings">${_('الإعدادات', 'Settings')}</a></div></div>
     <div class="skills4">${['L', 'R', 'W', 'S'].map(sk).join('')}</div></div>
+  ${!diagTaken() ? `<div class="card session-card"><div><span class="eyebrow">${_('ابدأ من هنا', 'Start here')}</span><h2>${_('اختبار تحديد المستوى', 'Placement test')}</h2><p class="small muted">${_('٢٠ سؤال استماع و١٣ سؤال قراءة بالصيغة المحوسبة. نحدد منه نقطة بدايتك ومهاراتك الأضعف.', '20 listening + 13 reading questions in the computer format. It finds your starting point and weakest skills.')}</p></div><a class="btn primary" href="#diag">${_('ابدأ الاختبار', 'Start the test')}</a></div>` : ''}
+  <div class="card session-card"><div><span class="eyebrow">${_('جلسة اليوم', 'Today’s session')}</span><h2>${sessDone ? _('أنهيت جلسة اليوم — أحسنت! يمكنك جلسة إضافية.', 'Today’s session done — well done! Fancy another?') : _('١٥ سؤالًا مختارة لك، مع تلميح وشرح لكل سؤال', '15 questions picked for you, each with a hint and explanation')}</h2>
+    <p class="small muted">${_('أخطاؤك المستحقة + أضعف مهارتين', 'Your due mistakes + your two weakest skills')}</p><div class="chips">${weak.map(w => `<span class="chip">${esc(L(SKL.find(s => s.id === w.id).title))}</span>`).join('')}</div></div><button class="btn primary" id="td-sess">${_('ابدأ الجلسة', 'Start session')}</button></div>
+  <section class="grid"><div class="spread"><h2>${_('خريطة الإتقان', 'Mastery map')}</h2><span class="small muted">${_('اضغط أي مهارة لدرسها وتمارينها', 'Tap any skill for its lesson and drills')}</span></div>${masteryMap()}</section>
   <div class="g2">
     <div class="card"><div class="spread"><h2>${_('مهام اليوم', 'Today’s tasks')}</h2><span class="chip ${done === plan.length ? 'ok' : ''}">${numL(done)}/${numL(plan.length)}</span></div>
       <ul class="tasks">${plan.map(t => { const d = taskDone(t); return `<li><a class="task ${d ? 'done' : ''}" href="${t.href}"><span class="tk">${d ? ic('check') : ''}</span><span class="tt"><b>${esc(t.t)}</b><small>${esc(t.s || '')}</small></span><span class="dot bg-${t.k}"></span></a></li>`; }).join('')}</ul>
-      <a href="#plan" class="small">${_('الخطة الأسبوعية كاملة', 'See the full weekly plan')} →</a></div>
-    <div class="grid">
-      <div class="card"><h2>${_('المسافة إلى الهدف', 'Distance to target')}</h2><div class="bars">${['L', 'R', 'W', 'S'].map(k => `<div class="bar-row"><span>${skName(k)}</span><span class="bandline"><i class="bg-${k}" style="inline-size:${(b[k] || 0) / 9 * 100}%"></i><span class="tgt" style="inset-inline-start:${tg / 9 * 100}%"></span></span><b class="num">${bandL(b[k])}</b></div>`).join('')}</div><p class="tiny muted">${_('الخط الأسود = درجتك المستهدفة.', 'Black line = your target band.')}</p></div>
-      <div class="card tight"><div class="spread"><span>${_('أيام متتالية', 'Day streak')}: <b>${numL(streak())}</b> 🔥</span><span>${_('أخطاء للمراجعة', 'Mistakes due')}: <b>${numL(S.mistakes.filter(m => m.due <= todayStr()).length)}</b></span></div></div>
-      ${PRO() ? '' : `<a class="card tile" href="#upgrade" style="background:var(--gold-soft);border-color:transparent"><b>${_('افتح كل الاختبارات والمصحح الذكي', 'Unlock every test and the AI examiner')}</b><span class="small">${_('أقل من عُشر رسوم إعادة اختبار واحد.', 'Less than a tenth of one test retake fee.')}</span></a>`}
-    </div></div>`;
+      <a href="#plan" class="small">${_('الخطة كاملة حتى يوم الاختبار', 'The full plan to test day')} →</a></div>
+    <div class="card"><h2>${_('طريقك إلى يوم الاختبار', 'Your road to test day')}</h2><ul class="checks">${checks.map(([ok, t]) => `<li class="${ok ? 'ok' : ''}"><span class="ck">${ok ? ic('check') : ''}</span>${t}</li>`).join('')}</ul>
+      <div class="small muted">${_('أيام متتالية', 'Day streak')}: <b>${numL(streak())}</b> 🔥 · ${_('أخطاء للمراجعة', 'Mistakes due')}: <b>${numL(S.mistakes.filter(m => m.due <= todayStr()).length + Object.values(S.dr).filter(v => !v.ok && v.due <= todayStr()).length)}</b></div></div>
+  </div>
+  <section class="grid"><h2>${_('المنهجية', 'The method')}</h2><div class="method">${[[_('افهم بالعربية', 'Understand in Arabic'), _('كل مهارة مشروحة بالعربية: الفكرة، والخطوات، والفخاخ، وأمثلة محلولة.', 'Every skill explained in Arabic: the idea, steps, traps and worked examples.'), '1'], [_('تدرّب بالإنجليزية', 'Practise in English'), _('أسئلة قصيرة مع تلميح وتقنية مسماة وشرح للحيلة.', 'Short questions with a hint, a named technique and the trick explained.'), '2'], [_('أتقن قبل أن تنتقل', 'Master before moving on'), _('مستويات الإتقان الأربعة تخبرك متى تنتقل للمهارة التالية.', 'Four mastery levels tell you when to move on.'), '3'], [_('اختبر نفسك كاملًا', 'Test yourself fully'), _('نماذج كاملة بالصيغة المحوسبة مع شرح كل إجابة وموضعها.', 'Full computer-format models with every answer explained and located.'), '4']].map(m => `<div class="mcard"><span class="mnum">${m[2]}</span><h3>${m[0]}</h3><p class="small">${m[1]}</p></div>`).join('')}</div></section>
+  ${PRO() ? '' : `<a class="card tile" href="#upgrade" style="background:var(--gold-soft);border-color:transparent"><b>${_('افتح كل المهارات والنماذج والمصحح الذكي', 'Unlock every skill, model exam and the AI examiner')}</b><span class="small">${_('أقل من عُشر رسوم إعادة اختبار واحد.', 'Less than a tenth of one test retake fee.')}</span></a>`}`;
 }
 async function pagePlan() {
   if (!S.onboarded) return pageOnboard();
+  await skillsData();
   const weeks = S.examDate ? Math.max(1, Math.ceil(daysBetween(todayStr(), S.examDate) / 7)) : 6;
   const lim = PRO() ? weeks : Math.min(weeks, +FREE.planWeeks || 2);
   let h = '';
@@ -1250,14 +1261,14 @@ async function openAccount() {
 }
 
 /* ---------- shell + router ---------- */
-const NAV = [['today', 'today', ['اليوم', 'Today']], ['listening', 'L', ['الاستماع', 'Listening']], ['reading', 'R', ['القراءة', 'Reading']], ['writing', 'W', ['الكتابة', 'Writing']], ['speaking', 'S', ['المحادثة', 'Speaking']], ['words', 'words', ['الكلمات', 'Words']], ['progress', 'prog', ['التقدم', 'Progress']]];
-const TABS = ['today', 'listening', 'writing', 'speaking', 'words'];
+const NAV = [['today', 'today', ['اليوم', 'Today']], ['learn', 'book', ['تعلّم', 'Learn']], ['practice', 'target', ['تدرّب', 'Practise']], ['tests', 'flag', ['النماذج', 'Model tests']], ['words', 'words', ['الكلمات', 'Words']], ['progress', 'prog', ['التقدم', 'Progress']]];
+const TABS = ['today', 'learn', 'practice', 'tests', 'progress'];
 function renderShell() {
   document.documentElement.lang = S.lang; document.documentElement.dir = AR() ? 'rtl' : 'ltr';
   document.title = AR() ? 'أكاديمية الآيلتس | IELTS Academy' : 'IELTS Academy | أكاديمية الآيلتس';
   $('#brand-n').textContent = _('أكاديمية الآيلتس', 'IELTS Academy'); $('#brand-t').textContent = AR() ? 'IELTS Academy' : 'أكاديمية الآيلتس';
   const cur = (location.hash.slice(1).split(/[/?]/)[0]) || 'today';
-  const map = { lesson: 'reading', lessons: 'reading', write: 'writing', speak: 'speaking', cards: 'words', para: 'words', drill: 'words', mistakes: 'words', mreview: 'words', plan: 'today', settings: 'progress', diag: 'today', upgrade: 'today' };
+  const map = { lesson: 'learn', lessons: 'learn', skill: 'learn', write: 'practice', writing: 'practice', speak: 'practice', speaking: 'practice', listening: 'tests', reading: 'tests', cards: 'words', para: 'words', drill: 'practice', drills: 'practice', mistakes: 'practice', mreview: 'practice', plan: 'today', settings: 'progress', diag: 'today', upgrade: 'today' };
   const on = map[cur] || cur;
   $('#nav').innerHTML = NAV.map(([k, i, l]) => `<a href="#${k}" class="${on === k ? 'on' : ''}">${ic(i, 'i20')}<span>${_(l[0], l[1])}</span></a>`).join('');
   $('#tabbar').innerHTML = NAV.filter(n => TABS.includes(n[0])).map(([k, i, l]) => `<a href="#${k}" class="${on === k ? 'on' : ''}">${ic(i, 'i20')}<span>${_(l[0], l[1])}</span></a>`).join('');
@@ -1286,7 +1297,11 @@ async function renderRoute() {
       case 'words': html = await pageWords(); break;
       case 'cards': html = await pageCards(a); break;
       case 'para': html = await pagePara(); break;
-      case 'drill': html = await pageDrill(a); break;
+      case 'drill': html = a ? await pageDrill(a) : pageDrillRun(); break;
+      case 'learn': html = await pageLearn(a || 'skills'); break;
+      case 'skill': html = await pageSkill(a); S.skillSeen = S.skillSeen || {}; S.skillSeen[a] = todayStr(); save(); break;
+      case 'practice': html = await pagePractice(); break;
+      case 'tests': html = await pageTestsHub(); break;
       case 'mistakes': html = await pageMistakes(); break;
       case 'mreview': html = await pageMReview(); break;
       case 'lessons': html = await pageLessons(); break;
@@ -1305,6 +1320,9 @@ async function renderRoute() {
   if (r === 'listening') bindTests('L'); if (r === 'reading') bindTests('R');
   if (r === 'writing') $$('[data-wtab]').forEach(x => x.onclick = () => { S.wTab = x.dataset.wtab; save(); renderRoute(); });
   if (r === 'progress') bindProgress();
+  if (r === 'practice') bindPractice();
+  if (r === 'tests') bindTestsHub();
+  if ((!r || r === 'today') && S.onboarded) { const b = $('#td-sess'); if (b) b.onclick = startSession; }
   $$('[data-lock]').forEach(x => { if (x.dataset.lock) x.addEventListener('click', () => track('limit_hit', x.dataset.lock)); });
   if (!window._noScroll) window.scrollTo(0, 0);
 }
@@ -1330,3 +1348,266 @@ function mergeCloud(c) {
 }
 window.__app = { getS: () => S, summary, mergeCloud, render: () => { window._noScroll = true; renderRoute().finally(() => window._noScroll = false); }, cloudStatus };
 renderRoute();
+/* ============ Skills layer (GAT model): mastery map, skill lessons, drills with hints & techniques, daily session ============ */
+var SKL = null, TECH = null, DRL = null;
+async function skillsData() {
+  if (!SKL) { const [a, b, c] = await Promise.all([content('skills'), content('techniques'), content('drills')]); SKL = a.items; TECH = b.items; DRL = c.items; }
+  return { SKL, TECH, DRL };
+}
+const SEC_ORDER = ['L', 'R', 'W', 'S'];
+const techOf = id => (TECH || []).find(t => t.id === id);
+if (!S.recent) S.recent = [];
+if (!S.dr) S.dr = {};
+const LEVELS = () => [_('لم تبدأ', 'Not started'), _('تأسيس', 'Foundation'), _('تطوير', 'Developing'), _('ثبات', 'Secure'), _('إتقان', 'Mastered')];
+function skillInfo(id) {
+  const r = S.recent.filter(x => x.s === id).slice(-25), n = r.length;
+  if (!n) return { n: 0, acc: null, level: 0 };
+  const acc = r.filter(x => x.ok).length / n;
+  let level = 1; if (n >= 5 && acc >= .6) level = 2; if (n >= 10 && acc >= .8) level = 3; if (n >= 20 && acc >= .9) level = 4;
+  return { n, acc, level };
+}
+const pips = lv => `<span class="pips" aria-label="${LEVELS()[lv]}">${[1, 2, 3, 4].map(i => `<i class="${i <= lv ? 'on' : ''}"></i>`).join('')}</span>`;
+function recordAns(skill, ok, secs, id) {
+  S.recent.push({ s: skill, ok: !!ok, t: secs == null ? null : Math.round(secs), d: todayStr(), id: id || null });
+  if (S.recent.length > 1500) S.recent = S.recent.slice(-1500);
+}
+/* exam question types feed the matching skill */
+function examSkill(sec, type) {
+  if (sec === 'L') return type === 'map' ? 'L-map' : ['mcq', 'mcq2', 'matching'].includes(type) ? 'L-mcq' : ['notes', 'flow', 'table', 'summary'].includes(type) ? 'L-notes' : 'L-detail';
+  if (['tfng', 'ynng'].includes(type)) return 'R-tfng';
+  if (['headings', 'mcq', 'mcq2'].includes(type)) return 'R-heading';
+  if (['info', 'features', 'short'].includes(type)) return 'R-locate';
+  return 'R-complete';
+}
+function rankSkills() { return (SKL || []).map(s => ({ id: s.id, ...skillInfo(s.id) })).sort((a, b) => (a.level - b.level) || ((a.acc ?? .5) - (b.acc ?? .5))); }
+
+/* ---------- mastery map ---------- */
+function masteryMap() {
+  const col = sec => `<div class="mcol"><div class="mcol-h c-${sec}">${ic(sec, 'i20')} ${skName(sec)}</div><div class="mtiles">${SKL.filter(s => s.sec === sec).map(s => { const i = skillInfo(s.id); return `<a class="mtile l${i.level}" href="#skill/${s.id}"><span class="mt-n">${esc(L(s.title))}</span>${pips(i.level)}<span class="mt-f">${LEVELS()[i.level]}${i.acc != null ? ` · ${numL(Math.round(i.acc * 100))}%` : ''}</span></a>`; }).join('')}</div></div>`;
+  return `<div class="mmap">${SEC_ORDER.map(col).join('')}</div>`;
+}
+
+/* ---------- learn hub ---------- */
+async function pageLearn(tab = 'skills') {
+  await skillsData();
+  const tabs = [['skills', _('المهارات', 'Skills')], ['tech', _('التقنيات والحيل', 'Techniques & tricks')], ['words', _('الكلمات', 'Words')], ['strategy', _('دروس الأسئلة', 'Question-type lessons')]];
+  let body = '';
+  if (tab === 'skills') {
+    body = SEC_ORDER.map(sec => `<h2 class="sec-h c-${sec}">${ic(sec, 'i20')} ${skName(sec)}</h2><div class="lgrid">${SKL.filter(s => s.sec === sec).map(s => { const i = skillInfo(s.id), n = DRL.filter(d => d.sk === s.id).length; return `<a class="card lcard" href="#skill/${s.id}"><div class="spread"><h3>${esc(L(s.title))}</h3>${pips(i.level)}</div><p class="small muted">${esc(L(s.tag))}</p><div class="chips"><span class="chip">${numL(n)}+ ${_('تمرين', 'drills')}</span><span class="chip teal">${LEVELS()[i.level]}</span></div></a>`; }).join('')}</div>`).join('');
+  } else if (tab === 'tech') {
+    const open = freeCount(TECH.length);
+    body = `<p class="lead">${_('حيل مختصرة تحفظها وتستخدمها في كل سؤال. كل تمرين في الموقع مربوط بإحدى هذه التقنيات.', 'Short tricks you memorise and use on every question. Every drill on the site is linked to one of them.')}</p>
+    ${SEC_ORDER.map(sec => { const ts = TECH.filter(t => t.sk[0] === sec); return `<h2 class="sec-h c-${sec}">${skName(sec)}</h2><div class="notes">${ts.map(t => { const lk = TECH.indexOf(t) >= open; return lk ? `<a class="note-card locked" href="#upgrade"><h3>${esc(L(t.t))}</h3><span class="lock-b">${ic('lock')}${_('برو', 'Pro')}</span></a>` : `<article class="note-card c${TECH.indexOf(t) % 4}"><h3>${esc(L(t.t))}</h3><p>${esc(L(t.d))}</p>${t.ex ? `<p class="ex ltr-text">${esc(t.ex)}</p>` : ''}<a class="tiny" href="#skill/${t.sk}">${esc(L(SKL.find(s => s.id === t.sk).title))} →</a></article>`; }).join('')}</div>`; }).join('')}`;
+  } else if (tab === 'words') { location.hash = '#words'; return ''; }
+  else { location.hash = '#lessons'; return ''; }
+  return `<div class="page-h"><span class="eyebrow">${_('الحقيبة', 'The kit')}</span><h1>${_('تعلّم المهارات قبل الاختبارات', 'Learn the skills before the tests')}</h1><p>${_('الآيلتس ليس حظًا: هو ١٦ مهارة دقيقة. لكل مهارة شرح بالعربية، وأمثلة محلولة، وفخاخ، وتقنيات، ثم تمارين بالإنجليزية مع تلميح وشرح لكل سؤال.', 'IELTS isn’t luck: it’s 16 micro-skills. Each has an Arabic explanation, worked examples, traps and techniques — then English drills with a hint and an explanation for every question.')}</p></div>
+  <nav class="tabs">${tabs.map(([k, l]) => `<a href="#learn/${k}" class="${tab === k ? 'on' : ''}">${l}</a>`).join('')}</nav>${body}`;
+}
+
+/* ---------- skill lesson page (GAT layout) ---------- */
+async function pageSkill(id) {
+  await skillsData();
+  const s = SKL.find(x => x.id === id); if (!s) return pageLearn();
+  const i = skillInfo(id), techs = TECH.filter(t => t.sk === id), n = DRL.filter(d => d.sk === id).length + (GEN[id] ? 1 : 0);
+  const both = (o) => `<p>${md(L(o))}</p>${AR() ? `<details class="en-v"><summary>English</summary><p class="ltr-text">${md(o.en)}</p></details>` : ''}`;
+  const list = (o, cls = 'bul') => `<${cls === 'nsteps' ? 'ol' : 'ul'} class="${cls}">${L(o).map(x => `<li>${md(x)}</li>`).join('')}</${cls === 'nsteps' ? 'ol' : 'ul'}>${AR() ? `<details class="en-v"><summary>English</summary><${cls === 'nsteps' ? 'ol' : 'ul'} class="${cls} ltr-text">${o.en.map(x => `<li>${md(x)}</li>`).join('')}</${cls === 'nsteps' ? 'ol' : 'ul'}></details>` : ''}`;
+  const side = `<div class="card side-card"><span class="eyebrow">${_('مستوى الإتقان', 'Mastery')}</span><div class="spread">${pips(i.level)}<b>${LEVELS()[i.level]}</b></div>
+    <div class="meter"><i style="inline-size:${Math.round((i.acc || 0) * 100)}%"></i></div><p class="small muted">${i.n ? `${numL(i.n)} ${_('إجابة', 'answers')} · ${numL(Math.round(i.acc * 100))}%` : _('لا إجابات بعد', 'No answers yet')}</p>
+    <ul class="lvl-rules small">${[[1, _('ابدأ التمرين', 'Start practising')], [2, _('٥ إجابات بدقة ٦٠٪+', '5 answers at 60%+')], [3, _('١٠ إجابات بدقة ٨٠٪+', '10 answers at 80%+')], [4, _('٢٠ إجابة بدقة ٩٠٪+', '20 answers at 90%+')]].map(([k, t]) => `<li class="${i.level >= k ? 'on' : ''}"><b>${LEVELS()[k]}</b> ${t}</li>`).join('')}</ul>
+    <button class="btn primary block" data-drill="${id}">${_('تدرّب: ١٠ أسئلة', 'Practise: 10 questions')}</button><p class="tiny muted">${_('كل سؤال فيه تلميح وتقنية وشرح.', 'Every question has a hint, a technique and an explanation.')}</p></div>`;
+  setTimeout(() => $$('[data-drill]').forEach(b => b.onclick = () => startDrill({ skills: [b.dataset.drill], n: 10, title: L(s.title) })), 0);
+  return `<div class="spread"><a href="#learn/skills" class="btn ghost sm">← ${_('المهارات', 'Skills')}</a><span class="chip c-${s.sec}">${skName(s.sec)}</span></div>
+  <div class="page-h"><h1>${esc(L(s.title))}</h1><p>${esc(L(s.tag))}</p></div>
+  <div class="lesson2">
+    <div class="lesson-main grid">
+      <section class="card"><h2>${_('الفكرة', 'The idea')}</h2>${L(s.concept).map(p => `<p>${md(p)}</p>`).join('')}${AR() ? `<details class="en-v"><summary>English</summary>${s.concept.en.map(p => `<p class="ltr-text">${md(p)}</p>`).join('')}</details>` : ''}</section>
+      <aside class="callout"><span class="eyebrow">${_('العقلية الصحيحة', 'Mindset')}</span>${both(s.mind)}</aside>
+      <section class="card"><h2>${_('خطوات الحل', 'Step by step')}</h2>${list(s.steps, 'nsteps')}</section>
+      <section><h2 class="h2s">${_('أشكال الأسئلة', 'What it looks like in the test')}</h2><div class="tgrid2">${s.forms.map(f => `<div class="tcell"><b class="ltr-text" style="text-align:start">${esc(f.en)}</b><span>${AR() ? `<b>${esc(f.ar)}</b> · ` : ''}${esc(L(f.d))}</span></div>`).join('')}</div></section>
+      ${s.rules ? `<section class="card"><h2>${_('قواعد وعبارات تحفظها', 'Rules & phrases to know')}</h2>${list(s.rules)}</section>` : ''}
+      <section class="card warn-card"><h2>${_('الفخاخ', 'Traps')}</h2>${list(s.traps)}</section>
+      <section><h2 class="h2s">${_('أمثلة محلولة', 'Worked examples')}</h2><div class="grid">${s.examples.map(e => `<details class="card excard"><summary><div class="src">${esc(e.src)}</div><b class="ltr-text" style="display:block;margin-top:8px">${esc(e.q)}</b><span class="reveal">${_('اضغط لإظهار الحل والشرح', 'Tap to reveal the answer and walk-through')}</span></summary><div class="walk"><b class="ltr-text">${esc(e.a)}</b><br>${esc(L(e.walk))}</div></details>`).join('')}</div></section>
+      ${techs.length ? `<section><h2 class="h2s">${_('تقنيات هذه المهارة', 'Techniques for this skill')}</h2><div class="notes">${techs.map((t, k) => `<article class="note-card c${k % 4}"><h3>${esc(L(t.t))}</h3><p>${esc(L(t.d))}</p>${t.ex ? `<p class="ex ltr-text">${esc(t.ex)}</p>` : ''}</article>`).join('')}</div></section>` : ''}
+      <section class="card accent-card"><h2>${_('للسرعة', 'Speed tips')}</h2>${list(s.speed)}</section>
+      <aside class="callout arab"><span class="eyebrow">${_('للمتعلم العربي', 'For Arabic speakers')}</span>${both(s.arab)}</aside>
+      <div class="mobile-cta"><button class="btn primary block" data-drill="${id}">${_('تدرّب: ١٠ أسئلة', 'Practise: 10 questions')}</button></div>
+    </div>
+    <aside class="lesson-side">${side}</aside>
+  </div>`;
+}
+
+/* ---------- generators (unlimited practice) ---------- */
+const NAMES = ['Hollins', 'Pearce', 'Fairley', 'Whitmore', 'Gaskell', 'Rowntree', 'Ashby', 'Kendrick', 'Mulligan', 'Thornton', 'Bexley', 'Garvey', 'Jessop', 'Ellwood', 'Quigley', 'Vaughan'];
+const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+const ORD = n => n + (n % 10 === 1 && n !== 11 ? 'st' : n % 10 === 2 && n !== 12 ? 'nd' : n % 10 === 3 && n !== 13 ? 'rd' : 'th');
+const rnd = n => Math.floor(Math.random() * n);
+const GEN = {
+  'L-detail': () => {
+    const k = rnd(4);
+    if (k === 0) { const nm = NAMES[rnd(NAMES.length)]; const sp = nm.toUpperCase().split('').reduce((a, c, i, arr) => { if (i && arr[i - 1] === c) return a; return a.concat(arr[i + 1] === c ? 'double ' + c : c); }, []).join(', ');
+      return { gen: 1, id: 'g-sp', sk: 'L-detail', tech: 'letters', kind: 'type', tts: `My surname is ${nm}. That’s ${sp}.`, q: 'Surname: ____', a: [nm], hint: { ar: 'اكتب الحروف واحدًا واحدًا، و«double» تعني حرفين.', en: 'Write the letters one by one; “double” means two of the same.' }, why: { ar: `التهجئة: ${sp}.`, en: `Spelling: ${sp}.` } }; }
+    if (k === 1) { const d1 = 10 + rnd(18), d2 = d1 + 1 + rnd(3), m = MONTHS[rnd(12)];
+      return { gen: 1, id: 'g-dt', sk: 'L-detail', tech: 'correction', kind: 'type', tts: `We’re arriving on the ${ORD(d1)} of ${m}. Oh, sorry, no — the ${ORD(d2)}.`, q: `Arrival: ____ ${m}`, a: [String(d2), ORD(d2)], hint: { ar: 'انتظر حتى نهاية الجملة: هل يتغيّر التاريخ؟', en: 'Wait for the end: does the date change?' }, why: { ar: `قيل ${d1} ثم صُحّح إلى ${d2}. الإجابة بعد التصحيح.`, en: `${d1} was corrected to ${d2}. The answer follows the correction.` } }; }
+    if (k === 2) { const teen = 13 + rnd(7), ty = (teen - 10) * 10, pick = rnd(2) ? teen : ty;
+      return { gen: 1, id: 'g-tn', sk: 'L-detail', tech: 'teen-ty', kind: 'type', tts: `The ticket costs ${pick} pounds.`, q: 'Price: £____', a: [String(pick)], hint: { ar: 'أين الضغط في الرقم: في آخره (-teen) أم في أوله (-ty)؟', en: 'Where’s the stress: at the end (-teen) or the start (-ty)?' }, why: { ar: `الرقم ${pick}. في -teen الضغط على آخر الكلمة، وفي -ty على أولها.`, en: `${pick}. -teen stresses the end; -ty stresses the start.` } }; }
+    const ph = '07' + Array.from({ length: 9 }, () => rnd(10)).join(''), say = ph.split('').map(c => c === '0' ? 'oh' : c).join(' ').replace(/(\d) \1/g, 'double $1');
+    return { gen: 1, id: 'g-ph', sk: 'L-detail', tech: 'predict', kind: 'type', tts: `My number is ${ph.slice(0, 5).split('').join(' ').replace(/0/g, 'oh')}, ${ph.slice(5).split('').join(' ').replace(/0/g, 'oh')}.`, q: 'Phone: ____', a: [ph, ph.slice(0, 5) + ' ' + ph.slice(5)], hint: { ar: '«oh» = صفر. اكتب الأرقام كما تسمعها.', en: '“oh” = zero. Write the digits as you hear them.' }, why: { ar: `الرقم ${ph}.`, en: `The number is ${ph}.` } };
+  },
+  'W-t1': () => {
+    const a = 20 + rnd(60), cases = [[a, a + 30 + rnd(20), 'rose sharply'], [a, a + 2 + rnd(3), 'increased slightly'], [a, Math.max(2, a - 25 - rnd(15)), 'fell dramatically'], [a, a, 'remained stable'], [a, a - 2 - rnd(2), 'dipped slightly']];
+    const [x, y, ok] = cases[rnd(cases.length)], all = ['rose sharply', 'increased slightly', 'fell dramatically', 'remained stable', 'dipped slightly'], opts = shuffle([ok, ...shuffle(all.filter(o => o !== ok)).slice(0, 2)]);
+    return { gen: 1, id: 'g-tr', sk: 'W-t1', tech: 'trend', kind: 'mcq', src: `Data: the figure went from ${x}% in 2015 to ${y}% in 2020.`, q: 'Which phrase describes the change best?', opts, a: LET[opts.indexOf(ok)], hint: { ar: 'احسب الفرق: كبير؟ صغير؟ لا تغيير؟ ثم اختر الفعل والظرف.', en: 'Work out the difference: big, small or none? Then choose verb + adverb.' }, why: { ar: `من ${x}% إلى ${y}%: ${ok}.`, en: `From ${x}% to ${y}%: ${ok}.` } };
+  }
+};
+async function extraItems(skill) {
+  if (skill === 'W-grammar') { const er = (await content('arab_errors')).items; return er.flatMap(e => e.drill.map((dr, i) => ({ id: 'e:' + e.id + ':' + i, sk: 'W-grammar', tech: 'arab-check', kind: 'type', src: dr.s, q: AR() ? 'صحّح الجملة' : 'Correct the sentence.', a: [dr.a], hint: dr.hint, why: e.why, lvl: 2 }))); }
+  if (skill === 'R-para') { const pp = (await content('paraphrase')).items; return pp.map(p => { const opts = shuffle([p.t, ...p.d], p.id.length * 7 + 3); return { id: 'p:' + p.id, sk: 'R-para', tech: 'synonym', kind: 'mcq', src: p.q, q: 'Which sentence means the same?', opts, a: LET[opts.indexOf(p.t)], hint: { ar: 'ابحث عن المعنى لا الكلمة، وانتبه للكلمات الصغيرة (some/all، may/will).', en: 'Search for meaning, not words; watch small words (some/all, may/will).' }, why: p.note, lvl: 2 }; }); }
+  return [];
+}
+
+/* ---------- drill sessions ---------- */
+let DS = null;
+async function poolFor(skill) { await skillsData(); return [...DRL.filter(d => d.sk === skill), ...(await extraItems(skill))]; }
+function pickItems(pool, n) {
+  const now = todayStr(), st = id => S.dr[id] || null;
+  const due = pool.filter(d => st(d.id) && !st(d.id).ok && (st(d.id).due || now) <= now), unseen = shuffle(pool.filter(d => !st(d.id))), seen = shuffle(pool.filter(d => st(d.id) && st(d.id).ok));
+  return [...due, ...unseen, ...seen].slice(0, n);
+}
+async function startDrill({ skills, n = 10, title, session }) {
+  if (!signedIn()) return openAuth('signup', () => startDrill({ skills, n, title, session }));
+  if (!PRO() && dailyLeft() <= 0) { track('limit_hit', 'daily'); return openUpgrade('daily'); }
+  await skillsData();
+  let items = [];
+  if (session) items = session;
+  else { const per = Math.ceil(n / skills.length); for (const s of skills) { const pool = await poolFor(s); let got = pickItems(pool, per); if (GEN[s]) while (got.length < per) got.push(GEN[s]()); if (GEN[s] && got.length >= per && Math.random() < .3) got[got.length - 1] = GEN[s](); items.push(...got); } items = items.slice(0, n); }
+  if (!PRO()) items = items.slice(0, Math.max(1, dailyLeft()));
+  if (!items.length) return toast(_('لا توجد تمارين لهذه المهارة بعد.', 'No drills for this skill yet.'));
+  DS = { title: title || _('جلسة تدريب', 'Practice session'), items, i: 0, res: [], t0: Date.now(), plays: 0, hint: false, done: false };
+  location.hash = '#drill';
+}
+function pageDrillRun() {
+  if (!DS) { setTimeout(() => location.hash = '#practice', 0); return ''; }
+  setTimeout(drRender, 0);
+  return `<div class="spread"><a href="#practice" class="btn ghost sm" id="dr-quit">← ${_('إنهاء', 'Quit')}</a><span class="chip pri">${esc(DS.title)}</span></div><div id="drill-stage" class="drill"></div>`;
+}
+function ttsSay(text) { try { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang = 'en-GB'; u.rate = .92; const v = speechSynthesis.getVoices().find(v => /en-GB/i.test(v.lang)); if (v) u.voice = v; speechSynthesis.speak(u); } catch (e) { toast(_('الصوت غير مدعوم في هذا المتصفح', 'Speech is not supported in this browser')); } }
+function drPlay(it) { DS.plays++; if (it.gen) return ttsSay(it.tts); const a = new Audio('/audio/dr/' + it.id + '.mp3'); a.volume = S.vol ?? .9; a.play().catch(() => toast(_('تعذّر تشغيل الصوت', 'Audio could not play'))); DS.audio = a; }
+function drRender() {
+  const el = $('#drill-stage'); if (!el || !DS) return;
+  if (DS.i >= DS.items.length) return drSummary();
+  const it = DS.items[DS.i], tech = techOf(it.tech), sk = (SKL || []).find(s => s.id === it.sk);
+  DS.qt0 = Date.now(); DS.hint = false; DS.plays = 0; DS.answered = false;
+  const isL = it.audio || it.tts;
+  el.innerHTML = `<div class="drill-top"><div class="meter"><i style="inline-size:${DS.i / DS.items.length * 100}%"></i></div><span class="small muted">${numL(DS.i + 1)} / ${numL(DS.items.length)}</span></div>
+  <div class="card drill-card">
+    <div class="spread"><a class="chip c-${it.sk[0]}" href="#skill/${it.sk}">${esc(sk ? L(sk.title) : it.sk)}</a>${tech ? `<span class="chip gold">${ic('spark')} ${esc(L(tech.t))}</span>` : ''}</div>
+    ${isL ? `<div class="row"><button class="btn teal" id="dr-play">${ic('play')} ${_('استمع', 'Listen')}</button><span class="small muted">${_('في الاختبار تسمع مرة واحدة؛ هنا يمكنك الإعادة مرة.', 'In the test you hear it once; here you may replay once.')}</span></div>` : ''}
+    ${it.src ? `<div class="src">${esc(it.src)}</div>` : ''}
+    <div class="dq ltr-text">${esc(it.q)}</div>
+    ${it.kind === 'mcq' ? `<div class="opt-btns ltr-text">${it.opts.map((o, k) => `<button class="opt-btn" data-k="${LET[k]}"><span class="L">${LET[k]}</span>${esc(o)}</button>`).join('')}</div>` : `<div class="row"><input class="inp ltr-text" id="dr-in" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="${_('اكتب إجابتك بالإنجليزية', 'Type your answer')}" style="flex:1;min-width:200px"><button class="btn primary" id="dr-check">${_('تحقق', 'Check')}</button></div>`}
+    <div class="row"><button class="btn ghost sm" id="dr-hint">💡 ${_('تلميح', 'Hint')}</button>${it.kind === 'type' ? `<button class="btn ghost sm" id="dr-skip">${_('لا أعرف', 'I don’t know')}</button>` : ''}</div>
+    <div id="dr-hint-b" hidden class="hint-box"></div>
+    <div id="dr-fb"></div>
+  </div>`;
+  if (isL) { $('#dr-play').onclick = () => { if (DS.plays >= 2 && !DS.answered) return toast(_('استمعت مرتين. أجب الآن.', 'You’ve listened twice. Answer now.')); drPlay(it); }; setTimeout(() => { if (DS && DS.items[DS.i] === it) drPlay(it); }, 400); }
+  $('#dr-hint').onclick = () => { DS.hint = true; const b = $('#dr-hint-b'); b.hidden = false; b.innerHTML = `<b>💡 ${esc(L(it.hint))}</b>${tech ? `<div class="small" style="margin-top:6px">${_('التقنية', 'Technique')}: <b>${esc(L(tech.t))}</b> — ${esc(L(tech.d))}</div>` : ''}${AR() ? `<div class="small ltr-text muted" style="margin-top:6px">${esc(it.hint.en)}</div>` : ''}`; };
+  if (it.kind === 'mcq') el.querySelectorAll('.opt-btn').forEach(b => b.onclick = () => drAnswer(it, b.dataset.k, b));
+  else { const go = () => drAnswer(it, $('#dr-in').value); $('#dr-check').onclick = go; $('#dr-in').onkeydown = e => { if (e.key === 'Enter') go(); }; $('#dr-skip').onclick = () => drAnswer(it, ''); setTimeout(() => { const i = $('#dr-in'); if (i && !isL) i.focus(); }, 50); }
+}
+function drAnswer(it, val, btn) {
+  if (DS.answered) return; DS.answered = true;
+  const secs = (Date.now() - DS.qt0) / 1000;
+  const ok = it.kind === 'mcq' ? val === it.a : (it.a || []).some(a => nrm(a).replace(/[.!?]$/, '') === nrm(val).replace(/[.!?]$/, ''));
+  if (it.kind === 'mcq') $$('#drill-stage .opt-btn').forEach(b => { b.disabled = true; if (b.dataset.k === it.a) b.classList.add('ok'); }), btn && !ok && btn.classList.add('bad');
+  else { $('#dr-in').disabled = true; $('#dr-check').disabled = true; }
+  DS.res.push({ it, ok, secs, hint: DS.hint });
+  recordAns(it.sk, ok, secs, it.id); useDaily(1); markDay();
+  if (!it.gen) { const st = S.dr[it.id] || { c: 0, t: 0 }; st.t++; if (ok) st.c++; st.ok = ok; st.due = addDays(todayStr(), ok ? 7 : 1); S.dr[it.id] = st; }
+  save();
+  const tech = techOf(it.tech), right = it.kind === 'mcq' ? `${it.a}. ${it.opts[LET.indexOf(it.a)]}` : (it.a || []).join(' / ');
+  const transcript = it.lines ? it.lines.map(l => l.t).join(' ') : it.tts || '';
+  $('#dr-fb').innerHTML = `<div class="fb ${ok ? 'ok' : 'no'}"><b>${ok ? '✓ ' + _('إجابة صحيحة', 'Correct') + (DS.hint ? ' ' + _('(بمساعدة التلميح)', '(with a hint)') : '') : '✗ ' + _('الإجابة الصحيحة', 'Correct answer') + ': <span class="ltr-text">' + esc(right) + '</span>'}</b>
+    <p>${esc(L(it.why))}</p>${AR() ? `<p class="small ltr-text muted">${esc(it.why.en)}</p>` : ''}
+    ${transcript ? `<details><summary class="small">${_('النص المسموع', 'Transcript')}</summary><div class="src">${esc(transcript)}</div></details>` : ''}
+    ${!ok && tech ? `<div class="tech-tip">${ic('spark')} ${_('تذكّر التقنية', 'Remember the technique')}: <b>${esc(L(tech.t))}</b> — ${esc(L(tech.d))}</div>` : ''}</div>
+    <button class="btn primary" id="dr-next">${DS.i + 1 < DS.items.length ? _('التالي', 'Next') : _('النتيجة', 'See result')} ${ic('arrow')}</button>`;
+  $('#dr-next').onclick = () => { if (DS.audio) DS.audio.pause(); DS.i++; drRender(); };
+  setTimeout(() => $('#dr-next') && $('#dr-next').focus({ preventScroll: true }), 50);
+}
+function drSummary() {
+  const el = $('#drill-stage'), R = DS.res, c = R.filter(r => r.ok).length, avg = R.length ? Math.round(R.reduce((a, r) => a + r.secs, 0) / R.length) : 0;
+  const missedTech = [...new Set(R.filter(r => !r.ok).map(r => r.it.tech))].map(techOf).filter(Boolean);
+  const skills = [...new Set(R.map(r => r.it.sk))];
+  track('test_done', 'drill:' + skills.join(','), Math.round(100 * c / Math.max(1, R.length)));
+  el.innerHTML = `<div class="card center grid"><h2>${_('انتهت الجلسة', 'Session complete')}</h2><div class="stamp lg" style="margin:auto;color:var(--pri)"><b>${numL(c)}/${numL(R.length)}</b><small>score</small></div>
+    <p class="muted">${_('متوسط الوقت', 'Average time')}: ${numL(avg)} ${_('ثانية', 's')} · ${_('تلميحات مستخدمة', 'hints used')}: ${numL(R.filter(r => r.hint).length)}</p>
+    <div class="list" style="text-align:start">${skills.map(s => { const i = skillInfo(s), sk = SKL.find(x => x.id === s); return `<a class="li" href="#skill/${s}"><span class="li-t"><b>${esc(sk ? L(sk.title) : s)}</b><small class="muted">${LEVELS()[i.level]} · ${i.acc != null ? numL(Math.round(i.acc * 100)) + '%' : ''}</small></span>${pips(i.level)}</a>`; }).join('')}</div>
+    ${missedTech.length ? `<div class="notice gold" style="text-align:start"><b>${_('راجع هذه التقنيات', 'Review these techniques')}:</b><ul>${missedTech.map(t => `<li><b>${esc(L(t.t))}</b> — ${esc(L(t.d))}</li>`).join('')}</ul></div>` : ''}
+    <div class="row" style="justify-content:center"><button class="btn primary" id="ds-again">${_('جلسة أخرى', 'Another round')}</button><a class="btn" href="#today">${_('خطة اليوم', 'Today')}</a></div></div>`;
+  const prev = DS; $('#ds-again').onclick = () => startDrill({ skills: skills, n: prev.items.length, title: prev.title });
+  DS.done = true;
+}
+/* daily session: mistakes due + weakest skills + mixed */
+async function startSession() {
+  await skillsData();
+  const now = todayStr(), items = [];
+  const dueIds = Object.entries(S.dr).filter(([, v]) => !v.ok && v.due <= now).map(([k]) => k);
+  items.push(...DRL.filter(d => dueIds.includes(d.id)).slice(0, 4));
+  const weak = rankSkills().slice(0, 2).map(x => x.id);
+  for (const s of weak) { const pool = (await poolFor(s)).filter(d => !items.includes(d)); items.push(...pickItems(pool, 4)); if (GEN[s]) items.push(GEN[s]()); }
+  const others = shuffle(SKL.map(s => s.id).filter(s => !weak.includes(s))).slice(0, 4);
+  for (const s of others) { const pool = (await poolFor(s)).filter(d => !items.includes(d)); items.push(...pickItems(pool, 1)); }
+  S.sessionDays = S.sessionDays || []; if (!S.sessionDays.includes(now)) S.sessionDays.push(now); save();
+  startDrill({ session: items.slice(0, 15), title: _('جلسة اليوم', 'Today’s session') });
+}
+
+/* ---------- practice hub ---------- */
+async function pagePractice() {
+  await skillsData();
+  const dl = dailyLeft();
+  return `<div class="page-h"><span class="eyebrow">${_('التدريب', 'Practice')}</span><h1>${_('تدرّب على كل مهارة حتى تتقنها', 'Practise every skill until you master it')}</h1><p>${_('أسئلة قصيرة بالإنجليزية، ولكل سؤال تلميح بالعربية وتقنية واضحة وشرح للحيلة بعد الإجابة. أخطاؤك تعود إليك تلقائيًا حتى تتقنها.', 'Short English questions, each with an Arabic hint, a named technique and an explanation of the trick. Your mistakes come back automatically until you master them.')}</p></div>
+  <div class="card session-card"><div><span class="eyebrow">${_('جلسة اليوم', 'Today’s session')}</span><h2>${_('١٥ سؤالًا مختارة لك', '15 questions picked for you')}</h2><p class="small muted">${_('أخطاء مستحقة + أضعف مهارتين + أسئلة منوّعة', 'Due mistakes + your two weakest skills + a mix')}</p>${dl !== Infinity && signedIn() ? `<p class="small">${_(`متبقٍ لك اليوم ${numL(dl)} سؤالًا مجانيًا`, `${dl} free questions left today`)}</p>` : ''}</div><button class="btn primary" id="pr-sess">${_('ابدأ الجلسة', 'Start session')}</button></div>
+  ${SEC_ORDER.map(sec => `<div class="card"><h2 class="c-${sec}">${ic(sec, 'i20')} ${skName(sec)}</h2><div class="list">${SKL.filter(s => s.sec === sec).map(s => { const i = skillInfo(s.id); return `<div class="li"><span class="li-t"><b>${esc(L(s.title))}</b><small class="muted">${LEVELS()[i.level]}${i.acc != null ? ' · ' + numL(Math.round(i.acc * 100)) + '%' : ''}</small></span>${pips(i.level)}<a class="btn ghost sm" href="#skill/${s.id}">${_('الدرس', 'Lesson')}</a><button class="btn sm" data-drill="${s.id}">${_('تدرّب', 'Practise')}</button></div>`; }).join('')}</div>
+    ${sec === 'W' ? `<a class="btn ghost sm" href="#writing">${ic('W')} ${_('استوديو الكتابة: اكتب مقالة كاملة', 'Writing studio: write a full task')}</a>` : sec === 'S' ? `<a class="btn ghost sm" href="#speaking">${ic('S')} ${_('غرفة المحادثة: تحدّث وسجّل', 'Speaking room: speak and record')}</a>` : ''}</div>`).join('')}
+  <div class="g3"><a class="card tile" href="#mistakes"><h3>${ic('box')} ${_('صندوق الأخطاء', 'Mistake box')}</h3><p class="small muted">${_('أسئلة الاختبارات التي أخطأت فيها', 'Test questions you got wrong')}</p></a><a class="card tile" href="#para"><h3>${ic('globe')} ${_('مدرّب إعادة الصياغة', 'Paraphrase trainer')}</h3></a><a class="card tile" href="#words"><h3>${ic('words')} ${_('بطاقات المفردات', 'Vocabulary cards')}</h3></a></div>`;
+}
+function bindPractice() {
+  const s = $('#pr-sess'); if (s) s.onclick = startSession;
+  $$('[data-drill]').forEach(b => b.onclick = async () => { await skillsData(); const sk = SKL.find(x => x.id === b.dataset.drill); startDrill({ skills: [b.dataset.drill], n: 10, title: L(sk.title) }); });
+}
+/* ============ Model tests hub ============ */
+async function pageTestsHub() {
+  const [w1, wg, w2, p1, p2] = await Promise.all([content('task1_academic'), content('task1_gt'), content('task2'), content('part1'), content('part23')]);
+  const Ls = CATALOG.listening, Rs = CATALOG.reading[S.module], n = Math.max(Ls.length, Rs.length);
+  const last = (sk, id) => S.attempts.filter(a => a.skill === sk && a.test.split('+').includes(id)).slice(-1)[0];
+  const lock = PRO() ? '' : `<span class="lock-b">${ic('lock')}${_('برو', 'Pro')}</span>`;
+  const models = Array.from({ length: n }, (_x, i) => {
+    const l = Ls[i], r = Rs[i], t1 = (S.module === 'gt' ? wg : w1).items[i], t2 = w2.items[i], sp = p2.items[i];
+    const la = l && last('L', l.id), ra = r && last('R', r.id);
+    return `<div class="card model"><div class="spread"><h2>${_('النموذج', 'Model test')} ${numL(i + 1)}</h2>${lock}</div>
+      <div class="msec">${l ? `<div class="mrow"><span class="dot bg-L"></span><b>${skName('L')}</b><span class="small muted">${_('٤ أجزاء · ٤٠ سؤالًا · ٣٠ دقيقة', '4 parts · 40 q · 30 min')}</span>${la ? `<span class="chip ok">${bandL(la.band)}</span>` : ''}<button class="btn sm" data-mt="L:${l.id}">${_('ابدأ', 'Start')}</button><button class="btn ghost sm" data-mt="LP:${l.id}">${_('تدريب', 'Practice')}</button></div>` : ''}
+      ${r ? `<div class="mrow"><span class="dot bg-R"></span><b>${skName('R')}</b><span class="small muted">${S.module === 'gt' ? 'General' : 'Academic'} · ${_('٤٠ سؤالًا · ٦٠ دقيقة', '40 q · 60 min')}</span>${ra ? `<span class="chip ok">${bandL(ra.band)}</span>` : ''}<button class="btn sm" data-mt="R:${r.id}">${_('ابدأ', 'Start')}</button></div>` : ''}
+      ${t1 ? `<div class="mrow"><span class="dot bg-W"></span><b>${skName('W')}</b><span class="small muted">${_('المهمة ١ + المهمة ٢ · ٦٠ دقيقة', 'Task 1 + Task 2 · 60 min')}</span><a class="btn sm" href="#write/${S.module === 'gt' ? 't1g' : 't1a'}/${t1.id}">Task 1</a>${t2 ? `<a class="btn sm" href="#write/t2/${t2.id}">Task 2</a>` : ''}</div>` : ''}
+      ${sp ? `<div class="mrow"><span class="dot bg-S"></span><b>${skName('S')}</b><span class="small muted">${_('الأجزاء ١–٣ · ١١–١٤ دقيقة', 'Parts 1–3 · 11–14 min')}</span><a class="btn sm" href="#speak/p2/${sp.id}">${_('البطاقة والنقاش', 'Cue card + discussion')}</a></div>` : ''}</div></div>`;
+  }).join('');
+  return `<div class="page-h"><span class="eyebrow">${_('النماذج', 'Model tests')}</span><h1>${_('نماذج كاملة بصيغة الاختبار المحوسب', 'Full models in the computer-delivered format')}</h1><p>${_('كل نموذج اختبار كامل بأقسامه الأربعة. بعد كل قسم ترى درجتك، وشرح كل إجابة بالعربية، وموضعها في التسجيل أو النص، وأي مهارة تحتاج تدريبًا.', 'Each model is a complete four-section test. After each section you get your band, every answer explained in Arabic with its location, and which skills need work.')}</p></div>
+  <div class="seg">${['ac', 'gt'].map(m => `<button data-mod="${m}" class="${S.module === m ? 'on' : ''}">${m === 'ac' ? 'Academic' : 'General Training'}</button>`).join('')}</div>
+  ${!diagTaken() ? `<a class="card tile" href="#diag" style="background:var(--teal-soft);border-color:transparent"><b>${_('اختبار تحديد المستوى (مجاني)', 'Placement test (free)')}</b><span class="small">${_('٢٠ سؤال استماع + ١٣ سؤال قراءة', '20 listening + 13 reading questions')}</span></a>` : ''}
+  <div class="grid">${models}</div>
+  <div class="card"><h2>${_('تدريب بالأجزاء', 'Practise by part')}</h2><p class="small muted">${_('جزء واحد من أي نموذج، في وضع التدريب.', 'One part of any model, in practice mode.')}</p>
+    <div class="list">${Ls.map(t => `<div class="li"><b>Listening ${t.n}</b>${[0, 1, 2, 3].map(i => `<button class="btn ghost sm" data-part="L:${t.id}:${i}">Part ${i + 1}</button>`).join('')}</div>`).join('')}${Rs.map(t => `<div class="li"><b>Reading ${t.n}</b>${(t.id[0] === 'G' ? [0, 1, 2, 3, 4] : [0, 1, 2]).map(i => `<button class="btn ghost sm" data-part="R:${t.id}:${i}">${t.id[0] === 'G' ? 'Text' : 'Passage'} ${i + 1}</button>`).join('')}</div>`).join('')}</div></div>
+  <div class="g3"><a class="card tile" href="#writing"><h3>${ic('W')} ${_('كل مهام الكتابة', 'All writing tasks')}</h3><p class="small muted">${numL(w1.items.length + wg.items.length + w2.items.length)} ${_('مهمة مع إجابات نموذجية', 'tasks with model answers')}</p></a><a class="card tile" href="#speaking"><h3>${ic('S')} ${_('غرفة المحادثة', 'Speaking room')}</h3><p class="small muted">${numL(p1.items.length)} + ${numL(p2.items.length)} ${_('موضوعًا', 'topics')}</p></a><a class="card tile" href="#speak/mock"><h3>${ic('spark')} ${_('اختبار محادثة كامل', 'Full speaking mock')}</h3></a></div>`;
+}
+function bindTestsHub() {
+  $$('[data-mod]').forEach(b => b.onclick = () => { S.module = b.dataset.mod; save(); renderRoute(); });
+  $$('[data-mt]').forEach(b => b.onclick = () => {
+    if (!PRO()) { track('limit_hit', 'test'); return openUpgrade('test'); }
+    const [k, id] = b.dataset.mt.split(':'), sk = k[0], n = sk === 'L' ? 4 : (id[0] === 'G' ? 5 : 3);
+    startTest({ kind: sk, title: `${sk === 'L' ? 'Listening' : 'Reading'} · Model ${+id.slice(1)}`, mode: k === 'LP' ? 'practice' : 'exam', time: sk === 'R' ? 3600 : 0, sections: Array.from({ length: n }, (_x, i) => ({ skill: sk, test: id, idx: i })) });
+  });
+  $$('[data-part]').forEach(b => b.onclick = () => {
+    if (!PRO()) { track('limit_hit', 'test'); return openUpgrade('test'); }
+    const [sk, id, i] = b.dataset.part.split(':');
+    startTest({ kind: sk, title: `${sk === 'L' ? 'Listening' : 'Reading'} ${+id.slice(1)} · ${b.textContent}`, mode: 'practice', time: sk === 'R' ? (id[0] === 'G' && +i < 4 ? 600 : 1200) : 0, sections: [{ skill: sk, test: id, idx: +i }] });
+  });
+}

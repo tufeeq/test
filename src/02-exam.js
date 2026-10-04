@@ -345,6 +345,7 @@ function finishTest(auto) {
       bySkill[s.skill].t++; if (r.ok) bySkill[s.skill].c++;
       const tk = s.skill + ':' + g.type; (qt[tk] = qt[tk] || { c: 0, t: 0 }).t++; if (r.ok) qt[tk].c++;
       qtAdd(s.skill, g.type, r.ok);
+      recordAns(examSkill(s.skill, g.type), r.ok, null);
       if (!r.ok) wrong.push({ test: s.test, skill: s.skill, pi: s.pi, n: r.n, type: g.type });
     });
   }
@@ -371,17 +372,18 @@ function renderResult() {
   EX.review = true;
   const rows = Object.entries(r.qt).sort((a, b) => a[1].c / a[1].t - b[1].c / b[1].t).map(([k, v]) => `<tr><td>${skName(k[0])}</td><td>${esc(qtName(k.slice(2)))}</td><td>${v.c}/${v.t}</td><td>${Math.round(100 * v.c / v.t)}%</td></tr>`).join('');
   const worst = Object.entries(r.qt).filter(([, v]) => v.t >= 2).sort((a, b) => a[1].c / a[1].t - b[1].c / b[1].t)[0];
-  const lessonFor = worst ? LESSON_FOR[worst[0].slice(2)] : null;
+  const lessonFor = worst ? examSkill(worst[0][0], worst[0].slice(2)) : null, lsk = lessonFor && (typeof SKL !== 'undefined' && SKL || []).find(x => x.id === lessonFor);
   ex.innerHTML = `<div class="ex-top"><span class="cand">${esc(EX.spec.title)} · RESULT</span><span class="clock"></span><button id="ex-x">${_('إغلاق', 'Close')}</button></div>
   <div class="ex-pane full" style="overflow:auto"><div class="result-top">
     <div style="display:flex;gap:30px;flex-wrap:wrap;justify-content:center">${r.made.map(a => `<div><div style="font-size:.85rem;color:#555">${skName(a.skill)}${a.full ? '' : ' · ' + _('تقدير', 'estimate')}</div><div class="big">${fmtBand(a.band)}</div><div>${a.raw} / ${a.of} ${_('صحيحة', 'correct')}</div></div>`).join('')}</div>
     <div dir="${AR() ? 'rtl' : 'ltr'}" style="font-family:var(--f-body);max-width:560px">${r.made.some(a => !a.full) ? _('هذه درجة تقديرية لأنك أجبت عن جزء من الاختبار؛ الاختبار الكامل (٤٠ سؤالًا) يعطي درجة أدق.', 'This is an estimate because you answered part of a test; a full 40-question test gives a more reliable band.') + ' ' : ''}${worst ? _(`أضعف نوع أسئلة في هذه المحاولة: «${qtName(worst[0].slice(2))}». `, `Your weakest question type this time: “${qtName(worst[0].slice(2))}”. `) : ''}${_('أُضيفت أخطاؤك إلى صندوق الأخطاء لمراجعتها لاحقًا.', 'Your mistakes have been added to your mistake box for spaced review.')}</div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center"><button class="go" id="rv-go" style="font:inherit;font-weight:700;background:#1f5fa8;color:#fff;border:0;border-radius:4px;padding:10px 18px;cursor:pointer">${_('راجع الإجابات مع الشرح', 'Review answers with explanations')}</button>${lessonFor ? `<button id="rv-lesson" style="font:inherit;border:1px solid #888;background:#fff;border-radius:4px;padding:10px 18px;cursor:pointer">${_('درس هذا النوع', 'Lesson for this type')}</button>` : ''}</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center"><button class="go" id="rv-go" style="font:inherit;font-weight:700;background:#1f5fa8;color:#fff;border:0;border-radius:4px;padding:10px 18px;cursor:pointer">${_('راجع الإجابات مع الشرح', 'Review answers with explanations')}</button>${lessonFor ? `<button id="rv-lesson" style="font:inherit;border:1px solid #888;background:#fff;border-radius:4px;padding:10px 18px;cursor:pointer">${_('ادرس المهارة', 'Study the skill')}${lsk ? ': ' + esc(L(lsk.title)) : ''}</button><button id="rv-drill" style="font:inherit;border:1px solid #888;background:#fff;border-radius:4px;padding:10px 18px;cursor:pointer">${_('تدرّب عليها: ١٠ أسئلة مع تلميحات', 'Drill it: 10 questions with hints')}</button>` : ''}</div>
     ${rows ? `<table class="qt-table"><tr><th>${_('المهارة', 'Skill')}</th><th>${_('نوع السؤال', 'Question type')}</th><th>${_('النتيجة', 'Score')}</th><th>%</th></tr>${rows}</table>` : ''}
   </div></div>`;
   ex.querySelector('#ex-x').onclick = () => closeExam();
   ex.querySelector('#rv-go').onclick = () => { EX.cur = 0; renderExam(); };
-  const rl = ex.querySelector('#rv-lesson'); if (rl) rl.onclick = () => { const id = lessonFor; closeExam(); location.hash = '#lesson/' + id; };
+  const rl = ex.querySelector('#rv-lesson'); if (rl) rl.onclick = () => { const id = lessonFor; closeExam(); location.hash = '#skill/' + id; };
+  const rd = ex.querySelector('#rv-drill'); if (rd) rd.onclick = () => { const id = lessonFor; closeExam(); startDrill({ skills: [id] }); };
 }
 const LESSON_FOR = { tfng: 'R-tfng', ynng: 'R-tfng', headings: 'R-headings', info: 'R-headings', summary: 'R-completion', summary_bank: 'R-completion', sentence: 'R-completion', short: 'R-completion', table: 'R-completion', form: 'L-form', notes: 'L-notes', mcq: 'L-mcq', mcq2: 'L-mcq', map: 'L-map', matching: 'L-mcq', features: 'R-headings', endings: 'R-completion', flow: 'R-completion' };
 

@@ -76,7 +76,7 @@ const EVENTS = {
   upgrade_view: ["شاهد الباقات", "Viewed plans", "butter"], checkout_start: ["بدأ الدفع", "Started checkout", "butter"], test_start: ["بدأ اختبارًا", "Started a test", ""],
   test_done: ["أنهى اختبارًا", "Finished a test", ""], report_view: ["شاهد تقرير التجربة", "Viewed trial report", "sky"]
 };
-const SOURCES = { tap: ["دفع إلكتروني", "Paid"], coupon: ["قسيمة", "Coupon"], manual: ["منحة يدوية", "Manual grant"], admin: ["مشرف", "Admin"] };
+const SOURCES = { tap: ["دفع إلكتروني", "Paid"], moyasar: ["دفع إلكتروني", "Paid"], coupon: ["قسيمة", "Coupon"], manual: ["منحة يدوية", "Manual grant"], admin: ["مشرف", "Admin"] };
 const srcL = s => (SOURCES[s] ? _(SOURCES[s][0], SOURCES[s][1]) : s || "—");
 const PSTAT = { paid: ["مدفوعة", "Paid"], refunded: ["مستردة", "Refunded"], failed: ["فاشلة", "Failed"], initiated: ["لم تكتمل", "Initiated"] };
 const pstatL = s => (PSTAT[s] ? _(PSTAT[s][0], PSTAT[s][1]) : s);
@@ -92,7 +92,7 @@ const ERR = {
   "not-refundable": ["لا يمكن استرداد هذه الدفعة (ليست مدفوعة).", "This payment can't be refunded (not paid)."],
   "bad-amount": ["مبلغ الاسترداد غير صحيح: يجب أن يكون أكبر من صفر ولا يتجاوز المبلغ المدفوع.", "Invalid refund amount: must be above zero and no more than what was paid."],
   "payments-not-configured": ["الدفع الإلكتروني غير مفعّل بعد (المتغير TAP_SECRET_KEY غير مضاف).", "Online payment isn't configured yet (TAP_SECRET_KEY is missing)."],
-  "no-charge": ["لا توجد عملية دفع لدى Tap مرتبطة بهذه الدفعة.", "There's no Tap charge linked to this payment."],
+  "no-charge": ["لا توجد عملية دفع لدى بوابة الدفع مرتبطة بهذه الدفعة.", "There's no gateway payment linked to this payment."],
   "bad-code": ["رمز القسيمة: ٣–٣٢ حرفًا إنجليزيًا أو رقمًا أو - أو _.", "Coupon code: 3–32 letters, digits, - or _."],
   "bad-pct": ["نسبة الخصم يجب أن تكون بين ١ و١٠٠.", "Discount must be between 1 and 100%."],
   "bad-date": ["تاريخ الانتهاء غير صالح.", "Invalid expiry date."],
@@ -700,19 +700,19 @@ async function vPayments(tok) {
   if (!live(tok)) return;
   const pays = r.payments.map(p => ({ ...p, amount: num(p.amount), refunded_amount: num(p.refunded_amount) }));
   const cnt = s => pays.filter(p => p.status === s).length;
-  MAIN.innerHTML = ph("المالية", "Billing", "المدفوعات والاشتراكات", "Payments & subscriptions", "كل الدفعات عبر Tap والتفعيلات بالقسائم، مع الاسترداد والتحقق.", "Every Tap payment and coupon activation, with refunds and re-checks.", refreshBtn()) + `
-  ${r.tap ? "" : `<div class="alert warn" role="note">${ic("alert")}<div><b>${_("الدفع الإلكتروني غير مفعّل بعد", "Online payment isn't active yet")}</b>${_("لتفعيله يضيف مالك الحساب المتغير <code>TAP_SECRET_KEY</code> (المفتاح السري من لوحة Tap) في Railway: الخدمة ← Variables ← New Variable، فتُعاد تهيئة الخدمة تلقائيًا. حتى ذلك الحين يرى الطلاب «جارٍ تفعيل الدفع الإلكتروني»، وتعمل قسائم ١٠٠٪ فقط، ولا يمكن استرداد دفعات Tap أو إعادة التحقق منها.", "To turn it on, the owner adds the <code>TAP_SECRET_KEY</code> variable (the secret key from the Tap dashboard) in Railway: Service → Variables → New Variable; the service restarts automatically. Until then students see “online payment is being activated”, only 100% coupons work, and Tap refunds/re-checks are unavailable.")}</div></div>`}
+  MAIN.innerHTML = ph("المالية", "Billing", "المدفوعات والاشتراكات", "Payments & subscriptions", "كل الدفعات الإلكترونية والتفعيلات بالقسائم، مع الاسترداد والتحقق.", "Every online payment and coupon activation, with refunds and re-checks.", refreshBtn()) + `
+  ${r.tap ? "" : `<div class="alert warn" role="note">${ic("alert")}<div><b>${_("الدفع الإلكتروني غير مفعّل بعد", "Online payment isn't active yet")}</b>${_("لتفعيله يضيف مالك الحساب المتغير <code>MOYASAR_SECRET_KEY</code> (المفتاح السري من لوحة ميسّر) في Railway: الخدمة ← Variables ← New Variable، فتُعاد تهيئة الخدمة تلقائيًا. حتى ذلك الحين يرى الطلاب «جارٍ تفعيل الدفع الإلكتروني»، وتعمل قسائم ١٠٠٪ فقط، ولا يمكن استرداد الدفعات الإلكترونية أو إعادة التحقق منها.", "To turn it on, the owner adds the <code>MOYASAR_SECRET_KEY</code> variable (the secret key from the Moyasar dashboard) in Railway: Service → Variables → New Variable; the service restarts automatically. Until then students see “online payment is being activated”, only 100% coupons work, and refunds/re-checks of online payments are unavailable.")}</div></div>`}
   <section class="card">
     <div class="toolbar"><div class="seg" role="group" aria-label="${_("الحالة", "Status")}" id="pay-st">${[["", "الكل", "All"], ["paid", PSTAT.paid[0], PSTAT.paid[1]], ["refunded", PSTAT.refunded[0], PSTAT.refunded[1]], ["failed", PSTAT.failed[0], PSTAT.failed[1]], ["initiated", PSTAT.initiated[0], PSTAT.initiated[1]]].map(([v, a, e]) => `<button type="button" data-v="${v}" class="${S.payStatus === v ? "on" : ""}" aria-pressed="${S.payStatus === v}">${_(a, e)}</button>`).join("")}</div><span class="sp"></span>
       <span class="small muted">${_(`${fmtN(pays.length)} دفعة`, `${fmtN(pays.length)} payments`)}${S.payStatus ? "" : ` · ${fmtN(cnt("paid"))} ${_("مدفوعة", "paid")} · ${fmtN(cnt("refunded"))} ${_("مستردة", "refunded")}`}</span></div>
-    ${pays.length ? `<div class="tbl"><table><thead><tr><th scope="col" class="hide-sm">${_("التاريخ", "Date")}</th><th scope="col">${_("الطالب", "Student")}</th><th scope="col" class="hide-sm">${_("الباقة", "Plan")}</th><th scope="col" class="num">${_("المبلغ", "Amount")}</th><th scope="col">${_("الحالة", "Status")}</th><th scope="col" class="hide-md">Tap</th><th scope="col"><span class="sr">${_("إجراءات", "Actions")}</span></th></tr></thead><tbody>
+    ${pays.length ? `<div class="tbl"><table><thead><tr><th scope="col" class="hide-sm">${_("التاريخ", "Date")}</th><th scope="col">${_("الطالب", "Student")}</th><th scope="col" class="hide-sm">${_("الباقة", "Plan")}</th><th scope="col" class="num">${_("المبلغ", "Amount")}</th><th scope="col">${_("الحالة", "Status")}</th><th scope="col" class="hide-md">${_("المرجع", "Reference")}</th><th scope="col"><span class="sr">${_("إجراءات", "Actions")}</span></th></tr></thead><tbody>
     ${pays.map(p => `<tr><td class="hide-sm"><span class="nowrap">${esc(fmtDate(p.created_at))}</span></td>
       <td>${p.user_id ? `<button class="btn link ltr em" type="button" data-user="${esc(p.user_id)}">${esc(p.email || "—")}</button>` : `<span class="ltr muted">${esc(p.email || _("حساب محذوف", "deleted account"))}</span>`}<small class="show-sm muted">${esc(fmtDate(p.created_at))} · ${esc(planName(p.plan_id))}</small></td>
       <td class="hide-sm wrap">${esc(planName(p.plan_id))}</td>
       <td class="num">${p.amount ? fmtMoney(p.amount) : `<span class="chip on">${_("قسيمة ١٠٠٪", "100% coupon")}</span>`}${p.refunded_amount ? `<br><small class="muted">−${fmtMoney(p.refunded_amount)}</small>` : ""}${p.coupon ? `<br><small class="mono muted" data-tip="${esc(_("القسيمة", "Coupon"))}">${esc(p.coupon)}</small>` : ""}</td>
       <td><span class="chip ${esc(p.status)}">${esc(pstatL(p.status))}</span></td>
       <td class="hide-md">${p.tap_id ? `<span class="mono small">${esc(p.tap_id)}</span><br><small class="muted">${esc(p.tap_status || "")}</small>` : "—"}</td>
-      <td><div class="acts">${p.status === "paid" && p.amount > 0 ? `<button class="btn ghost xs" type="button" data-refund="${esc(p.id)}">${ic("undo")}${_("استرداد", "Refund")}</button>` : ""}${p.tap_id ? `<button class="btn ghost xs" type="button" data-recheck="${esc(p.id)}" data-tip="${esc(_("اسأل Tap عن حالة العملية وفعّل الاشتراك إن اكتملت", "Ask Tap for the charge status and activate if captured"))}">${ic("refresh")}${_("تحقق", "Recheck")}</button>` : ""}</div></td></tr>`).join("")}
+      <td><div class="acts">${p.status === "paid" && p.amount > 0 ? `<button class="btn ghost xs" type="button" data-refund="${esc(p.id)}">${ic("undo")}${_("استرداد", "Refund")}</button>` : ""}${p.tap_id ? `<button class="btn ghost xs" type="button" data-recheck="${esc(p.id)}" data-tip="${esc(_("اسأل بوابة الدفع عن حالة العملية وفعّل الاشتراك إن اكتملت", "Ask the gateway for the payment status and activate if paid"))}">${ic("refresh")}${_("تحقق", "Recheck")}</button>` : ""}</div></td></tr>`).join("")}
     </tbody></table></div>` : `<p class="tbl-empty">${_("لا دفعات بهذه الحالة.", "No payments with this status.")}</p>`}
   </section>`;
   onSeg("pay-st", v => { S.payStatus = v; route(); });
@@ -725,7 +725,7 @@ async function vPayments(tok) {
 }
 async function recheck(btn) {
   btn.classList.add("is-busy");
-  try { const r = await api("POST", `/api/admin/payments/${encodeURIComponent(btn.dataset.recheck)}/recheck`); toast(r.status === "CAPTURED" ? _("العملية مكتملة والاشتراك مفعّل", "Charge captured; subscription active") : _("حالة العملية لدى Tap: ", "Tap status: ") + (r.status || "—"), r.status === "CAPTURED" ? "ok" : "info"); route(); }
+  try { const r = await api("POST", `/api/admin/payments/${encodeURIComponent(btn.dataset.recheck)}/recheck`); toast(r.status === "CAPTURED" ? _("العملية مكتملة والاشتراك مفعّل", "Charge captured; subscription active") : _("حالة العملية لدى بوابة الدفع: ", "Gateway status: ") + (r.status || "—"), r.status === "CAPTURED" ? "ok" : "info"); route(); }
   catch (e) { fail(e, _("تعذّر التحقق من العملية", "Couldn't recheck the charge")); btn.classList.remove("is-busy"); }
 }
 function dialog(html, onSubmit) {
@@ -742,7 +742,7 @@ function refundDialog(p, ret) {
     <label class="fld">${_("المبلغ المسترد", "Refund amount")}<span class="unit"><input type="number" id="rf-amt" min="0.01" max="${p.amount}" step="0.01" value="${p.amount}" required><span>${_("ر.س", "SAR")}</span></span><span class="hint">${_("الحد الأقصى ", "Up to ")}${fmtMoney(p.amount)}</span></label>
     <label class="fld">${_("السبب", "Reason")}<input type="text" id="rf-why" maxlength="100" list="rf-reasons" value="requested_by_customer" dir="ltr"><datalist id="rf-reasons"><option value="requested_by_customer"><option value="duplicate"><option value="fraudulent"></datalist></label>
     <label class="tgl"><input type="checkbox" class="tg" id="rf-rev" checked>${_("إلغاء الاشتراك المرتبط بهذه الدفعة", "Revoke the subscription bought with this payment")}</label>
-    ${p.tap_id ? `<p class="small muted">${_("سيُرسل طلب الاسترداد إلى Tap ويُعاد المبلغ إلى وسيلة الدفع.", "The refund is sent to Tap and returned to the original payment method.")}</p>` : ""}
+    ${p.tap_id ? `<p class="small muted">${_("سيُرسل طلب الاسترداد إلى بوابة الدفع ويُعاد المبلغ إلى وسيلة الدفع.", "The refund is sent to the payment gateway and returned to the original payment method.")}</p>` : ""}
     <div class="row"><button class="btn ghost sm" type="button" data-cancel>${_("إلغاء", "Cancel")}</button><button class="btn danger sm" type="submit">${_("استرداد", "Refund")}</button></div></form>`, async dl => {
     const amt = Math.round(num($("#rf-amt", dl).value) * 100) / 100;
     if (!(amt > 0 && amt <= p.amount)) { $("#rf-amt", dl).classList.add("invalid"); toast(_("تحقق من المبلغ", "Check the amount"), "err", errMsg("bad-amount")); return false; }

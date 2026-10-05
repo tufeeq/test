@@ -1,9 +1,14 @@
-// GAT Academy — plans, subscriptions, Tap payments, coupons, usage events and the admin back-office API.
+// GAT Academy — plans, subscriptions, payments (Moyasar, or Tap), coupons, usage events and the admin back-office API.
 // Mounted by server.js: require("./commerce")(app, ctx).
 const crypto = require("crypto");
 const xpbundle = require("./xpbundle");
 
 const TAP_API = process.env.TAP_API_BASE || "https://api.tap.company/v2"; // overridable for local testing
+const MOY_API = process.env.MOYASAR_API_BASE || "https://api.moyasar.com/v1";
+// which gateway takes new payments: PAYMENT_PROVIDER=moyasar|tap, else whichever key is set (Moyasar first)
+const PROVIDER = () => { const f = String(process.env.PAYMENT_PROVIDER || "").toLowerCase();
+  if (f === "moyasar" && process.env.MOYASAR_SECRET_KEY) return "moyasar"; if (f === "tap" && process.env.TAP_SECRET_KEY) return "tap";
+  return process.env.MOYASAR_SECRET_KEY ? "moyasar" : process.env.TAP_SECRET_KEY ? "tap" : null; };
 const EVENT_TYPES = new Set(["open", "diag_start", "diag_done", "xp_start", "xp_done", "limit_hit", "upgrade_view", "checkout_start", "test_start", "test_done", "report_view"]);
 
 // Defaults: every value here can be changed from the admin dashboard (settings table).
@@ -44,6 +49,8 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
         tap_id TEXT UNIQUE, tap_status TEXT, refunded_amount NUMERIC(10,2) DEFAULT 0, refund_id TEXT,
         created_at TIMESTAMPTZ NOT NULL DEFAULT now(), paid_at TIMESTAMPTZ);
       CREATE INDEX IF NOT EXISTS pay_user_idx ON payments(user_id);
+      ALTER TABLE payments ADD COLUMN IF NOT EXISTS provider TEXT;
+      ALTER TABLE payments ADD COLUMN IF NOT EXISTS ext_id TEXT UNIQUE;
       CREATE TABLE IF NOT EXISTS coupons (
         code TEXT PRIMARY KEY, pct INT NOT NULL, max_uses INT, used INT NOT NULL DEFAULT 0, expires_at TIMESTAMPTZ,
         plan_ids TEXT[], active BOOLEAN NOT NULL DEFAULT true, note TEXT, created_at TIMESTAMPTZ NOT NULL DEFAULT now());
@@ -70,7 +77,7 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
   const publicCfg = c => ({
     plans: c.plans.filter(p => p.active).map(({ id, ar, en, days, price, best }) => ({ id, ar, en, days, price, best: !!best })),
     currency: c.currency, refund: c.refund, free: c.free, banner: c.banner, trialReportDays: c.trialReportDays,
-    payments: !!process.env.TAP_SECRET_KEY,
+    payments: !!PROVIDER(), provider: PROVIDER(),
     social: require("./oauth").enabled()
   });
   const audit = (req, action, target, meta) => pool.query("INSERT INTO admin_audit(admin_email,action,target,meta) VALUES($1,$2,$3,$4)", [req.user.email, action, target || null, meta || null]).catch(e => console.error("audit", e.message));
@@ -152,7 +159,7 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
     res.json({ ok: true });
   }));
 
-  // ---------- checkout with Tap ----------
+  // ---------- checkout (Moyasar hosted invoice page, or Tap hosted charge page) ----------
   const money = n => Math.round(Number(n) * 100) / 100;
   async function priceFor(planId, code) {
     const c = await loadCfg(); const plan = c.plans.find(p => p.id === planId && p.active);
@@ -191,10 +198,23 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
       const until = await grant(req.user.id, q.plan.days, "coupon", { planId: q.plan.id, paymentId: pid });
       return res.json({ activated: true, until });
     }
-    if (!process.env.TAP_SECRET_KEY) return fail(res, 503, "payments-not-configured");
-    await pool.query("INSERT INTO payments(id,user_id,email,plan_id,amount,currency,coupon,status) VALUES($1,$2,$3,$4,$5,$6,$7,'initiated')", [pid, req.user.id, req.user.email, q.plan.id, q.amount, q.currency, q.coupon]);
+    const prov = PROVIDER();
+    if (!prov) return fail(res, 503, "payments-not-configured");
+    await pool.query("INSERT INTO payments(id,user_id,email,plan_id,amount,currency,coupon,status,provider) VALUES($1,$2,$3,$4,$5,$6,$7,'initiated',$8)", [pid, req.user.id, req.user.email, q.plan.id, q.amount, q.currency, q.coupon, prov]);
     const base = baseUrl(req), name = (req.user.name || "").split(" ");
     const lang = req.body.lang === "en" ? "en" : "ar";
+    if (prov === "moyasar") {
+      const inv = await moy("POST", "/invoices", {
+        amount: Math.round(q.amount * 100), currency: q.currency,
+        description: (lang === "en" ? "GAT Academy — " + q.plan.en : "أكاديمية القدرات — " + q.plan.ar),
+        callback_url: base + "/api/billing/moyasar/callback",
+        success_url: base + "/api/billing/return?pid=" + pid,
+        back_url: base + "/app#upgrade",
+        metadata: { pid, uid: req.user.id, plan: q.plan.id }
+      });
+      await pool.query("UPDATE payments SET ext_id=$1, tap_status=$2 WHERE id=$3", [inv.id, inv.status, pid]);
+      return res.json({ url: inv.url });
+    }
     const charge = await tap("POST", "/charges/", {
       amount: q.amount, currency: q.currency, threeDSecure: true, save_card: false,
       description: (lang === "en" ? "GAT Academy — " + q.plan.en : "أكاديمية القدرات — " + q.plan.ar),
@@ -226,8 +246,53 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
     }
     return { status: "CAPTURED", pid };
   }
+  // ---------- Moyasar ----------
+  async function moy(method, url, body) {
+    const r = await fetch(MOY_API + url, { method, headers: { Authorization: "Basic " + Buffer.from(process.env.MOYASAR_SECRET_KEY + ":").toString("base64"), "Content-Type": "application/json", Accept: "application/json" }, body: body ? JSON.stringify(body) : undefined });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) { const e = new Error("moyasar " + r.status + " " + JSON.stringify(j).slice(0, 300)); e.moy = j; throw e; }
+    return j;
+  }
+  // verify a Moyasar invoice by fetching it from Moyasar (never trust a redirect or callback body) and activate exactly once
+  async function settleMoyasar(invoiceId) {
+    const inv = await moy("GET", "/invoices/" + encodeURIComponent(invoiceId));
+    const r = await pool.query("SELECT * FROM payments WHERE ext_id=$1", [inv.id]); const p = r.rows[0];
+    if (!p) return { status: "unknown" };
+    await pool.query("UPDATE payments SET tap_status=$1 WHERE id=$2", [inv.status, p.id]);
+    if (inv.status !== "paid") { if (["failed", "canceled", "expired"].includes(inv.status)) await pool.query("UPDATE payments SET status='failed' WHERE id=$1 AND status='initiated'", [p.id]); return { status: inv.status, pid: p.id }; }
+    if (Number(inv.amount) !== Math.round(Number(p.amount) * 100) || String(inv.currency).toUpperCase() !== p.currency || (inv.metadata && inv.metadata.pid && inv.metadata.pid !== p.id)) { console.error("moyasar amount mismatch", p.id); return { status: "mismatch", pid: p.id }; }
+    const up = await pool.query("UPDATE payments SET status='paid', paid_at=now() WHERE id=$1 AND status<>'paid' RETURNING *", [p.id]);
+    if (up.rows[0]) {
+      const c = await loadCfg(); const plan = c.plans.find(x => x.id === p.plan_id) || { days: 30 };
+      await grant(p.user_id, plan.days, "moyasar", { planId: p.plan_id, paymentId: p.id });
+      if (p.coupon) await pool.query("UPDATE coupons SET used=used+1 WHERE code=$1", [p.coupon]);
+    }
+    return { status: "CAPTURED", pid: p.id };
+  }
+  const settleAny = async p => p.provider === "moyasar" ? settleMoyasar(p.ext_id) : settle(p.tap_id);
+  // Moyasar posts here (invoice callback_url and/or a dashboard webhook). We only act on invoices we created,
+  // and always re-fetch them from Moyasar, so a forged post cannot activate anything.
+  app.post("/api/billing/moyasar/callback", wrap(async (req, res) => {
+    if (!process.env.MOYASAR_SECRET_KEY) return res.status(503).end();
+    if (limited("mc:" + req.ip, 300, 3600e3)) return res.status(429).end();
+    const b = req.body || {}, d = b.data || {};
+    const want = process.env.MOYASAR_WEBHOOK_SECRET;
+    if (b.secret_token != null && want) { const a = Buffer.from(String(b.secret_token)), w = Buffer.from(want); if (a.length !== w.length || !crypto.timingSafeEqual(a, w)) { console.error("moyasar webhook: bad secret_token"); return res.status(400).end(); } }
+    const ids = [b.invoice_id, d.invoice_id, b.id, d.id].filter(x => typeof x === "string" && /^[0-9a-f-]{20,40}$/i.test(x));
+    for (const id of ids) {
+      const p = (await pool.query("SELECT ext_id FROM payments WHERE ext_id=$1 AND provider='moyasar'", [id])).rows[0];
+      if (p) { try { await settleMoyasar(p.ext_id); } catch (e) { console.error("moyasar callback settle", e.message); return res.status(500).end(); } break; }
+    }
+    res.json({ ok: true });
+  }));
+
   app.get("/api/billing/return", wrap(async (req, res) => {
     const tapId = String(req.query.tap_id || ""); let ok = false;
+    const pid = String(req.query.pid || "");
+    if (/^pay_[\w-]+$/.test(pid)) {
+      const p = (await pool.query("SELECT * FROM payments WHERE id=$1", [pid])).rows[0];
+      if (p && p.provider === "moyasar" && p.ext_id && process.env.MOYASAR_SECRET_KEY) { try { ok = (await settleMoyasar(p.ext_id)).status === "CAPTURED"; } catch (e) { console.error("moyasar return", e.message); } return res.redirect(302, "/app#upgrade?" + (ok ? "paid=1" : "failed=1")); }
+    }
     if (/^chg_[\w]+$/.test(tapId) && process.env.TAP_SECRET_KEY) { try { ok = (await settle(tapId)).status === "CAPTURED"; } catch (e) { console.error("tap return", e.message); } }
     res.redirect(302, "/app#upgrade?" + (ok ? "paid=1" : "failed=1"));
   }));
@@ -278,7 +343,7 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
         (SELECT count(DISTINCT e.user_id) FROM events e JOIN u ON u.id=e.user_id WHERE e.type='limit_hit')::int hit_limit,
         (SELECT count(DISTINCT e.user_id) FROM events e JOIN u ON u.id=e.user_id WHERE e.type='upgrade_view')::int saw_plans,
         (SELECT count(DISTINCT e.user_id) FROM events e JOIN u ON u.id=e.user_id WHERE e.type='checkout_start')::int checkout,
-        (SELECT count(DISTINCT s.user_id) FROM subscriptions s JOIN u ON u.id=s.user_id WHERE s.source IN ('tap','coupon'))::int paid`, [String(days)]);
+        (SELECT count(DISTINCT s.user_id) FROM subscriptions s JOIN u ON u.id=s.user_id WHERE s.source IN ('tap','moyasar','coupon'))::int paid`, [String(days)]);
     const limits = await pool.query(`SELECT k, count(*)::int n, count(DISTINCT user_id)::int users FROM events WHERE type='limit_hit' AND at>now()-($1||' days')::interval GROUP BY k ORDER BY n DESC`, [String(days)]);
     res.json({ days, steps: r.rows[0], limits: limits.rows });
   });
@@ -314,7 +379,7 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
     try { const S = JSON.parse(u.p || "null") || {}; skills = S.stats || {}; attempts = (S.attempts || []).slice(-30).reverse(); xp = S.xp || {}; diag = S.diag || null; } catch (e) {}
     delete u.p;
     const subs = (await pool.query("SELECT id,plan_id,source,starts_at,ends_at,revoked_at,note,created_by,payment_id FROM subscriptions WHERE user_id=$1 ORDER BY starts_at DESC", [id])).rows;
-    const pays = (await pool.query("SELECT id,plan_id,amount,currency,coupon,status,tap_id,tap_status,refunded_amount,created_at,paid_at FROM payments WHERE user_id=$1 ORDER BY created_at DESC", [id])).rows;
+    const pays = (await pool.query("SELECT id,plan_id,amount,currency,coupon,status,COALESCE(tap_id,ext_id) tap_id,tap_status,provider,refunded_amount,created_at,paid_at FROM payments WHERE user_id=$1 ORDER BY created_at DESC", [id])).rows;
     const events = (await pool.query("SELECT type,k,v,at FROM events WHERE user_id=$1 ORDER BY at DESC LIMIT 60", [id])).rows;
     res.json({ user: { ...u, isAdmin: isAdminEmail(u.email) }, plan: await planOf(u), skills, attempts, xp, diag, subscriptions: subs, payments: pays, events });
   });
@@ -338,8 +403,8 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
 
   A("get", "/payments", async (req, res) => {
     const st = String(req.query.status || "");
-    const r = await pool.query(`SELECT id,user_id,email,plan_id,amount,currency,coupon,status,tap_id,tap_status,refunded_amount,created_at,paid_at FROM payments ${st ? "WHERE status=$1" : "WHERE status<>'initiated' OR created_at>now()-interval '2 days'"} ORDER BY created_at DESC LIMIT 500`, st ? [st] : []);
-    res.json({ payments: r.rows, tap: !!process.env.TAP_SECRET_KEY });
+    const r = await pool.query(`SELECT id,user_id,email,plan_id,amount,currency,coupon,status,COALESCE(tap_id,ext_id) tap_id,tap_status,provider,refunded_amount,created_at,paid_at FROM payments ${st ? "WHERE status=$1" : "WHERE status<>'initiated' OR created_at>now()-interval '2 days'"} ORDER BY created_at DESC LIMIT 500`, st ? [st] : []);
+    res.json({ payments: r.rows, tap: !!PROVIDER(), provider: PROVIDER() });
   });
   A("post", "/payments/:id/refund", async (req, res) => {
     const p = (await pool.query("SELECT * FROM payments WHERE id=$1", [req.params.id])).rows[0];
@@ -347,7 +412,14 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
     const amount = req.body.amount != null ? money(req.body.amount) : money(p.amount);
     if (!(amount > 0 && amount <= money(p.amount))) return fail(res, 400, "bad-amount");
     let refundId = null;
-    if (p.tap_id && Number(p.amount) > 0) {
+    if (p.provider === "moyasar" && p.ext_id && Number(p.amount) > 0) {
+      if (!process.env.MOYASAR_SECRET_KEY) return fail(res, 503, "payments-not-configured");
+      const inv = await moy("GET", "/invoices/" + encodeURIComponent(p.ext_id));
+      const pay = (inv.payments || []).find(x => x.status === "paid" || x.status === "captured");
+      if (!pay) return fail(res, 400, "not-refundable");
+      const rf = await moy("POST", "/payments/" + encodeURIComponent(pay.id) + "/refund", { amount: Math.round(amount * 100) });
+      refundId = rf.id || pay.id;
+    } else if (p.tap_id && Number(p.amount) > 0) {
       if (!process.env.TAP_SECRET_KEY) return fail(res, 503, "payments-not-configured");
       const rf = await tap("POST", "/refunds/", { charge_id: p.tap_id, amount, currency: p.currency, reason: String(req.body.reason || "requested_by_customer").slice(0, 100), reference: { merchant: p.id }, post: { url: baseUrl(req) + "/api/billing/refund-webhook" } });
       refundId = rf.id || null;
@@ -358,10 +430,10 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
   });
   app.post("/api/billing/refund-webhook", (req, res) => res.json({ ok: true }));
   A("post", "/payments/:id/recheck", async (req, res) => {
-    const p = (await pool.query("SELECT tap_id FROM payments WHERE id=$1", [req.params.id])).rows[0];
-    if (!p || !p.tap_id) return fail(res, 400, "no-charge");
-    if (!process.env.TAP_SECRET_KEY) return fail(res, 503, "payments-not-configured");
-    res.json(await settle(p.tap_id));
+    const p = (await pool.query("SELECT tap_id,ext_id,provider FROM payments WHERE id=$1", [req.params.id])).rows[0];
+    if (!p || !(p.tap_id || p.ext_id)) return fail(res, 400, "no-charge");
+    if (p.provider === "moyasar" ? !process.env.MOYASAR_SECRET_KEY : !process.env.TAP_SECRET_KEY) return fail(res, 503, "payments-not-configured");
+    res.json(await settleAny(p));
   });
 
   A("get", "/coupons", async (req, res) => res.json({ coupons: (await pool.query("SELECT * FROM coupons ORDER BY created_at DESC")).rows }));
@@ -387,7 +459,7 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
     audit(req, "coupon_delete", req.params.code); res.json({ ok: true });
   });
 
-  A("get", "/settings", async (req, res) => { const c = await loadCfg(true); const b = await bundles(); res.json({ config: c, defaults: DEFAULTS, xpKeys: b.keys.all, tap: !!process.env.TAP_SECRET_KEY }); });
+  A("get", "/settings", async (req, res) => { const c = await loadCfg(true); const b = await bundles(); res.json({ config: c, defaults: DEFAULTS, xpKeys: b.keys.all, tap: !!PROVIDER(), provider: PROVIDER() }); });
   A("put", "/settings", async (req, res) => {
     const v = req.body && req.body.config; if (!v || typeof v !== "object") return fail(res, 400, "bad-config");
     const c = merge(JSON.parse(JSON.stringify(DEFAULTS)), v);

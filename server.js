@@ -141,7 +141,7 @@ const needUser = (req, res, next) => req.user ? next() : fail(res, 401, "unauthe
 const needAdmin = (req, res, next) => !req.user ? fail(res, 401, "unauthenticated") : isAdminEmail(req.user.email) ? next() : fail(res, 403, "forbidden");
 // CSRF guard: state-changing API calls must carry our header (browsers block it cross-site without CORS)
 // (payment-provider webhooks are server-to-server and verified by signature instead)
-const WEBHOOKS = new Set(["/billing/webhook", "/billing/refund-webhook"]);
+const WEBHOOKS = new Set(["/billing/webhook", "/billing/refund-webhook", "/billing/moyasar/callback"]);
 app.use("/api", (req, res, next) => (req.method === "GET" || req.get("X-Masar") === "1" || WEBHOOKS.has(req.path)) ? next() : fail(res, 403, "bad-origin"));
 const wrap = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 app.use("/api", (req, res, next) => { res.set("Cache-Control", "no-store"); next(); }); // per-user data: never cache

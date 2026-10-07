@@ -5,7 +5,9 @@ const crypto = require("crypto");
 const TAP_API = process.env.TAP_API_BASE || "https://api.tap.company/v2"; // overridable for local testing
 const xpbundle = require("./xpbundle");
 const FREE_XP_DEFAULT = ["xp-L-detail", "xp-R-tfng", "xp-W-t1", "xp-S-p1"];
-const EVENT_TYPES = new Set(["open", "diag_start", "diag_done", "xp_start", "xp_done", "limit_hit", "upgrade_view", "checkout_start", "test_start", "test_done", "report_view", "ai_writing", "ai_speaking", "lesson_done"]);
+// event types the browser may post. Server-recorded types (ai_writing, ai_speaking, ai_placement — which also count
+// against AI quotas — and checkout_start) are deliberately absent: the client can't fake funnel steps or burn quota.
+const EVENT_TYPES = new Set(["open", "diag_start", "diag_done", "xp_start", "xp_done", "limit_hit", "upgrade_view", "test_start", "test_done", "report_view", "lesson_done"]);
 
 // Defaults: every value here can be changed from the admin dashboard (settings table).
 const DEFAULTS = {
@@ -57,6 +59,8 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
       CREATE INDEX IF NOT EXISTS events_type_idx ON events(type, day);
       CREATE INDEX IF NOT EXISTS events_user_idx ON events(user_id);
       CREATE UNIQUE INDEX IF NOT EXISTS events_open_once ON events(user_id, day) WHERE type='open';
+      ALTER TABLE payments ADD COLUMN IF NOT EXISTS coupon_held BOOLEAN NOT NULL DEFAULT false;
+      CREATE INDEX IF NOT EXISTS pay_coupon_idx ON payments(coupon) WHERE coupon IS NOT NULL;
       INSERT INTO coupons(code,pct,expires_at,note) VALUES ('LAUNCH30',30,'2026-11-15T23:59:59+03:00','launch offer') ON CONFLICT (code) DO NOTHING;
       CREATE TABLE IF NOT EXISTS admin_audit (
         id BIGSERIAL PRIMARY KEY, admin_email TEXT NOT NULL, action TEXT NOT NULL, target TEXT, meta JSONB, at TIMESTAMPTZ NOT NULL DEFAULT now());
@@ -132,7 +136,7 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
 
   // ---------- checkout with Tap ----------
   const money = n => Math.round(Number(n) * 100) / 100;
-  async function priceFor(planId, code) {
+  async function priceFor(planId, code, userId) {
     const c = await loadCfg(); const plan = c.plans.find(p => p.id === planId && p.active);
     if (!plan) return { error: "bad-plan" };
     let pct = 0, coupon = null;
@@ -140,13 +144,14 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
       const r = await pool.query("SELECT * FROM coupons WHERE code=$1", [String(code).trim().toUpperCase()]);
       const cp = r.rows[0];
       if (!cp || !cp.active || (cp.expires_at && new Date(cp.expires_at) < new Date()) || (cp.max_uses != null && cp.used >= cp.max_uses) || (cp.plan_ids && cp.plan_ids.length && !cp.plan_ids.includes(plan.id))) return { error: "bad-coupon" };
+      if (userId && (await pool.query("SELECT 1 FROM payments WHERE user_id=$1 AND coupon=$2 AND status IN ('paid','refunded') LIMIT 1", [userId, cp.code])).rows[0]) return { error: "bad-coupon" }; // one use per learner
       pct = Math.max(0, Math.min(100, cp.pct)); coupon = cp.code;
     }
     const amount = pct >= 100 ? 0 : Math.max(1, money(plan.price * (100 - pct) / 100));
     return { plan, amount, pct, coupon, currency: c.currency };
   }
   app.post("/api/billing/quote", needUser, wrap(async (req, res) => {
-    const q = await priceFor(String(req.body.plan || ""), req.body.coupon);
+    const q = await priceFor(String(req.body.plan || ""), req.body.coupon, req.user.id);
     if (q.error) return fail(res, 400, q.error);
     res.json({ plan: q.plan.id, amount: q.amount, currency: q.currency, pct: q.pct, coupon: q.coupon });
   }));
@@ -156,24 +161,58 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
     if (!r.ok) { const e = new Error("tap " + r.status + " " + JSON.stringify(j).slice(0, 300)); e.tap = j; throw e; }
     return j;
   }
+  // A coupon use is "held" by a payment (payments.coupon_held) from checkout until the payment fails/expires.
+  // claimCoupon: per learner+code advisory lock; refuses a code the learner already paid with; supersedes the learner's
+  // unfinished checkouts with the same code (they release their hold); then increments `used` only while under max_uses.
+  async function claimCoupon(user, q, pid) {
+    const db = await pool.connect();
+    try {
+      await db.query("BEGIN");
+      await db.query("SELECT pg_advisory_xact_lock(hashtext($1))", ["coupon|" + user.id + "|" + q.coupon]);
+      if ((await db.query("SELECT 1 FROM payments WHERE user_id=$1 AND coupon=$2 AND status IN ('paid','refunded') LIMIT 1", [user.id, q.coupon])).rows[0]) { await db.query("ROLLBACK"); return { error: "bad-coupon" }; }
+      await db.query(`WITH old AS (SELECT id, coupon_held FROM payments WHERE user_id=$1 AND coupon=$2 AND status='initiated' FOR UPDATE),
+          upd AS (UPDATE payments p SET status='expired', coupon_held=false FROM old WHERE p.id=old.id)
+        UPDATE coupons SET used=GREATEST(used-(SELECT count(*) FROM old WHERE coupon_held)::int,0) WHERE code=$2 AND EXISTS (SELECT 1 FROM old WHERE coupon_held)`, [user.id, q.coupon]);
+      const cp = (await db.query(`UPDATE coupons SET used=used+1 WHERE code=$1 AND active AND (max_uses IS NULL OR used<max_uses) AND (expires_at IS NULL OR expires_at>now())
+        AND (plan_ids IS NULL OR cardinality(plan_ids)=0 OR $2=ANY(plan_ids)) RETURNING pct`, [q.coupon, q.plan.id])).rows[0];
+      if (!cp) { await db.query("ROLLBACK"); return { error: "bad-coupon" }; }
+      const pct = Math.max(0, Math.min(100, cp.pct)), amount = pct >= 100 ? 0 : Math.max(1, money(q.plan.price * (100 - pct) / 100));
+      await db.query("INSERT INTO payments(id,user_id,email,plan_id,amount,currency,coupon,status,paid_at,coupon_held) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,true)",
+        [pid, user.id, user.email, q.plan.id, amount, q.currency, q.coupon, amount === 0 ? "paid" : "initiated", amount === 0 ? new Date() : null]);
+      await db.query("COMMIT");
+      return { q: { ...q, pct, amount } };
+    } catch (e) { await db.query("ROLLBACK").catch(() => {}); throw e; }
+    finally { db.release(); }
+  }
+  // give back the coupon use held by a payment (idempotent: only the first call decrements)
+  const releaseCoupon = pid => pool.query(`WITH r AS (UPDATE payments SET coupon_held=false WHERE id=$1 AND coupon_held AND coupon IS NOT NULL RETURNING coupon)
+    UPDATE coupons c SET used=GREATEST(c.used-1,0) FROM r WHERE c.code=r.coupon`, [pid]);
+  // a paid payment always counts its coupon once (covers payments started before holds existed, or released then paid)
+  const holdCoupon = pid => pool.query(`WITH r AS (UPDATE payments SET coupon_held=true WHERE id=$1 AND NOT coupon_held AND coupon IS NOT NULL RETURNING coupon)
+    UPDATE coupons c SET used=c.used+1 FROM r WHERE c.code=r.coupon`, [pid]);
   const baseUrl = req => (process.env.PUBLIC_URL || ("https://" + (process.env.CANONICAL_HOST || req.headers.host))).replace(/\/$/, "");
   app.post("/api/billing/checkout", needUser, wrap(async (req, res) => {
     if (limited("co:" + req.user.id, 20, 3600e3)) return fail(res, 429, "too-many-requests");
-    const q = await priceFor(String(req.body.plan || ""), req.body.coupon);
+    let q = await priceFor(String(req.body.plan || ""), req.body.coupon, req.user.id);
     if (q.error) return fail(res, 400, q.error);
+    if (q.amount > 0 && !process.env.TAP_SECRET_KEY) return fail(res, 503, "payments-not-configured");
     const pid = "pay_" + crypto.randomBytes(9).toString("base64url");
     await pool.query("INSERT INTO events(user_id,type,k) VALUES($1,'checkout_start',$2)", [req.user.id, q.plan.id]);
-    if (q.amount === 0) { // 100% coupon: activate without a payment
-      await pool.query("INSERT INTO payments(id,user_id,email,plan_id,amount,currency,coupon,status,paid_at) VALUES($1,$2,$3,$4,0,$5,$6,'paid',now())", [pid, req.user.id, req.user.email, q.plan.id, q.currency, q.coupon]);
-      await pool.query("UPDATE coupons SET used=used+1 WHERE code=$1", [q.coupon]);
+    if (q.coupon) { // claim the coupon atomically together with creating the payment row
+      const c = await claimCoupon(req.user, q, pid);
+      if (c.error) return fail(res, 400, c.error);
+      q = c.q;
+    } else {
+      await pool.query("INSERT INTO payments(id,user_id,email,plan_id,amount,currency,coupon,status) VALUES($1,$2,$3,$4,$5,$6,NULL,'initiated')", [pid, req.user.id, req.user.email, q.plan.id, q.amount, q.currency]);
+    }
+    if (q.amount === 0) { // 100% coupon: activated without a payment (row already stored as paid)
       const until = await grant(req.user.id, q.plan.days, "coupon", { planId: q.plan.id, paymentId: pid });
       return res.json({ activated: true, until });
     }
-    if (!process.env.TAP_SECRET_KEY) return fail(res, 503, "payments-not-configured");
-    await pool.query("INSERT INTO payments(id,user_id,email,plan_id,amount,currency,coupon,status) VALUES($1,$2,$3,$4,$5,$6,$7,'initiated')", [pid, req.user.id, req.user.email, q.plan.id, q.amount, q.currency, q.coupon]);
     const base = baseUrl(req), name = (req.user.name || "").split(" ");
     const lang = req.body.lang === "en" ? "en" : "ar";
-    const charge = await tap("POST", "/charges/", {
+    let charge;
+    try { charge = await tap("POST", "/charges/", {
       amount: q.amount, currency: q.currency, threeDSecure: true, save_card: false,
       description: (lang === "en" ? "IELTS Academy — " + q.plan.en : "أكاديمية الآيلتس — " + q.plan.ar),
       metadata: { pid, uid: req.user.id, plan: q.plan.id },
@@ -183,7 +222,9 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
       source: { id: "src_all" },
       post: { url: base + "/api/billing/webhook" },
       redirect: { url: base + "/api/billing/return?pid=" + pid }
-    });
+    }); } catch (e) { // charge never created: free the coupon slot so the learner can retry
+      await pool.query("UPDATE payments SET status='failed' WHERE id=$1 AND status='initiated'", [pid]); await releaseCoupon(pid); throw e;
+    }
     await pool.query("UPDATE payments SET tap_id=$1, tap_status=$2 WHERE id=$3", [charge.id, charge.status, pid]);
     res.json({ url: charge.transaction && charge.transaction.url });
   }));
@@ -194,13 +235,21 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
     const r = await pool.query("SELECT * FROM payments WHERE id=$1", [pid]); const p = r.rows[0];
     if (!p) return { status: "unknown" };
     await pool.query("UPDATE payments SET tap_status=$1, tap_id=COALESCE(tap_id,$2) WHERE id=$3", [ch.status, ch.id, pid]);
-    if (ch.status !== "CAPTURED") { if (["FAILED", "DECLINED", "CANCELLED", "ABANDONED", "RESTRICTED", "VOID", "TIMEDOUT"].includes(ch.status)) await pool.query("UPDATE payments SET status='failed' WHERE id=$1 AND status='initiated'", [pid]); return { status: ch.status, pid }; }
+    if (ch.status !== "CAPTURED") {
+      if (["FAILED", "DECLINED", "CANCELLED", "ABANDONED", "RESTRICTED", "VOID", "TIMEDOUT"].includes(ch.status)) {
+        await pool.query("UPDATE payments SET status='failed' WHERE id=$1 AND status IN ('initiated','expired')", [pid]);
+        await releaseCoupon(pid);
+      }
+      return { status: ch.status, pid };
+    }
     if (money(ch.amount) !== money(p.amount) || String(ch.currency).toUpperCase() !== p.currency) { console.error("tap amount mismatch", pid); return { status: "mismatch", pid }; }
-    const up = await pool.query("UPDATE payments SET status='paid', paid_at=now() WHERE id=$1 AND status<>'paid' RETURNING *", [pid]);
+    const up = await pool.query("UPDATE payments SET status='paid', paid_at=now() WHERE id=$1 AND status NOT IN ('paid','refunded') RETURNING *", [pid]);
     if (up.rows[0]) { // first time we see it paid
+      await holdCoupon(pid); // no-op when the checkout already holds the use (no double count)
+      // account deleted before the charge settled: keep the payment (admin can refund) and answer 200 so Tap stops retrying
+      if (!p.user_id) { console.error("tap: payment settled for a deleted account", pid); return { status: "CAPTURED", pid, orphan: true }; }
       const c = await loadCfg(); const plan = c.plans.find(x => x.id === p.plan_id) || { days: 30 };
       await grant(p.user_id, plan.days, "tap", { planId: p.plan_id, paymentId: pid });
-      if (p.coupon) await pool.query("UPDATE coupons SET used=used+1 WHERE code=$1", [p.coupon]);
     }
     return { status: "CAPTURED", pid };
   }
@@ -221,6 +270,19 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
     if (/^chg_/.test(b.id || "")) { try { await settle(b.id); } catch (e) { console.error("tap webhook settle", e.message); return res.status(500).end(); } }
     res.json({ ok: true });
   }));
+
+  // unfinished Tap checkouts that hold a coupon: re-check after an hour (frees the use when abandoned); expire after 2 days
+  setInterval(async () => {
+    try {
+      await pool.query("UPDATE payments SET status='expired' WHERE status='initiated' AND created_at<now()-interval '2 days'");
+      const st = await pool.query("SELECT id,tap_id FROM payments WHERE coupon_held AND status IN ('initiated','expired') AND created_at<now()-interval '1 hour' ORDER BY created_at LIMIT 20");
+      for (const r of st.rows) {
+        if (r.tap_id && process.env.TAP_SECRET_KEY) { try { await settle(r.tap_id); } catch (e) { console.error("coupon sweep", e.message); continue; } }
+        const p = (await pool.query("SELECT status FROM payments WHERE id=$1", [r.id])).rows[0];
+        if ((p && p.status === "expired") || !r.tap_id) await releaseCoupon(r.id);
+      }
+    } catch (e) { console.error("coupon sweep", e.message); }
+  }, 1800e3).unref();
 
   // ======================= ADMIN =======================
   const A = (method, route, fn) => app[method]("/api/admin" + route, needAdmin, wrap(fn));

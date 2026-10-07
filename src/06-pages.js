@@ -26,7 +26,8 @@ function planFor(date) {
   t.push({ id: 'sess', k: 'R', t: _('جلسة اليوم', 'Today’s session'), s: _('١٥ سؤالًا منوّعة', '15 mixed questions'), href: '#practice' });
   if (dayN % 3 === 2) t.push({ id: 'act:W2', k: 'W', t: _('اكتب مقالة (المهمة ٢)', 'Write an essay (Task 2)'), s: _('٤٠ دقيقة', '40 minutes'), href: '#writing' });
   else if (dayN % 3 === 1) t.push({ id: 'act:S', k: 'S', t: _('محادثة: موضوع من الجزء الأول', 'Speaking: a Part 1 topic'), s: _('سجّل إجاباتك', 'record your answers'), href: '#speaking' });
-  else t.push({ id: 'cards', k: 'S', t: _('بطاقات المفردات', 'Vocabulary cards'), s: _('١٠ دقائق', '10 minutes'), href: '#cards/due' });
+  else { const anyDue = Object.values(S.vocab || {}).some(v => v.due && v.due <= date);
+    t.push({ id: 'cards', k: 'S', t: anyDue ? _('بطاقات المفردات: مراجعة', 'Vocabulary cards: review') : _('بطاقات المفردات: كلمات جديدة', 'Vocabulary cards: new words'), s: _('١٠ دقائق', '10 minutes'), href: anyDue ? '#cards/due' : '#cards/academic' }); }
   if (S.examDate && daysBetween(date, S.examDate) <= 14 && daysBetween(date, S.examDate) >= 0 && dayN % 2 === 0) t.unshift({ id: 'mock', k: 'L', t: _('نموذج كامل تحت الوقت', 'A full timed model exam'), s: _('الأسبوعان الأخيران', 'final two weeks'), href: '#tests' });
   return t;
 }
@@ -43,7 +44,7 @@ function taskDone(task, date = todayStr()) {
   if (task.id === 'act:W2') return S.writing.some(w => w.date === d && w.task === 't2');
   if (task.id === 'act:S') return S.speaking.some(w => w.date === d);
   if (task.id === 'para') return S.dq && S.dq.d === d && S.dq.n >= 5;
-  if (task.id === 'cards') return Object.values(S.vocab).some(v => v.due > d) && S.days.includes(d);
+  if (task.id === 'cards') return Object.values(S.vocab || {}).some(v => v.seen === d);
   if (task.id === 'mis') return !S.mistakes.some(m => m.due <= d);
   return false;
 }
@@ -62,20 +63,20 @@ async function pageToday() {
   return `<div class="hero"><div class="grid" style="gap:10px"><span class="eyebrow" style="color:var(--gold)">${name ? _('مرحبًا ', 'Hi ') + esc(name) + ' · ' : ''}${_('هدفك', 'Your target')} ${bandL(tg)}</span>
     <h1>${_('الآيلتس ليس حظًا.<br>هو ١٦ مهارة تُتقن.', 'IELTS is not luck.<br>It is 16 skills, mastered.')}</h1>
     <p class="muted">${_('تتعلم كل مهارة بالعربية، وتتدرّب عليها بالإنجليزية، ثم تختبر نفسك في نماذج كاملة بصيغة الاختبار المحوسب.', 'Learn each skill in Arabic, practise it in English, then test yourself in full computer-delivered model exams.')}</p>
-    <div class="row">${days != null ? `<span class="pill"><b>${numL(Math.max(0, days))}</b> ${_('يومًا حتى اختبارك', 'days to your test')}</span>` : `<a class="pill" href="#settings">${_('أضف موعد اختبارك', 'Add your test date')}</a>`}<span class="pill">${_('الدرجة التقديرية', 'Estimated band')} <b>${b.O == null ? '—' : bandL(b.O)}</b></span><a class="pill" href="#settings">${_('الإعدادات', 'Settings')}</a></div></div>
+    <div class="row">${days != null ? `<span class="pill"><b>${numL(Math.max(0, days))}</b> ${_('يومًا حتى اختبارك', 'days to your test')}</span>` : `<a class="pill" href="#settings">${_('أضف موعد اختبارك', 'Add your test date')}</a>`}<span class="pill stat">${_('الدرجة التقديرية', 'Estimated band')} <b>${b.O == null ? '—' : bandL(b.O)}</b></span><a class="pill hide-sm" href="#settings">${_('الإعدادات', 'Settings')}</a></div></div>
     <div class="skills4">${['L', 'R', 'W', 'S'].map(sk).join('')}</div></div>
   ${!diagTaken() ? `<div class="card session-card"><div><span class="eyebrow">${_('ابدأ من هنا', 'Start here')}</span><h2>${_('اختبار تحديد المستوى', 'Placement test')}</h2><p class="small muted">${_('يقيس المهارات الأربع: ٢٠ سؤال استماع، و١٣ سؤال قراءة، وكتابة قصيرة، و٣ أسئلة محادثة. نحدد منه مستواك في كل مهارة ونقاط ضعفك.', 'Measures all four skills: 20 listening and 13 reading questions, a short writing task and 3 speaking questions. It finds your level in each skill and your weak points.')}</p></div><a class="btn primary" href="#diag">${_('ابدأ الاختبار', 'Start the test')}</a></div>` : ''}
   ${xlSuggestCard()}
-  <div class="card session-card"><div><span class="eyebrow">${_('جلسة اليوم', 'Today’s session')}</span><h2>${sessDone ? _('أنهيت جلسة اليوم — أحسنت! يمكنك جلسة إضافية.', 'Today’s session done — well done! Fancy another?') : _('١٥ سؤالًا مختارة لك، مع تلميح وشرح لكل سؤال', '15 questions picked for you, each with a hint and explanation')}</h2>
-    <p class="small muted">${_('أخطاؤك المستحقة + أضعف مهارتين', 'Your due mistakes + your two weakest skills')}</p><div class="chips">${weak.map(w => `<span class="chip">${esc(L(SKL.find(s => s.id === w.id).title))}</span>`).join('')}</div></div><button class="btn primary" id="td-sess">${_('ابدأ الجلسة', 'Start session')}</button></div>
-  <section class="grid"><div class="spread"><h2>${_('خريطة الإتقان', 'Mastery map')}</h2><span class="small muted">${_('اضغط أي مهارة لدرسها وتمارينها', 'Tap any skill for its lesson and drills')}</span></div>${masteryMap()}</section>
+  ${!diagTaken() ? '' : `<div class="card session-card"><div><span class="eyebrow">${_('جلسة اليوم', 'Today’s session')}</span><h2>${sessDone ? _('أنهيت جلسة اليوم — أحسنت! يمكنك جلسة إضافية.', 'Today’s session done — well done! Fancy another?') : _('١٥ سؤالًا مختارة لك، مع تلميح وشرح لكل سؤال', '15 questions picked for you, each with a hint and explanation')}</h2>
+    <p class="small muted">${_('أخطاؤك المستحقة + أضعف مهارتين', 'Your due mistakes + your two weakest skills')}</p><div class="chips">${weak.map(w => `<span class="chip">${esc(L(SKL.find(s => s.id === w.id).title))}</span>`).join('')}</div></div><button class="btn primary" id="td-sess">${_('ابدأ الجلسة', 'Start session')}</button></div>`}
   <div class="g2">
     <div class="card"><div class="spread"><h2>${_('مهام اليوم', 'Today’s tasks')}</h2><span class="chip ${done === plan.length ? 'ok' : ''}">${numL(done)}/${numL(plan.length)}</span></div>
       <ul class="tasks">${plan.map(t => { const d = taskDone(t); return `<li><a class="task ${d ? 'done' : ''}" href="${t.href}"><span class="tk">${d ? ic('check') : ''}</span><span class="tt"><b>${esc(t.t)}</b><small>${esc(t.s || '')}</small></span><span class="dot bg-${t.k}"></span></a></li>`; }).join('')}</ul>
-      <a href="#plan" class="small">${_('الخطة كاملة حتى يوم الاختبار', 'The full plan to test day')} →</a></div>
+      <a href="#plan" class="small more-link">${_('الخطة كاملة حتى يوم الاختبار', 'The full plan to test day')}${FW()}</a></div>
     <div class="card"><h2>${_('طريقك إلى يوم الاختبار', 'Your road to test day')}</h2><ul class="checks">${checks.map(([ok, t]) => `<li class="${ok ? 'ok' : ''}"><span class="ck">${ok ? ic('check') : ''}</span>${t}</li>`).join('')}</ul>
       <div class="small muted">${_('أيام متتالية', 'Day streak')}: <b>${numL(streak())}</b> 🔥 · ${_('أخطاء للمراجعة', 'Mistakes due')}: <b>${numL(S.mistakes.filter(m => m.due <= todayStr()).length + Object.values(S.dr).filter(v => !v.ok && v.due <= todayStr()).length)}</b></div></div>
   </div>
+  <section class="grid"><div class="spread"><h2>${_('خريطة الإتقان', 'Mastery map')}</h2><span class="small muted">${_('اضغط أي مهارة لدرسها وتمارينها', 'Tap any skill for its lesson and drills')}</span></div>${masteryMap()}</section>
   <section class="grid"><h2>${_('المنهجية', 'The method')}</h2><div class="method">${[[_('افهم بالعربية', 'Understand in Arabic'), _('كل مهارة مشروحة بالعربية: الفكرة، والخطوات، والفخاخ، وأمثلة محلولة.', 'Every skill explained in Arabic: the idea, steps, traps and worked examples.'), '1'], [_('تدرّب بالإنجليزية', 'Practise in English'), _('أسئلة قصيرة مع تلميح وتقنية مسماة وشرح للحيلة.', 'Short questions with a hint, a named technique and the trick explained.'), '2'], [_('أتقن قبل أن تنتقل', 'Master before moving on'), _('مستويات الإتقان الأربعة تخبرك متى تنتقل للمهارة التالية.', 'Four mastery levels tell you when to move on.'), '3'], [_('اختبر نفسك كاملًا', 'Test yourself fully'), _('نماذج كاملة بالصيغة المحوسبة مع شرح كل إجابة وموضعها.', 'Full computer-format models with every answer explained and located.'), '4']].map(m => `<div class="mcard"><span class="mnum">${m[2]}</span><h3>${m[0]}</h3><p class="small">${m[1]}</p></div>`).join('')}</div></section>
   ${PRO() ? '' : `<a class="card tile" href="#upgrade" style="background:var(--gold-soft);border-color:transparent"><b>${_('افتح كل المهارات والنماذج والمصحح الذكي', 'Unlock every skill, model exam and the AI examiner')}</b><span class="small">${_('أقل من عُشر رسوم إعادة اختبار واحد.', 'Less than a tenth of one test retake fee.')}</span></a>`}`;
 }
@@ -148,8 +149,8 @@ async function pageLesson(id) {
     const dn = $('#les-done'); if (dn) dn.onclick = () => { S.lessons[id] = todayStr(); markDay(); save(); toast(_('أحسنت! سُجّل الدرس.', 'Nice! Lesson recorded.')); history.back(); };
   }, 0);
   const IK = { look: 'book', steps: 'check', example: 'spark', traps: 'flag', arab: 'globe', check: 'target', table: 'prog', tip: 'spark' };
-  return `<div class="spread"><a href="#lessons" class="btn ghost sm">← ${_('الدروس', 'Lessons')}</a><span class="chip">${numL(l.min)} ${_('دقائق', 'min')}</span></div>
-  <div class="lesson"><div class="page-h"><span class="eyebrow">${esc(l.skill)}</span><h1>${esc(L(l.title))}</h1><p>${esc(L(l.why))}</p></div>
+  return `<div class="spread"><a href="#lessons" class="btn ghost sm">${BK()}${_('الدروس', 'Lessons')}</a><span class="chip">${numL(l.min)} ${_('دقائق', 'min')}</span></div>
+  <div class="lesson"><div class="page-h"><span class="eyebrow">${esc(({ overview: _('عام', 'Overview'), listening: skName('L'), reading: skName('R'), writing: skName('W'), speaking: skName('S') })[l.skill] || l.skill)}</span><h1>${esc(L(l.title))}</h1><p>${esc(L(l.why))}</p></div>
   ${l.blocks.map((b, bi) => `<div class="card lb"><h3>${ic(IK[b.k] || 'book', 'i20')} ${esc(L(b.h))}</h3>
     ${b.p ? `<p>${md(L(b.p))}</p>` : ''}
     ${b.list ? `<ol>${L(b.list).map(x => `<li>${md(x)}</li>`).join('')}</ol>` : ''}
@@ -168,13 +169,14 @@ async function pageProgress() {
   qtRows.sort((a, c) => a.p - c.p);
   const series = ['L', 'R'].map(k => S.attempts.filter(a => a.skill === k).slice(-10));
   const spark = (arr, k) => { if (arr.length < 2) return ''; const W = 260, H = 70, x = i => 10 + (W - 20) * i / (arr.length - 1), y = v => H - 10 - (H - 20) * (v - 3) / 6; return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;max-width:300px;direction:ltr"><line x1="10" x2="${W - 10}" y1="${y(tg)}" y2="${y(tg)}" stroke="var(--ink)" stroke-dasharray="3 3" stroke-width="1"/><polyline fill="none" stroke="var(--c${k})" stroke-width="2.5" points="${arr.map((a, i) => x(i) + ',' + y(a.band)).join(' ')}"/>${arr.map((a, i) => `<circle cx="${x(i)}" cy="${y(a.band)}" r="3.5" fill="var(--c${k})"/>`).join('')}</svg>`; };
+  const cta = () => diagTaken() ? `<a class="btn sm" href="#tests">${_('اختر نموذجًا', 'Pick a model test')}</a>` : `<a class="btn primary sm" href="#diag">${_('ابدأ اختبار تحديد المستوى', 'Start the placement test')}</a>`;
   return `<div class="page-h"><span class="eyebrow">${_('تقدّمك', 'Your progress')}</span><h1>${_('أين أنت الآن؟', 'Where are you now?')}</h1></div>
   <div class="card"><div class="spread"><div class="skills4" style="flex:1">${['L', 'R', 'W', 'S'].map(k => `<div class="sk"><span class="stamp ${b[k] == null ? 'none' : 'c-' + k}"><b>${b[k] == null ? '?' : fmtBand(b[k])}</b><small>${k}</small></span><span class="lab">${skName(k)}</span></div>`).join('')}</div><div class="sk"><span class="stamp lg" style="color:var(--pri)"><b>${b.O == null ? '?' : fmtBand(b.O)}</b><small>${_('الكلية', 'overall')}</small></span><span class="lab">${_('الكلية', 'Overall')} · ${_('الهدف', 'target')} ${bandL(tg)}</span></div></div>
   <p class="small muted">${_('التقدير يعتمد على آخر ثلاث نتائج في كل مهارة، والاختبارات الكاملة لها وزن أكبر.', 'Estimates use your last three results in each skill; full tests weigh more.')}</p></div>
-  <div class="g2">${['L', 'R'].map((k, i) => `<div class="card"><h2>${skName(k)}</h2>${series[i].length > 1 ? spark(series[i], k) : `<p class="empty">${_('تحتاج محاولتين على الأقل لرسم المنحنى.', 'Two attempts needed to draw the trend.')}</p>`}</div>`).join('')}</div>
-  <div class="card"><h2>${_('أداؤك حسب نوع السؤال', 'Accuracy by question type')}</h2>${qtRows.length ? `<div class="bars">${qtRows.map(r => `<div class="bar-row"><span>${skName(r.sk)[0] === 'ا' ? '' : ''}${esc(qtName(r.t))} <small class="muted">${r.sk}</small></span><span class="meter"><i style="inline-size:${Math.round(r.p * 100)}%;background:${r.p < .6 ? 'var(--bad)' : r.p < .8 ? 'var(--gold)' : 'var(--ok)'}"></i></span><b class="num">${numL(Math.round(r.p * 100))}%</b></div>`).join('')}</div><p class="small">${qtRows[0].p < .7 ? `${_('ابدأ بدرس', 'Start with the lesson on')} <a href="#lesson/${LESSON_FOR[qtRows[0].t] || 'R-tfng'}">${esc(qtName(qtRows[0].t))}</a>.` : ''}</p>` : `<p class="empty">${_('حل اختبارًا لترى نقاط قوتك وضعفك.', 'Take a test to see your strengths and weaknesses.')}</p>`}</div>
-  <div class="card"><h2>${_('سجل المحاولات', 'Attempt history')}</h2>${hist.length ? `<div class="list">${hist.slice(0, 30).map(a => `<div class="li"><span class="li-t"><b>${skName(a.skill)} · ${esc(a.test)}${a.kind === 'diag' ? ' · ' + _('تحديد مستوى', 'placement') : ''}</b><small class="muted">${numL(a.date)} · ${a.raw == null ? (a.ai ? _('مصحح ذكي', 'AI marked') : _('تقدير', 'estimate')) : numL(a.raw) + '/' + numL(a.of)}</small></span><span class="chip ${a.band >= tg ? 'ok' : ''}">${bandL(a.band)}</span>${S.details[a.id] ? `<button class="btn ghost sm" data-rv="${a.id}">${_('مراجعة', 'Review')}</button>` : ''}</div>`).join('')}</div>` : `<p class="empty">${_('لا محاولات بعد.', 'No attempts yet.')}</p>`}</div>
-  <div class="card"><h2>${_('الكتابة والمحادثة', 'Writing & speaking')}</h2><div class="list">${S.writing.slice().reverse().slice(0, 10).map(w => `<div class="li"><span class="li-t"><b>${w.task === 'diag' ? _('كتابة تحديد المستوى', 'Placement writing') : (w.task === 't2' ? 'Task 2' : 'Task 1') + ' · ' + esc(w.pid)}</b><small class="muted">${numL(w.date)} · ${numL(w.words)} ${_('كلمة', 'words')} · ${w.ai ? _('مصحح ذكي', 'AI marked') : _('تقييم ذاتي', 'self-assessed')}</small></span><span class="chip">${bandL(w.band)}</span></div>`).join('') || `<p class="empty">${_('لا كتابات بعد.', 'Nothing written yet.')}</p>`}</div></div>
+  <div class="g2">${['L', 'R'].map((k, i) => `<div class="card"><h2>${skName(k)}</h2>${series[i].length > 1 ? spark(series[i], k) : `<p class="empty">${_('تحتاج محاولتين على الأقل لرسم المنحنى.', 'Two attempts needed to draw the trend.')}</p><a class="btn sm" href="#${k === 'L' ? 'listening' : 'reading'}">${k === 'L' ? _('اختبارات الاستماع', 'Listening tests') : _('اختبارات القراءة', 'Reading tests')}</a>`}</div>`).join('')}</div>
+  <div class="card"><h2>${_('أداؤك حسب نوع السؤال', 'Accuracy by question type')}</h2>${qtRows.length ? `<div class="bars">${qtRows.map(r => `<div class="bar-row"><span>${skName(r.sk)[0] === 'ا' ? '' : ''}${esc(qtName(r.t))} <small class="muted">${r.sk}</small></span><span class="meter"><i style="inline-size:${Math.round(r.p * 100)}%;background:${r.p < .6 ? 'var(--bad)' : r.p < .8 ? 'var(--gold)' : 'var(--ok)'}"></i></span><b class="num">${numL(Math.round(r.p * 100))}%</b></div>`).join('')}</div><p class="small">${qtRows[0].p < .7 ? `${_('ابدأ بدرس', 'Start with the lesson on')} <a href="#lesson/${LESSON_FOR[qtRows[0].t] || 'R-tfng'}">${esc(qtName(qtRows[0].t))}</a>.` : ''}</p>` : `<p class="empty">${_('حل اختبارًا لترى نقاط قوتك وضعفك.', 'Take a test to see your strengths and weaknesses.')}</p>${cta()}`}</div>
+  <div class="card"><h2>${_('سجل المحاولات', 'Attempt history')}</h2>${hist.length ? `<div class="list">${hist.slice(0, 30).map(a => `<div class="li"><span class="li-t"><b>${skName(a.skill)} · ${esc(a.test)}${a.kind === 'diag' ? ' · ' + _('تحديد مستوى', 'placement') : ''}</b><small class="muted">${numL(a.date)} · ${a.raw == null ? (a.ai ? _('مصحح ذكي', 'AI marked') : _('تقدير', 'estimate')) : numL(a.raw) + '/' + numL(a.of)}</small></span><span class="chip ${a.band >= tg ? 'ok' : ''}">${bandL(a.band)}</span>${S.details[a.id] ? `<button class="btn ghost sm" data-rv="${a.id}">${_('مراجعة', 'Review')}</button>` : ''}</div>`).join('')}</div>` : `<p class="empty">${_('لا محاولات بعد.', 'No attempts yet.')}</p>${cta()}`}</div>
+  <div class="card"><h2>${_('الكتابة والمحادثة', 'Writing & speaking')}</h2><div class="list">${S.writing.slice().reverse().slice(0, 10).map(w => `<div class="li"><span class="li-t"><b>${w.task === 'diag' ? _('كتابة تحديد المستوى', 'Placement writing') : (w.task === 't2' ? 'Task 2' : 'Task 1') + ' · ' + esc(w.pid)}</b><small class="muted">${numL(w.date)} · ${numL(w.words)} ${_('كلمة', 'words')} · ${w.ai ? _('مصحح ذكي', 'AI marked') : _('تقييم ذاتي', 'self-assessed')}</small></span><span class="chip">${bandL(w.band)}</span></div>`).join('') || `<p class="empty">${_('لا كتابات بعد.', 'Nothing written yet.')}</p><div class="row"><a class="btn sm" href="#writing">${_('استوديو الكتابة', 'Writing studio')}</a><a class="btn ghost sm" href="#speaking">${_('غرفة المحادثة', 'Speaking room')}</a></div>`}</div></div>
   <div class="row"><button class="btn ghost sm" id="pg-export">${_('تنزيل نسخة من تقدمي', 'Download my progress')}</button><a class="btn ghost sm" href="#settings">${_('الإعدادات', 'Settings')}</a></div>`;
 }
 function bindProgress() {
@@ -247,7 +249,7 @@ function openAuth(mode = 'signup', after) {
   if (after) AFTER_AUTH = after;
   const m = $('#acct'); m.hidden = false; m.className = 'modal';
   const soc = window.CLOUD && CLOUD.config && CLOUD.config.social || {};
-  m.innerHTML = `<div class="modal-in" role="dialog" aria-modal="true"><div class="modal-h"><h2>${mode === 'signup' ? _('أنشئ حسابك المجاني', 'Create your free account') : _('تسجيل الدخول', 'Sign in')}</h2><button class="icon-btn" id="au-x" aria-label="close">${ic('x')}</button></div>
+  m.innerHTML = `<div class="modal-in" role="dialog" aria-modal="true"><div class="modal-h"><h2>${mode === 'signup' ? _('أنشئ حسابك المجاني', 'Create your free account') : _('تسجيل الدخول', 'Sign in')}</h2><button class="icon-btn" id="au-x" aria-label="${_('إغلاق', 'Close')}">${ic('x')}</button></div>
   <p class="small muted">${_('يُحفظ تقدمك ونتائجك في حسابك وتتابعها من أي جهاز.', 'Your progress and results are saved to your account on any device.')}</p>
   ${soc.google ? `<a class="btn block" href="/auth/google?next=/app">Google</a>` : ''}${soc.facebook ? `<a class="btn block" href="/auth/facebook?next=/app">Facebook</a>` : ''}
   <form id="au-f" class="grid">${mode === 'signup' ? `<label class="fld">${_('الاسم', 'Name')}<input id="au-n" autocomplete="name" required></label>` : ''}
@@ -270,7 +272,7 @@ function openAuth(mode = 'signup', after) {
 /* ---------- forgotten password: email a one-time link ---------- */
 function openForgot(email) {
   const m = $('#acct'); m.hidden = false; m.className = 'modal';
-  m.innerHTML = `<div class="modal-in" role="dialog" aria-modal="true"><div class="modal-h"><h2>${_('استعادة كلمة المرور', 'Reset your password')}</h2><button class="icon-btn" id="fp-x" aria-label="close">${ic('x')}</button></div>
+  m.innerHTML = `<div class="modal-in" role="dialog" aria-modal="true"><div class="modal-h"><h2>${_('استعادة كلمة المرور', 'Reset your password')}</h2><button class="icon-btn" id="fp-x" aria-label="${_('إغلاق', 'Close')}">${ic('x')}</button></div>
   <div id="fp-body"><p class="small muted">${_('اكتب بريدك المسجّل، وسنرسل لك رابطًا لتعيين كلمة مرور جديدة. الرابط صالح لمدة ساعة ولمرة واحدة.', 'Enter the email you signed up with and we will send you a link to set a new password. The link works once, for one hour.')}</p>
   <form id="fp-f" class="grid"><label class="fld">${_('البريد الإلكتروني', 'Email')}<input id="fp-e" type="email" class="ltr-text" autocomplete="email" required value="${esc(email || '')}"></label>
   <div class="err" id="fp-err" role="alert"></div><button class="btn primary" id="fp-go">${_('أرسل الرابط', 'Send the link')}</button></form>
@@ -293,7 +295,7 @@ function openForgot(email) {
 async function openReset(token) {
   history.replaceState(null, '', '#today'); // keep the token out of the address bar and history
   const m = $('#acct'); m.hidden = false; m.className = 'modal';
-  m.innerHTML = `<div class="modal-in" role="dialog" aria-modal="true"><div class="modal-h"><h2>${_('كلمة مرور جديدة', 'New password')}</h2><button class="icon-btn" id="rs-x" aria-label="close">${ic('x')}</button></div><div id="rs-body"><p class="small muted">${_('نتحقق من الرابط…', 'Checking your link…')}</p></div></div>`;
+  m.innerHTML = `<div class="modal-in" role="dialog" aria-modal="true"><div class="modal-h"><h2>${_('كلمة مرور جديدة', 'New password')}</h2><button class="icon-btn" id="rs-x" aria-label="${_('إغلاق', 'Close')}">${ic('x')}</button></div><div id="rs-body"><p class="small muted">${_('نتحقق من الرابط…', 'Checking your link…')}</p></div></div>`;
   $('#rs-x').onclick = closeModal;
   let who;
   try { who = await CLOUD.checkReset(token); }
@@ -314,18 +316,19 @@ async function openReset(token) {
     catch (er) { $('#rs-err').textContent = er.code === 'reset-invalid' ? _('انتهت صلاحية الرابط. اطلب رابطًا جديدًا.', 'The link has expired. Ask for a new one.') : errMsg(er.code); btn.disabled = false; }
   };
 }
-function closeModal() { const m = $('#acct'); m.hidden = true; m.innerHTML = ''; }
+function closeModal() { const m = $('#acct'); m.hidden = true; m.innerHTML = ''; const r = closeModal.ret; closeModal.ret = null; if (r && r.focus && document.contains(r)) try { r.focus({ preventScroll: true }); } catch (e) {} }
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#acct').hidden && !document.body.classList.contains('xp-open')) closeModal(); });
 async function openAccount() {
   if (!signedIn()) return openAuth('signin');
-  const u = CLOUD.user, p = CLOUD.plan, m = $('#acct'); m.hidden = false; m.className = 'modal';
-  m.innerHTML = `<div class="modal-in"><div class="modal-h"><h2>${_('حسابي', 'My account')}</h2><button class="icon-btn" id="ac-x">${ic('x')}</button></div>
+  const u = CLOUD.user, p = CLOUD.plan, m = $('#acct'); if (m.hidden) closeModal.ret = document.activeElement; m.hidden = false; m.className = 'modal';
+  m.innerHTML = `<div class="modal-in" role="dialog" aria-modal="true" aria-labelledby="ac-h" tabindex="-1"><div class="modal-h"><h2 id="ac-h">${_('حسابي', 'My account')}</h2><button class="icon-btn" id="ac-x" aria-label="${_('إغلاق', 'Close')}">${ic('x')}</button></div>
     <p><b>${esc(u.name)}</b><br><span class="ltr-text small">${esc(u.email)}</span></p>
     <div class="notice ${PRO() ? 'teal' : ''}">${PRO() ? _('مشترك برو', 'Pro member') + (p.until ? ' · ' + _('حتى ', 'until ') + numL(String(p.until).slice(0, 10)) : '') : _('الخطة المجانية', 'Free plan') + ` · <a href="#upgrade" id="ac-up">${_('ترقية', 'Upgrade')}</a>`}</div>
     <div class="small muted">${_('حالة الحفظ', 'Sync')}: ${CLOUD.status === 'ok' ? _('محفوظ في حسابك', 'saved to your account') : CLOUD.status === 'saving' ? _('جارٍ الحفظ…', 'saving…') : CLOUD.status === 'error' ? _('تعذّر الحفظ؛ سنحاول مجددًا', 'could not sync; retrying') : '…'}</div>
-    <details><summary style="cursor:pointer">${_('تغيير كلمة المرور', 'Change password')}</summary><form id="ac-pw" class="grid" style="margin-top:8px"><input type="password" class="inp ltr-text" id="ac-c" placeholder="${_('الحالية', 'Current')}" required><input type="password" class="inp ltr-text" id="ac-n" placeholder="${_('الجديدة (٨+)', 'New (8+)')}" minlength="8" required><button class="btn sm">${_('غيّر', 'Change')}</button><div class="err" id="ac-err"></div></form></details>
+    <details><summary style="cursor:pointer">${_('تغيير كلمة المرور', 'Change password')}</summary><form id="ac-pw" class="grid" style="margin-top:8px"><label class="fld">${_('كلمة المرور الحالية', 'Current password')}<input type="password" class="ltr-text" id="ac-c" autocomplete="current-password" required></label><label class="fld">${_('كلمة المرور الجديدة', 'New password')}<input type="password" class="ltr-text" id="ac-n" autocomplete="new-password" minlength="8" required><span class="hint">${_('٨ أحرف على الأقل', 'At least 8 characters')}</span></label><button class="btn sm">${_('غيّر', 'Change')}</button><div class="err" id="ac-err" role="alert"></div></form></details>
     <div class="row"><button class="btn sm" id="ac-out">${_('تسجيل الخروج', 'Sign out')}</button><button class="btn ghost sm" id="ac-del" style="color:var(--bad-t)">${_('حذف الحساب', 'Delete account')}</button></div></div>`;
   $('#ac-x').onclick = closeModal; m.onclick = e => { if (e.target === m) closeModal(); };
+  setTimeout(() => { const x = $('#ac-x'); if (x) x.focus(); }, 50);
   const up = $('#ac-up'); if (up) up.onclick = closeModal;
   $('#ac-out').onclick = async () => { await CLOUD.signOut(); try { localStorage.removeItem(KEY); } catch (e) {} S = Object.assign(DEF(), { lang: S.lang }); closeModal(); renderRoute(); toast(_('سجّلت الخروج', 'Signed out')); };
   $('#ac-del').onclick = async () => { if (!confirm(_('حذف حسابك وكل تقدمك نهائيًا؟', 'Permanently delete your account and all progress?'))) return; await CLOUD.deleteAccount(); try { localStorage.removeItem(KEY); } catch (e) {} S = Object.assign(DEF(), { lang: S.lang }); closeModal(); renderRoute(); };
@@ -340,11 +343,11 @@ function renderShell() {
   document.title = AR() ? 'أكاديمية الآيلتس | IELTS Academy' : 'IELTS Academy | أكاديمية الآيلتس';
   $('#brand-n').textContent = _('أكاديمية الآيلتس', 'IELTS Academy'); $('#brand-t').textContent = AR() ? 'IELTS Academy' : 'أكاديمية الآيلتس';
   const cur = (location.hash.slice(1).split(/[/?]/)[0]) || 'today';
-  const map = { lesson: 'learn', lessons: 'learn', skill: 'learn', write: 'practice', writing: 'practice', speak: 'practice', speaking: 'practice', listening: 'tests', reading: 'tests', cards: 'words', para: 'words', drill: 'practice', drills: 'practice', mistakes: 'practice', mreview: 'practice', plan: 'today', settings: 'progress', diag: 'today', upgrade: 'today' };
-  const on = map[cur] || cur;
-  $('#nav').innerHTML = NAV.map(([k, i, l]) => `<a href="#${k}" class="${on === k ? 'on' : ''}">${ic(i, 'i20')}<span>${_(l[0], l[1])}</span></a>`).join('');
-  $('#tabbar').innerHTML = NAV.filter(n => TABS.includes(n[0])).map(([k, i, l]) => `<a href="#${k}" class="${on === k ? 'on' : ''}">${ic(i, 'i20')}<span>${_(l[0], l[1])}</span></a>`).join('');
-  $('#lang-btn').textContent = AR() ? 'English' : 'العربية';
+  const map = { lesson: 'learn', lessons: 'learn', skill: 'learn', write: 'practice', writing: 'practice', speak: 'practice', speaking: 'practice', listening: 'tests', reading: 'tests', cards: 'words', para: 'words', drill: 'practice', drills: 'practice', mistakes: 'practice', mreview: 'practice', plan: 'today', settings: 'progress', diag: 'today' };
+  const on = map[cur] || cur, onTab = TABS.includes(on) ? on : ({ words: 'learn' })[on];
+  $('#nav').innerHTML = NAV.map(([k, i, l]) => `<a href="#${k}" class="${on === k ? 'on' : ''}"${on === k ? ' aria-current="page"' : ''}>${ic(i, 'i20')}<span>${_(l[0], l[1])}</span></a>`).join('');
+  $('#tabbar').innerHTML = NAV.filter(n => TABS.includes(n[0])).map(([k, i, l]) => `<a href="#${k}" class="${onTab === k ? 'on' : ''}"${onTab === k ? ' aria-current="page"' : ''}>${ic(i, 'i20')}<span>${_(l[0], l[1])}</span></a>`).join('');
+  $('#lang-btn').textContent = AR() ? 'English' : 'العربية'; themeBtn();
   $('#acct-btn').hidden = !window.CLOUD; $('#acct-btn').setAttribute('aria-label', _('الحساب', 'Account'));
   $('#foot').innerHTML = `<span>© ${new Date().getFullYear()} ${_('أكاديمية الآيلتس', 'IELTS Academy')}</span><span><a href="#lessons">${_('الدروس', 'Lessons')}</a> · <a href="#plan">${_('الخطة', 'Plan')}</a> · <a href="/privacy">${_('الخصوصية', 'Privacy')}</a> · <a href="/terms">${_('الشروط', 'Terms')}</a> · <a href="mailto:info@myielts.academy">info@myielts.academy</a></span>`;
   const bn = window.CLOUD && CLOUD.config && CLOUD.config.banner, b = $('#banner'); if (bn && bn.on && (bn.ar || bn.en)) { b.hidden = false; b.className = bn.tone || ''; b.textContent = AR() ? bn.ar : bn.en; } else b.hidden = true;
@@ -403,8 +406,12 @@ async function renderRoute() {
 window.addEventListener('hashchange', renderRoute);
 $('#lang-btn').onclick = () => { S.lang = AR() ? 'en' : 'ar'; save(); renderRoute(); };
 $('#acct-btn').onclick = openAccount;
-$('#theme-btn').onclick = () => { const cur = document.documentElement.dataset.theme || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); const nx = cur === 'dark' ? 'light' : 'dark'; document.documentElement.dataset.theme = nx; try { localStorage.setItem('ielts_theme', nx); } catch (e) {} };
+const curTheme = () => document.documentElement.dataset.theme || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+/* the button shows the theme you would switch TO, and reports dark mode as its pressed state */
+function themeBtn() { const b = $('#theme-btn'); if (!b) return; const dk = curTheme() === 'dark'; b.innerHTML = ic(dk ? 'sun' : 'theme', 'i20'); b.setAttribute('aria-pressed', dk ? 'true' : 'false'); const t = dk ? _('الوضع الفاتح', 'Light mode') : _('الوضع الداكن', 'Dark mode'); b.setAttribute('aria-label', t); b.title = t; }
+$('#theme-btn').onclick = () => { const nx = curTheme() === 'dark' ? 'light' : 'dark'; document.documentElement.dataset.theme = nx; try { localStorage.setItem('ielts_theme', nx); } catch (e) {} themeBtn(); };
 try { const th = localStorage.getItem('ielts_theme'); if (th) document.documentElement.dataset.theme = th; } catch (e) {}
+try { matchMedia('(prefers-color-scheme: dark)').addEventListener('change', themeBtn); } catch (e) {}
 
 /* interface used by cloud.js */
 function mergeCloud(c) {

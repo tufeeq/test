@@ -20,7 +20,7 @@ html{scroll-padding-top:80px}
 .pass-route i{display:block;height:2px;background:repeating-linear-gradient(90deg,var(--pri) 0 8px,transparent 8px 14px);margin-bottom:6px}
 .pass-sk{display:grid;grid-template-columns:repeat(4,1fr);text-align:center;padding:14px 10px;font-weight:700;font-size:.85rem}
 .pass-sk b{display:block;font-size:1.3rem}
-.pass-f{background:var(--gold-soft);padding:12px 18px;font-size:.85rem;color:#14213D;direction:rtl;text-align:right;font-family:var(--f-body)}
+.pass-f{background:var(--gold-soft);padding:12px 18px;font-size:.85rem;color:var(--ink);direction:rtl;text-align:right;font-family:var(--f-body)}
 [lang="en"] .pass-f{direction:ltr;text-align:left}
 .lp-sec{padding:44px var(--gut);display:grid;gap:22px}
 .lp-h{font-size:clamp(1.4rem,3vw,2rem);text-align:center}
@@ -44,3 +44,7 @@ html{scroll-padding-top:80px}
 .faq p{margin-top:8px;color:var(--ink2)}
 .lp-cta{background:var(--navy);color:var(--navy-ink);padding:50px 0}
 .lp-cta h2{font-size:clamp(1.4rem,3vw,2rem)}
+
+/* features: 3×2 on desktop, 2×3 on tablets */
+@media (min-width:700px){#why .g3{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (min-width:1000px){#why .g3{grid-template-columns:repeat(3,minmax(0,1fr))}}

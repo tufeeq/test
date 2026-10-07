@@ -61,6 +61,10 @@ function radarHTML(a) {
 }
 
 /* ---------- pages ---------- */
+const W_KIND = { bar: ['مخطط أعمدة', 'Bar chart'], line: ['مخطط خطي', 'Line graph'], map: ['خريطة', 'Map'], pie: ['مخطط دائري', 'Pie chart'], process: ['مراحل عملية', 'Process'], table: ['جدول', 'Table'],
+  formal: ['رسمية', 'Formal'], informal: ['غير رسمية', 'Informal'], semi: ['شبه رسمية', 'Semi-formal'],
+  advdis: ['مزايا وعيوب', 'Advantages & disadvantages'], discussion: ['مناقشة رأيين', 'Discussion'], opinion: ['رأي', 'Opinion'], problem: ['مشكلة وحل', 'Problem & solution'], twopart: ['سؤالان', 'Two-part question'] };
+const wKind = k => W_KIND[k] ? _(W_KIND[k][0], W_KIND[k][1]) : k;
 async function pageWriting() {
   const [t1, g1, t2] = await Promise.all([content('task1_academic'), content('task1_gt'), content('task2')]);
   const tab = S.wTab || (S.module === 'gt' ? 'g1' : 'a1');
@@ -70,7 +74,7 @@ async function pageWriting() {
   return `<div class="page-h"><span class="eyebrow">${skName('W')}</span><h1>${_('استوديو الكتابة', 'Writing studio')}</h1><p>${_('اكتب في محرر يشبه الاختبار الحقيقي، مع عدّاد كلمات ومؤقت ورادار يلتقط أخطاء المتعلمين العرب أثناء الكتابة، ثم احصل على تقييم بالمعايير الأربعة وإجابة نموذجية.', 'Write in an exam-like editor with a word counter, timer and a radar that catches typical Arabic-speaker errors as you type, then get marked on the four criteria and compare with a model answer.')}</p></div>
   <div class="seg" role="tablist">${[['a1', _('المهمة ١ أكاديمي', 'Task 1 Academic')], ['g1', _('المهمة ١ عام (رسالة)', 'Task 1 General (letter)')], ['t2', _('المهمة ٢ (مقالة)', 'Task 2 (essay)')]].map(([k, l]) => `<button data-wtab="${k}" class="${tab === k ? 'on' : ''}">${l}</button>`).join('')}</div>
   <div class="list">${list.map((it, i) => { const w = done.get(it.id), lk = i >= open;
-    return `<a class="li ${lk ? 'locked' : ''}" href="${lk ? '#upgrade' : '#write/' + task + '/' + it.id}" data-lock="${lk ? 'writing' : ''}"><span class="li-t"><b class="ltr-text" style="text-align:start">${esc((it.prompt || '').split('\n')[0].slice(0, 120))}${(it.prompt || '').split('\n')[0].length > 120 ? '…' : ''}</b><span class="chips">${it.kind ? `<span class="chip teal">${esc(it.kind)}</span>` : ''}${it.tone ? `<span class="chip teal">${esc(it.tone)}</span>` : ''}${it.type ? `<span class="chip teal">${esc(it.type)}</span>` : ''}${w ? `<span class="chip ok">${_('آخر درجة', 'Last band')} ${bandL(w.band)}</span>` : ''}</span></span>${lk ? `<span class="lock-b">${ic('lock')}${_('برو', 'Pro')}</span>` : ic('arrow')}</a>`; }).join('')}</div>`;
+    return `<a class="li ${lk ? 'locked' : ''}" href="${lk ? '#upgrade' : '#write/' + task + '/' + it.id}" data-lock="${lk ? 'writing' : ''}"><span class="li-t"><b class="ltr-text" style="text-align:start">${esc((it.prompt || '').split('\n')[0].slice(0, 120))}${(it.prompt || '').split('\n')[0].length > 120 ? '…' : ''}</b><span class="chips">${it.kind ? `<span class="chip teal">${esc(wKind(it.kind))}</span>` : ''}${it.tone ? `<span class="chip teal">${esc(wKind(it.tone))}</span>` : ''}${it.type ? `<span class="chip teal">${esc(wKind(it.type))}</span>` : ''}${w ? `<span class="chip ok">${_('آخر درجة', 'Last band')} ${bandL(w.band)}</span>` : ''}</span></span>${lk ? `<span class="lock-b">${ic('lock')}${_('برو', 'Pro')}</span>` : ic('arrow')}</a>`; }).join('')}</div>`;
 }
 let WS = null;
 async function pageWrite(task, id) {
@@ -81,7 +85,7 @@ async function pageWrite(task, id) {
   const draftKey = 'w:' + id, draft = (S.notes || {})[draftKey] || '';
   WS = { task, it, start: null, secs: task === 't2' ? 2400 : 1200 };
   setTimeout(bindWrite, 0);
-  return `<div class="spread"><a href="#writing" class="btn ghost sm">← ${_('كل المهام', 'All tasks')}</a><span class="chip pri">${task === 't2' ? 'Task 2 · 40 min · 250+ words' : 'Task 1 · 20 min · 150+ words'}</span></div>
+  return `<div class="spread"><a href="#writing" class="btn ghost sm">${BK()}${_('كل المهام', 'All tasks')}</a><span class="chip pri">${task === 't2' ? 'Task 2 · 40 min · 250+ words' : 'Task 1 · 20 min · 150+ words'}</span></div>
   <div class="studio">
     <div class="card sticky"><div class="spread"><h2>${_('المهمة', 'The task')}</h2><button class="btn ghost sm" id="w-plan">${_('كيف أخطط؟', 'How to plan')}</button></div>
       <div class="prompt-box">${esc(it.prompt)}</div>${it.chart ? chartSVG(it.chart) : ''}

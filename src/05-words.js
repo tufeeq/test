@@ -33,13 +33,14 @@ async function pageCards(deck) {
   else list = list.filter(c => c.deck === deck).sort((a, b) => ((S.vocab[a.id] || { due: '' }).due || '').localeCompare((S.vocab[b.id] || { due: '' }).due || ''));
   const lockedN = deck === 'due' ? 0 : cards.filter(c => c.deck === deck).length - list.length;
   list = list.filter(c => !S.vocab[c.id] || S.vocab[c.id].due <= todayStr()).slice(0, 20);
-  FC = { list, i: 0, flip: false, deck, lockedN };
+  const fresh = cards.find((c, i) => cardOpen(c, i, cards) && !S.vocab[c.id] && c.deck !== deck);
+  FC = { list, i: 0, flip: false, deck, lockedN, next: fresh ? fresh.deck : null };
   setTimeout(fcRender, 0);
-  return `<div class="spread"><a href="#words" class="btn ghost sm">← ${_('بنك الكلمات', 'Word bank')}</a></div><div id="fc"></div>`;
+  return `<div class="spread"><a href="#words" class="btn ghost sm">${BK()}${_('بنك الكلمات', 'Word bank')}</a></div><div id="fc"></div>`;
 }
 function fcRender() {
   const el = $('#fc'); if (!el) return;
-  if (FC.i >= FC.list.length) { el.innerHTML = `<div class="card center"><h2>${FC.list.length ? _('أحسنت! أنهيت هذه الجولة.', 'Well done! Round complete.') : _('لا بطاقات مستحقة الآن.', 'No cards due right now.')}</h2><p class="muted">${_('سنعيد كل كلمة في الوقت المناسب قبل أن تنساها.', 'Each word comes back just before you would forget it.')}</p>${FC.lockedN ? `<p>${_(`${numL(FC.lockedN)} بطاقة أخرى في هذه المجموعة متاحة للمشتركين.`, `${FC.lockedN} more cards in this deck are available with Pro.`)} <a href="#upgrade">${_('الباقات', 'Plans')}</a></p>` : ''}<a class="btn primary" href="#words">${_('تم', 'Done')}</a></div>`; return; }
+  if (FC.i >= FC.list.length) { el.innerHTML = `<div class="card center"><h2>${FC.list.length ? _('أحسنت! أنهيت هذه الجولة.', 'Well done! Round complete.') : _('لا بطاقات مستحقة الآن.', 'No cards due right now.')}</h2><p class="muted">${_('سنعيد كل كلمة في الوقت المناسب قبل أن تنساها.', 'Each word comes back just before you would forget it.')}</p>${FC.lockedN ? `<p>${_(`${numL(FC.lockedN)} بطاقة أخرى في هذه المجموعة متاحة للمشتركين.`, `${FC.lockedN} more cards in this deck are available with Pro.`)} <a href="#upgrade">${_('الباقات', 'Plans')}</a></p>` : ''}<div class="row" style="justify-content:center">${FC.list.length ? `<a class="btn primary" href="#words">${_('تم', 'Done')}</a>` : (FC.next ? `<a class="btn primary" href="#cards/${FC.next}">${_('تعلّم كلمات جديدة', 'Learn new words')}</a>` : '') + `<a class="btn" href="#words">${_('كل المجموعات', 'All decks')}</a>`}</div></div>`; return; }
   const c = FC.list[FC.i];
   el.innerHTML = `<p class="center small muted">${numL(FC.i + 1)} / ${numL(FC.list.length)}</p><div class="flash ${FC.flip ? 'flip' : ''}" id="fc-card" role="button" tabindex="0" aria-label="${_('اقلب البطاقة', 'Flip card')}"><div class="flash-in"><div class="flash-f"><div class="word">${esc(c.w)}</div>${c.pos ? `<span class="chip">${esc(c.pos)}</span>` : ''}<p class="tiny muted">${_('اضغط لترى المعنى', 'Tap to see the meaning')}</p></div>
   <div class="flash-b"><div class="word" style="font-size:1.3rem">${esc(c.w)}</div><b style="font-size:1.3rem">${esc(c.ar)}</b><div class="ex">${esc(c.ex)}</div>${c.col && c.col.length ? `<div class="chips" style="justify-content:center">${c.col.map(x => `<span class="chip teal ltr-text">${esc(x)}</span>`).join('')}</div>` : ''}${c.fam && c.fam.length ? `<div class="tiny muted ltr-text" style="text-align:center">${esc(c.fam.join(' · '))}</div>` : ''}</div></div></div>
@@ -50,7 +51,7 @@ function fcRender() {
   $('#fc-say').onclick = () => { try { const u = new SpeechSynthesisUtterance(c.w); u.lang = 'en-GB'; speechSynthesis.cancel(); speechSynthesis.speak(u); } catch (e) {} };
   el.querySelectorAll('[data-k]').forEach(b => b.onclick = () => {
     const k = +b.dataset.k, v = S.vocab[c.id] || { box: 0 };
-    v.box = k === 0 ? 0 : k === 1 ? Math.max(1, v.box) : Math.min(5, v.box + 1); v.due = addDays(todayStr(), k === 0 ? 0 : BOX_DAYS[v.box]); S.vocab[c.id] = v;
+    v.box = k === 0 ? 0 : k === 1 ? Math.max(1, v.box) : Math.min(5, v.box + 1); v.due = addDays(todayStr(), k === 0 ? 0 : BOX_DAYS[v.box]); v.seen = todayStr(); S.vocab[c.id] = v;
     if (k === 0) FC.list.push(c);
     FC.i++; FC.flip = false; markDay(); save(); fcRender();
   });
@@ -63,7 +64,7 @@ async function pagePara() {
   const order = items.slice().sort((a, b) => { const A = S.para[a.id] || { c: 0, t: 0 }, B = S.para[b.id] || { c: 0, t: 0 }; return (A.t ? A.c / A.t : -1) - (B.t ? B.c / B.t : -1); });
   PT = { list: order.slice(0, 10), i: 0, score: 0 };
   setTimeout(ptRender, 0);
-  return `<div class="spread"><a href="#words" class="btn ghost sm">← ${_('بنك الكلمات', 'Word bank')}</a><span class="chip teal">${_('١٠ أسئلة', '10 questions')}</span></div><div class="card"><h2>${_('مدرّب إعادة الصياغة', 'Paraphrase trainer')}</h2><p class="small muted">${_('اختر العبارة التي تقول المعنى نفسه بالضبط — كما يحدث بين السؤال والنص في الاختبار.', 'Choose the sentence that means exactly the same — just like question vs text in the test.')}</p><div id="pt"></div></div>`;
+  return `<div class="spread"><a href="#words" class="btn ghost sm">${BK()}${_('بنك الكلمات', 'Word bank')}</a><span class="chip teal">${_('١٠ أسئلة', '10 questions')}</span></div><div class="card"><h2>${_('مدرّب إعادة الصياغة', 'Paraphrase trainer')}</h2><p class="small muted">${_('اختر العبارة التي تقول المعنى نفسه بالضبط — كما يحدث بين السؤال والنص في الاختبار.', 'Choose the sentence that means exactly the same — just like question vs text in the test.')}</p><div id="pt"></div></div>`;
 }
 function ptRender() {
   const el = $('#pt'); if (!el) return;
@@ -84,12 +85,12 @@ async function pageDrill(id) {
   const e = (await content('arab_errors')).items.find(x => x.id === id); if (!e) return '';
   setTimeout(() => {
     $$('[data-dr]').forEach(btn => btn.onclick = () => {
-      const i = +btn.dataset.dr, d = e.drill[i], inp = $('#dr-' + i), ok = nrm(inp.value).replace(/[.!?]$/, '') === nrm(d.a).replace(/[.!?]$/, '');
+      const i = +btn.dataset.dr, d = e.drill[i], inp = $('#dr-' + i), cl = x => nrm(x).replace(/[.!?]$/, ''), ok = [d.a, ...(d.alt || [])].some(x => cl(inp.value) === cl(x));
       $('#drf-' + i).innerHTML = `<div class="walk">${ok ? '✓ ' + _('ممتاز!', 'Excellent!') : '✗ ' + _('الصحيح', 'Correct')}: <span class="ltr-text"><b>${esc(d.a)}</b></span> · ${esc(L(d.hint))}</div>`;
       if (ok) { S.drills[id] = (S.drills[id] || 0) + 1; markDay(); save(); }
     });
   }, 0);
-  return `<div class="spread"><a href="#words" class="btn ghost sm">← ${_('بنك الكلمات', 'Word bank')}</a></div><div class="lesson"><div class="page-h"><span class="eyebrow">${_('أخطاء المتعلم العربي', 'Arabic-speaker errors')}</span><h1>${esc(L(e.title))}</h1></div>
+  return `<div class="spread"><a href="#words" class="btn ghost sm">${BK()}${_('بنك الكلمات', 'Word bank')}</a></div><div class="lesson"><div class="page-h"><span class="eyebrow">${_('أخطاء المتعلم العربي', 'Arabic-speaker errors')}</span><h1>${esc(L(e.title))}</h1></div>
   <div class="card"><div class="fix"><div class="q">${esc(e.wrong)}</div><div class="b">${esc(e.right)}</div></div><p>${esc(L(e.why))}</p></div>
   <div class="card"><h2>${_('صحّح الجمل', 'Correct the sentences')}</h2>${e.drill.map((d, i) => `<div class="grid" style="gap:6px"><div class="src" style="border-color:var(--bad)">${esc(d.s)}</div><input class="inp ltr-text" id="dr-${i}" placeholder="${_('اكتب الجملة الصحيحة', 'Type the corrected sentence')}" autocomplete="off" spellcheck="false"><div class="row"><button class="btn sm" data-dr="${i}">${_('تحقق', 'Check')}</button></div><div id="drf-${i}"></div></div>`).join('<hr class="sep">')}</div></div>`;
 }
@@ -114,7 +115,7 @@ async function pageMReview() {
   const now = todayStr(); const lim = PRO() ? Infinity : (+FREE.mistakesMax || 15);
   const due = S.mistakes.slice(-lim).filter(m => m.due <= now).slice(0, 15);
   MR = { list: due, i: 0 }; setTimeout(mrRender, 0);
-  return `<div class="spread"><a href="#mistakes" class="btn ghost sm">← ${_('صندوق الأخطاء', 'Mistake box')}</a></div><div id="mr"></div>`;
+  return `<div class="spread"><a href="#mistakes" class="btn ghost sm">${BK()}${_('صندوق الأخطاء', 'Mistake box')}</a></div><div id="mr"></div>`;
 }
 function findQ(d, m) {
   const part = m.skill === 'L' ? d.parts[m.pi] : d.passages[m.pi]; if (!part) return null;

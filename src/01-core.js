@@ -50,6 +50,7 @@ const IC = {
   pause: '<svg viewBox="0 0 24 24"><path class="f" d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z"/></svg>',
   user: '<svg viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="4"/><path d="M4.5 20c1.2-3.8 4.2-5.5 7.5-5.5s6.3 1.7 7.5 5.5"/></svg>',
   theme: '<svg viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>',
+  sun: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg>',
   spark: '<svg viewBox="0 0 24 24"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8zM19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8z"/></svg>',
   book: '<svg viewBox="0 0 24 24"><path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h11"/></svg>',
   flag: '<svg viewBox="0 0 24 24"><path d="M5 21V4M5 4h11l-2 4 2 4H5"/></svg>',
@@ -61,7 +62,10 @@ const IC = {
   refresh: '<svg viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 5v6h-6"/></svg>',
   globe: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.5 2.5 3.5 5.5 3.5 8.5s-1 6-3.5 8.5c-2.5-2.5-3.5-5.5-3.5-8.5s1-6 3.5-8.5z"/></svg>'
 };
-const ic = (k, c = 'i16') => (IC[k] || '').replace('<svg ', `<svg class="${c}" aria-hidden="true" `);
+const ic = (k, c = 'i16') => (IC[k] || '').replace('<svg ', `<svg class="${c}${k === 'arrow' ? ' arr' : ''}" aria-hidden="true" `);
+/* direction-aware text arrows: back points to the reading start, forward to the reading end */
+const BK = () => AR() ? '→ ' : '← ';
+const FW = () => AR() ? ' ←' : ' →';
 const SK = { L: ['الاستماع', 'Listening'], R: ['القراءة', 'Reading'], W: ['الكتابة', 'Writing'], S: ['المحادثة', 'Speaking'] };
 const skName = k => _(SK[k][0], SK[k][1]);
 
@@ -105,9 +109,9 @@ function weakest() { const b = bands(); const ks = ['L', 'R', 'W', 'S']; const t
 /* question-type stats */
 function qtAdd(skill, type, ok) { const s = S.qt[skill] || (S.qt[skill] = {}); const x = s[type] || (s[type] = { c: 0, t: 0 }); x.t++; if (ok) x.c++; }
 const QT_NAMES = {
-  tfng: ['صح/خطأ/غير مذكور', 'True/False/Not Given'], ynng: ['نعم/لا/غير مذكور', 'Yes/No/Not Given'], mcq: ['اختيار من متعدد', 'Multiple choice'], mcq2: ['اختيار إجابتين', 'Choose two'],
-  headings: ['مطابقة العناوين', 'Matching headings'], info: ['مطابقة المعلومات', 'Matching information'], features: ['مطابقة الخصائص', 'Matching features'], endings: ['نهايات الجمل', 'Sentence endings'],
-  matching: ['المطابقة', 'Matching'], sentence: ['إكمال الجمل', 'Sentence completion'], short: ['إجابات قصيرة', 'Short answers'], notes: ['إكمال الملاحظات', 'Note completion'], form: ['إكمال النموذج', 'Form completion'],
+  tfng: ['صح / خطأ / غير مذكور', 'True/False/Not Given'], ynng: ['نعم / لا / غير مذكور', 'Yes/No/Not Given'], mcq: ['اختيار من متعدد', 'Multiple choice'], mcq2: ['اختيار إجابتين', 'Choose two'],
+  headings: ['مطابقة العناوين', 'Matching headings'], info: ['مطابقة المعلومات', 'Matching information'], features: ['مطابقة الخصائص', 'Matching features'], endings: ['مطابقة نهايات الجمل', 'Sentence endings'],
+  matching: ['المطابقة', 'Matching'], sentence: ['إكمال الجمل', 'Sentence completion'], short: ['الإجابات القصيرة', 'Short answers'], notes: ['إكمال الملاحظات', 'Note completion'], form: ['إكمال النموذج', 'Form completion'],
   table: ['إكمال الجدول', 'Table completion'], flow: ['المخطط الانسيابي', 'Flow chart'], summary: ['إكمال الملخص', 'Summary completion'], summary_bank: ['ملخص ببنك كلمات', 'Summary (word bank)'], map: ['الخرائط', 'Maps & plans']
 };
 const qtName = t => QT_NAMES[t] ? _(QT_NAMES[t][0], QT_NAMES[t][1]) : t;

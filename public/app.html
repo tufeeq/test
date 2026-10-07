@@ -12,7 +12,8 @@
 <meta property="og:site_name" content="أكاديمية الآيلتس | IELTS Academy">
 <meta property="og:title" content="أكاديمية الآيلتس · طريقك إلى درجتك المستهدفة">
 <meta property="og:description" content="اختبارات استماع وقراءة بصيغة الاختبار المحوسب مع شرح كل إجابة بالعربية، ومصحح ذكي للكتابة والمحادثة، وخطة يومية حتى موعد اختبارك.">
-<meta property="og:image" content="/og.png">
+<meta property="og:image" content="https://myielts.academy/og.png">
+<meta name="robots" content="noindex">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -36,10 +37,11 @@
 <div id="exam" hidden></div>
 <div id="toast" role="status" hidden></div>
 <div id="acct" hidden></div>
+<!-- all deferred: run in this order after parsing; cloud.js last, as before (it was the only deferred script) -->
+<script src="/vendor/gsap.min.js" defer></script>
+<script src="/xp-engine.js" defer></script>
+<script src="/xp/free.js" defer></script>
+<script src="/app.js" defer></script>
 <script src="/cloud.js" defer></script>
-<script src="/vendor/gsap.min.js"></script>
-<script src="/xp-engine.js"></script>
-<script src="/xp/free.js"></script>
-<script src="/app.js"></script>
 </body>
 </html>

@@ -9,11 +9,15 @@
   "dependencies": {
     "acorn": "^8.18.0",
     "bcryptjs": "^3.0.3",
+    "compression": "^1.8.2",
     "express": "^4.22.3",
     "pg": "^8.23.0"
   },
   "private": true,
   "engines": {
     "node": ">=20"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.2"
   }
 }

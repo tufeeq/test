@@ -590,3 +590,32 @@ body.xp-open{overflow:hidden}
 .pl-ov{display:grid;justify-items:center;gap:2px;padding:12px 26px;border:2px solid var(--edge);border-radius:var(--r);box-shadow:var(--pop);background:var(--pri-soft)}
 .pl-ov .big{font-size:3.4rem}
 .pl-notes{display:grid;gap:8px;max-width:620px;text-align:start;width:100%}
+
+/* ===== UX pass: RTL arrows, tap targets, today layout, exam nav ===== */
+[dir=rtl] .arr{transform:scaleX(-1)}
+[dir=rtl] #exam .arr,[dir=rtl] [dir=ltr] .arr{transform:none}
+.btn.sm{min-height:40px}
+.pill.stat{border-style:dashed;background:color-mix(in srgb,var(--navy-ink) 8%,transparent);cursor:default}
+a.pill{min-height:36px;font-weight:600;text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px}
+.tabs a{min-height:40px;display:inline-flex;align-items:center}
+.note-card>a.tiny{display:inline-flex;align-items:center;min-height:40px;padding-block:8px;margin-block:-8px;justify-self:start;font-size:.82rem}
+.drill-card .spread>a.chip{min-height:40px;display:inline-flex;align-items:center;padding-inline:12px;text-decoration:none}
+.ex-top #ex-x{min-height:40px}
+.ex-nav{padding-inline-end:0}
+.ex-nav .acts{box-shadow:-12px 0 10px -6px var(--ex-card);z-index:1;align-self:stretch;align-items:center;margin-block:-7px;padding-block:7px;padding-inline-end:10px}
+@media (max-width:600px){
+  .ex-nav button.nb{min-width:40px;height:40px;font-size:.82rem}
+  .ex-nav .acts button{min-height:40px}
+  .ex-top #ex-x{min-height:40px;padding-inline:12px}
+  .icon-btn{inline-size:40px;block-size:40px}
+  #lang-btn{min-height:40px}
+  .hero{padding:18px;gap:12px}
+  .hero h1{font-size:1.3rem;line-height:1.4}
+  .hero .hide-sm{display:none}
+  .hero .row{gap:8px}
+  .hero > .grid > p.muted{display:none}
+  .hero .skills4 .stamp{inline-size:54px;block-size:54px}
+  .hero .skills4 .lab{font-size:.74rem}
+  a.pill{min-height:40px}
+}
+.more-link{display:inline-flex;align-items:center;min-height:40px}

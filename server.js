@@ -5,13 +5,16 @@ const fs = require("fs");
 const zlib = require("zlib");
 const crypto = require("crypto");
 const bcrypt = require("bcryptjs");
+const compression = require("compression");
 const { Pool } = require("pg");
 const commerce = require("./commerce");
 const oauth = require("./oauth");
 
 const PORT = process.env.PORT || 3000;
+const PUB = path.join(__dirname, "public");
 const SESSION_DAYS = Number(process.env.SESSION_DAYS || 60);
 const ADMIN_EMAILS = String(process.env.ADMIN_EMAILS || "").split(",").map(s => s.trim().toLowerCase()).filter(Boolean);
+process.on("unhandledRejection", e => console.error("unhandled rejection:", e && e.stack || e));
 if (!process.env.DATABASE_URL) { console.error("DATABASE_URL is not set. Add a Postgres database to this Railway project."); process.exit(1); }
 
 // SSL: Railway's private URL (*.railway.internal) has no sslmode and needs no SSL; the public proxy URL may carry
@@ -90,6 +93,10 @@ app.use((req, res, next) => {
   next();
 });
 app.disable("x-powered-by");
+// on-the-fly gzip/brotli for dynamic responses (API JSON, /xp/free.js, /audio/*.json, robots, sitemap…).
+// Static text files and HTML pages are pre-compressed and cached below; responses that already carry
+// Content-Encoding are left alone by this middleware.
+app.use(compression({ threshold: 1024, brotli: { params: { [zlib.constants.BROTLI_PARAM_QUALITY]: 5 } } }));
 app.use(express.json({ limit: "2mb" })); // progress p may be up to 900k chars; JSON escaping inflates it
 
 // security headers
@@ -102,7 +109,7 @@ app.use((req, res, next) => {
     "Cross-Origin-Opener-Policy": "same-origin",
     "Content-Security-Policy": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; media-src 'self' blob:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
   });
-  if (req.secure) res.set("Strict-Transport-Security", "max-age=15552000");
+  if (req.secure) res.set("Strict-Transport-Security", "max-age=15552000; includeSubDomains");
   next();
 });
 
@@ -308,14 +315,15 @@ app.post("/api/admin/users/:id/reset-password", needAdmin, wrap(async (req, res)
   res.json({ email: r.rows[0].email, tempPassword: temp });
 }));
 
+const SITE_HOST = CANONICAL_HOST || "myielts.academy";
 app.get("/robots.txt", (req, res) => {
   res.type("text/plain").set("Cache-Control", "public, max-age=86400")
-    .send("User-agent: *\nAllow: /\nDisallow: /admin.html\nDisallow: /api/\n" + (CANONICAL_HOST ? `Sitemap: https://${CANONICAL_HOST}/sitemap.xml\n` : ""));
+    .send(`User-agent: *\nAllow: /\nDisallow: /admin.html\nDisallow: /admin\nDisallow: /api/\nSitemap: https://${SITE_HOST}/sitemap.xml\n`);
 });
-app.get("/sitemap.xml", (req, res) => {
-  const base = "https://" + (CANONICAL_HOST || String(req.headers.host || ""));
+app.get("/sitemap.xml", (req, res) => { // /app is a signed-in web app (noindex), so it is not listed
+  const base = "https://" + SITE_HOST;
   res.type("application/xml").set("Cache-Control", "public, max-age=86400")
-    .send(`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>${base}/</loc></url><url><loc>${base}/app</loc></url><url><loc>${base}/privacy</loc></url><url><loc>${base}/terms</loc></url></urlset>\n`);
+    .send(`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>${base}/</loc></url><url><loc>${base}/privacy</loc></url><url><loc>${base}/terms</loc></url></urlset>\n`);
 });
 // ---------- AI examiner + premium content ----------
 require("./ai")(app, { pool, wrap, fail, needUser, C, limited });
@@ -330,6 +338,27 @@ app.get("/api/content/:name", needUser, wrap(async (req, res) => {
 // Narration clips live in Postgres (table narration); data/tracks.json maps each explainer to its clips + beat timings.
 // data/clip_urls.json, when present, lists freshly generated clips ({id,url}) that are imported once at startup.
 const TRACKS_FILE = path.join(__dirname, "data", "tracks.json");
+// ---------- premium listening audio ----------
+// Test audio keeps its public URLs (/audio/L02-p1.mp3, /audio/L02.timing.json) but tests whose content lives in
+// content-pro/ (L02–L04) are only sent to subscribers, using the same plan check as /api/content.
+let proTests = { at: 0, set: new Set() };
+function proListening() {
+  if (Date.now() - proTests.at > 60e3) {
+    let names = []; try { names = fs.readdirSync(CONTENT_PRO); } catch (e) {}
+    proTests = { at: Date.now(), set: new Set(names.map(n => /^(L\d+)\.json$/.exec(n)).filter(Boolean).map(m => m[1])) };
+  }
+  return proTests.set;
+}
+app.get(/^\/audio\/(L\d+)(?:-p\d+\.mp3|\.timing\.json)$/, wrap(async (req, res, next) => {
+  if (!proListening().has(req.params[0])) return next(); // free test (L01): public static file
+  await auth(req, res, () => {});
+  if (!req.user) return fail(res, 401, "unauthenticated");
+  const p = await C.planOf(req.user); if (p.tier !== "pro") return fail(res, 402, "subscription-required");
+  const f = path.join(PUB, req.path.slice(1)); if (!fs.existsSync(f)) return next();
+  res.set({ "Cache-Control": "private, max-age=86400", "Vary": "Cookie" });
+  if (f.endsWith(".json")) return sendText(req, res, f, "private, max-age=3600");
+  res.sendFile(f, { cacheControl: false }); // honours Range requests (Safari/iOS)
+}));
 app.get("/audio/tracks.json", (req, res) => { res.set("Cache-Control", "no-cache"); if (!fs.existsSync(TRACKS_FILE)) return res.json({}); res.type("application/json").sendFile(TRACKS_FILE); });
 app.get("/audio/index.json", wrap(async (req, res) => {
   const r = await pool.query("SELECT id FROM narration ORDER BY id");
@@ -339,7 +368,10 @@ app.get("/audio/:id.mp3", wrap(async (req, res, next) => {
   const r = await pool.query("SELECT mime, data, updated_at FROM narration WHERE id=$1", [req.params.id]);
   const row = r.rows[0]; if (!row) return next();   // not a narration clip: let static files (test audio) answer
   const buf = row.data, total = buf.length;
-  res.set({ "Content-Type": row.mime, "Accept-Ranges": "bytes", "Cache-Control": "public, max-age=604800, immutable", "Last-Modified": new Date(row.updated_at).toUTCString() });
+  // a clip can be replaced under the same URL (clip_urls.json "replace"), so cache for a day and revalidate by ETag
+  const etag = `"n-${new Date(row.updated_at).getTime().toString(36)}-${total.toString(36)}"`;
+  res.set({ "Content-Type": row.mime, "Accept-Ranges": "bytes", "Cache-Control": "public, max-age=86400", "ETag": etag, "Last-Modified": new Date(row.updated_at).toUTCString() });
+  if (!req.get("Range") && req.fresh) return res.status(304).end();
   const m = /^bytes=(\d*)-(\d*)$/.exec(req.get("Range") || "");   // Safari/iOS need range requests for audio
   if (m) {
     let start = m[1] === "" ? total - Number(m[2]) : Number(m[1]);
@@ -370,42 +402,142 @@ async function importNarration() {
 app.get("/healthz", (req, res) => { res.set("Cache-Control", "no-store"); res.send("ok"); });
 
 // ---------- static site ----------
-const PUB = path.join(__dirname, "public");
-app.use((req, res, next) => { if (/^\/admin(\.html)?$/.test(req.path)) res.set("X-Robots-Tag", "noindex"); next(); });
+// Caching: HTML is no-cache. Local JS/CSS referenced from our HTML pages get ?v=<content hash> appended when the
+// page is served; a request whose ?v= matches the file's current hash is cached for a year (immutable), anything
+// else (un-versioned or stale hash) is no-cache + ETag. Text files are pre-compressed once per version (br + gzip).
+app.use((req, res, next) => { if (/^\/(admin(\.html)?|app\/?)$/.test(req.path)) res.set("X-Robots-Tag", "noindex"); next(); });
 app.get("/favicon.ico", (req, res) => res.redirect(301, "/favicon.svg"));
+const md5 = b => crypto.createHash("md5").update(b).digest("hex");
+const verCache = new Map(); // file -> { key, v }
+function fileVersion(f) {
+  let st; try { st = fs.statSync(f); } catch (e) { return null; }
+  if (!st.isFile()) return null;
+  const key = st.size + ":" + st.mtimeMs, c = verCache.get(f);
+  if (c && c.key === key) return c.v;
+  const v = md5(fs.readFileSync(f)).slice(0, 10); verCache.set(f, { key, v }); return v;
+}
+const TEXT_RE = /\.(js|css|html|json|svg|txt|xml|webmanifest|map)$/;
+const zCache = new Map(); // key -> Promise<{ raw, br, gz }>
+function packed(key, raw) {
+  let p = zCache.get(key);
+  if (!p) {
+    p = Promise.all([
+      new Promise((ok, no) => zlib.brotliCompress(raw, { params: { [zlib.constants.BROTLI_PARAM_QUALITY]: 11, [zlib.constants.BROTLI_PARAM_SIZE_HINT]: raw.length } }, (e, b) => e ? no(e) : ok(b))),
+      new Promise((ok, no) => zlib.gzip(raw, { level: 9 }, (e, b) => e ? no(e) : ok(b)))
+    ]).then(([br, gz]) => ({ raw, br, gz }));
+    p.catch(() => zCache.delete(key));
+    zCache.set(key, p);
+    if (zCache.size > 400) zCache.delete(zCache.keys().next().value);
+  }
+  return p;
+}
+// send text (a file path, or { body, type, key }) compressed with the best encoding the client accepts
+async function sendText(req, res, src, cacheControl, status) {
+  let raw, key, type, mtime;
+  if (typeof src === "string") {
+    const st = await fs.promises.stat(src); raw = await fs.promises.readFile(src); mtime = st.mtime;
+    key = src + ":" + st.size + ":" + st.mtimeMs; type = path.extname(src);
+  } else { raw = src.body; key = src.key; type = src.type; }
+  const etag = `W/"${md5(key).slice(0, 16)}"`, ae = req.get("Accept-Encoding") || "";
+  const enc = raw.length < 1024 ? null : /\bbr\b/.test(ae) ? "br" : /\bgzip\b/.test(ae) ? "gzip" : null;
+  res.status(status || 200).type(type).set({ "Cache-Control": cacheControl, "ETag": etag, "Vary": "Accept-Encoding" });
+  if (mtime) res.set("Last-Modified", mtime.toUTCString());
+  if (!status && req.fresh) return res.status(304).end();
+  let body = raw;
+  if (enc) { const z = await packed(key, raw); body = enc === "br" ? z.br : z.gz; res.set("Content-Encoding", enc); }
+  res.set("Content-Length", body.length);
+  res.end(req.method === "HEAD" ? undefined : body);
+}
+const cacheFor = (req, f) => {
+  if (/\.(js|css)$/.test(f) && req.query.v && req.query.v === fileVersion(f)) return "public, max-age=31536000, immutable";
+  if (/\.(js|css|html|json|map)$/.test(f)) return "no-cache";
+  if (/\.(svg|png|ico|webmanifest)$/.test(f)) return "public, max-age=604800";
+  return "no-cache";
+};
+
+// HTML pages: asset URLs versioned, landing page pre-filled with live prices + JSON-LD
+const ASSET_RE = /(<(?:script|link)\b[^>]*?\b(?:src|href)=")(\/?)([\w\/.-]+\.(?:js|css))(")/g;
+const versionAssets = html => html.replace(ASSET_RE, (m, a, slash, p, z) => {
+  const v = fileVersion(path.join(PUB, p)); return v ? `${a}${slash}${p}?v=${v}${z}` : m;
+});
+const escHtml = t => String(t).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+const unescHtml = t => String(t).replace(/<[^>]+>/g, "").replace(/&(amp|lt|gt|quot|#39);/g, (m, k) => ({ amp: "&", lt: "<", gt: ">", quot: '"', "#39": "'" })[k]);
+const arNum = n => String(n).replace(/\d/g, d => "٠١٢٣٤٥٦٧٨٩"[d]);
+function landingExtras(html, cfg) {
+  const plans = cfg.plans.filter(p => p.active);
+  // same markup landing.js builds (Arabic): it removes .paid cards and rebuilds them once /api/config arrives
+  const ben = ["كل الشروحات المرئية التفاعلية للمهارات الـ١٦", "كل الاختبارات الكاملة مع الشرح بالعربية", "المصحح الذكي للكتابة والمحادثة يوميًا", "كل الدروس والبطاقات والإجابات النموذجية", "الخطة الكاملة وصندوق أخطاء غير محدود", "اختبار محادثة كامل بممتحن صوتي"];
+  const cards = plans.map(p => `<div class="card paid${p.best ? " best" : ""}"><h3>${escHtml(p.ar)}${p.best ? ` <span class="chip pri">الأوفر</span>` : ""}</h3><div class="price">${arNum(p.price)} <small style="font-size:1rem">ريال</small></div>${p.days > 31 ? `<p class="small" style="margin:0;color:var(--teal-t,#14686C);font-weight:700">≈ ${arNum(Math.round(p.price / (p.days / 30)))} ريال شهريًا</p>` : ""}<p class="small muted">دفعة واحدة لمدة ${arNum(p.days)} يومًا · بدون تجديد تلقائي</p><ul class="benefits">${ben.map(b => `<li>✓ ${b}</li>`).join("")}</ul><a class="btn ${p.best ? "primary" : ""} block" href="/app?lang=ar#upgrade">اشترك</a></div>`).join("");
+  html = html.replace("<!--PLANS-->", cards);
+  if (plans.length) {
+    const m = Math.min(...plans.map(p => Math.round(p.price / Math.max(1, p.days / 30))));
+    html = html.replace(/(<td class="us" id="lp-cmp-price" data-en=")[^"]*(">)[^<]*(<\/td>)/, `$1from SAR ${m}/month$2من ${arNum(m)} ريالًا شهريًا$3`);
+  }
+  const base = "https://" + SITE_HOST;
+  const faq = [...html.matchAll(/<details><summary[^>]*>([\s\S]*?)<\/summary><p[^>]*>([\s\S]*?)<\/p><\/details>/g)]
+    .map(m => ({ "@type": "Question", name: unescHtml(m[1]).trim(), acceptedAnswer: { "@type": "Answer", text: unescHtml(m[2]).trim() } }));
+  const ld = [
+    { "@context": "https://schema.org", "@type": "EducationalOrganization", name: "أكاديمية الآيلتس", alternateName: "IELTS Academy", url: base + "/",
+      logo: base + "/favicon.svg", image: base + "/og.png", email: "info@myielts.academy", inLanguage: ["ar", "en"] },
+    { "@context": "https://schema.org", "@type": "Course", name: "التحضير لاختبار الآيلتس | IELTS preparation", inLanguage: ["ar", "en"],
+      description: "تحضير لاختبار الآيلتس الأكاديمي والعام بصيغة الاختبار المحوسب مع شرح بالعربية ومصحح ذكي للكتابة والمحادثة.",
+      provider: { "@type": "EducationalOrganization", name: "أكاديمية الآيلتس", url: base + "/" },
+      offers: plans.map(p => ({ "@type": "Offer", name: p.ar, price: String(p.price), priceCurrency: cfg.currency, category: "Paid", url: base + "/#pricing" })),
+      hasCourseInstance: { "@type": "CourseInstance", courseMode: "online", courseWorkload: "PT30M" } },
+    faq.length ? { "@context": "https://schema.org", "@type": "FAQPage", inLanguage: "ar", mainEntity: faq } : null
+  ].filter(Boolean);
+  const json = JSON.stringify(ld).replace(/</g, "\\u003c");
+  return html.replace("<!--JSONLD-->", `<script type="application/ld+json">${json}</script>`);
+}
+const htmlCache = new Map(); // file -> { key, body }
+async function sendPage(req, res, name, status) {
+  const f = path.join(PUB, name), st = await fs.promises.stat(f);
+  let extraKey = "";
+  let cfg = null;
+  if (name === "index.html") { cfg = await C.loadCfg(); extraKey = JSON.stringify([cfg.plans, cfg.currency]); }
+  const vers = [...(htmlCache.get(f) || { assets: [] }).assets].map(p => fileVersion(path.join(PUB, p))).join(",");
+  const key = f + ":" + st.mtimeMs + ":" + st.size + ":" + vers + ":" + extraKey;
+  let c = htmlCache.get(f);
+  if (!c || c.key !== key) {
+    let html = await fs.promises.readFile(f, "utf8");
+    const assets = [...html.matchAll(ASSET_RE)].map(m => m[3]);
+    html = versionAssets(html);
+    if (cfg) html = landingExtras(html, cfg);
+    const v2 = assets.map(p => fileVersion(path.join(PUB, p))).join(",");
+    c = { key: f + ":" + st.mtimeMs + ":" + st.size + ":" + v2 + ":" + extraKey, body: Buffer.from(html), assets };
+    htmlCache.set(f, c);
+  }
+  return sendText(req, res, { body: c.body, key: c.key, type: "html" }, "no-cache", status);
+}
 // "/" is the marketing page for visitors; signed-in students go straight to the app at /app
 app.get("/", wrap(async (req, res) => {
   const tok = parseCookies(req)[COOKIE];
   if (tok && req.query.home === undefined) { const r = await pool.query("SELECT 1 FROM sessions WHERE token_hash=$1 AND expires_at>now()", [sha(tok)]); if (r.rows[0]) return res.redirect(302, "/app"); }
-  res.set("Cache-Control", "no-cache").sendFile(path.join(PUB, "index.html"));
+  return sendPage(req, res, "index.html");
 }));
-app.get(["/app", "/app/"], (req, res) => res.set("Cache-Control", "no-cache").sendFile(path.join(PUB, "app.html")));
-// gzip the big text assets (app.js is ~380 KB) without an extra dependency; cached per file mtime
-const gzCache = new Map();
-app.get(/^\/(app\.js|app\.css|admin\.js|cloud\.js|xp-engine\.js|landing\.js|landing\.css|content\/[\w-]+\.json)$/, (req, res, next) => {
-  if (!/\bgzip\b/.test(req.get("Accept-Encoding") || "")) return next();
-  const f = path.join(PUB, req.path.slice(1));
-  fs.stat(f, (err, st) => {
-    if (err) return next();
-    let c = gzCache.get(f);
-    if (!c || c.mtime !== st.mtimeMs) {
-      try { c = { mtime: st.mtimeMs, gz: zlib.gzipSync(fs.readFileSync(f), { level: 9 }), etag: `W/"${st.size.toString(16)}-${Math.floor(st.mtimeMs).toString(16)}-gz"` }; }
-      catch (e) { return next(); }
-      gzCache.set(f, c);
-    }
-    res.set({ "Content-Type": (f.endsWith(".css") ? "text/css" : f.endsWith(".json") ? "application/json" : "application/javascript") + "; charset=UTF-8", "Content-Encoding": "gzip",
-      "Vary": "Accept-Encoding", "Cache-Control": "no-cache", "ETag": c.etag, "Last-Modified": new Date(st.mtimeMs).toUTCString() });
-    if (req.fresh) return res.status(304).end();
-    res.send(c.gz);
-  });
-});
+app.get(["/app", "/app/"], wrap((req, res) => sendPage(req, res, "app.html")));
+app.get(/^\/(index|app|admin|privacy|terms|404)(\.html)?$/, wrap((req, res) => {
+  const n = req.params[0];
+  if (n === "index") return res.redirect(301, "/");
+  if (n === "404") return sendPage(req, res, "404.html", 404);
+  return sendPage(req, res, n + ".html");
+}));
+// pre-compressed static text (JS, CSS, JSON, SVG…); binary files fall through to express.static
+app.use(wrap(async (req, res, next) => {
+  if ((req.method !== "GET" && req.method !== "HEAD") || !TEXT_RE.test(req.path)) return next();
+  let rel; try { rel = decodeURIComponent(req.path); } catch (e) { return next(); }
+  const f = path.join(PUB, rel);
+  if (!f.startsWith(PUB + path.sep) || rel.includes("\0")) return next();
+  let st; try { st = await fs.promises.stat(f); } catch (e) { return next(); }
+  if (!st.isFile()) return next();
+  return sendText(req, res, f, cacheFor(req, f));
+}));
 app.use(express.static(PUB, { extensions: ["html"], setHeaders: (res, f) => {
-  if (/\.(js|css|html)$/.test(f)) res.set("Cache-Control", "no-cache");
-  else if (/\.(svg|png|ico|webmanifest)$/.test(f)) res.set("Cache-Control", "public, max-age=604800");
-  else if (/\.mp3$/.test(f)) res.set("Cache-Control", "public, max-age=2592000");
+  res.set("Cache-Control", cacheFor(res.req, f));
+  if (/\.mp3$/.test(f)) res.set("Cache-Control", "public, max-age=2592000");
 } }));
 app.use("/api", (req, res) => fail(res, 404, "not-found"));
-app.use((req, res) => res.status(404).type("html").sendFile(path.join(PUB, "404.html"), e => { if (e) res.end("Not found"); }));
+app.use((req, res) => sendPage(req, res, "404.html", 404).catch(() => res.status(404).end("Not found")));
 app.use((err, req, res, next) => {
   if (err && (err.type === "entity.parse.failed" || err.type === "entity.too.large" || err.type === "encoding.unsupported" || err.type === "charset.unsupported")) {
     const tooBig = err.type === "entity.too.large";

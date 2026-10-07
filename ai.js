@@ -69,18 +69,48 @@ function clean(o, keys) {
 }
 
 module.exports = function ai(app, { pool, wrap, fail, needUser, C, limited }) {
-  async function quota(req, kind) { // kind: ai_writing | ai_speaking
+  // limits per kind: admin unlimited; pro has daily caps; free has lifetime caps. Placement: free 1 lifetime, pro 3 a day.
+  async function limitOf(req, kind) {
     const cfg = await C.loadCfg(), plan = await C.planOf(req.user);
-    if (plan.source === "admin") return { ok: true, plan };
-    if (plan.tier === "pro") {
-      const max = kind === "ai_writing" ? cfg.pro.aiWritingDaily : cfg.pro.aiSpeakingDaily;
-      const n = (await pool.query("SELECT count(*)::int n FROM events WHERE user_id=$1 AND type=$2 AND day=CURRENT_DATE", [req.user.id, kind])).rows[0].n;
-      return { ok: n < max, plan, left: Math.max(0, max - n - 1), reason: "daily" };
-    }
-    const max = kind === "ai_writing" ? cfg.free.aiWriting : cfg.free.aiSpeaking;
-    const n = (await pool.query("SELECT count(*)::int n FROM events WHERE user_id=$1 AND type=$2", [req.user.id, kind])).rows[0].n;
-    return { ok: n < max, plan, left: Math.max(0, max - n - 1), reason: "free" };
+    if (plan.source === "admin") return { plan, max: Infinity, daily: false };
+    const pro = plan.tier === "pro";
+    const max = kind === "ai_placement" ? (pro ? 3 : 1)
+      : pro ? (kind === "ai_writing" ? cfg.pro.aiWritingDaily : cfg.pro.aiSpeakingDaily)
+      : (kind === "ai_writing" ? cfg.free.aiWriting : cfg.free.aiSpeaking);
+    return { plan, max, daily: pro };
   }
+  const countSQL = daily => "SELECT count(*)::int n FROM events WHERE user_id=$1 AND type=$2" + (daily ? " AND day=CURRENT_DATE" : "");
+  async function quota(req, kind) { // read-only view for /api/ai/status
+    const L = await limitOf(req, kind);
+    if (L.max === Infinity) return { ok: true, plan: L.plan };
+    const n = (await pool.query(countSQL(L.daily), [req.user.id, kind])).rows[0].n;
+    return { ok: n < L.max, plan: L.plan, left: Math.max(0, L.max - n - 1), reason: L.daily ? "daily" : "free" };
+  }
+  // Atomically reserve one use BEFORE calling the model: a per-user+kind advisory lock serialises parallel requests,
+  // so count + insert cannot interleave. The pending row (k='pending') counts against the limit; commit() fills it in
+  // after a successful marking, release() deletes it when the marking fails.
+  async function reserve(req, kind) {
+    const L = await limitOf(req, kind);
+    const db = await pool.connect();
+    try {
+      await db.query("BEGIN");
+      await db.query("SELECT pg_advisory_xact_lock(hashtext($1))", [req.user.id + "|" + kind]);
+      let n = 0;
+      if (L.max !== Infinity) {
+        n = (await db.query(countSQL(L.daily), [req.user.id, kind])).rows[0].n;
+        if (n >= L.max) { await db.query("ROLLBACK"); return { ok: false, reason: L.daily ? "daily" : "free" }; }
+      }
+      const id = (await db.query("INSERT INTO events(user_id,type,k) VALUES($1,$2,'pending') RETURNING id", [req.user.id, kind])).rows[0].id;
+      await db.query("COMMIT");
+      return { ok: true, id, plan: L.plan, left: L.max === Infinity ? undefined : Math.max(0, L.max - n - 1) };
+    } catch (e) { await db.query("ROLLBACK").catch(() => {}); throw e; }
+    finally { db.release(); }
+  }
+  const commit = (id, k, v) => pool.query("UPDATE events SET k=$2, v=$3 WHERE id=$1", [id, k, v == null ? null : v]);
+  const release = id => pool.query("DELETE FROM events WHERE id=$1", [id]).catch(e => console.error("ai release", e.message));
+  const limitErr = q => q.reason === "daily" ? "ai-daily-limit" : "ai-free-limit";
+  // a reservation left behind by a crash mid-call is freed after 15 minutes
+  setInterval(() => pool.query("DELETE FROM events WHERE type IN ('ai_writing','ai_speaking','ai_placement') AND k='pending' AND at<now()-interval '15 minutes'").catch(() => {}), 600e3).unref();
   app.get("/api/ai/status", needUser, wrap(async (req, res) => {
     const w = await quota(req, "ai_writing"), s = await quota(req, "ai_speaking");
     res.json({ on: !!process.env.ANTHROPIC_API_KEY, writing: { ok: w.ok, left: w.ok ? w.left + 1 : 0 }, speaking: { ok: s.ok, left: s.ok ? s.left + 1 : 0 } });
@@ -92,18 +122,18 @@ module.exports = function ai(app, { pool, wrap, fail, needUser, C, limited }) {
     const b = req.body || {}, task = ["t1a", "t1g", "t2"].includes(b.task) ? b.task : "t2";
     const essay = clip(b.essay, 6000), prompt = clip(b.prompt, 2500), data = clip(b.data, 3000);
     if (words(essay) < 40) return fail(res, 400, "too-short");
-    const q = await quota(req, "ai_writing"); if (!q.ok) return fail(res, 402, q.reason === "daily" ? "ai-daily-limit" : "ai-free-limit");
     const user = `${task === "t2" ? "IELTS Writing Task 2" : task === "t1a" ? "IELTS Academic Writing Task 1" : "IELTS General Training Writing Task 1 (letter)"}
 TASK PROMPT:
 ${prompt}
 ${data ? "DATA SHOWN IN THE VISUAL (for checking accuracy):\n" + data + "\n" : ""}
 CANDIDATE'S ANSWER (${words(essay)} words):
 ${essay}`;
+    const q = await reserve(req, "ai_writing"); if (!q.ok) return fail(res, 402, limitErr(q));
     let out;
     try { out = clean(extractJSON(await claude(WRITING_SYS, user, 2500)), ["TA", "CC", "LR", "GRA"]); }
-    catch (e) { console.error("ai writing", e.message); return fail(res, 502, "ai-failed"); }
+    catch (e) { console.error("ai writing", e.message); await release(q.id); return fail(res, 502, "ai-failed"); }
     out.words = words(essay);
-    await pool.query("INSERT INTO events(user_id,type,k,v) VALUES($1,'ai_writing',$2,$3)", [req.user.id, task, out.overall]);
+    await commit(q.id, task, out.overall);
     res.json({ result: out, left: q.left });
   }));
 
@@ -113,12 +143,12 @@ ${essay}`;
     const b = req.body || {}, part = [1, 2, 3].includes(Number(b.part)) ? Number(b.part) : 1;
     const transcript = clip(b.transcript, 5000), question = clip(b.question, 800), dur = Math.max(0, Math.min(600, Number(b.seconds) || 0));
     if (words(transcript) < 5) return fail(res, 400, "too-short");
-    const q = await quota(req, "ai_speaking"); if (!q.ok) return fail(res, 402, q.reason === "daily" ? "ai-daily-limit" : "ai-free-limit");
     const user = `IELTS Speaking Part ${part}\nQUESTION / CUE CARD:\n${question}\nDURATION: ${Math.round(dur)} seconds\nTRANSCRIPT (${words(transcript)} words):\n${transcript}`;
+    const q = await reserve(req, "ai_speaking"); if (!q.ok) return fail(res, 402, limitErr(q));
     let out;
     try { out = clean(extractJSON(await claude(SPEAKING_SYS, user, 1800)), ["FC", "LR", "GRA", "P"]); }
-    catch (e) { console.error("ai speaking", e.message); return fail(res, 502, "ai-failed"); }
-    await pool.query("INSERT INTO events(user_id,type,k,v) VALUES($1,'ai_speaking',$2,$3)", [req.user.id, "p" + part, out.overall]);
+    catch (e) { console.error("ai speaking", e.message); await release(q.id); return fail(res, 502, "ai-failed"); }
+    await commit(q.id, "p" + part, out.overall);
     res.json({ result: out, left: q.left });
   }));
 
@@ -126,22 +156,17 @@ ${essay}`;
   app.post("/api/ai/placement", needUser, wrap(async (req, res) => {
     if (!process.env.ANTHROPIC_API_KEY) return fail(res, 503, "ai-not-configured");
     if (limited("aip:" + req.user.id, 6, 3600e3)) return fail(res, 429, "too-many-requests");
-    const plan = await C.planOf(req.user);
-    if (plan.source !== "admin") {
-      const pro = plan.tier === "pro";
-      const n = (await pool.query(`SELECT count(*)::int n FROM events WHERE user_id=$1 AND type='ai_placement'${pro ? " AND day=CURRENT_DATE" : ""}`, [req.user.id])).rows[0].n;
-      if (n >= (pro ? 3 : 1)) return fail(res, 402, pro ? "ai-daily-limit" : "ai-free-limit");
-    }
     const b = req.body || {}, w = b.writing && words(b.writing.essay) >= 30 ? { prompt: clip(b.writing.prompt, 1500), essay: clip(b.writing.essay, 4000) } : null;
     const sp = (Array.isArray(b.speaking) ? b.speaking : []).slice(0, 5).map(x => ({ part: [1, 2, 3].includes(Number(x.part)) ? Number(x.part) : 1, q: clip(x.question, 300), t: clip(x.transcript, 2000), s: Math.max(0, Math.min(300, Number(x.seconds) || 0)) })).filter(x => words(x.t) >= 3);
     if (!w && !sp.length) return fail(res, 400, "too-short");
     const user = `${w ? `WRITING\nQUESTION:\n${w.prompt}\nANSWER (${words(w.essay)} words):\n${w.essay}\n\n` : "WRITING: not provided\n\n"}${sp.length ? "SPEAKING\n" + sp.map((x, i) => `${i + 1}. Part ${x.part} question: ${x.q}\nDuration: ${Math.round(x.s)} seconds\nTranscript (${words(x.t)} words): ${x.t}`).join("\n\n") : "SPEAKING: not provided"}`;
+    const q = await reserve(req, "ai_placement"); if (!q.ok) return fail(res, 402, limitErr(q));
     let o;
     try { o = extractJSON(await claude(PLACE_SYS, user, 1500)); }
-    catch (e) { console.error("ai placement", e.message); return fail(res, 502, "ai-failed"); }
+    catch (e) { console.error("ai placement", e.message); await release(q.id); return fail(res, 502, "ai-failed"); }
     const part = (x, keys) => { if (!x || !x.bands) return null; const c = clean(x, keys); return { bands: c.bands, overall: c.overall, summary: c.summary, next: c.next }; };
     const out = { W: w ? part(o.W, ["TA", "CC", "LR", "GRA"]) : null, S: sp.length ? part(o.S, ["FC", "LR", "GRA", "P"]) : null };
-    await pool.query("INSERT INTO events(user_id,type,k,v) VALUES($1,'ai_placement',$2,$3)", [req.user.id, (out.W ? "W" : "") + (out.S ? "S" : ""), out.W ? out.W.overall : out.S && out.S.overall]);
+    await commit(q.id, (out.W ? "W" : "") + (out.S ? "S" : ""), out.W ? out.W.overall : out.S && out.S.overall);
     res.json({ result: out });
   }));
 };

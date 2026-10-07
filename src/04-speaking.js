@@ -32,7 +32,7 @@ async function pageSpeak(mode, id) {
   }
   SP = { mode, id, title, steps, i: 0, answers: [], rec: null, stream: null };
   setTimeout(() => spRender(), 0);
-  return `<div class="spread"><a href="#speaking" class="btn ghost sm">← ${_('غرفة المحادثة', 'Speaking room')}</a><span class="chip pri">${esc(title)}</span></div><div id="sp-stage" class="grid"></div>`;
+  return `<div class="spread"><a href="#speaking" class="btn ghost sm">${BK()}${_('غرفة المحادثة', 'Speaking room')}</a><span class="chip pri">${esc(title)}</span></div><div id="sp-stage" class="grid"></div>`;
 }
 function spAudio(clip) { return new Promise(res => { const a = new Audio('/audio/sp/' + clip + '.mp3'); a.volume = S.vol ?? .9; a.onended = res; a.onerror = res; a.play().catch(res); SP.player = a; }); }
 async function spRender() {

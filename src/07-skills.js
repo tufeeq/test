@@ -48,7 +48,7 @@ async function pageLearn(tab = 'xp') {
   } else if (tab === 'tech') {
     const open = freeCount(TECH.length);
     body = `<p class="lead">${_('حيل مختصرة تحفظها وتستخدمها في كل سؤال. كل تمرين في الموقع مربوط بإحدى هذه التقنيات.', 'Short tricks you memorise and use on every question. Every drill on the site is linked to one of them.')}</p>
-    ${SEC_ORDER.map(sec => { const ts = TECH.filter(t => t.sk[0] === sec); return `<h2 class="sec-h c-${sec}">${skName(sec)}</h2><div class="notes">${ts.map(t => { const lk = TECH.indexOf(t) >= open; return lk ? `<a class="note-card locked" href="#upgrade"><h3>${esc(L(t.t))}</h3><span class="lock-b">${ic('lock')}${_('برو', 'Pro')}</span></a>` : `<article class="note-card c${TECH.indexOf(t) % 4}"><h3>${esc(L(t.t))}</h3><p>${esc(L(t.d))}</p>${t.ex ? `<p class="ex ltr-text">${esc(t.ex)}</p>` : ''}<a class="tiny" href="#skill/${t.sk}">${esc(L(SKL.find(s => s.id === t.sk).title))} →</a></article>`; }).join('')}</div>`; }).join('')}`;
+    ${SEC_ORDER.map(sec => { const ts = TECH.filter(t => t.sk[0] === sec); return `<h2 class="sec-h c-${sec}">${skName(sec)}</h2><div class="notes">${ts.map(t => { const lk = TECH.indexOf(t) >= open; return lk ? `<a class="note-card locked" href="#upgrade"><h3>${esc(L(t.t))}</h3><span class="lock-b">${ic('lock')}${_('برو', 'Pro')}</span></a>` : `<article class="note-card c${TECH.indexOf(t) % 4}"><h3>${esc(L(t.t))}</h3><p>${esc(L(t.d))}</p>${t.ex ? `<p class="ex ltr-text">${esc(t.ex)}</p>` : ''}<a class="tiny" href="#skill/${t.sk}">${esc(L(SKL.find(s => s.id === t.sk).title))}${FW()}</a></article>`; }).join('')}</div>`; }).join('')}`;
   } else if (tab === 'words') { location.hash = '#words'; return ''; }
   else { location.hash = '#lessons'; return ''; }
   return `<div class="page-h"><span class="eyebrow">${_('الحقيبة', 'The kit')}</span><h1>${_('تعلّم المهارات قبل الاختبارات', 'Learn the skills before the tests')}</h1><p>${_('الآيلتس ليس حظًا: هو ١٦ مهارة دقيقة. لكل مهارة شرح بالعربية، وأمثلة محلولة، وفخاخ، وتقنيات، ثم تمارين بالإنجليزية مع تلميح وشرح لكل سؤال.', 'IELTS isn’t luck: it’s 16 micro-skills. Each has an Arabic explanation, worked examples, traps and techniques — then English drills with a hint and an explanation for every question.')}</p></div>
@@ -69,7 +69,7 @@ async function pageSkill(id) {
     <ul class="lvl-rules small">${[[1, _('ابدأ التمرين', 'Start practising')], [2, _('٥ إجابات بدقة ٦٠٪+', '5 answers at 60%+')], [3, _('١٠ إجابات بدقة ٨٠٪+', '10 answers at 80%+')], [4, _('٢٠ إجابة بدقة ٩٠٪+', '20 answers at 90%+')]].map(([k, t]) => `<li class="${i.level >= k ? 'on' : ''}"><b>${LEVELS()[k]}</b> ${t}</li>`).join('')}</ul>
     <button class="btn primary block" data-drill="${id}">${_('تدرّب: ١٠ أسئلة', 'Practise: 10 questions')}</button><p class="tiny muted">${_('كل سؤال فيه تلميح وتقنية وشرح.', 'Every question has a hint, a technique and an explanation.')}</p></div>`;
   setTimeout(() => $$('[data-drill]').forEach(b => b.onclick = () => startDrill({ skills: [b.dataset.drill], n: 10, title: L(s.title) })), 0);
-  return `<div class="spread"><a href="#learn/skills" class="btn ghost sm">← ${_('المهارات', 'Skills')}</a><span class="chip c-${s.sec}">${skName(s.sec)}</span></div>
+  return `<div class="spread"><a href="#learn/skills" class="btn ghost sm">${BK()}${_('المهارات', 'Skills')}</a><span class="chip c-${s.sec}">${skName(s.sec)}</span></div>
   <div class="page-h"><h1>${esc(L(s.title))}</h1><p>${esc(L(s.tag))}</p></div>
   <div class="lesson2">
     <div class="lesson-main grid">
@@ -100,7 +100,7 @@ const GEN = {
     const k = rnd(4);
     if (k === 0) { const nm = NAMES[rnd(NAMES.length)]; const sp = nm.toUpperCase().split('').reduce((a, c, i, arr) => { if (i && arr[i - 1] === c) return a; return a.concat(arr[i + 1] === c ? 'double ' + c : c); }, []).join(', ');
       return { gen: 1, id: 'g-sp', sk: 'L-detail', tech: 'letters', kind: 'type', tts: `My surname is ${nm}. That’s ${sp}.`, q: 'Surname: ____', a: [nm], hint: { ar: 'اكتب الحروف واحدًا واحدًا، و«double» تعني حرفين.', en: 'Write the letters one by one; “double” means two of the same.' }, why: { ar: `التهجئة: ${sp}.`, en: `Spelling: ${sp}.` } }; }
-    if (k === 1) { const d1 = 10 + rnd(18), d2 = d1 + 1 + rnd(3), m = MONTHS[rnd(12)];
+    if (k === 1) { const d1 = 10 + rnd(16), d2 = d1 + 1 + rnd(3), m = MONTHS[rnd(12)]; // d2 ≤ 28: valid in every month
       return { gen: 1, id: 'g-dt', sk: 'L-detail', tech: 'correction', kind: 'type', tts: `We’re arriving on the ${ORD(d1)} of ${m}. Oh, sorry, no — the ${ORD(d2)}.`, q: `Arrival: ____ ${m}`, a: [String(d2), ORD(d2)], hint: { ar: 'انتظر حتى نهاية الجملة: هل يتغيّر التاريخ؟', en: 'Wait for the end: does the date change?' }, why: { ar: `قيل ${d1} ثم صُحّح إلى ${d2}. الإجابة بعد التصحيح.`, en: `${d1} was corrected to ${d2}. The answer follows the correction.` } }; }
     if (k === 2) { const teen = 13 + rnd(7), ty = (teen - 10) * 10, pick = rnd(2) ? teen : ty;
       return { gen: 1, id: 'g-tn', sk: 'L-detail', tech: 'teen-ty', kind: 'type', tts: `The ticket costs ${pick} pounds.`, q: 'Price: £____', a: [String(pick)], hint: { ar: 'أين الضغط في الرقم: في آخره (-teen) أم في أوله (-ty)؟', en: 'Where’s the stress: at the end (-teen) or the start (-ty)?' }, why: { ar: `الرقم ${pick}. في -teen الضغط على آخر الكلمة، وفي -ty على أولها.`, en: `${pick}. -teen stresses the end; -ty stresses the start.` } }; }
@@ -108,14 +108,21 @@ const GEN = {
     return { gen: 1, id: 'g-ph', sk: 'L-detail', tech: 'predict', kind: 'type', tts: `My number is ${ph.slice(0, 5).split('').join(' ').replace(/0/g, 'oh')}, ${ph.slice(5).split('').join(' ').replace(/0/g, 'oh')}.`, q: 'Phone: ____', a: [ph, ph.slice(0, 5) + ' ' + ph.slice(5)], hint: { ar: '«oh» = صفر. اكتب الأرقام كما تسمعها.', en: '“oh” = zero. Write the digits as you hear them.' }, why: { ar: `الرقم ${ph}.`, en: `The number is ${ph}.` } };
   },
   'W-t1': () => {
-    const a = 20 + rnd(60), cases = [[a, a + 30 + rnd(20), 'rose sharply'], [a, a + 2 + rnd(3), 'increased slightly'], [a, Math.max(2, a - 25 - rnd(15)), 'fell dramatically'], [a, a, 'remained stable'], [a, a - 2 - rnd(2), 'dipped slightly']];
+    const a = 20 + rnd(60), lo = 10 + rnd(40), hi = 50 + rnd(45); // keeps every value within 0–100%
+    const cases = [[lo, Math.min(98, lo + 30 + rnd(20)), 'rose sharply'], [a, a + 2 + rnd(3), 'increased slightly'], [hi, hi - 25 - rnd(15), 'fell dramatically'], [a, a, 'remained stable'], [a, a - 2 - rnd(2), 'dipped slightly']];
     const [x, y, ok] = cases[rnd(cases.length)], all = ['rose sharply', 'increased slightly', 'fell dramatically', 'remained stable', 'dipped slightly'], opts = shuffle([ok, ...shuffle(all.filter(o => o !== ok)).slice(0, 2)]);
     return { gen: 1, id: 'g-tr', sk: 'W-t1', tech: 'trend', kind: 'mcq', src: `Data: the figure went from ${x}% in 2015 to ${y}% in 2020.`, q: 'Which phrase describes the change best?', opts, a: LET[opts.indexOf(ok)], hint: { ar: 'احسب الفرق: كبير؟ صغير؟ لا تغيير؟ ثم اختر الفعل والظرف.', en: 'Work out the difference: big, small or none? Then choose verb + adverb.' }, why: { ar: `من ${x}% إلى ${y}%: ${ok}.`, en: `From ${x}% to ${y}%: ${ok}.` } };
   }
 };
 async function extraItems(skill) {
-  if (skill === 'W-grammar') { const er = (await content('arab_errors')).items; return er.flatMap(e => e.drill.map((dr, i) => ({ id: 'e:' + e.id + ':' + i, sk: 'W-grammar', tech: 'arab-check', kind: 'type', src: dr.s, q: AR() ? 'صحّح الجملة' : 'Correct the sentence.', a: [dr.a], hint: dr.hint, why: e.why, lvl: 2 }))); }
-  if (skill === 'R-para') { const pp = (await content('paraphrase')).items; return pp.map(p => { const opts = shuffle([p.t, ...p.d], p.id.length * 7 + 3); return { id: 'p:' + p.id, sk: 'R-para', tech: 'synonym', kind: 'mcq', src: p.q, q: 'Which sentence means the same?', opts, a: LET[opts.indexOf(p.t)], hint: { ar: 'ابحث عن المعنى لا الكلمة، وانتبه للكلمات الصغيرة (some/all، may/will).', en: 'Search for meaning, not words; watch small words (some/all, may/will).' }, why: p.note, lvl: 2 }; }); }
+  const seedOf = s => [...s].reduce((n, c) => (n * 131 + c.charCodeAt(0)) % 233280, 17) + 1; // stable per item, spreads the correct option across A–D
+  if (skill === 'W-grammar') { const er = (await content('arab_errors')).items; return er.flatMap(e => e.drill.map((dr, i) => {
+    // dr.a = model correction (string or array), dr.alt = other accepted corrections, dr.d = wrong options → multiple choice
+    const acc = [].concat(dr.a, dr.alt || []).filter(Boolean), base = { id: 'e:' + e.id + ':' + i, sk: 'W-grammar', tech: 'arab-check', src: dr.s, hint: dr.hint, why: e.why, lvl: 2 };
+    if (dr.d && dr.d.length) { const opts = shuffle([acc[0], ...dr.d], seedOf(e.id + ':' + i)); return { ...base, kind: 'mcq', q: AR() ? 'اختر التصحيح الأنسب' : 'Choose the best correction.', opts, a: LET[opts.indexOf(acc[0])] }; }
+    return { ...base, kind: 'type', q: AR() ? 'صحّح الجملة' : 'Correct the sentence.', a: acc };
+  })); }
+  if (skill === 'R-para') { const pp = (await content('paraphrase')).items; return pp.map(p => { const opts = shuffle([p.t, ...p.d], seedOf(p.id)); return { id: 'p:' + p.id, sk: 'R-para', tech: 'synonym', kind: 'mcq', src: p.q, q: 'Which sentence means the same?', opts, a: LET[opts.indexOf(p.t)], hint: { ar: 'ابحث عن المعنى لا الكلمة، وانتبه للكلمات الصغيرة (some/all، may/will).', en: 'Search for meaning, not words; watch small words (some/all, may/will).' }, why: p.note, lvl: 2 }; }); }
   return [];
 }
 
@@ -143,7 +150,7 @@ async function startDrill({ skills, n = 10, title, session }) {
 function pageDrillRun() {
   if (!DS) { setTimeout(() => location.hash = '#practice', 0); return ''; }
   setTimeout(drRender, 0);
-  return `<div class="spread"><a href="#practice" class="btn ghost sm" id="dr-quit">← ${_('إنهاء', 'Quit')}</a><span class="chip pri">${esc(DS.title)}</span></div><div id="drill-stage" class="drill"></div>`;
+  return `<div class="spread"><a href="#practice" class="btn ghost sm" id="dr-quit">${BK()}${_('إنهاء', 'Quit')}</a>${DS.items.every(x => x.sk === DS.items[0].sk) ? '' : `<span class="chip pri">${esc(DS.title)}</span>`}</div><div id="drill-stage" class="drill"></div>`;
 }
 function ttsSay(text) { try { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang = 'en-GB'; u.rate = .92; const v = speechSynthesis.getVoices().find(v => /en-GB/i.test(v.lang)); if (v) u.voice = v; speechSynthesis.speak(u); } catch (e) { toast(_('الصوت غير مدعوم في هذا المتصفح', 'Speech is not supported in this browser')); } }
 function drPlay(it) { DS.plays++; if (it.gen) return ttsSay(it.tts); const a = new Audio('/audio/dr/' + it.id + '.mp3'); a.volume = S.vol ?? .9; a.play().catch(() => toast(_('تعذّر تشغيل الصوت', 'Audio could not play'))); DS.audio = a; }

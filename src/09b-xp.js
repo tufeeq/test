@@ -46,7 +46,7 @@ function hookXp() {
 function loadPremiumXp() {
   if (XP_PREM || !PRO() || !xpOK()) return; XP_PREM = 1;
   const s = document.createElement('script'); s.src = '/api/xp/premium.js';
-  s.onload = () => { XP_PREM = 2; try { XP.loadTracks(); } catch (e) {} renderRoute(); };
+  s.onload = () => { XP_PREM = 2; renderRoute(); }; // narration tracks for all lessons were already loaded by hookXp
   s.onerror = () => { XP_PREM = 0; s.remove(); };
   document.head.appendChild(s);
 }

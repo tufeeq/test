@@ -15,6 +15,10 @@
   }
   R.classList.remove('no-js');
 
+  /* ---------- fonts: the preloaded Google Fonts CSS becomes a stylesheet without blocking the first paint ---------- */
+  var gf = D.getElementById('lp-fonts');
+  if (gf) { var fl = D.createElement('link'); fl.rel = 'stylesheet'; fl.href = gf.href; D.head.appendChild(fl); }
+
   /* ---------- storage helpers (private mode, blocked storage) ---------- */
   function sget(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
   function sset(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
@@ -42,9 +46,11 @@
     if (saved === 'en' || saved === 'ar') LANG = saved;
     else { try { var S = JSON.parse(sget('masar100_v1') || 'null'); if (S && S.lang === 'en') LANG = 'en'; } catch (e) {} }
   }
+  // the server renders ?lang=en in English (data-ssr="en"); otherwise the HTML is Arabic and English is applied here
+  var SSR = R.getAttribute('data-ssr') === 'en' ? 'en' : 'ar';
   function setRootLang() { R.lang = LANG; R.dir = LANG === 'ar' ? 'rtl' : 'ltr'; }
   setRootLang();
-  if (LANG === 'en') {
+  if (LANG !== SSR) {
     R.classList.add('lp-pending');
     setTimeout(function () { R.classList.remove('lp-pending'); }, 1500);
   }
@@ -336,7 +342,12 @@
     if (t && stt) stt.textContent = t.textContent;
   }
   function openXp(k, trigger) {
-    if (!hasXP()) { var d = $('#demo'); if (d) d.scrollIntoView({ behavior: 'smooth' }); return; }
+    if (!hasXP()) {
+      var pl = $('#lp-play'); if (pl) pl.classList.add('busy');
+      loadXP().then(function () { if (pl) pl.classList.remove('busy'); openXp(k, trigger); },
+        function () { if (pl) pl.classList.remove('busy'); var d = $('#demo'); if (d) d.scrollIntoView({ behavior: 'smooth' }); });
+      return;
+    }
     var key = xpKey(k);
     if (!window.XP.get(key)) key = xpKey(DEMO[0]);
     lastTrigger = trigger || null;
@@ -347,15 +358,45 @@
       window.XP.open(key);
     });
   }
-  function initDemo() {
-    if (hasXP()) {
+  /* the player scripts (gsap, engine, free explainers) are loaded on demand, in order, from <template id="lp-xp-scripts"> */
+  var xpLoad = null;
+  function loadXP() {
+    if (xpLoad) return xpLoad;
+    var tpl = $('#lp-xp-scripts'), srcs = [];
+    if (tpl && tpl.content) srcs = Array.prototype.map.call(tpl.content.querySelectorAll('script[src]'), function (s) { return s.getAttribute('src'); });
+    xpLoad = srcs.reduce(function (p, src) {
+      return p.then(function () {
+        return new Promise(function (ok, bad) {
+          var el = D.createElement('script'); el.src = src; el.async = false;
+          el.onload = ok; el.onerror = function () { bad(new Error(src)); };
+          D.body.appendChild(el);
+        });
+      });
+    }, Promise.resolve()).then(function () {
+      if (!hasXP()) throw new Error('xp');
       try { tracks = window.XP.loadTracks(); } catch (e) { tracks = null; }
       window.XP.setHooks({ onClose: function () { if (lastTrigger && lastTrigger.focus) { try { lastTrigger.focus({ preventScroll: true }); } catch (e) {} } } });
-    }
-    $$('.lp-pk').forEach(function (b) { b.addEventListener('click', function () { pick(b.getAttribute('data-xp')); }); });
+      syncDemo();
+    });
+    xpLoad.catch(function () { xpLoad = null; }); // allow a retry on the next press
+    return xpLoad;
+  }
+  function initDemo() {
+    $$('.lp-pk').forEach(function (b) { b.addEventListener('click', function () { pick(b.getAttribute('data-xp')); loadXP().catch(function () {}); }); });
     var play = $('#lp-play'); if (play) play.addEventListener('click', function () { openXp(sel, play); });
-    $$('[data-xp-hero]').forEach(function (a) { a.addEventListener('click', function (e) { if (!hasXP()) return; e.preventDefault(); openXp('analogy', a); }); });
+    $$('[data-xp-hero]').forEach(function (a) { a.addEventListener('click', function (e) { e.preventDefault(); openXp('analogy', a); }); });
     syncDemo();
+    // start loading when the demo is close to the screen, or once the page has settled (not on data-saver connections)
+    var demo = $('#demo');
+    if (demo && 'IntersectionObserver' in window) {
+      var io = new IntersectionObserver(function (ents) { if (ents.some(function (x) { return x.isIntersecting; })) { io.disconnect(); loadXP().catch(function () {}); } }, { rootMargin: '150px 0px' });
+      io.observe(demo);
+    }
+    var saveData = navigator.connection && navigator.connection.saveData;
+    if (!saveData) {
+      var idle = function () { (window.requestIdleCallback || function (f) { setTimeout(f, 1); })(function () { loadXP().catch(function () {}); }); };
+      if (D.readyState === 'complete') setTimeout(idle, 2500); else window.addEventListener('load', function () { setTimeout(idle, 2500); });
+    }
   }
 
   /* ---------- header, theme button, language button ---------- */
@@ -377,6 +418,7 @@
     if (lb) lb.addEventListener('click', function (e) {
       e.preventDefault();
       LANG = LANG === 'ar' ? 'en' : 'ar'; sset(LKEY, LANG);
+      if (SSR !== 'ar') { location.href = lb.getAttribute('href') + location.hash; return; } // the Arabic text isn't in this HTML
       try { var u = new URL(location.href); if (u.searchParams.has('lang')) { u.searchParams.set('lang', LANG); history.replaceState(null, '', u.pathname + u.search + u.hash); } } catch (err) {}
       setRootLang(); translate(); renderLive(); syncDemo(); syncThemeBtn();
     });

@@ -36,7 +36,7 @@ function track(type, k, v) {
   if (evq.length >= 20) flush(); else if (!evTimer) evTimer = setTimeout(flush, 5000);
 }
 function openOnce() { // one "open" per account per day
-  if (!user) return; const d = new Date().toISOString().slice(0, 10), key = "masar100_open", v = user.email + "|" + d;
+  if (!user) return; const n = new Date(), d = n.getFullYear() + "-" + (n.getMonth() + 1) + "-" + n.getDate(), key = "masar100_open", v = user.email + "|" + d; // the student's own calendar day, not UTC
   if (ls.get(key) === v) return; ls.set(key, v); track("open");
 }
 document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden") flush(true); });
@@ -74,16 +74,41 @@ async function pull() {
   }
   await push(); safe(() => A().render());
 }
+/* What the student was about to do when the sign-in prompt appeared (start a test, open the plans). If signing in
+   reloads the page (another account's progress was on this device), it is kept for this tab and resumed after the reload. */
+const RESUME = "masar100_resume";
+const ss = { get: k => { try { return sessionStorage.getItem(k); } catch (e) { return null; } }, set: (k, v) => { try { sessionStorage.setItem(k, v); } catch (e) {} }, del: k => { try { sessionStorage.removeItem(k); } catch (e) {} } };
+function pendingAction() { // reads app.js globals (PEND, UP) without changing them
+  try {
+    const p = typeof PEND !== "undefined" ? PEND : null; if (!p) return null;
+    if (p.kind) return { t: "test", kind: String(p.kind), o: JSON.parse(JSON.stringify(p.o || {})) };
+    if (p.fn) return { t: "upgrade", k: typeof UP !== "undefined" && UP ? UP.k || null : null };
+  } catch (e) {}
+  return null;
+}
+function resumeAction(email) {
+  const raw = ss.get(RESUME); if (!raw) return; ss.del(RESUME);
+  let a; try { a = JSON.parse(raw); } catch (e) { return; }
+  if (!a || a.email !== email || Date.now() - a.at > 10 * 60e3) return; // only for the account just signed in, shortly after
+  setTimeout(() => safe(() => {
+    if (a.t === "test" && typeof startTest === "function") startTest(a.kind, a.o || {});
+    else if (a.t === "upgrade" && typeof openUpgrade === "function") openUpgrade(a.k);
+  }), 0);
+}
 async function afterLogin(u) {
   const email = String(u.email || "").toLowerCase(), owner = ls.get(OWNER);
   // progress in this browser belongs to a different account (shared device): don't merge it into this one
-  if (owner && owner !== email) { ls.del("masar100_v1"); ls.del("masar100_details"); ls.set(OWNER, email); location.reload(); return new Promise(() => {}); }
+  if (owner && owner !== email) {
+    const pa = pendingAction(); if (pa) ss.set(RESUME, JSON.stringify({ ...pa, email, at: Date.now() }));
+    ls.del("masar100_v1"); ls.del("masar100_details"); ls.set(OWNER, email); location.reload(); return new Promise(() => {});
+  }
   ls.set(OWNER, email);
   reset(); user = { email: u.email, name: u.name || "", emailVerified: true, isAdmin: !!u.isAdmin };
   setPlan(u.isAdmin && (!u.plan || u.plan.tier !== "pro") ? { tier: "pro", until: null, source: "admin" } : u.plan);
   openOnce(); flush();
   if (!u.plan) { try { const r = await api("GET", "/api/me"); if (r.config) config = r.config; if (r.user) setPlan(r.user.isAdmin && (!r.user.plan || r.user.plan.tier !== "pro") ? { tier: "pro", until: null, source: "admin" } : r.user.plan); } catch (e) {} } // sign-in/sign-up responses carry no plan
   await pull();
+  resumeAction(email);
 }
 let checked = false; // true once the first /api/me answer (or failure) has arrived
 window.CLOUD = {

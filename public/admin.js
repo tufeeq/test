@@ -33,9 +33,11 @@ const fmtN = (n, max = 0) => new Intl.NumberFormat(LOC(), { maximumFractionDigit
 const fmtMoney = n => fmtN(n, 2) + " " + _("ر.س", "SAR");
 const fmtPct = (x, max = 1) => new Intl.NumberFormat(LOC(), { style: "percent", maximumFractionDigits: max }).format(num(x));
 const toDate = v => (v ? new Date(/^\d{4}-\d{2}-\d{2}$/.test(v) ? v + "T00:00:00Z" : v) : null);
-const fmtDate = (v, utc) => { const d = toDate(v); return d && !isNaN(d) ? new Intl.DateTimeFormat(LOC(), { day: "numeric", month: "short", year: "numeric", timeZone: utc || /^\d{4}-\d{2}-\d{2}$/.test(v) ? "UTC" : undefined }).format(d) : "—"; };
-const fmtDay = v => { const d = toDate(v); return d ? new Intl.DateTimeFormat(LOC(), { day: "numeric", month: "short", timeZone: "UTC" }).format(d) : ""; };
-const fmtDT = v => { const d = toDate(v); return d && !isNaN(d) ? new Intl.DateTimeFormat(LOC(), { day: "numeric", month: "short", year: "numeric", hour: "numeric", minute: "2-digit" }).format(d) : "—"; };
+// the owner works in Saudi time: timestamps are shown in Asia/Riyadh whatever the device's zone; plain dates (YYYY-MM-DD) stay as they are
+const TZ = "Asia/Riyadh";
+const fmtDate = (v, utc) => { const d = toDate(v); return d && !isNaN(d) ? new Intl.DateTimeFormat(LOC(), { day: "numeric", month: "short", year: "numeric", timeZone: utc || /^\d{4}-\d{2}-\d{2}$/.test(v) ? "UTC" : TZ }).format(d) : "—"; };
+const fmtDay = v => { const d = toDate(v); return d && !isNaN(d) ? new Intl.DateTimeFormat(LOC(), { day: "numeric", month: "short", timeZone: /^\d{4}-\d{2}-\d{2}$/.test(v) ? "UTC" : TZ }).format(d) : ""; };
+const fmtDT = v => { const d = toDate(v); return d && !isNaN(d) ? new Intl.DateTimeFormat(LOC(), { day: "numeric", month: "short", year: "numeric", hour: "numeric", minute: "2-digit", timeZone: TZ }).format(d) : "—"; };
 function rel(v) {
   const d = toDate(v); if (!d || isNaN(d)) return "—";
   const s = (d.getTime() - Date.now()) / 1000, a = Math.abs(s), f = new Intl.RelativeTimeFormat(LOC(), { numeric: "auto" });
@@ -46,7 +48,7 @@ function rel(v) {
   return fmtDate(v);
 }
 const fmtDur = sec => { sec = Math.round(num(sec)); if (!sec) return "—"; const m = Math.floor(sec / 60), s = sec % 60; return m ? fmtN(m) + _(" د ", "m ") + (s ? fmtN(s) + _(" ث", "s") : "") : fmtN(s) + _(" ث", "s"); };
-const today = () => new Date().toISOString().slice(0, 10);
+const today = () => new Intl.DateTimeFormat("en-CA", { timeZone: TZ, year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date()); // Saudi calendar day, YYYY-MM-DD
 
 /* ================= domain labels ================= */
 const SKILLS = {
@@ -89,9 +91,11 @@ const ERR = {
   "not-found": ["العنصر غير موجود، ربما حُذف.", "Not found. It may have been deleted."],
   "bad-days": ["عدد الأيام يجب أن يكون بين ١ و١٠٠٠.", "Days must be between 1 and 1000."],
   "invalid-name": ["الاسم يجب أن يكون بين حرفين و٦٠ حرفًا.", "Name must be 2–60 characters."],
-  "not-refundable": ["لا يمكن استرداد هذه الدفعة (ليست مدفوعة).", "This payment can't be refunded (not paid)."],
-  "bad-amount": ["مبلغ الاسترداد غير صحيح: يجب أن يكون أكبر من صفر ولا يتجاوز المبلغ المدفوع.", "Invalid refund amount: must be above zero and no more than what was paid."],
-  "payments-not-configured": ["الدفع الإلكتروني غير مفعّل بعد (المتغير TAP_SECRET_KEY غير مضاف).", "Online payment isn't configured yet (TAP_SECRET_KEY is missing)."],
+  "not-refundable": ["لا يمكن استرداد هذه الدفعة (غير مدفوعة أو استُرد كامل مبلغها).", "This payment can't be refunded (not paid, or already fully refunded)."],
+  "bad-amount": ["مبلغ الاسترداد غير صحيح: يجب أن يكون أكبر من صفر ولا يتجاوز المتبقي من المبلغ المدفوع.", "Invalid refund amount: must be above zero and no more than what is left of the payment."],
+  "payments-not-configured": ["الدفع الإلكتروني غير مفعّل بعد (المتغير MOYASAR_SECRET_KEY غير مضاف).", "Online payment isn't configured yet (MOYASAR_SECRET_KEY is missing)."],
+  "gateway-error": ["لم تستجب بوابة الدفع أو رفضت الطلب. لم يتغير شيء؛ أعد المحاولة بعد قليل أو راجع لوحة ميسّر.", "The payment gateway didn't respond or refused the request. Nothing was changed; try again shortly or check the Moyasar dashboard."],
+  "bad-max": ["أقصى عدد استخدامات يجب أن يكون ١ أو أكثر.", "Max uses must be 1 or more."],
   "no-charge": ["لا توجد عملية دفع لدى بوابة الدفع مرتبطة بهذه الدفعة.", "There's no gateway payment linked to this payment."],
   "bad-code": ["رمز القسيمة: ٣–٣٢ حرفًا إنجليزيًا أو رقمًا أو - أو _.", "Coupon code: 3–32 letters, digits, - or _."],
   "bad-pct": ["نسبة الخصم يجب أن تكون بين ١ و١٠٠.", "Discount must be between 1 and 100%."],
@@ -99,7 +103,7 @@ const ERR = {
   exists: ["يوجد قسيمة بهذا الرمز مسبقًا.", "A coupon with this code already exists."],
   "in-use": ["لا يمكن حذف قسيمة مستخدمة؛ عطّلها بدلًا من ذلك.", "A used coupon can't be deleted; disable it instead."],
   "bad-config": ["الإعدادات المرسلة غير صالحة.", "The settings sent are invalid."],
-  "bad-plans": ["تحقق من الباقات: معرّف صالح، سعر أكبر من صفر، ومدة يوم على الأقل.", "Check the plans: valid id, price above zero, at least 1 day."],
+  "bad-plans": ["تحقق من الباقات: معرّف صالح غير مكرر، سعر ١ ر.س على الأقل، مدة يوم على الأقل، وباقة مفعّلة واحدة على الأقل.", "Check the plans: unique valid id, price at least 1 SAR, at least 1 day, and at least one active plan."],
   "too-many-requests": ["طلبات كثيرة، انتظر قليلًا ثم أعد المحاولة.", "Too many requests. Wait a moment and try again."],
   "invalid-credential": ["البريد أو كلمة المرور غير صحيحة.", "Wrong email or password."],
   "bad-json": ["البيانات المرسلة غير صالحة.", "Invalid data sent."], "too-large": ["البيانات أكبر من المسموح.", "Data too large."],
@@ -200,8 +204,8 @@ function niceScale(max, int) {
   if (int) step = Math.max(1, Math.ceil(step));
   return { top: Math.ceil(max / step) * step, step };
 }
-function seriesDays(arr, days) {
-  const m = new Map((arr || []).map(p => [p.d, num(p.n)])); const out = []; const end = new Date(today() + "T00:00:00Z");
+function seriesDays(arr, days, end0) {
+  const m = new Map((arr || []).map(p => [p.d, num(p.n)])); const out = []; const end = new Date((end0 || today()) + "T00:00:00Z");
   for (let i = days - 1; i >= 0; i--) { const d = new Date(end.getTime() - i * 864e5).toISOString().slice(0, 10); out.push({ d, n: m.get(d) || 0 }); }
   return out;
 }
@@ -414,7 +418,7 @@ async function vOverview(tok) {
   const T = o.totals;
   const kc = (cls, icon, label, val, sub, tip) => `<div class="kcard ${cls}" ${tip ? `tabindex="0" data-tip-h="${esc(label)}" data-tip="${esc(tip)}"` : ""}><span class="kl muted"><i>${ic(icon)}</i>${esc(label)}</span><b class="kv">${val}</b>${sub ? `<span class="ks">${sub}</span>` : ""}</div>`;
   const per = _(PERIODS.find(p => p[0] === d)[1], PERIODS.find(p => p[0] === d)[2]);
-  const sig = bucket(seriesDays(o.series.signups, d), "sum"), act = bucket(seriesDays(o.series.active, d), "avg"), rev = bucket(seriesDays(o.series.revenue, d), "sum");
+  const sig = bucket(seriesDays(o.series.signups, d, o.today), "sum"), act = bucket(seriesDays(o.series.active, d, o.today), "avg"), rev = bucket(seriesDays(o.series.revenue, d, o.today), "sum");
   const sum = a => a.reduce((s, p) => s + p.n, 0);
   const byPlan = (o.byPlan || []).map(p => ({ ...p, n: num(p.n), amount: num(p.amount) })).sort((a, b) => b.amount - a.amount || b.n - a.n);
   const anyAmt = byPlan.some(p => p.amount > 0), totAmt = byPlan.reduce((s, p) => s + p.amount, 0), totN = byPlan.reduce((s, p) => s + p.n, 0);
@@ -425,12 +429,12 @@ async function vOverview(tok) {
     ${kc("", "user", _("الخطة المجانية", "Free plan"), fmtN(T.free), _("بلا اشتراك ساري", "no active subscription"))}
     ${kc("pink", "percent", _("نسبة التحويل", "Conversion"), fmtPct(T.conversion), _("برو ÷ كل المستخدمين", "pro ÷ all users"), _("نسبة من لديهم اشتراك ساري من إجمالي المسجلين (بما فيها القسائم والمنح).", "Share of all users with an active subscription (incl. coupons and grants)."))}
     <div class="kcard sky"><span class="kl muted"><i>${ic("pulse")}</i>${_("المستخدمون النشطون", "Active users")}</span><div class="trio"><div tabindex="0" data-tip-h="DAU" data-tip="${_("فتحوا التطبيق اليوم", "Opened the app today")}"><b>${fmtN(T.dau)}</b><span>${_("اليوم", "Today")}</span></div><div tabindex="0" data-tip-h="WAU" data-tip="${_("آخر ٧ أيام", "Last 7 days")}"><b>${fmtN(T.wau)}</b><span>${_("أسبوعيًا", "Weekly")}</span></div><div tabindex="0" data-tip-h="MAU" data-tip="${_("آخر ٣٠ يومًا", "Last 30 days")}"><b>${fmtN(T.mau)}</b><span>${_("شهريًا", "Monthly")}</span></div></div><span class="ks">DAU · WAU · MAU</span></div>
-    ${kc("butter", "coin", _("الإيراد", "Revenue") + " · " + per, fmtMoney(T.revenue), _("بعد خصم المبالغ المستردة", "net of refunds"))}
-    ${kc("butter", "coin", _("إجمالي الإيراد", "Total revenue"), fmtMoney(T.revenueall ?? T.revenueAll), _("منذ الإطلاق", "since launch"))}
-    ${kc("", "cart", _("الطلبات", "Orders") + " · " + per, fmtN(T.orders), _("دفعات مكتملة (تشمل قسائم ١٠٠٪)", "completed payments (incl. 100% coupons)"))}
-    ${kc(T.expiring7 ? "pink" : "", "clock", _("تنتهي خلال ٧ أيام", "Expiring in 7 days"), fmtN(T.expiring7), _("اشتراكات تنتهي قريبًا", "subscriptions ending soon"))}
+    ${kc("butter", "coin", _("صافي الإيراد", "Net revenue") + " · " + per, fmtMoney(T.revenue), num(T.refunds) ? _(`${fmtMoney(T.gross)} مدفوع − ${fmtMoney(T.refunds)} مسترد`, `${fmtMoney(T.gross)} paid − ${fmtMoney(T.refunds)} refunded`) : _("بعد خصم المبالغ المستردة", "net of refunds"), _("مجموع الدفعات المكتملة في الفترة (بتوقيت السعودية) بعد خصم ما استُرد منها.", "Completed payments in the period (Saudi time), minus what was refunded from them."))}
+    ${kc("butter", "coin", _("صافي الإيراد الكلي", "Net revenue, all time"), fmtMoney(T.revenueall ?? T.revenueAll), _("منذ الإطلاق، بعد الاسترداد", "since launch, after refunds"))}
+    ${kc("", "cart", _("الطلبات", "Orders") + " · " + per, fmtN(T.orders), T.paidorders != null ? _(`${fmtN(T.paidorders)} مدفوعة · ${fmtN(T.orders - T.paidorders)} بقسيمة ١٠٠٪`, `${fmtN(T.paidorders)} paid · ${fmtN(T.orders - T.paidorders)} with a 100% coupon`) : _("دفعات مكتملة (تشمل قسائم ١٠٠٪)", "completed payments (incl. 100% coupons)"))}
+    ${kc(T.expiring7 ? "pink" : "", "clock", _("تنتهي خلال ٧ أيام", "Expiring in 7 days"), fmtN(T.expiring7), _("طلاب ينتهي برو لديهم دون تجديد", "students whose pro ends, not renewed"))}
   </section>
-  <section class="card"><div class="card-h"><h2>${_("التسجيلات اليومية", "Signups per day")}</h2><span class="sub">${d > 120 ? _("مجمّعة أسبوعيًا", "weekly totals") : _("لكل يوم", "per day")}</span></div>
+  <section class="card"><div class="card-h"><h2>${_("التسجيلات اليومية", "Signups per day")}</h2><span class="sub">${d > 120 ? _("مجمّعة أسبوعيًا", "weekly totals") : _("لكل يوم", "per day")} · ${_("بتوقيت السعودية", "Saudi time")}</span></div>
     ${chartBox("signups", "", _("مخطط التسجيلات. استخدم الأسهم لقراءة القيم.", "Signups chart. Use arrow keys to read values."))}
     <div class="chart-foot"><span>${_("المجموع", "Total")}: <b>${fmtN(sum(sig))}</b></span>${dataTable(sig, v => fmtN(v))}</div></section>
   <div class="g2">
@@ -441,7 +445,7 @@ async function vOverview(tok) {
       ${chartBox("revenue", "butter", _("مخطط الإيراد. استخدم الأسهم لقراءة القيم.", "Revenue chart. Use arrow keys to read values."))}
       <div class="chart-foot"><span>${_("المجموع", "Total")}: <b>${fmtMoney(sum(rev))}</b></span>${dataTable(rev, fmtMoney)}</div></section>
   </div>
-  <section class="card"><div class="card-h"><h2>${_("توزيع الإيراد حسب الباقة", "Revenue by plan")}</h2><span class="sub">${_("كل الفترات · الدفعات المكتملة", "all time · completed payments")}</span></div>
+  <section class="card"><div class="card-h"><h2>${_("توزيع الإيراد حسب الباقة", "Revenue by plan")}</h2><span class="sub">${_("كل الفترات · صافي بعد الاسترداد", "all time · net of refunds")}</span></div>
     ${byPlan.length ? hbars(byPlan.map(p => ({ label: planName(p.plan_id), sub: p.plan_id, v: anyAmt ? p.amount : p.n, vlabel: fmtMoney(p.amount), vsub: _(`${fmtN(p.n)} طلب`, `${fmtN(p.n)} orders`), tipH: planName(p.plan_id), tip: `${fmtMoney(p.amount)} · ${fmtN(p.n)} ${_("طلب", "orders")} · ${fmtPct(anyAmt ? p.amount / (totAmt || 1) : p.n / (totN || 1))}` })), { cls: "butter" }) : `<p class="empty">${_("لا مدفوعات بعد.", "No payments yet.")}</p>`}
   </section>`;
   onSeg("ov-p", v => { S.ovDays = +v; LS.set("adm_ovDays", S.ovDays); route(); });
@@ -544,7 +548,7 @@ function planChip(u) {
 }
 
 /* ---------- student drawer ---------- */
-const DR = { id: null, data: null, temp: null, revokeAsk: false, del: "", days: 30, note: "", ret: null };
+const DR = { id: null, data: null, temp: null, revokeAsk: false, resetAsk: false, del: "", days: 30, note: "", ret: null };
 function closeDrawer(silent) {
   const r = $("#drawer-root"); if (!r) return; r.remove(); document.removeEventListener("keydown", drKey); hideTip();
   if (!silent && DR.ret && document.contains(DR.ret)) DR.ret.focus(); DR.id = null; DR.data = null;
@@ -555,7 +559,7 @@ function drKey(e) {
 }
 async function openStudent(id, ret) {
   closeDrawer(true);
-  Object.assign(DR, { id, data: null, temp: null, revokeAsk: false, del: "", days: 30, note: "", ret: ret || document.activeElement });
+  Object.assign(DR, { id, data: null, temp: null, revokeAsk: false, resetAsk: false, del: "", days: 30, note: "", ret: ret || document.activeElement });
   const root = document.createElement("div"); root.id = "drawer-root";
   root.innerHTML = `<div class="dr-bg" data-close></div><section class="drawer" role="dialog" aria-modal="true" aria-labelledby="dr-t"><header class="dr-h"><span class="av" aria-hidden="true">…</span><div class="tt"><b id="dr-t">${_("جارٍ التحميل…", "Loading…")}</b></div><button class="btn ghost sm icon" type="button" data-close aria-label="${_("إغلاق", "Close")}">${ic("x")}</button></header><div class="dr-b"><div class="skel" style="min-block-size:120px"></div><div class="skel" style="min-block-size:220px"></div></div></section>`;
   document.body.appendChild(root);
@@ -614,7 +618,7 @@ function renderDrawer() {
 
     <section class="card"><div class="card-h"><h2>${_("الحساب", "Account")}</h2></div>
       <form id="f-name" class="row" novalidate><label class="fld" style="flex:1;min-width:200px"><span>${_("الاسم", "Name")}</span><input type="text" id="n-name" value="${esc(u.name || "")}" minlength="2" maxlength="60" dir="auto"></label><button class="btn ghost sm" type="submit" style="align-self:flex-end">${ic("edit")}${_("حفظ الاسم", "Save name")}</button></form>
-      <div class="row"><button class="btn ghost sm" type="button" id="b-reset" ${self ? "disabled" : ""}>${ic("key")}${_("كلمة مرور مؤقتة", "Reset password")}</button>${self ? `<span class="small muted" style="align-self:center">${_("لا يمكن تنفيذ ذلك على حسابك.", "Not available for your own account.")}</span>` : ""}</div>
+      <div class="row">${DR.resetAsk && !self ? `<span class="small" style="align-self:center;flex-basis:100%">${_("ستُستبدل كلمة مرور الطالب بكلمة مؤقتة ويُسجَّل خروجه من كل أجهزته. متابعة؟", "The student's password is replaced with a temporary one and they're signed out on every device. Continue?")}</span><button class="btn danger sm" type="button" id="b-reset-y">${ic("key")}${_("نعم، أنشئ كلمة مؤقتة", "Yes, create a temporary password")}</button><button class="btn ghost sm" type="button" id="b-reset-n">${_("تراجع", "Cancel")}</button>` : `<button class="btn ghost sm" type="button" id="b-reset" ${self ? "disabled" : ""}>${ic("key")}${_("كلمة مرور مؤقتة", "Reset password")}</button>${self ? `<span class="small muted" style="align-self:center">${_("لا يمكن تنفيذ ذلك على حسابك.", "Not available for your own account.")}</span>` : ""}`}</div>
       ${DR.temp ? `<div class="temp" role="status"><code id="tmp-pw">${esc(DR.temp.tempPassword)}</code><button class="btn primary sm" type="button" id="b-copy">${ic("copy")}${_("نسخ", "Copy")}</button><p class="small" style="flex-basis:100%">${_("أرسلها للطالب؛ سُجّل خروجه من كل الأجهزة، ويغيّرها من نافذة الحساب بعد الدخول. لن تظهر مرة أخرى.", "Send it to the student. They were signed out everywhere and can change it from the account window. It won't be shown again.")}</p></div>` : ""}
     </section>
 
@@ -638,7 +642,7 @@ function renderDrawer() {
 
     <section class="card"><div class="card-h"><h2>${_("المدفوعات", "Payments")}</h2></div>
       ${pays.length ? `<div class="tbl"><table><thead><tr><th scope="col">${_("التاريخ", "Date")}</th><th scope="col">${_("الباقة", "Plan")}</th><th scope="col" class="num">${_("المبلغ", "Amount")}</th><th scope="col">${_("القسيمة", "Coupon")}</th><th scope="col">${_("الحالة", "Status")}</th></tr></thead><tbody>
-      ${pays.map(x => `<tr><td>${esc(fmtDate(x.created_at))}</td><td>${esc(planName(x.plan_id))}</td><td class="num">${fmtMoney(x.amount)}${num(x.refunded_amount) ? `<br><small class="muted">−${fmtMoney(x.refunded_amount)}</small>` : ""}</td><td class="mono">${esc(x.coupon || "—")}</td><td><span class="chip ${esc(x.status)}">${esc(pstatL(x.status))}</span></td></tr>`).join("")}</tbody></table></div>` : `<p class="empty">${_("لا مدفوعات.", "No payments.")}</p>`}</section>
+      ${pays.map(x => { const [sc, sl] = payStat(x); return `<tr><td>${esc(fmtDate(x.paid_at || x.created_at))}${x.provider ? `<br><small class="muted">${esc(provL(x.provider))}</small>` : ""}</td><td>${esc(planName(x.plan_id))}</td><td class="num">${num(x.amount) ? fmtMoney(x.amount) : _("قسيمة ١٠٠٪", "100% coupon")}${num(x.refunded_amount) ? `<br><small class="muted">−${fmtMoney(x.refunded_amount)}</small>` : ""}</td><td class="mono">${esc(x.coupon || "—")}</td><td><span class="chip ${esc(sc)}">${esc(sl)}</span></td></tr>`; }).join("")}</tbody></table></div>` : `<p class="empty">${_("لا مدفوعات.", "No payments.")}</p>`}</section>
 
     <section class="card"><div class="card-h"><h2>${_("آخر الأحداث", "Recent events")}</h2><span class="sub">${fmtN(evs.length)}</span></div>
       ${evs.length ? `<ul class="plain evl">${evs.slice(0, 40).map(e => { const L = EVENTS[e.type] || [e.type, e.type, ""]; const extra = e.type === "limit_hit" ? limitL(e.k) : (e.type === "test_done" || e.type === "test_start") ? kindL(e.k) : e.k || ""; const v = e.v != null ? (e.type === "xp_done" ? fmtN(e.v, 1) : fmtN(e.v, 1) + (["diag_done", "test_done"].includes(e.type) ? (LANG === "ar" ? "٪" : "%") : "")) : ""; return `<li><span class="ic ${L[2]}" aria-hidden="true"></span><span>${esc(_(L[0], L[1]))}${extra ? ` · <span class="${e.type.startsWith("xp") ? "mono" : ""}">${esc(extra)}</span>` : ""}${v ? ` · <b>${esc(v)}</b>` : ""}</span><time datetime="${esc(e.at)}" title="${esc(fmtDT(e.at))}">${esc(rel(e.at))}</time></li>`; }).join("")}</ul>` : `<p class="empty">${_("لا أحداث مسجلة.", "No events recorded.")}</p>`}</section>
@@ -673,10 +677,12 @@ function renderDrawer() {
     try { await api("POST", `/api/admin/users/${encodeURIComponent(u.id)}/name`, { name }); toast(_("تم حفظ الاسم", "Name saved"), "ok"); await loadDrawer(); loadStudents(); }
     catch (x) { fail(x, _("تعذّر حفظ الاسم", "Couldn't save the name")); }
   });
-  const rs = $("#b-reset"); if (rs) rs.addEventListener("click", async () => {
-    rs.classList.add("is-busy");
-    try { DR.temp = await api("POST", `/api/admin/users/${encodeURIComponent(u.id)}/reset-password`); toast(_("أُنشئت كلمة مرور مؤقتة", "Temporary password created"), "ok", _("انسخها وأرسلها للطالب.", "Copy it and send it to the student.")); renderDrawer(); const c = $("#b-copy"); if (c) c.focus(); }
-    catch (x) { fail(x, _("تعذّر إنشاء كلمة مؤقتة", "Couldn't reset the password")); rs.classList.remove("is-busy"); }
+  const rs0 = $("#b-reset"); if (rs0) rs0.addEventListener("click", () => { DR.resetAsk = true; renderDrawer(); const n = $("#b-reset-n"); if (n) n.focus(); });
+  const rsn = $("#b-reset-n"); if (rsn) rsn.addEventListener("click", () => { DR.resetAsk = false; renderDrawer(); const b = $("#b-reset"); if (b) b.focus(); });
+  const rs = $("#b-reset-y"); if (rs) rs.addEventListener("click", async () => {
+    rs.classList.add("is-busy"); rs.disabled = true;
+    try { DR.resetAsk = false; DR.temp = await api("POST", `/api/admin/users/${encodeURIComponent(u.id)}/reset-password`); toast(_("أُنشئت كلمة مرور مؤقتة", "Temporary password created"), "ok", _("انسخها وأرسلها للطالب.", "Copy it and send it to the student.")); renderDrawer(); const c = $("#b-copy"); if (c) c.focus(); }
+    catch (x) { fail(x, _("تعذّر إنشاء كلمة مؤقتة", "Couldn't reset the password")); rs.classList.remove("is-busy"); rs.disabled = false; }
   });
   const cp = $("#b-copy"); if (cp) cp.addEventListener("click", () => copyText(DR.temp.tempPassword, $("#tmp-pw")));
   const di = $("#del-in"); if (di) di.addEventListener("input", () => { DR.del = di.value; $("#b-del").disabled = di.value.trim().toLowerCase() !== u.email.toLowerCase(); });
@@ -695,25 +701,34 @@ async function copyText(t, el) {
 }
 
 /* ================= 4. payments ================= */
+const PROV = { moyasar: ["ميسّر", "Moyasar"], tap: ["Tap", "Tap"] };
+const provL = p => (PROV[p] ? _(PROV[p][0], PROV[p][1]) : "");
+// gateway-side status, in words
+const GWS = { paid: ["مدفوعة", "paid"], captured: ["مدفوعة", "captured"], initiated: ["بانتظار الدفع", "awaiting payment"], INITIATED: ["بانتظار الدفع", "awaiting payment"], expired: ["انتهت مهلتها", "expired"], canceled: ["ألغاها الطالب", "canceled"], CANCELLED: ["ألغاها الطالب", "canceled"], failed: ["فشلت", "failed"], FAILED: ["فشلت", "failed"], DECLINED: ["رُفضت", "declined"], ABANDONED: ["تُركت", "abandoned"], CAPTURED: ["مدفوعة", "captured"], refunded: ["مستردة", "refunded"], "gateway-error": ["تعذّر الاتصال بالبوابة", "gateway unreachable"] };
+const gwL = s => (s ? (GWS[s] ? _(GWS[s][0], GWS[s][1]) : s) : "");
+const left = p => Math.round((num(p.amount) - num(p.refunded_amount)) * 100) / 100;
+const payStat = p => (p.status === "refunded" && left(p) > 0 ? ["refunded", _("استرداد جزئي", "Partly refunded")] : [p.status, pstatL(p.status)]);
 async function vPayments(tok) {
   const [r] = await Promise.all([api("GET", `/api/admin/payments${S.payStatus ? "?status=" + S.payStatus : ""}`), getSettings().catch(() => null)]);
   if (!live(tok)) return;
   const pays = r.payments.map(p => ({ ...p, amount: num(p.amount), refunded_amount: num(p.refunded_amount) }));
   const cnt = s => pays.filter(p => p.status === s).length;
+  const net = pays.filter(p => p.status === "paid" || p.status === "refunded").reduce((a, p) => a + left(p), 0);
   MAIN.innerHTML = ph("المالية", "Billing", "المدفوعات والاشتراكات", "Payments & subscriptions", "كل الدفعات الإلكترونية والتفعيلات بالقسائم، مع الاسترداد والتحقق.", "Every online payment and coupon activation, with refunds and re-checks.", refreshBtn()) + `
   ${r.tap ? "" : `<div class="alert warn" role="note">${ic("alert")}<div><b>${_("الدفع الإلكتروني غير مفعّل بعد", "Online payment isn't active yet")}</b>${_("لتفعيله يضيف مالك الحساب المتغير <code>MOYASAR_SECRET_KEY</code> (المفتاح السري من لوحة ميسّر) في Railway: الخدمة ← Variables ← New Variable، فتُعاد تهيئة الخدمة تلقائيًا. حتى ذلك الحين يرى الطلاب «جارٍ تفعيل الدفع الإلكتروني»، وتعمل قسائم ١٠٠٪ فقط، ولا يمكن استرداد الدفعات الإلكترونية أو إعادة التحقق منها.", "To turn it on, the owner adds the <code>MOYASAR_SECRET_KEY</code> variable (the secret key from the Moyasar dashboard) in Railway: Service → Variables → New Variable; the service restarts automatically. Until then students see “online payment is being activated”, only 100% coupons work, and refunds/re-checks of online payments are unavailable.")}</div></div>`}
   <section class="card">
     <div class="toolbar"><div class="seg" role="group" aria-label="${_("الحالة", "Status")}" id="pay-st">${[["", "الكل", "All"], ["paid", PSTAT.paid[0], PSTAT.paid[1]], ["refunded", PSTAT.refunded[0], PSTAT.refunded[1]], ["failed", PSTAT.failed[0], PSTAT.failed[1]], ["initiated", PSTAT.initiated[0], PSTAT.initiated[1]]].map(([v, a, e]) => `<button type="button" data-v="${v}" class="${S.payStatus === v ? "on" : ""}" aria-pressed="${S.payStatus === v}">${_(a, e)}</button>`).join("")}</div><span class="sp"></span>
-      <span class="small muted">${_(`${fmtN(pays.length)} دفعة`, `${fmtN(pays.length)} payments`)}${S.payStatus ? "" : ` · ${fmtN(cnt("paid"))} ${_("مدفوعة", "paid")} · ${fmtN(cnt("refunded"))} ${_("مستردة", "refunded")}`}</span></div>
-    ${pays.length ? `<div class="tbl"><table><thead><tr><th scope="col" class="hide-sm">${_("التاريخ", "Date")}</th><th scope="col">${_("الطالب", "Student")}</th><th scope="col" class="hide-sm">${_("الباقة", "Plan")}</th><th scope="col" class="num">${_("المبلغ", "Amount")}</th><th scope="col">${_("الحالة", "Status")}</th><th scope="col" class="hide-md">${_("المرجع", "Reference")}</th><th scope="col"><span class="sr">${_("إجراءات", "Actions")}</span></th></tr></thead><tbody>
-    ${pays.map(p => `<tr><td class="hide-sm"><span class="nowrap">${esc(fmtDate(p.created_at))}</span></td>
-      <td>${p.user_id ? `<button class="btn link ltr em" type="button" data-user="${esc(p.user_id)}">${esc(p.email || "—")}</button>` : `<span class="ltr muted">${esc(p.email || _("حساب محذوف", "deleted account"))}</span>`}<small class="show-sm muted">${esc(fmtDate(p.created_at))} · ${esc(planName(p.plan_id))}</small></td>
+      <span class="small muted">${_(`${fmtN(pays.length)} دفعة`, `${fmtN(pays.length)} payments`)}${S.payStatus ? "" : ` · ${fmtN(cnt("paid"))} ${_("مدفوعة", "paid")} · ${fmtN(cnt("refunded"))} ${_("مستردة", "refunded")} · ${_("الصافي", "net")} <b>${fmtMoney(net)}</b>`}</span></div>
+    ${S.payStatus ? "" : `<p class="small muted pay-note">${ic("info", "i16")} ${_("«الكل» يُخفي محاولات الدفع غير المكتملة الأقدم من يومين؛ اعرضها من «لم تكتمل».", "“All” hides unfinished checkouts older than 2 days; see them under “Initiated”.")}</p>`}
+    ${pays.length ? `<div class="tbl"><table class="pay-t"><thead><tr><th scope="col" class="hide-sm">${_("التاريخ", "Date")}</th><th scope="col">${_("الطالب", "Student")}</th><th scope="col" class="hide-sm">${_("الباقة", "Plan")}</th><th scope="col" class="num">${_("المبلغ", "Amount")}</th><th scope="col" class="hide-sm">${_("الحالة", "Status")}</th><th scope="col" class="hide-md">${_("البوابة والمرجع", "Gateway & reference")}</th><th scope="col"><span class="sr">${_("إجراءات", "Actions")}</span></th></tr></thead><tbody>
+    ${pays.map(p => { const [sc, sl] = payStat(p), ref = p.tap_id || ""; return `<tr><td class="hide-sm"><span class="nowrap" title="${esc(fmtDT(p.paid_at || p.created_at))}">${esc(fmtDate(p.paid_at || p.created_at))}</span></td>
+      <td class="stu">${p.user_id ? `<button class="btn link ltr em" type="button" data-user="${esc(p.user_id)}" title="${esc(p.email || "")}">${esc(p.email || "—")}</button>` : `<span class="ltr muted">${esc(p.email || _("حساب محذوف", "deleted account"))}</span>`}<small class="show-sm muted">${esc(fmtDate(p.paid_at || p.created_at))} · ${esc(planName(p.plan_id))}${p.provider ? " · " + esc(provL(p.provider)) : ""}</small></td>
       <td class="hide-sm wrap">${esc(planName(p.plan_id))}</td>
-      <td class="num">${p.amount ? fmtMoney(p.amount) : `<span class="chip on">${_("قسيمة ١٠٠٪", "100% coupon")}</span>`}${p.refunded_amount ? `<br><small class="muted">−${fmtMoney(p.refunded_amount)}</small>` : ""}${p.coupon ? `<br><small class="mono muted" data-tip="${esc(_("القسيمة", "Coupon"))}">${esc(p.coupon)}</small>` : ""}</td>
-      <td><span class="chip ${esc(p.status)}">${esc(pstatL(p.status))}</span></td>
-      <td class="hide-md">${p.tap_id ? `<span class="mono small">${esc(p.tap_id)}</span><br><small class="muted">${esc(p.tap_status || "")}</small>` : "—"}</td>
-      <td><div class="acts">${p.status === "paid" && p.amount > 0 ? `<button class="btn ghost xs" type="button" data-refund="${esc(p.id)}">${ic("undo")}${_("استرداد", "Refund")}</button>` : ""}${p.tap_id ? `<button class="btn ghost xs" type="button" data-recheck="${esc(p.id)}" data-tip="${esc(_("اسأل بوابة الدفع عن حالة العملية وفعّل الاشتراك إن اكتملت", "Ask the gateway for the payment status and activate if paid"))}">${ic("refresh")}${_("تحقق", "Recheck")}</button>` : ""}</div></td></tr>`).join("")}
-    </tbody></table></div>` : `<p class="tbl-empty">${_("لا دفعات بهذه الحالة.", "No payments with this status.")}</p>`}
+      <td class="num">${p.amount ? fmtMoney(p.amount) : `<span class="chip on">${_("قسيمة ١٠٠٪", "100% coupon")}</span>`}${p.refunded_amount ? `<br><small class="muted">−${fmtMoney(p.refunded_amount)}</small>` : ""}${p.coupon ? `<br><small class="mono muted" data-tip="${esc(_("القسيمة", "Coupon"))}">${esc(p.coupon)}</small>` : ""}<span class="show-sm"><span class="chip ${esc(sc)}">${esc(sl)}</span></span></td>
+      <td class="hide-sm"><span class="chip ${esc(sc)}">${esc(sl)}</span></td>
+      <td class="hide-md">${p.provider || ref ? `<span class="gw"><b>${esc(provL(p.provider) || "—")}</b>${ref ? `<button type="button" class="btn link mono ref" data-copy="${esc(ref)}" title="${esc(ref)}" aria-label="${esc(_("نسخ المرجع ", "Copy reference ") + ref)}">${esc(ref.length > 14 ? ref.slice(0, 8) + "…" + ref.slice(-4) : ref)}</button>` : ""}</span><small class="muted">${esc(gwL(p.tap_status))}</small>` : `<span class="muted small">${_("قسيمة، بلا دفع", "coupon, no charge")}</span>`}</td>
+      <td><div class="acts">${(p.status === "paid" || p.status === "refunded") && left(p) > 0 && p.amount > 0 ? `<button class="btn ghost xs" type="button" data-refund="${esc(p.id)}" aria-label="${_("استرداد", "Refund")}" data-tip="${_("استرداد", "Refund")}">${ic("undo")}<span class="lbl">${_("استرداد", "Refund")}</span></button>` : ""}${ref && (p.status === "initiated" || p.status === "failed") ? `<button class="btn ghost xs" type="button" data-recheck="${esc(p.id)}" aria-label="${_("تحقق لدى البوابة", "Recheck with the gateway")}" data-tip="${esc(_("اسأل بوابة الدفع عن حالة العملية وفعّل الاشتراك إن اكتملت", "Ask the gateway for the payment status and activate if paid"))}">${ic("refresh")}<span class="lbl">${_("تحقق", "Recheck")}</span></button>` : ""}</div></td></tr>`; }).join("")}
+    </tbody></table></div>` : `<p class="tbl-empty">${S.payStatus ? _("لا دفعات بهذه الحالة.", "No payments with this status.") : _("لا مدفوعات بعد. تظهر هنا كل عملية دفع أو تفعيل بقسيمة.", "No payments yet. Every payment or coupon activation shows up here.")}</p>`}
   </section>`;
   onSeg("pay-st", v => { S.payStatus = v; route(); });
   onRefresh(route);
@@ -721,34 +736,46 @@ async function vPayments(tok) {
     const u = e.target.closest("[data-user]"); if (u) return openStudent(u.dataset.user, u);
     const rf = e.target.closest("[data-refund]"); if (rf) return refundDialog(pays.find(p => p.id === rf.dataset.refund), rf);
     const rc = e.target.closest("[data-recheck]"); if (rc) return recheck(rc);
+    const cp = e.target.closest("[data-copy]"); if (cp) return copyText(cp.dataset.copy, cp);
   });
 }
 async function recheck(btn) {
   btn.classList.add("is-busy");
-  try { const r = await api("POST", `/api/admin/payments/${encodeURIComponent(btn.dataset.recheck)}/recheck`); toast(r.status === "CAPTURED" ? _("العملية مكتملة والاشتراك مفعّل", "Charge captured; subscription active") : _("حالة العملية لدى بوابة الدفع: ", "Gateway status: ") + (r.status || "—"), r.status === "CAPTURED" ? "ok" : "info"); route(); }
-  catch (e) { fail(e, _("تعذّر التحقق من العملية", "Couldn't recheck the charge")); btn.classList.remove("is-busy"); }
+  try {
+    const r = await api("POST", `/api/admin/payments/${encodeURIComponent(btn.dataset.recheck)}/recheck`);
+    const okPaid = r.status === "CAPTURED" && r.local === "paid";
+    toast(okPaid ? _("العملية مكتملة والاشتراك مفعّل", "Payment captured; subscription active") : r.status === "mismatch" ? _("المبلغ لدى البوابة لا يطابق الطلب؛ لم يُفعَّل شيء", "The gateway amount doesn't match the order; nothing was activated") : _("حالة العملية لدى بوابة الدفع: ", "Gateway status: ") + (gwL(r.status) || r.status || "—"), okPaid ? "ok" : r.status === "mismatch" ? "warn" : "info");
+    route();
+  }
+  catch (e) { fail(e, _("تعذّر التحقق من العملية", "Couldn't recheck the payment")); btn.classList.remove("is-busy"); }
 }
 function dialog(html, onSubmit) {
   const d = document.createElement("dialog"); d.className = "dlg"; d.innerHTML = html; document.body.appendChild(d);
   d.addEventListener("close", () => d.remove());
   d.addEventListener("click", e => { if (e.target === d || e.target.closest("[data-cancel]")) d.close(); });
-  $("form", d).addEventListener("submit", async e => { e.preventDefault(); const b = $("button[type=submit]", d); b.classList.add("is-busy"); try { if (await onSubmit(d) !== false) d.close(); } finally { b.classList.remove("is-busy"); } });
+  $("form", d).addEventListener("submit", async e => { e.preventDefault(); const b = $("button[type=submit]", d); if (b.classList.contains("is-busy")) return; b.classList.add("is-busy"); b.disabled = true; try { if (await onSubmit(d) !== false) d.close(); } finally { b.classList.remove("is-busy"); b.disabled = false; } });
   d.showModal(); return d;
 }
 function refundDialog(p, ret) {
   if (!p) return;
+  const max = left(p);
   const d = dialog(`<form novalidate><h2>${_("استرداد دفعة", "Refund payment")}</h2>
-    <p class="small">${esc(p.email || "")} · ${esc(planName(p.plan_id))} · <b>${fmtMoney(p.amount)}</b></p>
-    <label class="fld">${_("المبلغ المسترد", "Refund amount")}<span class="unit"><input type="number" id="rf-amt" min="0.01" max="${p.amount}" step="0.01" value="${p.amount}" required><span>${_("ر.س", "SAR")}</span></span><span class="hint">${_("الحد الأقصى ", "Up to ")}${fmtMoney(p.amount)}</span></label>
+    <p class="small">${esc(p.email || "")} · ${esc(planName(p.plan_id))} · <b>${fmtMoney(p.amount)}</b>${p.refunded_amount ? ` · ${_("استُرد سابقًا", "already refunded")} ${fmtMoney(p.refunded_amount)}` : ""}</p>
+    <label class="fld">${_("المبلغ المسترد", "Refund amount")}<span class="unit"><input type="number" id="rf-amt" min="0.01" max="${max}" step="0.01" value="${max}" required><span>${_("ر.س", "SAR")}</span></span><span class="hint">${_("الحد الأقصى ", "Up to ")}${fmtMoney(max)}</span></label>
     <label class="fld">${_("السبب", "Reason")}<input type="text" id="rf-why" maxlength="100" list="rf-reasons" value="requested_by_customer" dir="ltr"><datalist id="rf-reasons"><option value="requested_by_customer"><option value="duplicate"><option value="fraudulent"></datalist></label>
-    <label class="tgl"><input type="checkbox" class="tg" id="rf-rev" checked>${_("إلغاء الاشتراك المرتبط بهذه الدفعة", "Revoke the subscription bought with this payment")}</label>
-    ${p.tap_id ? `<p class="small muted">${_("سيُرسل طلب الاسترداد إلى بوابة الدفع ويُعاد المبلغ إلى وسيلة الدفع.", "The refund is sent to the payment gateway and returned to the original payment method.")}</p>` : ""}
+    <label class="tgl"><input type="checkbox" class="tg" id="rf-rev" checked>${_("إلغاء الاشتراك المرتبط بهذه الدفعة (تتقدّم أي مدة لاحقة اشتراها الطالب فلا تنقطع)", "Revoke the subscription bought with this payment (any later period the student bought moves up, with no gap)")}</label>
+    <p class="small muted" id="rf-hint">${_("عند الاسترداد الجزئي يبقى الاشتراك عادةً.", "For a partial refund the subscription usually stays.")}</p>
+    ${p.provider || p.tap_id ? `<p class="small muted">${_(`يُرسل طلب الاسترداد إلى ${provL(p.provider) || "بوابة الدفع"} ويُعاد المبلغ إلى وسيلة الدفع الأصلية. لا يمكن التراجع عنه.`, `The refund is sent to ${provL(p.provider) || "the payment gateway"} and returned to the original payment method. It can't be undone.`)}</p>` : ""}
     <div class="row"><button class="btn ghost sm" type="button" data-cancel>${_("إلغاء", "Cancel")}</button><button class="btn danger sm" type="submit">${_("استرداد", "Refund")}</button></div></form>`, async dl => {
     const amt = Math.round(num($("#rf-amt", dl).value) * 100) / 100;
-    if (!(amt > 0 && amt <= p.amount)) { $("#rf-amt", dl).classList.add("invalid"); toast(_("تحقق من المبلغ", "Check the amount"), "err", errMsg("bad-amount")); return false; }
-    try { await api("POST", `/api/admin/payments/${encodeURIComponent(p.id)}/refund`, { amount: amt, reason: $("#rf-why", dl).value.trim() || undefined, revoke: $("#rf-rev", dl).checked }); toast(_("تم الاسترداد", "Refund issued"), "ok", fmtMoney(amt)); route(); }
+    if (!(amt > 0 && amt <= max)) { $("#rf-amt", dl).classList.add("invalid"); toast(_("تحقق من المبلغ", "Check the amount"), "err", errMsg("bad-amount")); return false; }
+    try { const r = await api("POST", `/api/admin/payments/${encodeURIComponent(p.id)}/refund`, { amount: amt, reason: $("#rf-why", dl).value.trim() || undefined, revoke: $("#rf-rev", dl).checked }); toast(_("تم الاسترداد", "Refund issued"), "ok", fmtMoney(amt) + (r.revoked ? _(" · أُلغي الاشتراك", " · subscription revoked") : "")); route(); }
     catch (e) { fail(e, _("تعذّر الاسترداد", "Refund failed")); return false; }
   });
+  // full refund → revoke by default; partial → keep, unless the admin chose otherwise
+  let touched = false; const amtEl = $("#rf-amt", d), rev = $("#rf-rev", d);
+  rev.addEventListener("change", () => { touched = true; });
+  amtEl.addEventListener("input", () => { amtEl.classList.remove("invalid"); if (!touched) rev.checked = num(amtEl.value) >= max; });
   d.addEventListener("close", () => { if (ret && document.contains(ret)) ret.focus(); });
 }
 
@@ -764,7 +791,7 @@ async function vCoupons(tok) {
       <label class="fld">${_("الرمز", "Code")}<input type="text" id="cp-code" maxlength="32" dir="ltr" autocomplete="off" spellcheck="false" placeholder="SCHOOL25" style="text-transform:uppercase"><span class="hint">${_("حروف إنجليزية وأرقام و - _", "Letters, digits, - and _")}</span></label>
       <label class="fld">${_("نسبة الخصم", "Discount")}<span class="unit"><input type="number" id="cp-pct" min="1" max="100" step="1" value="20"><span>%</span></span></label>
       <label class="fld">${_("أقصى عدد استخدامات", "Max uses")}<input type="number" id="cp-max" min="1" step="1" placeholder="${_("بلا حد", "Unlimited")}"></label>
-      <label class="fld">${_("تاريخ الانتهاء", "Expires")}<input type="date" id="cp-exp" min="${today()}"><span class="hint">${_("تبقى صالحة حتى نهاية هذا اليوم", "Valid through the end of this day")}</span></label>
+      <label class="fld">${_("تاريخ الانتهاء", "Expires")}<input type="date" id="cp-exp" min="${today()}"><span class="hint">${_("تبقى صالحة حتى نهاية هذا اليوم بتوقيت السعودية", "Valid through the end of this day, Saudi time")}</span></label>
       <div class="fld wide"><span>${_("الباقات", "Plans")} <span class="hint">${_("(لا اختيار = كل الباقات)", "(none = all plans)")}</span></span><div class="checks">${plans.map(p => `<label class="ck"><input type="checkbox" name="cp-plan" value="${esc(p.id)}">${esc(_(p.ar || p.id, p.en || p.id))} <span class="mono muted">${esc(p.id)}</span></label>`).join("") || `<span class="muted small">—</span>`}</div></div>
       <label class="fld wide">${_("ملاحظة داخلية", "Internal note")}<input type="text" id="cp-note" maxlength="200" placeholder="${_("مثال: شراكة مدرسة الرياض", "e.g. Riyadh school partnership")}"></label>
       <div class="row wide" style="grid-column:1/-1"><button class="btn primary sm" type="submit">${ic("plus")}${_("إنشاء القسيمة", "Create coupon")}</button></div>
@@ -791,7 +818,7 @@ async function vCoupons(tok) {
     if (!/^[A-Z0-9_-]{3,32}$/.test(body.code)) { code.classList.add("invalid"); errs.push("bad-code"); }
     if (!(body.pct >= 1 && body.pct <= 100)) { $("#cp-pct").classList.add("invalid"); errs.push("bad-pct"); }
     const mx = $("#cp-max").value; if (mx) { if (!(num(mx) >= 1)) { $("#cp-max").classList.add("invalid"); errs.push("bad-max"); } else body.maxUses = Math.round(num(mx)); }
-    const ex = $("#cp-exp").value; if (ex) body.expires = new Date(ex + "T23:59:59").toISOString();
+    const ex = $("#cp-exp").value; if (ex) body.expires = new Date(ex + "T23:59:59+03:00").toISOString(); // end of that day, Saudi time
     const pl = $$("input[name=cp-plan]:checked").map(x => x.value); if (pl.length) body.plans = pl;
     const note = $("#cp-note").value.trim(); if (note) body.note = note;
     if (errs.length) { toast(_("تحقق من الحقول المظللة", "Check the highlighted fields"), "err", errs[0] === "bad-max" ? _("أقصى عدد استخدامات يجب أن يكون ١ أو أكثر.", "Max uses must be 1 or more.") : errMsg(errs[0])); return; }
@@ -807,9 +834,7 @@ async function vCoupons(tok) {
     const b = e.target.closest("[data-del]"); if (!b) return; const c = b.dataset.del;
     const d = dialog(`<form novalidate><h2>${_("حذف القسيمة؟", "Delete coupon?")}</h2><p>${_("ستُحذف القسيمة", "This deletes")} <b class="mono">${esc(c)}</b> ${_("نهائيًا. لم يستخدمها أحد بعد.", "permanently. Nobody has used it yet.")}</p><div class="row"><button class="btn ghost sm" type="button" data-cancel>${_("تراجع", "Cancel")}</button><button class="btn danger sm" type="submit">${_("حذف", "Delete")}</button></div></form>`, async () => {
       try {
-        await api("DELETE", `/api/admin/coupons/${encodeURIComponent(c)}`);
-        const after = await api("GET", "/api/admin/coupons"); // the endpoint answers ok even when a used coupon is kept
-        if (after.coupons.some(x => x.code === c)) throw Object.assign(new Error(), { code: "in-use" });
+        await api("DELETE", `/api/admin/coupons/${encodeURIComponent(c)}`); // 409 in-use if a student used it meanwhile
         toast(_("حُذفت القسيمة ", "Coupon deleted: ") + c, "ok"); route();
       } catch (x) { fail(x, _("تعذّر حذف القسيمة", "Couldn't delete the coupon")); route(); }
     });
@@ -854,7 +879,8 @@ function validate(c) {
   c.plans.forEach((p, i) => {
     if (!/^[\w-]{1,20}$/.test(p.id || "")) E[`plans.${i}.id`] = _("معرّف من ١–٢٠ حرفًا إنجليزيًا/رقمًا/-/_", "1–20 letters, digits, - or _");
     else if (ids.has(p.id)) E[`plans.${i}.id`] = _("المعرّف مكرر", "Duplicate id"); ids.add(p.id);
-    if (!(num(p.price) > 0) || p.price === "") E[`plans.${i}.price`] = _("السعر أكبر من صفر", "Price must be above 0");
+    if (!(num(p.price) >= 1 && num(p.price) <= 100000) || p.price === "") E[`plans.${i}.price`] = _("السعر من ١ إلى ١٠٠٬٠٠٠ ر.س", "Price from 1 to 100,000 SAR");
+    if (num(p.days) > 3650) E[`plans.${i}.days`] = _("١٠ سنوات كحد أقصى", "10 years at most");
     if (!(num(p.days) >= 1) || p.days === "") E[`plans.${i}.days`] = _("يوم واحد على الأقل", "At least 1 day");
     if (!String(p.ar || "").trim()) E[`plans.${i}.ar`] = _("مطلوب", "Required");
     if (!String(p.en || "").trim()) E[`plans.${i}.en`] = _("مطلوب", "Required");
@@ -909,12 +935,12 @@ function renderSettings() {
       <td data-l="${_("الاسم بالعربية", "Arabic name")}"><input type="text" data-p="plans.${i}.ar" value="${esc(p.ar)}" dir="rtl" maxlength="60" ${inv(`plans.${i}.ar`)} aria-label="${_("الاسم بالعربية", "Arabic name")}">${err(`plans.${i}.ar`)}</td>
       <td data-l="${_("الاسم بالإنجليزية", "English name")}"><input type="text" data-p="plans.${i}.en" value="${esc(p.en)}" dir="ltr" maxlength="60" ${inv(`plans.${i}.en`)} aria-label="${_("الاسم بالإنجليزية", "English name")}">${err(`plans.${i}.en`)}</td>
       <td data-l="${_("الأيام", "Days")}"><input type="number" data-p="plans.${i}.days" data-num value="${esc(p.days)}" min="1" step="1" ${inv(`plans.${i}.days`)} aria-label="${_("الأيام", "Days")}">${err(`plans.${i}.days`)}</td>
-      <td data-l="${_("السعر", "Price")}"><input type="number" data-p="plans.${i}.price" data-num value="${esc(p.price)}" min="0.01" step="0.01" ${inv(`plans.${i}.price`)} aria-label="${_("السعر", "Price")}">${err(`plans.${i}.price`)}</td>
+      <td data-l="${_("السعر", "Price")}"><input type="number" data-p="plans.${i}.price" data-num value="${esc(p.price)}" min="1" step="0.01" ${inv(`plans.${i}.price`)} aria-label="${_("السعر", "Price")}">${err(`plans.${i}.price`)}</td>
       <td class="c" data-l="${_("مفعّلة", "Active")}"><input type="checkbox" class="tg" data-p="plans.${i}.active" data-bool ${p.active !== false ? "checked" : ""} aria-label="${_("مفعّلة", "Active")}"></td>
       <td class="c" data-l="${_("الأفضل قيمة", "Best value")}"><input type="checkbox" class="tg" data-best="${i}" ${p.best ? "checked" : ""} aria-label="${_("الأفضل قيمة", "Best value")}"></td>
       <td class="rm"><button class="btn danger-ghost xs icon" type="button" data-rm="${i}" aria-label="${_("حذف الباقة", "Remove plan")}" ${c.plans.length < 2 ? "disabled" : ""}>${ic("trash")}</button></td></tr>`).join("")}
     </tbody></table></div>${E.plans ? `<p class="fld"><span class="err">${esc(E.plans)}</span></p>` : ""}
-    <div class="row"><button class="btn ghost sm" type="button" id="s-add">${ic("plus")}${_("إضافة باقة", "Add plan")}</button><span class="small muted" style="align-self:center">${_("الباقة غير المفعّلة تختفي من صفحة الأسعار وتبقى الاشتراكات القائمة.", "Inactive plans are hidden from pricing; existing subscriptions stay.")}</span></div>
+    <div class="row"><button class="btn ghost sm" type="button" id="s-add">${ic("plus")}${_("إضافة باقة", "Add plan")}</button><span class="small muted" style="align-self:center">${_("الباقة غير المفعّلة تختفي من صفحة الأسعار وتبقى الاشتراكات القائمة. تغيير السعر أو المدة يسري على عمليات الدفع الجديدة فقط.", "Inactive plans are hidden from pricing; existing subscriptions stay. Price or length changes apply to new checkouts only.")}</span></div>
   </section>
 
   <section class="card"><div class="card-h"><h2>${_("حدود الخطة المجانية", "Free-plan limits")}</h2><div class="sec-acts">${rst("limits")}</div></div>
@@ -1002,25 +1028,26 @@ const AUD = {
   rename: ["edit", "sky", (m, t) => _(`غيّر اسم ${t} إلى «${m.name || ""}»`, `Renamed ${t} to “${m.name || ""}”`)],
   reset_password: ["key", "butter", (m, t) => _(`أنشأ كلمة مرور مؤقتة لـ ${t}`, `Reset the password for ${t}`)],
   delete_user: ["trash", "coral", (m, t) => _(`حذف حساب ${t}`, `Deleted the account ${t}`)],
-  refund: ["undo", "butter", (m, t) => _(`استرد ${fmtMoney(m.amount)} من الدفعة ${t}`, `Refunded ${fmtMoney(m.amount)} on payment ${t}`)],
+  refund: ["undo", "butter", (m, t) => _(`استرد ${fmtMoney(m.amount)} من الدفعة ${t}`, `Refunded ${fmtMoney(m.amount)} on payment ${t}`) + (m.email ? ` (${m.email})` : "") + (m.revoked ? _(" · أُلغي الاشتراك", " · subscription revoked") : m.revoke === false ? _(" · بقي الاشتراك", " · subscription kept") : "")],
+  recheck: ["refresh", "sky", (m, t) => _(`تحقق من الدفعة ${t} لدى البوابة: ${gwL(m.status) || m.status || "—"}`, `Re-checked payment ${t} with the gateway: ${gwL(m.status) || m.status || "—"}`) + (m.local ? ` → ${pstatL(m.local)}` : "")],
   coupon_create: ["ticket", "pink", (m, t) => _(`أنشأ القسيمة ${t} بخصم ${fmtN(m.pct)}٪`, `Created coupon ${t} (${m.pct}% off)`) + (m.maxUses ? _(` · حتى ${fmtN(m.maxUses)} استخدام`, ` · up to ${m.maxUses} uses`) : "")],
   coupon_on: ["ticket", "pink", (m, t) => _(`فعّل القسيمة ${t}`, `Enabled coupon ${t}`)],
   coupon_off: ["ticket", "", (m, t) => _(`عطّل القسيمة ${t}`, `Disabled coupon ${t}`)],
   coupon_delete: ["trash", "coral", (m, t) => _(`حذف القسيمة ${t}`, `Deleted coupon ${t}`)],
-  settings: ["gear", "", () => _("حدّث الإعدادات", "Updated the settings")],
+  settings: ["gear", "", m => _("حدّث الإعدادات", "Updated the settings") + (m.changed && !m.changed.length ? _(" (بلا تغيير)", " (no change)") : ""), m => (m.changed || []).join("  ·  ")],
   export_users: ["download", "sky", m => _(`صدّر قائمة الطلاب (${fmtN(m.n)})`, `Exported the student list (${m.n})`)]
 };
 async function vAudit(tok) {
   const r = await api("GET", "/api/admin/audit"); if (!live(tok)) return;
   const tgt = t => { if (!t) return ""; if (USERS_BY_ID.has(t)) return USERS_BY_ID.get(t); return t; };
-  const items = r.audit.map(a => { const A = AUD[a.action] || ["info", "", () => a.action]; const text = A[2](a.meta || {}, tgt(a.target)); return { ...a, A, text, hay: (text + " " + a.admin_email + " " + a.action + " " + (a.target || "")).toLowerCase() }; });
+  const items = r.audit.map(a => { const A = AUD[a.action] || ["info", "", () => a.action]; const text = A[2](a.meta || {}, tgt(a.target)), detail = A[3] ? A[3](a.meta || {}) : ""; return { ...a, A, text, detail, hay: (text + " " + detail + " " + a.admin_email + " " + a.action + " " + (a.target || "")).toLowerCase() }; });
   MAIN.innerHTML = ph("الحوكمة", "Governance", "سجل العمليات", "Audit log", "كل ما نفّذه المشرفون، الأحدث أولًا (آخر ٣٠٠ عملية).", "Everything admins did, newest first (last 300 actions).", refreshBtn()) + `
   <section class="card"><div class="toolbar"><label class="search"><span class="sr">${_("بحث في السجل", "Search the log")}</span>${ic("search")}<input type="search" id="au-q" value="${esc(S.auditQ)}" placeholder="${_("ابحث بالبريد أو القسيمة أو العملية", "Search by email, coupon or action")}" dir="auto"></label><span class="small muted" id="au-n"></span></div><ul class="plain au" id="au-l"></ul></section>`;
   const draw = () => {
     const q = S.auditQ.toLowerCase(), list = items.filter(a => !q || a.hay.includes(q)); let lastDay = "";
     $("#au-n").textContent = _(`${fmtN(list.length)} عملية`, `${list.length} actions`);
     $("#au-l").innerHTML = list.length ? list.map(a => { const dd = fmtDate(a.at); const head = dd !== lastDay ? `<li class="day">${esc(dd)}</li>` : ""; lastDay = dd;
-      return head + `<li><span class="ic ${a.A[1]}" aria-hidden="true">${ic(a.A[0])}</span><div><p>${esc(a.text)}</p><small class="ltr">${esc(a.admin_email)}</small></div><time datetime="${esc(a.at)}" title="${esc(fmtDT(a.at))}">${esc(rel(a.at))}</time></li>`; }).join("") : `<li class="empty" style="display:block">${q ? _("لا نتائج مطابقة.", "No matches.") : _("لا عمليات مسجلة بعد.", "No admin actions yet.")}</li>`;
+      return head + `<li><span class="ic ${a.A[1]}" aria-hidden="true">${ic(a.A[0])}</span><div><p>${esc(a.text)}</p>${a.detail ? `<p class="au-d mono" dir="ltr">${esc(a.detail)}</p>` : ""}<small class="ltr">${esc(a.admin_email)}</small></div><time datetime="${esc(a.at)}" title="${esc(fmtDT(a.at))}">${esc(rel(a.at))}</time></li>`; }).join("") : `<li class="empty" style="display:block">${q ? _("لا نتائج مطابقة.", "No matches.") : _("لا عمليات مسجلة بعد.", "No admin actions yet.")}</li>`;
   };
   draw();
   $("#au-q").addEventListener("input", e => { S.auditQ = e.target.value.trim(); draw(); });

@@ -6,6 +6,9 @@
 <title>أكاديمية القدرات | التحضير لاختبار القدرات العامة (GAT) بخطة يومية وشروحات مسموعة</title>
 <meta name="description" content="استعد لاختبار القدرات العامة (قدرات · GAT) باختبار تشخيصي وخطة يومية حتى موعد اختبارك، و٣٣ شرحًا متحركًا مسموعًا، و٣٠ نموذجًا محاكيًا بصيغة الاختبار المحوسب، وصندوق أخطاء بالتكرار المتباعد. بالعربية والإنجليزية، مع خطة مجانية دائمة.">
 <link rel="canonical" href="https://gat.academy/">
+<link rel="alternate" hreflang="ar" href="https://gat.academy/">
+<link rel="alternate" hreflang="en" href="https://gat.academy/?lang=en">
+<link rel="alternate" hreflang="x-default" href="https://gat.academy/">
 <meta name="theme-color" content="#FCFBFF" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#15112A" media="(prefers-color-scheme: dark)">
 <meta name="color-scheme" content="light dark">
@@ -24,15 +27,21 @@
 <meta name="twitter:title" content="أكاديمية القدرات · التحضير لاختبار القدرات العامة">
 <meta name="twitter:description" content="اختبار تشخيصي، خطة يومية، شروحات مسموعة، ونماذج محاكية بصيغة المحوسب. ابدأ مجانًا.">
 <meta name="twitter:image" content="https://gat.academy/og.png">
+<meta name="twitter:image:alt" content="أكاديمية القدرات: خريطة إتقان المهارات العشر لاختبار القدرات العامة">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Almarai:wght@400;700;800&family=Aref+Ruqaa:wght@400;700&family=Baloo+Bhaijaan+2:wght@500;600;700;800&family=Caveat:wght@600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<!-- Google Fonts: fetched early but not render-blocking; landing.js turns this preload into a stylesheet (CSP allows no inline onload) -->
+<link rel="preload" as="style" id="lp-fonts" href="https://fonts.googleapis.com/css2?family=Almarai:wght@400;700;800&family=Aref+Ruqaa:wght@400;700&family=Baloo+Bhaijaan+2:wght@500;600;700;800&family=Caveat:wght@600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Almarai:wght@400;700;800&family=Aref+Ruqaa:wght@400;700&family=Baloo+Bhaijaan+2:wght@500;600;700;800&family=Caveat:wght@600;700&family=IBM+Plex+Mono:wght@500;600&display=swap"></noscript>
 <link rel="stylesheet" href="/app.css">
 <link rel="stylesheet" href="/landing.css">
-<!-- landing.js runs its first lines immediately (theme, language, old app links), the rest after the DOM is parsed -->
+<!-- landing.js runs its first lines immediately (theme, language, fonts, old app links), the rest after the DOM is parsed -->
 <script src="/landing.js"></script>
-<!-- Structured data. Offer prices are the defaults in commerce.js (m1 = 49, m3 = 119 SAR); live prices come from /api/config, so update these if the plans change in the admin. -->
+<!-- Structured data. The server (site.js) replaces this block on every request: live plan prices from the admin settings,
+     and an FAQPage built from the questions below in the page's language. This copy is only a fallback. -->
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -487,8 +496,8 @@
   </div>
 </footer>
 
-<script src="/vendor/gsap.min.js" defer></script>
-<script src="/xp-engine.js" defer></script>
-<script src="/xp/free.js" defer></script>
+<!-- the explainer player for the demo: landing.js loads these when the demo comes near the screen, when a demo
+     button is pressed, or once the page is idle, so they never compete with the first paint -->
+<template id="lp-xp-scripts"><script src="/vendor/gsap.min.js"></script><script src="/xp-engine.js"></script><script src="/xp/free.js"></script></template>
 </body>
 </html>

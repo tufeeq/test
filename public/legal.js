@@ -6,6 +6,9 @@
   'use strict';
   var D = document, R = D.documentElement;
   R.classList.remove('no-js');
+  // fonts: the preloaded Google Fonts CSS becomes a stylesheet without blocking the first paint
+  var gf = D.getElementById('lg-fonts');
+  if (gf) { var fl = D.createElement('link'); fl.rel = 'stylesheet'; fl.href = gf.href; D.head.appendChild(fl); }
 
   function sget(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
   function sset(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }

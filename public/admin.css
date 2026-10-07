@@ -110,7 +110,7 @@ input[type=number]{font-variant-numeric:tabular-nums}
 /* ---------- charts ---------- */
 .chart{position:relative;min-block-size:200px;border-radius:12px}
 .chart:focus-visible{outline-offset:4px}
-.chart svg{display:block;inline-size:100%;overflow:visible}
+.chart svg{display:block;inline-size:100%;min-width:0;min-inline-size:0;overflow:visible} /* app.css gives the app's .chart svg a 360px minimum: not here */
 .chart .ax text{fill:var(--muted);stroke:none;font-family:var(--f-body);font-size:11px}
 .chart .grid line{stroke:var(--line);stroke-width:1;stroke-dasharray:3 4}
 .chart .base{stroke:var(--line);stroke-width:1.5}
@@ -377,3 +377,16 @@ dialog.dlg .row{justify-content:flex-end}
   .plans-ed td.rm{grid-column:1 / -1;justify-self:end}
   .plans-ed input[type=text],.plans-ed input[type=number],.plans-ed input:not([type]){inline-size:100%!important;min-inline-size:0}
 }
+/* payments: gateway + short reference */
+.tbl .gw{display:flex;gap:6px;align-items:baseline;flex-wrap:wrap}
+.tbl .gw .ref{font-size:.78rem;padding:0;min-block-size:0;color:var(--ink2)}
+.tbl .gw + small{display:block;font-size:.74rem}
+.pay-note{margin:0 0 10px;display:flex;gap:6px;align-items:center}
+.pay-note svg{flex:none}
+.pay-t td.stu{max-inline-size:250px}
+.pay-t td.stu .btn.link{display:block;max-inline-size:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pay-t td.wrap{min-inline-size:96px}
+.pay-t .show-sm .chip{margin-block-start:4px}
+@media (max-width:1360px){.pay-t .acts .lbl{display:none}}
+@media (max-width:700px){.pay-t td.stu{max-inline-size:150px;white-space:normal}.pay-t td,.pay-t th{padding-inline:8px}.pay-t .show-sm{white-space:normal}}
+.au .au-d{font-size:.76rem;color:var(--ink2);margin:2px 0;white-space:normal;overflow-wrap:anywhere;text-align:start}

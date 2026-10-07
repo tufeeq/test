@@ -9,6 +9,7 @@ const MOY_API = process.env.MOYASAR_API_BASE || "https://api.moyasar.com/v1";
 const PROVIDER = () => { const f = String(process.env.PAYMENT_PROVIDER || "").toLowerCase();
   if (f === "moyasar" && process.env.MOYASAR_SECRET_KEY) return "moyasar"; if (f === "tap" && process.env.TAP_SECRET_KEY) return "tap";
   return process.env.MOYASAR_SECRET_KEY ? "moyasar" : process.env.TAP_SECRET_KEY ? "tap" : null; };
+const TZ = "Asia/Riyadh"; // day buckets, "today", DAU… are Saudi calendar days, not UTC
 const EVENT_TYPES = new Set(["open", "diag_start", "diag_done", "xp_start", "xp_done", "limit_hit", "upgrade_view", "checkout_start", "test_start", "test_done", "report_view"]);
 
 // Defaults: every value here can be changed from the admin dashboard (settings table).
@@ -62,6 +63,20 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
       CREATE UNIQUE INDEX IF NOT EXISTS events_open_once ON events(user_id, day) WHERE type='open';
       CREATE TABLE IF NOT EXISTS admin_audit (
         id BIGSERIAL PRIMARY KEY, admin_email TEXT NOT NULL, action TEXT NOT NULL, target TEXT, meta JSONB, at TIMESTAMPTZ NOT NULL DEFAULT now());
+      -- plan length is fixed at checkout, so editing a plan never changes a payment already in flight
+      ALTER TABLE payments ADD COLUMN IF NOT EXISTS days INT;
+      ALTER TABLE payments ADD COLUMN IF NOT EXISTS refunded_at TIMESTAMPTZ;
+      -- "day" buckets follow Saudi time (the owner and the students are in Asia/Riyadh)
+      ALTER TABLE events ALTER COLUMN day SET DEFAULT ((now() AT TIME ZONE '${TZ}')::date);
+      CREATE INDEX IF NOT EXISTS events_user_type_at_idx ON events(user_id, type, at);
+      CREATE INDEX IF NOT EXISTS events_type_at_idx ON events(type, at);
+      CREATE INDEX IF NOT EXISTS subs_payment_idx ON subscriptions(payment_id);
+      CREATE INDEX IF NOT EXISTS pay_status_idx ON payments(status, created_at);
+      CREATE INDEX IF NOT EXISTS pay_paid_idx ON payments(paid_at) WHERE paid_at IS NOT NULL;
+      CREATE INDEX IF NOT EXISTS pay_coupon_pending_idx ON payments(coupon) WHERE status='initiated';
+      CREATE INDEX IF NOT EXISTS audit_at_idx ON admin_audit(at);
+      CREATE INDEX IF NOT EXISTS users_created_idx ON users(created_at);
+      CREATE INDEX IF NOT EXISTS progress_updated_idx ON progress(updated_at);
     `);
   }
 
@@ -91,14 +106,36 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
     return s ? { tier: "pro", until: s.ends_at, source: s.source } : { tier: "free", until: null, source: null };
   }
   const needPro = wrap(async (req, res, next) => { const p = await planOf(req.user); req.plan = p; return p.tier === "pro" ? next() : fail(res, 402, "subscription-required"); });
-  async function grant(userId, days, source, extra = {}) {
+  // run fn(client) in one transaction
+  async function tx(fn) {
+    const c = await pool.connect();
+    try { await c.query("BEGIN"); const r = await fn(c); await c.query("COMMIT"); return r; }
+    catch (e) { await c.query("ROLLBACK").catch(() => {}); throw e; }
+    finally { c.release(); }
+  }
+  // serialise subscription changes per student (two payments settling at once must not both start "now")
+  const lockUser = (db, userId) => db.query("SELECT pg_advisory_xact_lock(hashtext('sub:' || $1))", [String(userId)]);
+  async function grant(userId, days, source, extra = {}, db) {
+    if (!db) return tx(c => grant(userId, days, source, extra, c));
+    await lockUser(db, userId);
     // new period starts when the current one ends (stacking), so renewing early never loses days
-    const cur = await pool.query("SELECT max(ends_at) e FROM subscriptions WHERE user_id=$1 AND revoked_at IS NULL AND ends_at>now()", [userId]);
+    const cur = await db.query("SELECT max(ends_at) e FROM subscriptions WHERE user_id=$1 AND revoked_at IS NULL AND ends_at>now()", [userId]);
     const start = cur.rows[0].e ? new Date(cur.rows[0].e) : new Date();
     const end = new Date(start.getTime() + days * 86400e3);
-    await pool.query("INSERT INTO subscriptions(user_id,plan_id,source,starts_at,ends_at,payment_id,note,created_by) VALUES($1,$2,$3,$4,$5,$6,$7,$8)",
+    await db.query("INSERT INTO subscriptions(user_id,plan_id,source,starts_at,ends_at,payment_id,note,created_by) VALUES($1,$2,$3,$4,$5,$6,$7,$8)",
       [userId, extra.planId || null, source, start, end, extra.paymentId || null, extra.note || null, extra.by || null]);
     return end;
+  }
+  // revoke the subscription(s) bought with one payment; later stacked periods move up so the student keeps them without a gap
+  async function revokePayment(db, paymentId, userId) {
+    if (userId) await lockUser(db, userId);
+    const r = await db.query("UPDATE subscriptions SET revoked_at=now() WHERE payment_id=$1 AND revoked_at IS NULL RETURNING user_id, starts_at, ends_at", [paymentId]);
+    for (const s of r.rows) {
+      const now = Date.now(), cut = new Date(s.ends_at).getTime() - Math.max(now, new Date(s.starts_at).getTime());
+      if (cut > 0) await db.query("UPDATE subscriptions SET starts_at=starts_at-($3::bigint * interval '1 millisecond'), ends_at=ends_at-($3::bigint * interval '1 millisecond') WHERE user_id=$1 AND revoked_at IS NULL AND starts_at>=$2",
+        [s.user_id, s.ends_at, Math.round(cut)]);
+    }
+    return r.rowCount;
   }
 
   // ---------- public config + plan ----------
@@ -161,18 +198,27 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
 
   // ---------- checkout (Moyasar hosted invoice page, or Tap hosted charge page) ----------
   const money = n => Math.round(Number(n) * 100) / 100;
-  async function priceFor(planId, code) {
+  // price in halalas, computed on integers so 119 × 85% is exactly 101.15 (minimum charge 1 SAR)
+  const discounted = (price, pct) => pct >= 100 ? 0 : Math.max(100, Math.round(Math.round(Number(price) * 100) * (100 - pct) / 100)) / 100;
+  // with { db, lock, userId }: locks the coupon row and counts other students' open checkouts (last hour) against max_uses,
+  // so concurrent checkouts cannot oversell a limited coupon
+  async function priceFor(planId, code, o = {}) {
+    const db = o.db || pool;
     const c = await loadCfg(); const plan = c.plans.find(p => p.id === planId && p.active);
     if (!plan) return { error: "bad-plan" };
     let pct = 0, coupon = null;
     if (code) {
-      const r = await pool.query("SELECT * FROM coupons WHERE code=$1", [String(code).trim().toUpperCase()]);
+      const r = await db.query("SELECT * FROM coupons WHERE code=$1" + (o.lock ? " FOR UPDATE" : ""), [String(code).trim().toUpperCase().slice(0, 40)]);
       const cp = r.rows[0];
-      if (!cp || !cp.active || (cp.expires_at && new Date(cp.expires_at) < new Date()) || (cp.max_uses != null && cp.used >= cp.max_uses) || (cp.plan_ids && cp.plan_ids.length && !cp.plan_ids.includes(plan.id))) return { error: "bad-coupon" };
+      if (!cp || !cp.active || (cp.expires_at && new Date(cp.expires_at) < new Date()) || (cp.plan_ids && cp.plan_ids.length && !cp.plan_ids.includes(plan.id))) return { error: "bad-coupon" };
+      if (cp.max_uses != null) {
+        let taken = cp.used;
+        if (o.lock && cp.pct < 100) taken += (await db.query("SELECT count(*)::int n FROM payments WHERE coupon=$1 AND status='initiated' AND created_at>now()-interval '1 hour' AND user_id IS DISTINCT FROM $2", [cp.code, o.userId || null])).rows[0].n;
+        if (taken >= cp.max_uses) return { error: "bad-coupon" };
+      }
       pct = Math.max(0, Math.min(100, cp.pct)); coupon = cp.code;
     }
-    const amount = pct >= 100 ? 0 : Math.max(1, money(plan.price * (100 - pct) / 100));
-    return { plan, amount, pct, coupon, currency: c.currency };
+    return { plan, amount: discounted(plan.price, pct), pct, coupon, currency: c.currency };
   }
   app.post("/api/billing/quote", needUser, wrap(async (req, res) => {
     const q = await priceFor(String(req.body.plan || ""), req.body.coupon);
@@ -188,21 +234,33 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
   const baseUrl = req => (process.env.PUBLIC_URL || ("https://" + (process.env.CANONICAL_HOST || req.headers.host))).replace(/\/$/, "");
   app.post("/api/billing/checkout", needUser, wrap(async (req, res) => {
     if (limited("co:" + req.user.id, 20, 3600e3)) return fail(res, 429, "too-many-requests");
-    const q = await priceFor(String(req.body.plan || ""), req.body.coupon);
+    const pid = "pay_" + crypto.randomBytes(9).toString("base64url"), prov = PROVIDER();
+    // price, coupon check and the payment row are one transaction (the coupon row is locked), so max_uses holds under concurrency
+    const q = await tx(async c => {
+      const q = await priceFor(String(req.body.plan || ""), req.body.coupon, { db: c, lock: true, userId: req.user.id });
+      if (q.error) return q;
+      if (q.amount === 0) { // 100% coupon: activate without a payment
+        await c.query("INSERT INTO payments(id,user_id,email,plan_id,amount,currency,coupon,status,paid_at,days) VALUES($1,$2,$3,$4,0,$5,$6,'paid',now(),$7)", [pid, req.user.id, req.user.email, q.plan.id, q.currency, q.coupon, q.plan.days]);
+        await c.query("UPDATE coupons SET used=used+1 WHERE code=$1", [q.coupon]);
+        q.until = await grant(req.user.id, q.plan.days, "coupon", { planId: q.plan.id, paymentId: pid }, c);
+      } else if (prov) {
+        await c.query("INSERT INTO payments(id,user_id,email,plan_id,amount,currency,coupon,status,provider,days) VALUES($1,$2,$3,$4,$5,$6,$7,'initiated',$8,$9)", [pid, req.user.id, req.user.email, q.plan.id, q.amount, q.currency, q.coupon, prov, q.plan.days]);
+      }
+      return q;
+    });
     if (q.error) return fail(res, 400, q.error);
-    const pid = "pay_" + crypto.randomBytes(9).toString("base64url");
-    await pool.query("INSERT INTO events(user_id,type,k) VALUES($1,'checkout_start',$2)", [req.user.id, q.plan.id]);
-    if (q.amount === 0) { // 100% coupon: activate without a payment
-      await pool.query("INSERT INTO payments(id,user_id,email,plan_id,amount,currency,coupon,status,paid_at) VALUES($1,$2,$3,$4,0,$5,$6,'paid',now())", [pid, req.user.id, req.user.email, q.plan.id, q.currency, q.coupon]);
-      await pool.query("UPDATE coupons SET used=used+1 WHERE code=$1", [q.coupon]);
-      const until = await grant(req.user.id, q.plan.days, "coupon", { planId: q.plan.id, paymentId: pid });
-      return res.json({ activated: true, until });
-    }
-    const prov = PROVIDER();
+    await pool.query("INSERT INTO events(user_id,type,k) VALUES($1,'checkout_start',$2)", [req.user.id, q.plan.id]).catch(() => {});
+    if (q.amount === 0) return res.json({ activated: true, until: q.until });
     if (!prov) return fail(res, 503, "payments-not-configured");
-    await pool.query("INSERT INTO payments(id,user_id,email,plan_id,amount,currency,coupon,status,provider) VALUES($1,$2,$3,$4,$5,$6,$7,'initiated',$8)", [pid, req.user.id, req.user.email, q.plan.id, q.amount, q.currency, q.coupon, prov]);
     const base = baseUrl(req), name = (req.user.name || "").split(" ");
     const lang = req.body.lang === "en" ? "en" : "ar";
+    try { return await startGateway(); }
+    catch (e) { // gateway down or rejected the request: release the coupon reservation and tell the student to retry
+      console.error("checkout", prov, e.message);
+      await pool.query("UPDATE payments SET status='failed', tap_status='gateway-error' WHERE id=$1 AND status='initiated'", [pid]).catch(() => {});
+      return fail(res, 502, "gateway-error");
+    }
+    async function startGateway() {
     if (prov === "moyasar") {
       const inv = await moy("POST", "/invoices", {
         amount: Math.round(q.amount * 100), currency: q.currency,
@@ -228,7 +286,22 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
     });
     await pool.query("UPDATE payments SET tap_id=$1, tap_status=$2 WHERE id=$3", [charge.id, charge.status, pid]);
     res.json({ url: charge.transaction && charge.transaction.url });
+    }
   }));
+  // mark a verified payment paid and activate it, exactly once and atomically (status flip + subscription + coupon use).
+  // Only an open (initiated) or failed payment can become paid: a refunded payment is never re-activated by a late
+  // callback or a re-check.
+  async function activate(pid, source) {
+    return tx(async c => {
+      const p = (await c.query("UPDATE payments SET status='paid', paid_at=now() WHERE id=$1 AND status IN ('initiated','failed') RETURNING *", [pid])).rows[0];
+      if (!p) return false;
+      let days = p.days;
+      if (!days) { const cfg = await loadCfg(); const plan = cfg.plans.find(x => x.id === p.plan_id); days = plan ? plan.days : 30; }
+      if (p.user_id) await grant(p.user_id, days, source, { planId: p.plan_id, paymentId: p.id }, c); // account deleted meanwhile: keep the record only
+      if (p.coupon) await c.query("UPDATE coupons SET used=used+1 WHERE code=$1", [p.coupon]);
+      return true;
+    });
+  }
   // verify a Tap charge by fetching it from Tap (never trust the redirect alone) and activate exactly once
   async function settle(tapId) {
     const ch = await tap("GET", "/charges/" + encodeURIComponent(tapId));
@@ -236,16 +309,12 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
     const r = await pool.query("SELECT * FROM payments WHERE id=$1", [pid]); const p = r.rows[0];
     if (!p) return { status: "unknown" };
     await pool.query("UPDATE payments SET tap_status=$1, tap_id=COALESCE(tap_id,$2) WHERE id=$3", [ch.status, ch.id, pid]);
-    if (ch.status !== "CAPTURED") { if (["FAILED", "DECLINED", "CANCELLED", "ABANDONED", "RESTRICTED", "VOID", "TIMEDOUT"].includes(ch.status)) await pool.query("UPDATE payments SET status='failed' WHERE id=$1 AND status='initiated'", [pid]); return { status: ch.status, pid }; }
+    if (ch.status !== "CAPTURED") { if (["FAILED", "DECLINED", "CANCELLED", "ABANDONED", "RESTRICTED", "VOID", "TIMEDOUT"].includes(ch.status)) await pool.query("UPDATE payments SET status='failed' WHERE id=$1 AND status='initiated'", [pid]); return { status: ch.status, pid, local: await localStatus(pid) }; }
     if (money(ch.amount) !== money(p.amount) || String(ch.currency).toUpperCase() !== p.currency) { console.error("tap amount mismatch", pid); return { status: "mismatch", pid }; }
-    const up = await pool.query("UPDATE payments SET status='paid', paid_at=now() WHERE id=$1 AND status<>'paid' RETURNING *", [pid]);
-    if (up.rows[0]) { // first time we see it paid
-      const c = await loadCfg(); const plan = c.plans.find(x => x.id === p.plan_id) || { days: 30 };
-      await grant(p.user_id, plan.days, "tap", { planId: p.plan_id, paymentId: pid });
-      if (p.coupon) await pool.query("UPDATE coupons SET used=used+1 WHERE code=$1", [p.coupon]);
-    }
-    return { status: "CAPTURED", pid };
+    await activate(pid, "tap");
+    return { status: "CAPTURED", pid, local: await localStatus(pid) };
   }
+  const localStatus = async pid => ((await pool.query("SELECT status FROM payments WHERE id=$1", [pid])).rows[0] || {}).status || null;
   // ---------- Moyasar ----------
   async function moy(method, url, body) {
     const r = await fetch(MOY_API + url, { method, headers: { Authorization: "Basic " + Buffer.from(process.env.MOYASAR_SECRET_KEY + ":").toString("base64"), "Content-Type": "application/json", Accept: "application/json" }, body: body ? JSON.stringify(body) : undefined });
@@ -259,15 +328,10 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
     const r = await pool.query("SELECT * FROM payments WHERE ext_id=$1", [inv.id]); const p = r.rows[0];
     if (!p) return { status: "unknown" };
     await pool.query("UPDATE payments SET tap_status=$1 WHERE id=$2", [inv.status, p.id]);
-    if (inv.status !== "paid") { if (["failed", "canceled", "expired"].includes(inv.status)) await pool.query("UPDATE payments SET status='failed' WHERE id=$1 AND status='initiated'", [p.id]); return { status: inv.status, pid: p.id }; }
+    if (inv.status !== "paid") { if (["failed", "canceled", "expired"].includes(inv.status)) await pool.query("UPDATE payments SET status='failed' WHERE id=$1 AND status='initiated'", [p.id]); return { status: inv.status, pid: p.id, local: await localStatus(p.id) }; }
     if (Number(inv.amount) !== Math.round(Number(p.amount) * 100) || String(inv.currency).toUpperCase() !== p.currency || (inv.metadata && inv.metadata.pid && inv.metadata.pid !== p.id)) { console.error("moyasar amount mismatch", p.id); return { status: "mismatch", pid: p.id }; }
-    const up = await pool.query("UPDATE payments SET status='paid', paid_at=now() WHERE id=$1 AND status<>'paid' RETURNING *", [p.id]);
-    if (up.rows[0]) {
-      const c = await loadCfg(); const plan = c.plans.find(x => x.id === p.plan_id) || { days: 30 };
-      await grant(p.user_id, plan.days, "moyasar", { planId: p.plan_id, paymentId: p.id });
-      if (p.coupon) await pool.query("UPDATE coupons SET used=used+1 WHERE code=$1", [p.coupon]);
-    }
-    return { status: "CAPTURED", pid: p.id };
+    await activate(p.id, "moyasar");
+    return { status: "CAPTURED", pid: p.id, local: await localStatus(p.id) };
   }
   const settleAny = async p => p.provider === "moyasar" ? settleMoyasar(p.ext_id) : settle(p.tap_id);
   // Moyasar posts here (invoice callback_url and/or a dashboard webhook). We only act on invoices we created,
@@ -312,47 +376,55 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
   // ======================= ADMIN =======================
   const A = (method, route, fn) => app[method]("/api/admin" + route, needAdmin, wrap(fn));
   const day = d => new Date(d).toISOString().slice(0, 10);
+  // Saudi calendar: SINCE(n) = midnight in Riyadh n-1 days ago (so "7 days" = today + the 6 days before); DAY(col) = Riyadh date as text
+  const SINCE = n => `(((now() AT TIME ZONE '${TZ}')::date - (${n})::int + 1)::timestamp AT TIME ZONE '${TZ}')`;
+  const DAY = col => `to_char(${col} AT TIME ZONE '${TZ}','YYYY-MM-DD')`;
 
   A("get", "/overview", async (req, res) => {
-    const days = Math.max(7, Math.min(365, Number(req.query.days) || 30));
+    const days = Math.max(7, Math.min(365, Math.round(Number(req.query.days)) || 30));
     const q = (s, p) => pool.query(s, p).then(r => r.rows);
+    const done = "status IN ('paid','refunded')";
     const [tot] = await q(`SELECT (SELECT count(*) FROM users)::int users,
       (SELECT count(DISTINCT user_id) FROM subscriptions WHERE revoked_at IS NULL AND starts_at<=now() AND ends_at>now())::int pro,
-      (SELECT count(*) FROM users WHERE created_at>now()-interval '7 days')::int new7,
-      (SELECT count(DISTINCT user_id) FROM events WHERE type='open' AND day=CURRENT_DATE)::int dau,
-      (SELECT count(DISTINCT user_id) FROM events WHERE type='open' AND day>CURRENT_DATE-7)::int wau,
-      (SELECT count(DISTINCT user_id) FROM events WHERE type='open' AND day>CURRENT_DATE-30)::int mau,
-      (SELECT COALESCE(sum(amount-COALESCE(refunded_amount,0)),0) FROM payments WHERE status IN ('paid','refunded') AND paid_at>now()-($1||' days')::interval)::float revenue,
-      (SELECT COALESCE(sum(amount-COALESCE(refunded_amount,0)),0) FROM payments WHERE status IN ('paid','refunded'))::float revenueAll,
-      (SELECT count(*) FROM payments WHERE status='paid' AND paid_at>now()-($1||' days')::interval)::int orders,
-      (SELECT count(*) FROM subscriptions WHERE revoked_at IS NULL AND ends_at BETWEEN now() AND now()+interval '7 days')::int expiring7`, [String(days)]);
-    const signups = await q(`SELECT created_at::date d, count(*)::int n FROM users WHERE created_at>now()-($1||' days')::interval GROUP BY 1 ORDER BY 1`, [String(days)]);
-    const active = await q(`SELECT day d, count(DISTINCT user_id)::int n FROM events WHERE type='open' AND day>CURRENT_DATE-$1::int GROUP BY 1 ORDER BY 1`, [days]);
-    const revenue = await q(`SELECT paid_at::date d, sum(amount-COALESCE(refunded_amount,0))::float n FROM payments WHERE status IN ('paid','refunded') AND paid_at>now()-($1||' days')::interval GROUP BY 1 ORDER BY 1`, [String(days)]);
-    const byPlan = await q(`SELECT plan_id, count(*)::int n, sum(amount)::float amount FROM payments WHERE status='paid' GROUP BY 1`);
-    res.json({ days, totals: { ...tot, free: tot.users - tot.pro, conversion: tot.users ? tot.pro / tot.users : 0 },
-      series: { signups: signups.map(r => ({ d: day(r.d), n: r.n })), active: active.map(r => ({ d: day(r.d), n: r.n })), revenue: revenue.map(r => ({ d: day(r.d), n: r.n })) }, byPlan });
+      (SELECT count(*) FROM users WHERE created_at>=${SINCE(7)})::int new7,
+      (SELECT count(DISTINCT user_id) FROM events WHERE type='open' AND at>=${SINCE(1)})::int dau,
+      (SELECT count(DISTINCT user_id) FROM events WHERE type='open' AND at>=${SINCE(7)})::int wau,
+      (SELECT count(DISTINCT user_id) FROM events WHERE type='open' AND at>=${SINCE(30)})::int mau,
+      (SELECT COALESCE(sum(amount-COALESCE(refunded_amount,0)),0) FROM payments WHERE ${done} AND paid_at>=${SINCE("$1")})::float revenue,
+      (SELECT COALESCE(sum(amount),0) FROM payments WHERE ${done} AND paid_at>=${SINCE("$1")})::float gross,
+      (SELECT COALESCE(sum(refunded_amount),0) FROM payments WHERE ${done} AND paid_at>=${SINCE("$1")})::float refunds,
+      (SELECT COALESCE(sum(amount-COALESCE(refunded_amount,0)),0) FROM payments WHERE ${done})::float revenueall,
+      (SELECT count(*) FROM payments WHERE ${done} AND paid_at>=${SINCE("$1")})::int orders,
+      (SELECT count(*) FROM payments WHERE ${done} AND amount>0 AND paid_at>=${SINCE("$1")})::int paidorders,
+      (SELECT count(*) FROM (SELECT max(ends_at) e FROM subscriptions WHERE revoked_at IS NULL AND ends_at>now() GROUP BY user_id) x WHERE e<=now()+interval '7 days')::int expiring7`, [days]);
+    const signups = await q(`SELECT ${DAY("created_at")} d, count(*)::int n FROM users WHERE created_at>=${SINCE("$1")} GROUP BY 1 ORDER BY 1`, [days]);
+    const active = await q(`SELECT ${DAY("at")} d, count(DISTINCT user_id)::int n FROM events WHERE type='open' AND at>=${SINCE("$1")} GROUP BY 1 ORDER BY 1`, [days]);
+    const revenue = await q(`SELECT ${DAY("paid_at")} d, sum(amount-COALESCE(refunded_amount,0))::float n FROM payments WHERE ${done} AND paid_at>=${SINCE("$1")} GROUP BY 1 ORDER BY 1`, [days]);
+    const byPlan = await q(`SELECT plan_id, count(*)::int n, sum(amount-COALESCE(refunded_amount,0))::float amount FROM payments WHERE ${done} GROUP BY 1`);
+    const today = (await q(`SELECT to_char(now() AT TIME ZONE '${TZ}','YYYY-MM-DD') d`))[0].d;
+    res.json({ days, today, tz: TZ, totals: { ...tot, revenueAll: tot.revenueall, free: tot.users - tot.pro, conversion: tot.users ? tot.pro / tot.users : 0 },
+      series: { signups, active, revenue }, byPlan });
   });
 
   A("get", "/funnel", async (req, res) => {
-    const days = Math.max(7, Math.min(365, Number(req.query.days) || 90));
-    const r = await pool.query(`WITH u AS (SELECT id FROM users WHERE created_at>now()-($1||' days')::interval)
+    const days = Math.max(7, Math.min(365, Math.round(Number(req.query.days)) || 90));
+    const r = await pool.query(`WITH u AS (SELECT id FROM users WHERE created_at>=${SINCE("$1")})
       SELECT (SELECT count(*) FROM u)::int signed_up,
         (SELECT count(DISTINCT e.user_id) FROM events e JOIN u ON u.id=e.user_id WHERE e.type='diag_done')::int diagnostic,
         (SELECT count(DISTINCT e.user_id) FROM events e JOIN u ON u.id=e.user_id WHERE e.type='xp_done')::int explainer,
         (SELECT count(DISTINCT e.user_id) FROM events e JOIN u ON u.id=e.user_id WHERE e.type='limit_hit')::int hit_limit,
         (SELECT count(DISTINCT e.user_id) FROM events e JOIN u ON u.id=e.user_id WHERE e.type='upgrade_view')::int saw_plans,
         (SELECT count(DISTINCT e.user_id) FROM events e JOIN u ON u.id=e.user_id WHERE e.type='checkout_start')::int checkout,
-        (SELECT count(DISTINCT s.user_id) FROM subscriptions s JOIN u ON u.id=s.user_id WHERE s.source IN ('tap','moyasar','coupon'))::int paid`, [String(days)]);
-    const limits = await pool.query(`SELECT k, count(*)::int n, count(DISTINCT user_id)::int users FROM events WHERE type='limit_hit' AND at>now()-($1||' days')::interval GROUP BY k ORDER BY n DESC`, [String(days)]);
+        (SELECT count(DISTINCT s.user_id) FROM subscriptions s JOIN u ON u.id=s.user_id WHERE s.source IN ('tap','moyasar','coupon'))::int paid`, [days]);
+    const limits = await pool.query(`SELECT k, count(*)::int n, count(DISTINCT user_id)::int users FROM events WHERE type='limit_hit' AND at>=${SINCE("$1")} GROUP BY k ORDER BY n DESC`, [days]);
     res.json({ days, steps: r.rows[0], limits: limits.rows });
   });
 
   A("get", "/users", async (req, res) => {
     const qs = String(req.query.q || "").trim().toLowerCase(), plan = String(req.query.plan || ""), sort = String(req.query.sort || "active");
-    const page = Math.max(0, Number(req.query.page) || 0), size = Math.min(200, Math.max(10, Number(req.query.size) || 50));
+    const page = Math.max(0, Math.floor(Number(req.query.page)) || 0), size = Math.min(200, Math.max(10, Math.floor(Number(req.query.size)) || 50));
     const where = [], params = [];
-    if (qs) { params.push("%" + qs + "%"); where.push(`(lower(u.email) LIKE $${params.length} OR lower(COALESCE(u.name,'')) LIKE $${params.length})`); }
+    if (qs) { params.push("%" + qs.slice(0, 100).replace(/[\\%_]/g, m => "\\" + m) + "%"); where.push(`(lower(u.email) LIKE $${params.length} OR lower(COALESCE(u.name,'')) LIKE $${params.length})`); }
     if (plan === "pro") where.push("s.ends_at IS NOT NULL"); else if (plan === "free") where.push("s.ends_at IS NULL");
     const order = { active: "p.updated_at DESC NULLS LAST", new: "u.created_at DESC", name: "lower(COALESCE(u.name,u.email))", ends: "s.ends_at ASC NULLS LAST" }[sort] || "p.updated_at DESC NULLS LAST";
     const base = `FROM users u LEFT JOIN progress p ON p.user_id=u.id
@@ -365,7 +437,8 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
   A("get", "/users.csv", async (req, res) => {
     const r = await pool.query(`SELECT u.email,u.name,u.created_at,p.track,p.target,p.exam_date,p.summary,p.updated_at,
       (SELECT max(ends_at) FROM subscriptions WHERE user_id=u.id AND revoked_at IS NULL AND ends_at>now()) pro_until FROM users u LEFT JOIN progress p ON p.user_id=u.id ORDER BY u.created_at`);
-    const esc = v => { const s = v == null ? "" : String(v instanceof Date ? v.toISOString() : v); return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
+    // text a student typed (name, email) must never run as a spreadsheet formula: prefix = + - @ tab CR with a quote
+    const esc = v => { let s = v == null ? "" : String(v instanceof Date ? v.toISOString() : v); if (typeof v === "string" && /^[=+\-@\t\r]/.test(s)) s = "'" + s; return /[",\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
     const head = ["email", "name", "created_at", "track", "target", "exam_date", "est_score", "accuracy", "solved", "last_active", "pro_until"];
     const rows = r.rows.map(x => [x.email, x.name, x.created_at, x.track, x.target, x.exam_date, x.summary && x.summary.est, x.summary && x.summary.acc, x.summary && x.summary.solved, x.summary && x.summary.lastActive, x.pro_until].map(esc).join(","));
     audit(req, "export_users", null, { n: rows.length });
@@ -379,7 +452,7 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
     try { const S = JSON.parse(u.p || "null") || {}; skills = S.stats || {}; attempts = (S.attempts || []).slice(-30).reverse(); xp = S.xp || {}; diag = S.diag || null; } catch (e) {}
     delete u.p;
     const subs = (await pool.query("SELECT id,plan_id,source,starts_at,ends_at,revoked_at,note,created_by,payment_id FROM subscriptions WHERE user_id=$1 ORDER BY starts_at DESC", [id])).rows;
-    const pays = (await pool.query("SELECT id,plan_id,amount,currency,coupon,status,COALESCE(tap_id,ext_id) tap_id,tap_status,provider,refunded_amount,created_at,paid_at FROM payments WHERE user_id=$1 ORDER BY created_at DESC", [id])).rows;
+    const pays = (await pool.query("SELECT id,plan_id,amount,currency,coupon,status,COALESCE(tap_id,ext_id) tap_id,tap_status,COALESCE(provider, CASE WHEN tap_id IS NOT NULL THEN 'tap' END) provider,refunded_amount,refunded_at,created_at,paid_at FROM payments WHERE user_id=$1 ORDER BY created_at DESC", [id])).rows;
     const events = (await pool.query("SELECT type,k,v,at FROM events WHERE user_id=$1 ORDER BY at DESC LIMIT 60", [id])).rows;
     res.json({ user: { ...u, isAdmin: isAdminEmail(u.email) }, plan: await planOf(u), skills, attempts, xp, diag, subscriptions: subs, payments: pays, events });
   });
@@ -391,9 +464,10 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
     audit(req, "grant", u.email, { days, note }); res.json({ until });
   });
   A("post", "/users/:id/revoke", async (req, res) => {
-    const r = await pool.query("UPDATE subscriptions SET revoked_at=now() WHERE user_id=$1 AND revoked_at IS NULL AND ends_at>now() RETURNING id", [req.params.id]);
     const em = (await pool.query("SELECT email FROM users WHERE id=$1", [req.params.id])).rows[0];
-    audit(req, "revoke", em ? em.email : req.params.id, { n: r.rowCount }); res.json({ revoked: r.rowCount });
+    if (!em) return fail(res, 404, "not-found");
+    const n = await tx(async c => { await lockUser(c, req.params.id); return (await c.query("UPDATE subscriptions SET revoked_at=now() WHERE user_id=$1 AND revoked_at IS NULL AND ends_at>now()", [req.params.id])).rowCount; });
+    audit(req, "revoke", em.email, { n }); res.json({ revoked: n });
   });
   A("post", "/users/:id/name", async (req, res) => {
     const name = cleanName(req.body.name); if (name.length < 2 || name.length > 60) return fail(res, 400, "invalid-name");
@@ -402,38 +476,55 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
   });
 
   A("get", "/payments", async (req, res) => {
-    const st = String(req.query.status || "");
-    const r = await pool.query(`SELECT id,user_id,email,plan_id,amount,currency,coupon,status,COALESCE(tap_id,ext_id) tap_id,tap_status,provider,refunded_amount,created_at,paid_at FROM payments ${st ? "WHERE status=$1" : "WHERE status<>'initiated' OR created_at>now()-interval '2 days'"} ORDER BY created_at DESC LIMIT 500`, st ? [st] : []);
+    const st = ["paid", "refunded", "failed", "initiated"].includes(req.query.status) ? req.query.status : "";
+    const r = await pool.query(`SELECT id,user_id,email,plan_id,amount,currency,coupon,status,COALESCE(tap_id,ext_id) tap_id,tap_status,
+      COALESCE(provider, CASE WHEN tap_id IS NOT NULL THEN 'tap' END) provider,refunded_amount,refunded_at,days,created_at,paid_at FROM payments ${st ? "WHERE status=$1" : "WHERE status<>'initiated' OR created_at>now()-interval '2 days'"} ORDER BY created_at DESC LIMIT 500`, st ? [st] : []);
     res.json({ payments: r.rows, tap: !!PROVIDER(), provider: PROVIDER() });
   });
   A("post", "/payments/:id/refund", async (req, res) => {
-    const p = (await pool.query("SELECT * FROM payments WHERE id=$1", [req.params.id])).rows[0];
-    if (!p || p.status !== "paid") return fail(res, 400, "not-refundable");
-    const amount = req.body.amount != null ? money(req.body.amount) : money(p.amount);
-    if (!(amount > 0 && amount <= money(p.amount))) return fail(res, 400, "bad-amount");
-    let refundId = null;
-    if (p.provider === "moyasar" && p.ext_id && Number(p.amount) > 0) {
-      if (!process.env.MOYASAR_SECRET_KEY) return fail(res, 503, "payments-not-configured");
-      const inv = await moy("GET", "/invoices/" + encodeURIComponent(p.ext_id));
-      const pay = (inv.payments || []).find(x => x.status === "paid" || x.status === "captured");
-      if (!pay) return fail(res, 400, "not-refundable");
-      const rf = await moy("POST", "/payments/" + encodeURIComponent(pay.id) + "/refund", { amount: Math.round(amount * 100) });
-      refundId = rf.id || pay.id;
-    } else if (p.tap_id && Number(p.amount) > 0) {
-      if (!process.env.TAP_SECRET_KEY) return fail(res, 503, "payments-not-configured");
-      const rf = await tap("POST", "/refunds/", { charge_id: p.tap_id, amount, currency: p.currency, reason: String(req.body.reason || "requested_by_customer").slice(0, 100), reference: { merchant: p.id }, post: { url: baseUrl(req) + "/api/billing/refund-webhook" } });
-      refundId = rf.id || null;
-    }
-    await pool.query("UPDATE payments SET status='refunded', refunded_amount=$1, refund_id=$2 WHERE id=$3", [amount, refundId, p.id]);
-    if (req.body.revoke !== false) await pool.query("UPDATE subscriptions SET revoked_at=now() WHERE payment_id=$1 AND revoked_at IS NULL", [p.id]);
-    audit(req, "refund", p.id, { amount, refundId }); res.json({ ok: true, refundId });
+    const reason = String(req.body.reason || "requested_by_customer").slice(0, 100);
+    // the payment row stays locked for the whole refund, so a double click cannot refund twice;
+    // several partial refunds are allowed up to what is left of the payment
+    const out = await tx(async c => {
+      const p = (await c.query("SELECT * FROM payments WHERE id=$1 FOR UPDATE", [req.params.id])).rows[0];
+      if (!p || !["paid", "refunded"].includes(p.status)) return { err: "not-refundable" };
+      const left = money(Number(p.amount) - Number(p.refunded_amount || 0));
+      if (!(left > 0)) return { err: "not-refundable" };
+      const raw = req.body.amount;
+      const amount = raw == null || raw === "" ? left : money(raw);
+      if (!(amount > 0 && amount <= left)) return { err: "bad-amount" };
+      let refundId = null;
+      try {
+        if (p.provider === "moyasar" && p.ext_id) {
+          if (!process.env.MOYASAR_SECRET_KEY) return { err: "payments-not-configured", status: 503 };
+          const inv = await moy("GET", "/invoices/" + encodeURIComponent(p.ext_id));
+          const pay = (inv.payments || []).find(x => ["paid", "captured", "refunded"].includes(x.status) && Number(x.amount) - Number(x.refunded || 0) > 0);
+          if (!pay) return { err: "not-refundable" };
+          const rf = await moy("POST", "/payments/" + encodeURIComponent(pay.id) + "/refund", { amount: Math.round(amount * 100) });
+          refundId = rf.id || pay.id;
+        } else if (p.tap_id) {
+          if (!process.env.TAP_SECRET_KEY) return { err: "payments-not-configured", status: 503 };
+          const rf = await tap("POST", "/refunds/", { charge_id: p.tap_id, amount, currency: p.currency, reason, reference: { merchant: p.id }, post: { url: baseUrl(req) + "/api/billing/refund-webhook" } });
+          refundId = rf.id || null;
+        } else return { err: "no-charge" };
+      } catch (e) { console.error("refund", p.id, e.message); return { err: "gateway-error", status: 502 }; }
+      await c.query("UPDATE payments SET status='refunded', refunded_amount=COALESCE(refunded_amount,0)+$1, refund_id=$2, refunded_at=now() WHERE id=$3", [amount, refundId, p.id]);
+      const revoked = req.body.revoke !== false ? await revokePayment(c, p.id, p.user_id) : 0;
+      return { p, amount, refundId, revoked, left: money(left - amount) };
+    });
+    if (out.err) return fail(res, out.status || 400, out.err);
+    audit(req, "refund", out.p.id, { amount: out.amount, refundId: out.refundId, email: out.p.email, revoke: req.body.revoke !== false, revoked: out.revoked, left: out.left, reason });
+    res.json({ ok: true, refundId: out.refundId, left: out.left, revoked: out.revoked });
   });
   app.post("/api/billing/refund-webhook", (req, res) => res.json({ ok: true }));
   A("post", "/payments/:id/recheck", async (req, res) => {
     const p = (await pool.query("SELECT tap_id,ext_id,provider FROM payments WHERE id=$1", [req.params.id])).rows[0];
     if (!p || !(p.tap_id || p.ext_id)) return fail(res, 400, "no-charge");
     if (p.provider === "moyasar" ? !process.env.MOYASAR_SECRET_KEY : !process.env.TAP_SECRET_KEY) return fail(res, 503, "payments-not-configured");
-    res.json(await settleAny(p));
+    let r;
+    try { r = await settleAny(p); } catch (e) { console.error("recheck", req.params.id, e.message); return fail(res, 502, "gateway-error"); }
+    audit(req, "recheck", req.params.id, { status: r.status, local: r.local || null });
+    res.json(r);
   });
 
   A("get", "/coupons", async (req, res) => res.json({ coupons: (await pool.query("SELECT * FROM coupons ORDER BY created_at DESC")).rows }));
@@ -441,9 +532,10 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
     const code = String(req.body.code || "").trim().toUpperCase();
     if (!/^[A-Z0-9_-]{3,32}$/.test(code)) return fail(res, 400, "bad-code");
     const pct = Math.round(Number(req.body.pct)); if (!(pct >= 1 && pct <= 100)) return fail(res, 400, "bad-pct");
-    const maxUses = req.body.maxUses ? Math.max(1, Math.round(Number(req.body.maxUses))) : null;
-    const exp = req.body.expires ? new Date(req.body.expires) : null; if (exp && isNaN(exp)) return fail(res, 400, "bad-date");
-    const plans = Array.isArray(req.body.plans) && req.body.plans.length ? req.body.plans.map(String) : null;
+    const mu = req.body.maxUses; let maxUses = null;
+    if (mu != null && mu !== "") { maxUses = Math.round(Number(mu)); if (!(maxUses >= 1 && maxUses <= 1e6)) return fail(res, 400, "bad-max"); }
+    const exp = req.body.expires ? new Date(req.body.expires) : null; if (exp && (isNaN(exp) || exp.getFullYear() > 2100)) return fail(res, 400, "bad-date");
+    const plans = Array.isArray(req.body.plans) && req.body.plans.length ? [...new Set(req.body.plans.map(String))].filter(x => /^[\w-]{1,20}$/.test(x)).slice(0, 12) : null;
     try { await pool.query("INSERT INTO coupons(code,pct,max_uses,expires_at,plan_ids,note) VALUES($1,$2,$3,$4,$5,$6)", [code, pct, maxUses, exp, plans, String(req.body.note || "").slice(0, 200)]); }
     catch (e) { if (e.code === "23505") return fail(res, 409, "exists"); throw e; }
     audit(req, "coupon_create", code, { pct, maxUses, exp, plans }); res.json({ ok: true });
@@ -461,33 +553,61 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
 
   A("get", "/settings", async (req, res) => { const c = await loadCfg(true); const b = await bundles(); res.json({ config: c, defaults: DEFAULTS, xpKeys: b.keys.all, tap: !!PROVIDER(), provider: PROVIDER() }); });
   A("put", "/settings", async (req, res) => {
-    const v = req.body && req.body.config; if (!v || typeof v !== "object") return fail(res, 400, "bad-config");
-    const c = merge(JSON.parse(JSON.stringify(DEFAULTS)), v);
+    const v = req.body && req.body.config; if (!v || typeof v !== "object" || Array.isArray(v)) return fail(res, 400, "bad-config");
+    const old = JSON.parse(JSON.stringify(await loadCfg(true)));
+    // only known keys are taken from the request (no mass assignment); anything missing keeps its current value
+    const pick = (o, ks) => { const r = {}; if (o && typeof o === "object" && !Array.isArray(o)) ks.forEach(k => { if (Object.prototype.hasOwnProperty.call(o, k)) r[k] = o[k]; }); return r; };
+    const obj = x => x && typeof x === "object" && !Array.isArray(x);
+    const c = { plans: v.plans !== undefined ? v.plans : old.plans, currency: DEFAULTS.currency,
+      refund: { ...old.refund, ...pick(v.refund, ["on", "days"]) },
+      free: { ...old.free, ...pick(v.free, Object.keys(DEFAULTS.free)) },
+      banner: { ...old.banner, ...pick(v.banner, ["on", "ar", "en", "tone"]) },
+      trialReportDays: v.trialReportDays !== undefined ? v.trialReportDays : old.trialReportDays };
     // validate
-    if (!Array.isArray(c.plans) || !c.plans.length || c.plans.some(p => !/^[\w-]{1,20}$/.test(p.id || "") || !(Number(p.price) > 0) || !(Number(p.days) >= 1))) return fail(res, 400, "bad-plans");
+    const ids = new Set();
+    if (!Array.isArray(c.plans) || !c.plans.length || c.plans.length > 12 || c.plans.some(p => !obj(p) || !/^[\w-]{1,20}$/.test(p.id || "") || ids.has(p.id) || !ids.add(p.id) ||
+      !(Number(p.price) >= 1 && Number(p.price) <= 100000) || !(Number(p.days) >= 1 && Number(p.days) <= 3650))) return fail(res, 400, "bad-plans");
     c.plans = c.plans.map(p => ({ id: p.id, ar: String(p.ar || "").slice(0, 60), en: String(p.en || "").slice(0, 60), days: Math.round(Number(p.days)), price: money(p.price), active: p.active !== false, best: !!p.best }));
+    if (!c.plans.some(p => p.active)) return fail(res, 400, "bad-plans");
     const f = c.free; f.dailyQuestions = Math.max(0, Math.min(500, Math.round(Number(f.dailyQuestions) || 0)));
     ["cardsFrac", "techFrac"].forEach(k => { f[k] = Math.max(0, Math.min(1, Number(f[k]) || 0)); });
     f.planWeeks = Math.max(0, Math.min(52, Math.round(Number(f.planWeeks) || 0))); f.mistakesMax = Math.max(0, Math.min(1000, Math.round(Number(f.mistakesMax) || 0)));
-    f.xp = Array.isArray(f.xp) ? f.xp.map(String).filter(k => /^[\w-]{1,40}$/.test(k)) : DEFAULTS.free.xp;
+    f.xp = Array.isArray(f.xp) ? [...new Set(f.xp.map(String).filter(k => /^[\w-]{1,40}$/.test(k)))].slice(0, 500) : DEFAULTS.free.xp;
+    f.diagnostic = f.diagnostic !== false;
     c.banner = { on: !!c.banner.on, ar: String(c.banner.ar || "").slice(0, 200), en: String(c.banner.en || "").slice(0, 200), tone: ["info", "promo", "warn"].includes(c.banner.tone) ? c.banner.tone : "info" };
     c.refund = { on: !!c.refund.on, days: Math.max(0, Math.min(60, Math.round(Number(c.refund.days) || 0))) };
     c.trialReportDays = Math.max(1, Math.min(60, Math.round(Number(c.trialReportDays) || 14)));
     await pool.query("INSERT INTO settings(key,value,updated_at) VALUES('config',$1,now()) ON CONFLICT (key) DO UPDATE SET value=$1, updated_at=now()", [c]);
     await loadCfg(true); pcache.at = 0;
-    audit(req, "settings", null, null); res.json({ config: c });
+    audit(req, "settings", null, { changed: cfgDiff(old, c) }); res.json({ config: c });
   });
+  // human-readable list of what a settings save changed, for the audit log (e.g. "m1.price: 49 → 59")
+  function cfgDiff(a, b) {
+    const out = [], J = x => JSON.stringify(x), S = x => (typeof x === "string" ? x : J(x));
+    const ap = new Map((a.plans || []).map(p => [p.id, p])), bp = new Map((b.plans || []).map(p => [p.id, p]));
+    for (const [id, p] of bp) { const o = ap.get(id); if (!o) { out.push(`+plan ${id} (${p.price} / ${p.days}d)`); continue; }
+      ["price", "days", "active", "best", "ar", "en"].forEach(k => { if (J(o[k]) !== J(p[k])) out.push(`${id}.${k}: ${S(o[k])} → ${S(p[k])}`); }); }
+    for (const id of ap.keys()) if (!bp.has(id)) out.push(`-plan ${id}`);
+    for (const k of Object.keys(b.free)) if (J(a.free && a.free[k]) !== J(b.free[k])) {
+      if (k === "xp") { const A = new Set(a.free.xp || []), B = new Set(b.free.xp); const add = [...B].filter(x => !A.has(x)), rm = [...A].filter(x => !B.has(x)); out.push(`free.xp: ${add.length ? "+" + add.join(",") : ""}${add.length && rm.length ? " " : ""}${rm.length ? "-" + rm.join(",") : ""}`); }
+      else out.push(`free.${k}: ${S(a.free && a.free[k])} → ${S(b.free[k])}`);
+    }
+    ["refund", "banner"].forEach(g => Object.keys(b[g]).forEach(k => { if (J(a[g] && a[g][k]) !== J(b[g][k])) out.push(`${g}.${k}: ${S(a[g] && a[g][k])} → ${S(b[g][k])}`); }));
+    if (a.trialReportDays !== b.trialReportDays) out.push(`trialReportDays: ${a.trialReportDays} → ${b.trialReportDays}`);
+    return out.slice(0, 40).map(x => x.slice(0, 160));
+  }
+
 
   A("get", "/content", async (req, res) => {
-    const days = Math.max(7, Math.min(365, Number(req.query.days) || 90));
+    const days = Math.max(7, Math.min(365, Math.round(Number(req.query.days)) || 90));
     const xp = (await pool.query(`SELECT k, count(*) FILTER (WHERE type='xp_start')::int starts, count(DISTINCT user_id) FILTER (WHERE type='xp_start')::int users,
       count(*) FILTER (WHERE type='xp_done')::int done, avg(v) FILTER (WHERE type='xp_done')::float score
-      FROM events WHERE type IN ('xp_start','xp_done') AND at>now()-($1||' days')::interval AND k IS NOT NULL GROUP BY k ORDER BY starts DESC`, [String(days)])).rows;
+      FROM events WHERE type IN ('xp_start','xp_done') AND at>=${SINCE("$1")} AND k IS NOT NULL GROUP BY k ORDER BY starts DESC`, [days])).rows;
     // skill accuracy aggregated from the students' saved progress (stats per skill: c correct, t total, time)
-    const prog = await pool.query("SELECT p FROM progress WHERE updated_at>now()-($1||' days')::interval", [String(days)]);
+    const prog = await pool.query(`SELECT p FROM progress WHERE updated_at>=${SINCE("$1")}`, [days]);
     const skills = {};
     for (const row of prog.rows) { try { const st = (JSON.parse(row.p) || {}).stats || {}; for (const s in st) { const x = skills[s] || (skills[s] = { c: 0, t: 0, time: 0, users: 0 }); x.c += st[s].c || 0; x.t += st[s].t || 0; x.time += st[s].time || 0; x.users++; } } catch (e) {} }
-    const tests = (await pool.query(`SELECT k, count(*)::int n, avg(v)::float avg FROM events WHERE type='test_done' AND at>now()-($1||' days')::interval GROUP BY k ORDER BY n DESC`, [String(days)])).rows;
+    const tests = (await pool.query(`SELECT k, count(*)::int n, avg(v)::float avg FROM events WHERE type='test_done' AND at>=${SINCE("$1")} GROUP BY k ORDER BY n DESC`, [days])).rows;
     res.json({ days, explainers: xp, skills, tests });
   });
   A("get", "/audit", async (req, res) => res.json({ audit: (await pool.query("SELECT admin_email,action,target,meta,at FROM admin_audit ORDER BY at DESC LIMIT 300")).rows }));

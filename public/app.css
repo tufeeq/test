@@ -154,7 +154,12 @@ main{max-width:1160px;margin:0 auto;padding-inline:var(--gut);padding-block:26px
 .hero-ring{position:relative;z-index:1;background:var(--n2);border-radius:10px;padding:14px;transform:rotate(3deg);border:2px solid var(--edge);box-shadow:3px 3px 0 var(--edge)}
 .hero-ring::before{content:"";position:absolute;top:-10px;inset-inline-start:50%;inline-size:70px;block-size:20px;background:rgba(255,255,255,.55);transform:translateX(-50%) rotate(-4deg)}
 .hero .r-track{stroke:rgba(29,24,56,.15)} .hero .r-val{stroke:var(--note-ink)} .hero .r-txt{fill:var(--note-ink)} .hero .r-lab{fill:var(--note-ink)}
-@media (max-width:640px){.hero{grid-template-columns:1fr}.hero-ring{justify-self:center;order:-1}.hero-ring .ring{inline-size:120px!important}}
+/* phones: a compact hero (ring beside the heading) so today's session shows in the first screen */
+@media (max-width:640px){.hero{grid-template-columns:minmax(0,1fr) auto;gap:10px 14px;align-items:start;padding:24px 18px 20px}
+  .hero-main{display:contents}.hero-main>*{position:relative;z-index:1;grid-column:1}.hero-main>p,.hero-main>.hero-meta{grid-column:1/-1}
+  .hero-ring{grid-column:2;grid-row:1/span 2;justify-self:end;align-self:center;padding:8px;margin-block-start:6px}.hero-ring::before{inline-size:46px;block-size:14px;top:-7px}
+  .hero-ring .ring{inline-size:100px!important}.hero .r-lab{font-size:9px}
+  .hero h1{font-size:clamp(1.35rem,6vw,1.6rem)}.hero-main>p{display:none}}
 .ring{max-width:100%;display:block}
 .r-track{stroke:var(--surface2);stroke-width:9}
 .r-val{stroke:var(--pri);stroke-width:9;stroke-linecap:round}
@@ -246,6 +251,7 @@ main{max-width:1160px;margin:0 auto;padding-inline:var(--gut);padding-block:26px
 /* plan */
 .settings-form{display:flex;flex-wrap:wrap;gap:12px;align-items:end}
 .settings-form label{display:grid;gap:4px;font-size:.84rem;color:var(--ink2);flex:1 1 150px;font-weight:700}
+.settings-form :is(input,select){block-size:48px;box-sizing:border-box} /* equal heights keep the labels of a row on one line */
 input,select,textarea{font:inherit;font-size:.95rem;padding:9px 11px;border:2px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink);max-width:100%;min-block-size:46px}
 .phase-row{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
 .phase-row li{background:var(--surface);border:1.5px solid var(--line);border-radius:14px;padding:12px 14px;display:grid;gap:4px}
@@ -708,7 +714,7 @@ body.xp-open{overflow:hidden}
 .lock-b .i16{inline-size:13px;block-size:13px;vertical-align:-2px;stroke-width:2.2}
 .lock-line{font:inherit;inline-size:100%;display:flex;align-items:center;gap:10px;text-align:start;background:var(--butter-soft);color:var(--ink);border:1.5px dashed var(--warn);border-radius:12px;padding:9px 12px;cursor:pointer;line-height:1.5;font-size:.9rem;min-block-size:44px}
 .lock-line .ll-t{flex:1}
-.lock-line b{color:var(--pri);font-size:.85rem;white-space:nowrap}
+.lock-line b{color:color-mix(in srgb,var(--pri) 78%,var(--ink));font-size:.85rem;white-space:nowrap}
 .lock-line:hover{border-style:solid}
 .lock-line .lk{color:var(--warn-t)}
 .locked{cursor:pointer}
@@ -854,3 +860,10 @@ body.sheet-open{overflow:hidden}
 .acct-snote a,.chkl a{color:var(--pri);font-weight:700}
 .acct-or{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:.85rem;margin:6px 0 0}
 .acct-or::before,.acct-or::after{content:"";flex:1;border-top:1px solid var(--line)}
+.ex-between>.card{display:grid;gap:10px;justify-items:center;text-align:center;padding:32px 20px;margin-block-start:4vh}.ex-between>.card h2{font-size:1.4rem}.ex-between>.card .btn{margin-block-start:8px}
+#exam:focus{outline:none}
+/* narrow phones (≤400px, e.g. 360px Android): the brand name wraps onto two short lines and the account button shows only its icon, so the header never scrolls sideways */
+@media (max-width:400px){.top-in{gap:5px}.brand{flex-shrink:1;min-inline-size:0}.brand b{font-size:.86rem;line-height:1.15;max-inline-size:5.4em;white-space:normal}
+  .top-in>.pro-chip{padding-inline:7px;font-size:.74rem}#lang-btn{padding-inline:7px}}
+@media (max-width:379px){#acct-btn .acct-name{display:none}#acct-btn.has-name{inline-size:38px;padding:0;display:grid;place-items:center}}
+.ex-leg{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:8px 4px 0;color:var(--muted);font-weight:700}

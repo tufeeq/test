@@ -143,7 +143,7 @@ const VB_EN = [
 
 /* ---------- Quant fixed bank (bilingual) ---------- */
 const QB = [
- {s:'comparison',cmp:1,q:{ar:'س > 0<br>القيمة الأولى: ⟦س⟧<br>القيمة الثانية: ⟦س^2⟧',en:'x > 0<br>Quantity A: ⟦x⟧<br>Quantity B: ⟦x^2⟧'},a:3,e:{ar:'عند ⟦س = ½⟧ الأولى أكبر، وعند ⟦س = 2⟧ الثانية أكبر.',en:'At ⟦x = ½⟧ A is greater; at ⟦x = 2⟧ B is greater.'}},
+ {s:'comparison',cmp:1,q:{ar:'⟦س > 0⟧<br>القيمة الأولى: ⟦س⟧<br>القيمة الثانية: ⟦س^2⟧',en:'⟦x > 0⟧<br>Quantity A: ⟦x⟧<br>Quantity B: ⟦x^2⟧'},a:3,e:{ar:'عند ⟦س = ½⟧ الأولى أكبر، وعند ⟦س = 2⟧ الثانية أكبر.',en:'At ⟦x = ½⟧ A is greater; at ⟦x = 2⟧ B is greater.'}},
  {s:'comparison',cmp:1,q:{ar:'القيمة الأولى: ⟦0.5⟧<br>القيمة الثانية: ⟦½⟧',en:'Quantity A: ⟦0.5⟧<br>Quantity B: ⟦½⟧'},a:2,e:{ar:'⟦½ = 0.5⟧',en:'⟦½ = 0.5⟧'}},
  {s:'comparison',cmp:1,q:{ar:'القيمة الأولى: ⟦(−1)^100⟧<br>القيمة الثانية: ⟦(−1)^101⟧',en:'Quantity A: ⟦(−1)^100⟧<br>Quantity B: ⟦(−1)^101⟧'},a:0,e:{ar:'الأس الزوجي يعطي 1، والفردي يعطي −1.',en:'An even power gives 1, an odd power gives −1.'}},
  {s:'comparison',cmp:1,q:{ar:'س عدد صحيح موجب<br>القيمة الأولى: ⟦2س⟧<br>القيمة الثانية: ⟦س + 1⟧',en:'x is a positive integer<br>Quantity A: ⟦2x⟧<br>Quantity B: ⟦x + 1⟧'},a:3,e:{ar:'عند ⟦س = 1⟧ متساويتان، وعند ⟦س = 2⟧ الأولى أكبر.',en:'At ⟦x = 1⟧ they are equal; at ⟦x = 2⟧ A is greater.'}},
@@ -184,7 +184,7 @@ const N = n=>{ // format number: minus sign, trim decimals
 
 function mkOpts(ans, cands, fmt=N, allowNeg=false){
   const out=[fmt(ans)]; const seen=new Set(out);
-  const push=c=>{ if(out.length>=4||!isFinite(c)) return; if(!allowNeg&&c<0) return; const f=fmt(c); if(!seen.has(f)){seen.add(f);out.push(f);} };
+  const push=c=>{ if(out.length>=4||!isFinite(c)) return; if(!allowNeg&&c<=0) return; const f=fmt(c); if(!seen.has(f)){seen.add(f);out.push(f);} };
   cands.forEach(push);
   const offs=[1,-1,2,-2,3,-3,5,-5,10,-10,4,6,7,8];
   for(const o of offs){ if(out.length>=4) break; push(ans+o); }
@@ -216,21 +216,23 @@ const GENS = {
     return {s:'algebra',q:bi(`إذا كان ⟦${b}^${m} × ${b}^${n} ÷ ${b}^${k} = ${b}^ن⟧ فما قيمة ن؟`,`If ⟦${b}^${m} × ${b}^${n} ÷ ${b}^${k} = ${b}^n⟧, what is n?`),o:mkOpts(ans,[m*n-k,m+n+k,m+n,ans+1]),e:bi(`نجمع أسس الضرب ونطرح أس القسمة: ⟦${m} + ${n} − ${k} = ${ans}⟧`,`Add exponents when multiplying, subtract when dividing: ⟦${m} + ${n} − ${k} = ${ans}⟧`)}; },
   seqArith(){ const s=R(1,20), d=R(2,9); const t=[0,1,2,3,4].map(i=>s+i*d); const ans=s+5*d;
     return {s:'algebra',q:bi(`ما العدد التالي في المتتابعة: ⟦${t.join('، ')}، ...⟧؟`,`What comes next: ⟦${t.join(', ')}, ...⟧?`),o:mkOpts(ans,[ans+d,ans-1,ans+1,t[4]+2*d-1]),e:bi(`فرق ثابت ⟦${d}⟧: ⟦${t[4]} + ${d} = ${ans}⟧`,`Constant difference ⟦${d}⟧: ⟦${t[4]} + ${d} = ${ans}⟧`)}; },
-  seqGeo(){ const s=R(1,5), r=pick([2,3]); const t=[0,1,2,3].map(i=>s*r**i); const ans=s*r**4;
+  seqGeo(){ const r=pick([2,3,4]), s=R(1,r===4?3:6); const t=[0,1,2,3].map(i=>s*r**i); const ans=s*r**4;
     return {s:'algebra',q:bi(`ما العدد التالي في المتتابعة: ⟦${t.join('، ')}، ...⟧؟`,`What comes next: ⟦${t.join(', ')}, ...⟧?`),o:mkOpts(ans,[t[3]+(t[3]-t[2]),ans*r,ans-r,ans+s]),e:bi(`كل حد يُضرب في ⟦${r}⟧: ⟦${t[3]} × ${r} = ${ans}⟧`,`Each term is multiplied by ⟦${r}⟧: ⟦${t[3]} × ${r} = ${ans}⟧`)}; },
-  evaluate(){ const x=R(-4,6); const v=x*x-3*x+2;
-    return {s:'algebra',q:bi(`إذا كان ⟦س = ${N(x)}⟧ فما قيمة ⟦س^2 − 3س + 2⟧؟`,`If ⟦x = ${N(x)}⟧, what is ⟦x^2 − 3x + 2⟧?`),o:mkOpts(v,[v+2,x*x+3*x+2,v-1,-v],N,true),e:bi(`⟦(${N(x)})^2 − 3(${N(x)}) + 2 = ${x*x} ${x<0?'+':'−'} ${Math.abs(3*x)} + 2 = ${N(v)}⟧`,`⟦(${N(x)})^2 − 3(${N(x)}) + 2 = ${x*x} ${x<0?'+':'−'} ${Math.abs(3*x)} + 2 = ${N(v)}⟧`)}; },
+  evaluate(){ const x=R(-4,6), b=pick([2,3,4,5]), c=R(1,6); const v=x*x-b*x+c;
+    const w=()=>`⟦(${N(x)})^2 − ${b}(${N(x)}) + ${c} = ${x*x} ${x<0?'+':'−'} ${Math.abs(b*x)} + ${c} = ${N(v)}⟧`;
+    return {s:'algebra',q:bi(`إذا كان ⟦س = ${N(x)}⟧ فما قيمة ⟦س^2 − ${b}س + ${c}⟧؟`,`If ⟦x = ${N(x)}⟧, what is ⟦x^2 − ${b}x + ${c}⟧?`),o:mkOpts(v,[v+2,x*x+b*x+c,v-1,-v],N,true),e:bi(w(),w())}; },
   rect(){ const l=R(4,15), w=R(2,l-1); const area=l*w, per=2*(l+w);
     if(rnd()<.5) return {s:'geometry',q:bi(`مستطيل طوله ${l} سم وعرضه ${w} سم. ما مساحته بالسنتيمتر المربع؟`,`A rectangle is ${l} cm long and ${w} cm wide. What is its area in cm²?`),o:mkOpts(area,[per,l+w,area+l,area-w]),e:bi(`⟦${l} × ${w} = ${area}⟧`,`⟦${l} × ${w} = ${area}⟧`)};
     return {s:'geometry',q:bi(`مستطيل طوله ${l} سم وعرضه ${w} سم. ما محيطه بالسنتيمتر؟`,`A rectangle is ${l} cm long and ${w} cm wide. What is its perimeter in cm?`),o:mkOpts(per,[area,l+w,per+2,per-2]),e:bi(`⟦2 × (${l} + ${w}) = ${per}⟧`,`⟦2 × (${l} + ${w}) = ${per}⟧`)}; },
   triangle(){ const a=R(30,80), b=R(20,Math.min(100,170-a)); const c=180-a-b;
     return {s:'geometry',q:bi(`مثلث قياس زاويتين فيه ${a}° و ${b}°. ما قياس الزاوية الثالثة؟`,`Two angles of a triangle are ${a}° and ${b}°. What is the third angle?`),o:mkOpts(c,[c+10,c-10,180-a,a+b],x=>N(x)+'°'),e:bi(`⟦180 − ${a} − ${b} = ${c}⟧`,`⟦180 − ${a} − ${b} = ${c}⟧`)}; },
-  pyth(){ const [a,b,c]=pick([[3,4,5],[5,12,13],[8,15,17],[7,24,25],[6,8,10],[9,12,15],[12,16,20]]);
+  pyth(){ const [a,b,c]=pick([[3,4,5],[5,12,13],[8,15,17],[7,24,25],[6,8,10],[9,12,15],[12,16,20],[10,24,26],[15,20,25],[20,21,29],[9,40,41]]);
     return {s:'geometry',q:bi(`مثلث قائم الزاوية طولا ضلعي القائمة ${a} و ${b}. ما طول الوتر؟`,`A right triangle has legs ${a} and ${b}. What is the hypotenuse?`),o:mkOpts(c,[a+b,c+1,c-1,c+2]),e:bi(`⟦√(${a*a} + ${b*b}) = √${c*c} = ${c}⟧`,`⟦√(${a*a} + ${b*b}) = √${c*c} = ${c}⟧`)}; },
   circle(){ const r=R(2,12); const ans=r*r;
+    if(rnd()<.35) return {s:'geometry',q:bi(`دائرة نصف قطرها ${r} سم. ما محيطها؟`,`A circle has a radius of ${r} cm. What is its circumference?`),o:mkOpts(2*r,[r*r,r,4*r,2*r+2],x=>`⟦${x}π⟧`),e:bi(`⟦المحيط = 2π × ${r} = ${2*r}π⟧`,`⟦C = 2π × ${r} = ${2*r}π⟧`)};
     return {s:'geometry',q:bi(`دائرة نصف قطرها ${r} سم. ما مساحتها؟`,`A circle has a radius of ${r} cm. What is its area?`),o:mkOpts(ans,[2*r,4*r*r,r,r*r+r],x=>`⟦${x}π⟧`),e:bi(`⟦π × ${r}^2 = ${ans}π⟧`,`⟦π × ${r}^2 = ${ans}π⟧`)}; },
   avgMissing(){ const avg=R(10,30); let x,y,z,w; do{ x=R(avg-8,avg+8); y=R(avg-8,avg+8); z=R(avg-8,avg+8); w=4*avg-x-y-z; }while(w<=0);
-    return {s:'stats',q:bi(`متوسط أربعة أعداد ${avg}، وثلاثة منها ${x} و ${y} و ${z}. ما العدد الرابع؟`,`The mean of four numbers is ${avg}. Three of them are ${x}, ${y} and ${z}. What is the fourth?`),o:mkOpts(w,[avg,w+4,w-4,4*avg]),e:bi(`المجموع ⟦4 × ${avg} = ${4*avg}⟧، والرابع ⟦${4*avg} − ${x+y+z} = ${w}⟧`,`Sum ⟦= 4 × ${avg} = ${4*avg}⟧, fourth ⟦= ${4*avg} − ${x+y+z} = ${w}⟧`)}; },
+    return {s:'stats',q:bi(`متوسط أربعة أعداد يساوي ${avg}، وثلاثة منها ${x} و ${y} و ${z}. ما العدد الرابع؟`,`The mean of four numbers is ${avg}. Three of them are ${x}, ${y} and ${z}. What is the fourth?`),o:mkOpts(w,[avg,w+4,w-4,4*avg]),e:bi(`المجموع ⟦4 × ${avg} = ${4*avg}⟧، والرابع ⟦${4*avg} − ${x+y+z} = ${w}⟧`,`Sum ⟦= 4 × ${avg} = ${4*avg}⟧, fourth ⟦= ${4*avg} − ${x+y+z} = ${w}⟧`)}; },
   median(){ const s=new Set(); while(s.size<5) s.add(R(1,40)); const arr=[...s]; const sorted=arr.slice().sort((a,b)=>a-b); const med=sorted[2];
     const mean=Math.round(arr.reduce((a,b)=>a+b,0)/5);
     return {s:'stats',q:bi(`ما الوسيط للقيم: ⟦${arr.join('، ')}⟧؟`,`What is the median of: ⟦${arr.join(', ')}⟧?`),o:mkOpts(med,[arr[2],mean,sorted[1],sorted[3]]),e:bi(`بعد الترتيب: ⟦${sorted.join('، ')}⟧، والوسيط ⟦${med}⟧`,`Sorted: ⟦${sorted.join(', ')}⟧, median ⟦= ${med}⟧`)}; },
@@ -269,7 +271,7 @@ Object.assign(PASSAGES.ar,{
   P8:'يَعِد الذكاء الاصطناعي بتعليم يتكيّف مع كل طالب، فيقدّم له التمارين التي تناسب مستواه ويشرح له ما أخطأ فيه فورًا. لكن الخبراء يحذّرون من أن الاعتماد الكامل عليه قد يُضعف قدرة الطالب على التفكير المستقل إذا صار يطلب الإجابة قبل أن يحاول. ويرون أن أفضل استخدام له أن يكون مدرّبًا يطرح الأسئلة ويوجّه، لا آلة تعطي الحلول الجاهزة.'
 });
 Object.assign(PASSAGES.en,{
-  P4:'In Islamic civilization, a waqf (endowment) means holding the original asset permanently while dedicating its benefit to charity: the asset stays fixed, it cannot be sold or inherited, and its revenue is spent on good causes. Over the centuries, endowments helped build schools and hospitals and dig wells, so much that some cities relied on them to educate their children and treat their sick. Researchers believe the secret of the waqf\'s survival across centuries lies in its core idea: the asset remains and the benefit renews.',
+  P4:'In Islamic civilization, a waqf (endowment) means holding the original asset permanently while dedicating its benefit to charity: the asset stays fixed, it cannot be sold or inherited, and its revenue is spent on good causes. Over the centuries, endowments helped build schools and hospitals and dig wells, so much so that some cities relied on them to educate their children and treat their sick. Researchers believe the secret of the waqf\'s survival across centuries lies in its core idea: the asset remains and the benefit renews.',
   P5:'Teachers notice that many students struggle to concentrate for long periods. Some researchers attribute this to excessive smartphone use, since frequent notifications train the brain to switch quickly between tasks. However, the solution is not to ban the phone completely but to organize its use, for example by setting study periods in which the phone is kept out of reach, followed by a short reward period of phone use.',
   P6:'Many regions of the Arabian Peninsula depend on groundwater, water that has accumulated in layers of the earth over thousands of years. The danger of overusing it lies in the fact that it renews very slowly compared with how fast it is consumed; what is drained in decades may take centuries to return. Modern plans therefore focus on desalinating seawater and recycling used water for agriculture.',
   P7:'Arabic script went through many stages of development. At first it had no dots or vowel marks. Dots were later added to distinguish similar letters, and vowel marks to fix pronunciation, when many non-Arabs entered Islam and there was fear of errors in reciting the Quran. Later, calligraphy turned from a writing tool into an art in its own right, with schools and styles such as Naskh, Thuluth, Diwani and Kufic.',
@@ -380,7 +382,7 @@ VB_EN.push(
  {s:'context',q:'The player trained hard, so his performance declined and he shone in the match.',o:['trained','declined','shone','match'],a:1,e:'It should be "improved".'},
  {s:'context',q:'The more a person reads, the poorer his vocabulary and the broader his knowledge.',o:['reads','poorer','broader','knowledge'],a:1,e:'It should be "richer".'},
  {s:'context',q:'The shop closed down because of its large number of customers and high profits.',o:['closed','large','customers','profits'],a:0,e:'Customers and profits imply it "expanded".'},
- {s:'context',q:'Hatim al-Tai was famous for his stinginess, so much that he became a proverb for generosity.',o:['famous','stinginess','proverb','generosity'],a:1,e:'It should be "generosity".'},
+ {s:'context',q:'Hatim al-Tai was famous for his stinginess, so much so that he became a proverb for generosity.',o:['famous','stinginess','proverb','generosity'],a:1,e:'It should be "generosity".'},
  {s:'context',q:'Demand for fans rises in winter because of the intense heat.',o:['Demand','fans','winter','heat'],a:2,e:'It should be "summer".'},
  {s:'context',q:'When it grew dark, we extinguished the lamps to see the road clearly.',o:['dark','extinguished','see','clearly'],a:1,e:'It should be "lit".'},
  {s:'reading',p:'P4',q:'According to the passage, dedicating the benefit of a waqf means:',o:['spending its revenue on good causes','selling the asset','passing the asset to heirs','freezing the asset without using it'],a:0,e:'"its revenue is spent on good causes".'},
@@ -412,9 +414,9 @@ const REL = {
   {n:'جزء من كل',sym:0,p:[['إصبع','يد'],['صفحة','كتاب'],['غرفة','منزل'],['ورقة','شجرة'],['عجلة','سيارة'],['حرف','كلمة'],['آية','سورة'],['لاعب','فريق'],['بيت','قصيدة'],['دقيقة','ساعة']]},
   {n:'تضاد',sym:1,p:[['كريم','بخيل'],['شجاع','جبان'],['طويل','قصير'],['سريع','بطيء'],['غني','فقير'],['صادق','كاذب'],['نور','ظلام'],['قوي','ضعيف'],['صعب','سهل'],['قريب','بعيد']]},
   {n:'ترادف',sym:1,grp:'syn',p:[['جليل','عظيم'],['ضخم','كبير'],['فطن','ذكي'],['مسرور','سعيد'],['متين','قوي'],['ساكن','هادئ'],['رفيق','صديق'],['جسور','شجاع'],['غيث','مطر'],['وهن','ضعف']]},
-  {n:'صاحب المهنة ومكان عمله',sym:0,p:[['طبيب','مستشفى'],['معلم','مدرسة'],['قاضٍ','محكمة'],['مزارع','حقل'],['خباز','مخبز'],['بحّار','سفينة'],['صيدلي','صيدلية'],['طيار','طائرة'],['عامل','مصنع'],['ممثل','مسرح']]},
+  {n:'صاحب المهنة ومكان عمله',sym:0,grp:'place',p:[['طبيب','مستشفى'],['معلم','مدرسة'],['قاضٍ','محكمة'],['مزارع','حقل'],['خباز','مخبز'],['بحّار','سفينة'],['صيدلي','صيدلية'],['طيار','طائرة'],['عامل','مصنع'],['ممثل','مسرح']]},
   {n:'سبب ونتيجة',sym:0,p:[['مطر','سيول'],['إهمال','فشل'],['اجتهاد','نجاح'],['نار','دخان'],['زلزال','دمار'],['تلوث','مرض'],['إسراف','فقر'],['رياضة','لياقة'],['برد','قشعريرة'],['سهر','إرهاق']]},
-  {n:'الكائن ومسكنه',sym:0,p:[['نحلة','خلية'],['طائر','عش'],['أسد','عرين'],['حصان','إسطبل'],['دجاجة','قن'],['أرنب','جحر'],['عنكبوت','شبكة'],['نمل','قرية']]},
+  {n:'الكائن ومسكنه',sym:0,grp:'place',p:[['نحلة','خلية'],['طائر','عش'],['أسد','عرين'],['حصان','إسطبل'],['دجاجة','قن'],['أرنب','جحر'],['عنكبوت','شبكة'],['نمل','قرية']]},
   {n:'الصغير والكبير من النوع نفسه',sym:0,p:[['شبل','أسد'],['مهر','حصان'],['جرو','كلب'],['عجل','بقرة'],['حُوار','ناقة'],['طفل','رجل'],['فرخ','دجاجة']]},
   {n:'الصانع والمادة التي يعمل عليها',sym:0,p:[['نجار','خشب'],['خياط','قماش'],['حداد','حديد'],['خزاف','طين'],['صائغ','ذهب'],['نحات','رخام'],['خطاط','حبر']]},
   {n:'المادة الخام وما يُصنع منها',sym:0,p:[['قطن','قماش'],['دقيق','خبز'],['حليب','جبن'],['رمل','زجاج'],['جلد','حذاء'],['قمح','دقيق'],['خشب','ورق']]},
@@ -425,9 +427,9 @@ const REL = {
   {n:'part and whole',sym:0,p:[['finger','hand'],['page','book'],['room','house'],['leaf','tree'],['wheel','car'],['letter','word'],['verse','poem'],['player','team'],['petal','flower'],['minute','hour']]},
   {n:'opposites',sym:1,p:[['generous','stingy'],['brave','cowardly'],['tall','short'],['fast','slow'],['rich','poor'],['honest','dishonest'],['light','darkness'],['strong','weak'],['difficult','easy'],['near','far']]},
   {n:'synonyms',sym:1,grp:'syn',p:[['huge','enormous'],['clever','intelligent'],['glad','happy'],['sturdy','strong'],['calm','tranquil'],['companion','friend'],['bold','brave'],['begin','start'],['fragile','delicate'],['rapid','quick']]},
-  {n:'worker and workplace',sym:0,p:[['doctor','hospital'],['teacher','school'],['judge','court'],['farmer','field'],['baker','bakery'],['sailor','ship'],['pharmacist','pharmacy'],['pilot','cockpit'],['actor','stage'],['chef','kitchen']]},
+  {n:'worker and workplace',sym:0,grp:'place',p:[['doctor','hospital'],['teacher','school'],['judge','court'],['farmer','field'],['baker','bakery'],['sailor','ship'],['pharmacist','pharmacy'],['pilot','cockpit'],['actor','stage'],['chef','kitchen']]},
   {n:'cause and effect',sym:0,p:[['rain','flood'],['negligence','failure'],['effort','success'],['fire','smoke'],['earthquake','destruction'],['drought','famine'],['pollution','illness'],['exercise','fitness'],['cold','shiver'],['sleeplessness','fatigue']]},
-  {n:'animal and home',sym:0,p:[['bee','hive'],['bird','nest'],['lion','den'],['horse','stable'],['chicken','coop'],['rabbit','burrow'],['spider','web'],['ant','anthill']]},
+  {n:'animal and home',sym:0,grp:'place',p:[['bee','hive'],['bird','nest'],['lion','den'],['horse','stable'],['chicken','coop'],['rabbit','burrow'],['spider','web'],['ant','anthill']]},
   {n:'young and adult',sym:0,p:[['cub','lion'],['foal','horse'],['puppy','dog'],['calf','cow'],['child','adult'],['chick','hen'],['kitten','cat']]},
   {n:'maker and material',sym:0,p:[['carpenter','wood'],['tailor','fabric'],['blacksmith','iron'],['potter','clay'],['goldsmith','gold'],['sculptor','marble'],['glassblower','glass']]},
   {n:'raw material and product',sym:0,p:[['cotton','cloth'],['flour','bread'],['milk','cheese'],['sand','glass'],['leather','shoe'],['wheat','flour'],['wood','paper']]},
@@ -437,26 +439,26 @@ const REL = {
 };
 const CATS = {
  ar:[
-  ['فواكه',['تفاح','موز','برتقال','عنب','مانجو','رمان','خوخ','كمثرى'],'خضار'],
-  ['خضار',['جزر','خيار','بصل','بطاطس','كوسا','خس','ملفوف','فجل'],'فواكه'],
-  ['مدن سعودية',['المدينة المنورة','جدة','الدمام','أبها','تبوك','الطائف','بريدة','حائل'],'عواصم عربية'],
-  ['عواصم عربية',['القاهرة','عمّان','بغداد','الرباط','دمشق','بيروت','الدوحة','مسقط'],'مدن سعودية'],
-  ['طيور',['صقر','حمامة','نسر','عصفور','بومة','هدهد','ببغاء'],'حيوانات برية'],
-  ['حيوانات برية',['أسد','نمر','فهد','ذئب','غزال','ثعلب','ضبع'],'طيور'],
-  ['معادن',['ذهب','فضة','نحاس','حديد','ألمنيوم','زنك'],'أحجار كريمة'],
-  ['أحجار كريمة',['ياقوت','زمرد','ماس','فيروز','عقيق'],'معادن'],
-  ['مشاعر مبهجة',['فرح','سرور','بهجة','سعادة','ابتهاج'],'مشاعر مؤلمة'],
-  ['مشاعر مؤلمة',['حزن','غضب','خوف','قلق','أسى'],'مشاعر مبهجة'],
-  ['أفعال حركة',['مشى','ركض','قفز','سبح','زحف','هرول'],'أفعال كلام'],
-  ['أفعال كلام',['قال','تحدث','همس','صرخ','نادى','خطب'],'أفعال حركة'],
-  ['شهور هجرية',['محرم','صفر','رجب','شعبان','رمضان','شوال'],'شهور ميلادية'],
-  ['شهور ميلادية',['يناير','مارس','أبريل','يونيو','أغسطس','أكتوبر'],'شهور هجرية'],
-  ['أدوات مطبخ',['ملعقة','شوكة','سكين','قدر','مغرفة','مقلاة'],'أدوات مدرسية'],
-  ['أدوات مدرسية',['قلم','مسطرة','ممحاة','دفتر','براية','فرجار'],'أدوات مطبخ'],
-  ['أعضاء داخلية',['قلب','رئة','كبد','كلية','معدة'],'حواس'],
-  ['حواس',['سمع','بصر','شم','ذوق','لمس'],'أعضاء داخلية'],
-  ['كواكب',['عطارد','المريخ','المشتري','زحل','نبتون','أورانوس'],'نجوم وأجرام'],
-  ['نجوم وأجرام',['الشمس','سهيل','الثريا','الشعرى'],'كواكب']
+  ['الفواكه',['تفاح','موز','برتقال','عنب','مانجو','رمان','خوخ','كمثرى'],'الخضار'],
+  ['الخضار',['جزر','خيار','بصل','بطاطس','كوسا','خس','ملفوف','فجل'],'الفواكه'],
+  ['المدن السعودية',['المدينة المنورة','جدة','الدمام','أبها','تبوك','الطائف','بريدة','حائل'],'العواصم العربية'],
+  ['العواصم العربية',['القاهرة','عمّان','بغداد','الرباط','دمشق','بيروت','الدوحة','مسقط'],'المدن السعودية'],
+  ['الطيور',['صقر','حمامة','نسر','عصفور','بومة','هدهد','ببغاء'],'الثدييات البرية'],
+  ['الثدييات البرية',['أسد','نمر','فهد','ذئب','غزال','ثعلب','ضبع'],'الطيور'],
+  ['المعادن',['ذهب','فضة','نحاس','حديد','ألمنيوم','زنك'],'الأحجار الكريمة'],
+  ['الأحجار الكريمة',['ياقوت','زمرد','ماس','فيروز','عقيق'],'المعادن'],
+  ['المشاعر المبهجة',['فرح','سرور','بهجة','سعادة','ابتهاج'],'المشاعر المزعجة'],
+  ['المشاعر المزعجة',['حزن','غضب','خوف','قلق','أسى'],'المشاعر المبهجة'],
+  ['أفعال الحركة',['مشى','ركض','قفز','سبح','زحف','هرول'],'أفعال الكلام'],
+  ['أفعال الكلام',['قال','تحدث','همس','صرخ','نادى','خطب'],'أفعال الحركة'],
+  ['الشهور الهجرية',['محرم','صفر','رجب','شعبان','رمضان','شوال'],'الشهور الميلادية'],
+  ['الشهور الميلادية',['يناير','مارس','أبريل','يونيو','أغسطس','أكتوبر'],'الشهور الهجرية'],
+  ['أدوات المطبخ',['ملعقة','شوكة','سكين','قدر','مغرفة','مقلاة'],'الأدوات المدرسية'],
+  ['الأدوات المدرسية',['قلم','مسطرة','ممحاة','دفتر','براية','فرجار'],'أدوات المطبخ'],
+  ['الأعضاء الداخلية',['قلب','رئة','كبد','كلية','معدة'],'الحواس'],
+  ['الحواس',['سمع','بصر','شم','ذوق','لمس'],'الأعضاء الداخلية'],
+  ['الكواكب',['عطارد','المريخ','المشتري','زحل','نبتون','أورانوس'],'النجوم'],
+  ['النجوم',['الشمس','سهيل','الثريا','الشعرى'],'الكواكب']
  ],
  en:[
   ['fruits',['apple','banana','orange','grape','mango','pomegranate','peach','pear'],'vegetables'],
@@ -467,8 +469,8 @@ const CATS = {
   ['wild mammals',['lion','tiger','leopard','wolf','gazelle','fox','hyena'],'birds'],
   ['metals',['gold','silver','copper','iron','aluminum','zinc'],'gemstones'],
   ['gemstones',['ruby','emerald','diamond','turquoise','sapphire'],'metals'],
-  ['pleasant feelings',['joy','delight','happiness','cheer','elation'],'painful feelings'],
-  ['painful feelings',['sorrow','anger','fear','anxiety','grief'],'pleasant feelings'],
+  ['pleasant feelings',['joy','delight','happiness','cheer','elation'],'unpleasant feelings'],
+  ['unpleasant feelings',['sorrow','anger','fear','anxiety','grief'],'pleasant feelings'],
   ['movement verbs',['walk','run','jump','swim','crawl','jog'],'speech verbs'],
   ['speech verbs',['say','speak','whisper','shout','call','announce'],'movement verbs'],
   ['kitchen tools',['spoon','fork','knife','pot','ladle','pan'],'school supplies'],
@@ -553,8 +555,8 @@ const PX = {
     ['تميز سوق عكاظ بأنه:',['سوق تجاري ومنتدى أدبي','سوق للماشية فقط','مكان للعبادة','حصن عسكري'],'«لم يكن للبيع فحسب، بل منتدى أدبيًا».'],
     ['يقع السوق قرب:',['الطائف','مكة','جدة','المدينة'],'نص صريح.'],
     ['«يتبارى» تعني:',['يتنافس','يتعاون','يتعلم','يسافر'],'المباراة منافسة.']]],
-  P21:['تُهدر كميات كبيرة من الطعام في المنازل، غالبًا بسبب شراء ما يزيد عن الحاجة أو إعداد كميات لا تؤكل. ولا تقتصر الخسارة على المال، بل تشمل الماء والطاقة التي استُهلكت في إنتاج ذلك الطعام. ويمكن تقليل الهدر بالتخطيط للمشتريات، وحفظ البقايا جيدًا، ومشاركة الفائض.',[
-    ['من أسباب الهدر المذكورة:',['شراء ما يزيد عن الحاجة','ارتفاع الأسعار','قلة المطاعم','ضعف الزراعة'],'نص صريح.'],
+  P21:['تُهدر كميات كبيرة من الطعام في المنازل، غالبًا بسبب شراء ما يزيد على الحاجة أو إعداد كميات لا تؤكل. ولا تقتصر الخسارة على المال، بل تشمل الماء والطاقة التي استُهلكت في إنتاج ذلك الطعام. ويمكن تقليل الهدر بالتخطيط للمشتريات، وحفظ البقايا جيدًا، ومشاركة الفائض.',[
+    ['من أسباب الهدر المذكورة:',['شراء ما يزيد على الحاجة','ارتفاع الأسعار','قلة المطاعم','ضعف الزراعة'],'نص صريح.'],
     ['الخسارة الناتجة عن الهدر تشمل:',['المال والماء والطاقة','المال فقط','الوقت فقط','الصحة فقط'],'نص صريح.'],
     ['ليس من الحلول المذكورة:',['زيادة المشتريات','التخطيط للمشتريات','حفظ البقايا','مشاركة الفائض'],'زيادة المشتريات تزيد الهدر.']]],
   P22:['تطير الخفافيش في الظلام دون أن تصطدم بشيء، لأنها تطلق أصواتًا عالية لا يسمعها الإنسان، ثم تستقبل صداها المرتد عن الأجسام، فتحدد مواقعها وأحجامها. وقد استفاد الإنسان من هذه الفكرة في تطوير أجهزة السونار التي تكشف ما تحت سطح الماء.',[
@@ -603,7 +605,7 @@ const PX = {
     ['The House of Wisdom was mainly for:',['translating books and transferring knowledge','building mosques','training armies','collecting taxes'],'Stated directly.'],
     ['It can be understood that Muslim scholars:',['added to what they translated','only translated','translated only from Greek','rejected other sciences'],'"did not stop at translating".'],
     ['The result of this movement was that:',['Arabic became the language of science','translation stopped','scholars moved to Greece','Baghdad declined'],'Last sentence.']]],
-  P17:['The benefits of exercise are not limited to the body. It increases blood flow to the brain and triggers substances that improve mood and strengthen memory. That is why some students find a short walk before studying helps them focus more than sitting for long stretches.',[
+  P17:['The benefits of exercise are not limited to the body. It increases blood flow to the brain and triggers the release of substances that improve mood and strengthen memory. That is why some students find a short walk before studying helps them focus more than sitting for long stretches.',[
     ['The main idea is:',['how exercise affects the brain and learning','types of useful sports','back pain from sitting','the best study times'],'It links exercise to the brain.'],
     ['Which benefit is mentioned?',['stronger memory','weight gain','less sleep','more hunger'],'Stated directly.'],
     ['"not limited to the body" means the benefits:',['include the body and more','are only physical','are few','are uncertain'],'They extend beyond the body.']]],
@@ -618,7 +620,7 @@ const PX = {
   P20:['Souq Okaz, near Taif, was one of the most famous Arab markets before Islam. It was not only a place to buy and sell but a literary forum where poets and orators competed and news was shared. In modern times it has been revived as a cultural festival that recalls that history.',[
     ['Souq Okaz was:',['a market and a literary forum','a livestock market only','a place of worship','a fortress'],'"not only... but a literary forum".'],
     ['It is located near:',['Taif','Makkah','Jeddah','Madinah'],'Stated directly.'],
-    ['"competed" is closest to:',['contested','cooperated','studied','traveled'],'Poets contested one another.']]],
+    ['"competed" is closest to:',['vied','cooperated','studied','traveled'],'Poets vied with one another.']]],
   P21:['Large amounts of food are wasted at home, often because people buy more than they need or cook portions that go uneaten. The loss is not only money but also the water and energy used to produce that food. Waste can be cut by planning purchases, storing leftovers well and sharing extra food.',[
     ['One cause of waste mentioned is:',['buying more than needed','high prices','few restaurants','weak farming'],'Stated directly.'],
     ['The loss includes:',['money, water and energy','money only','time only','health only'],'Stated directly.'],
@@ -643,7 +645,7 @@ VB_AR.push(
  {s:'context',q:'يتميز الصقر بحدة بصره، لذلك يرى فريسته من مسافات قريبة جدًا فقط.',o:['حدة','يرى','فريسته','قريبة'],a:3,e:'حدة البصر تعني الرؤية من مسافات بعيدة.'},
  {s:'context',q:'ازدحمت الشوارع بالسيارات فتأخر الموظفون، ووصلوا إلى أعمالهم مبكرين.',o:['ازدحمت','تأخر','وصلوا','مبكرين'],a:3,e:'المرتكزان: «ازدحمت» و«تأخر».'},
  {s:'context',q:'يغلي الماء عند مئة درجة مئوية، ويتجمد عند خمسين درجة.',o:['يغلي','مئة','يتجمد','خمسين'],a:3,e:'يتجمد الماء عند الصفر.'},
- {s:'context',q:'تغرب الشمس في جهة الشرق، فيحل الليل وتظهر النجوم.',o:['تغرب','الشرق','الليل','النجوم'],a:1,e:'تغيب الشمس من الغرب.'},
+ {s:'context',q:'تغرب الشمس في جهة الشرق، فيحل الليل وتظهر النجوم.',o:['تغرب','الشرق','الليل','النجوم'],a:1,e:'الصحيح «الغرب»؛ فالشمس تغرب في جهة الغرب.'},
  {s:'context',q:'كان الطالب متفوقًا في دراسته، فرسب في جميع المواد وحصل على المركز الأول.',o:['متفوقًا','رسب','جميع','الأول'],a:1,e:'الصحيح «نجح».'},
  {s:'context',q:'الكتاب صديق وفيّ، يؤنسك في وحدتك ويخذلك حين تحتاجه.',o:['وفيّ','يؤنسك','وحدتك','يخذلك'],a:3,e:'الصحيح «يعينك».'},
  {s:'context',q:'حرصًا على سلامة الأطفال، تُحفظ الأدوية في أماكن قريبة من متناول أيديهم.',o:['حرصًا','سلامة','تُحفظ','قريبة'],a:3,e:'الصحيح «بعيدة».'},
@@ -654,7 +656,7 @@ VB_AR.push(
  {s:'context',q:'كلما زادت سرعة السيارة قصُرت المسافة اللازمة لإيقافها.',o:['زادت','سرعة','قصُرت','إيقافها'],a:2,e:'الصحيح «طالت».'},
  {s:'context',q:'الشجاع يواجه المخاطر بقلب مرتجف ويُقدم دون تردد.',o:['الشجاع','يواجه','مرتجف','تردد'],a:2,e:'الصحيح «ثابت».'},
  {s:'context',q:'يبعث الربيع في النفس الكآبة بأزهاره الملونة وجوّه المعتدل.',o:['يبعث','الكآبة','الملونة','المعتدل'],a:1,e:'الصحيح «البهجة».'},
- {s:'context',q:'اقتصد في مصروفك حتى تنفق كل ما لديك قبل نهاية الشهر.',o:['اقتصد','مصروفك','تنفق','نهاية'],a:2,e:'الاقتصاد غايته ألا ينفد المال؛ الصحيح «لا تنفق».'},
+ {s:'context',q:'أسرِف في مصروفك حتى يكفيك إلى نهاية الشهر.',o:['أسرِف','مصروفك','يكفيك','نهاية'],a:0,e:'الصحيح «اقتصد»؛ فالإسراف لا يجعل المال يكفي إلى آخر الشهر.'},
  {s:'context',q:'تحتفظ الصحراء بحرارتها ليلًا، لذلك تنخفض درجة الحرارة فيها بشدة بعد الغروب.',o:['تحتفظ','ليلًا','تنخفض','الغروب'],a:0,e:'الصحيح «تفقد».'},
  {s:'context',q:'أنصت الطلاب إلى المعلم باهتمام، فلم يفهموا شيئًا من الدرس.',o:['أنصت','باهتمام','فلم','الدرس'],a:2,e:'الصحيح «ففهموا».'},
  {s:'context',q:'النباتات الصحراوية أوراقها عريضة لتقلل فقد الماء بالتبخر.',o:['الصحراوية','عريضة','تقلل','التبخر'],a:1,e:'الصحيح «صغيرة» أو «إبرية».'},
@@ -679,7 +681,7 @@ VB_EN.push(
  {s:'context',q:'Water boils at 100 degrees Celsius and freezes at 50 degrees.',o:['boils','100','freezes','50'],a:3,e:'Water freezes at 0.'},
  {s:'context',q:'The sun sets in the east, and night falls and the stars appear.',o:['sets','east','night','stars'],a:1,e:'The sun sets in the west.'},
  {s:'context',q:'The student excelled in his studies, so he failed every subject and came first.',o:['excelled','failed','every','first'],a:1,e:'It should be "passed".'},
- {s:'context',q:'A book is a loyal friend that keeps you company when alone and abandons you when you need it.',o:['loyal','company','alone','abandons'],a:3,e:'It should be "supports".'},
+ {s:'context',q:'A book is a loyal friend that keeps you company when you are alone and abandons you when you need it.',o:['loyal','company','alone','abandons'],a:3,e:'It should be "supports".'},
  {s:'context',q:'To keep children safe, medicines are stored within easy reach of their hands.',o:['safe','medicines','stored','within'],a:3,e:'It should be "out of reach".'},
  {s:'context',q:'Because oxygen is scarce at high altitudes, climbers breathe easily and comfortably.',o:['scarce','altitudes','breathe','easily'],a:3,e:'It should be "with difficulty".'},
  {s:'context',q:'Honesty is among the lowest qualities a person can have.',o:['Honesty','lowest','qualities','person'],a:1,e:'It should be "noblest".'},
@@ -688,7 +690,7 @@ VB_EN.push(
  {s:'context',q:'The faster a car goes, the shorter the distance it needs to stop.',o:['faster','car','shorter','stop'],a:2,e:'It should be "longer".'},
  {s:'context',q:'A brave person faces danger with a trembling heart and moves forward without hesitation.',o:['brave','faces','trembling','hesitation'],a:2,e:'It should be "steady".'},
  {s:'context',q:'Spring fills the soul with gloom through its colorful flowers and mild weather.',o:['fills','gloom','colorful','mild'],a:1,e:'It should be "joy".'},
- {s:'context',q:'Be thrifty with your allowance so that you spend everything before the month ends.',o:['thrifty','allowance','spend','ends'],a:2,e:'Thrift aims to avoid running out; it should be "don\'t spend".'},
+ {s:'context',q:'Be extravagant with your allowance so that it lasts until the end of the month.',o:['extravagant','allowance','lasts','end'],a:0,e:'It should be "thrifty"; spending freely does not make money last.'},
  {s:'context',q:'The desert keeps its heat at night, so temperatures drop sharply after sunset.',o:['keeps','night','drop','sunset'],a:0,e:'It should be "loses".'},
  {s:'context',q:'The students listened to the teacher attentively, so they understood nothing of the lesson.',o:['listened','attentively','nothing','lesson'],a:2,e:'It should be "everything".'},
  {s:'context',q:'Desert plants have broad leaves to reduce water loss through evaporation.',o:['Desert','broad','reduce','evaporation'],a:1,e:'It should be "small" or "needle-like".'},
@@ -775,7 +777,7 @@ QB.push(
  Qx('algebra','إذا كان ⟦أ = −2⟧ فما قيمة ⟦أ^3 − أ⟧؟','If ⟦a = −2⟧, what is ⟦a^3 − a⟧?',['−6','−10','6','−8'],'⟦−8 − (−2) = −6⟧','⟦−8 − (−2) = −6⟧'),
  Qx('arith','قرأ أحمد 30% من كتاب عدد صفحاته 250. كم صفحة بقيت؟','Ahmed read 30% of a 250-page book. How many pages are left?',['175','75','150','220'],'المتبقي ⟦70% × 250 = 175⟧','Remaining ⟦70% × 250 = 175⟧'),
  Qx('stats','ما المنوال للقيم: ⟦3، 7، 7، 2، 9، 7، 3⟧؟','What is the mode of: ⟦3, 7, 7, 2, 9, 7, 3⟧?',['7','3','5','9'],'العدد 7 تكرر ثلاث مرات، وهو الأكثر تكرارًا.','7 appears three times, more than any other value.'),
- Qx('stats','ما الوسيط للقيم: ⟦4، 9، 1، 7، 3، 8⟧؟','What is the median of: ⟦4, 9, 1, 7, 3, 8⟧?',['5.5','4','7','5.3'],'بعد الترتيب ⟦1، 3، 4، 7، 8، 9⟧ والعدد زوجي: ⟦(4 + 7) ÷ 2 = 5.5⟧','Sorted ⟦1, 3, 4, 7, 8, 9⟧, an even count: ⟦(4 + 7) ÷ 2 = 5.5⟧'),
+ Qx('stats','ما الوسيط للقيم: ⟦4، 9، 1، 7، 3، 8⟧؟','What is the median of: ⟦4, 9, 1, 7, 3, 8⟧?',['5.5','4','7','5.3'],'بعد الترتيب ⟦1، 3، 4، 7، 8، 9⟧ وعدد القيم زوجي: ⟦(4 + 7) ÷ 2 = 5.5⟧','Sorted ⟦1, 3, 4, 7, 8, 9⟧, an even count: ⟦(4 + 7) ÷ 2 = 5.5⟧'),
  Qx('stats','ما المدى للقيم: ⟦12، 5، 20، 9، 15⟧؟','What is the range of: ⟦12, 5, 20, 9, 15⟧?',['15','20','12','11'],'المدى = أكبر قيمة − أصغر قيمة: ⟦20 − 5 = 15⟧','Range = largest − smallest: ⟦20 − 5 = 15⟧'),
  Qx('stats','حصل طالب على 70 و 80 و 90 في ثلاثة اختبارات. كم يحتاج في الاختبار الرابع ليصبح متوسطه 85؟','A student scored 70, 80 and 90 on three tests. What score on the fourth test makes the mean 85?',['100','95','85','90'],'⟦4 × 85 = 340⟧ ، ⟦340 − 240 = 100⟧','⟦4 × 85 = 340⟧, ⟦340 − 240 = 100⟧'),
  Qx('stats','رُمي حجر نرد منتظم مرة واحدة. ما احتمال ظهور عدد زوجي؟','A fair die is rolled once. What is the probability of an even number?',['⟦1/2⟧','⟦1/3⟧','⟦1/6⟧','⟦2/3⟧'],'الأعداد الزوجية 2 و 4 و 6: ⟦3/6 = 1/2⟧','Even numbers are 2, 4 and 6: ⟦3/6 = 1/2⟧'),
@@ -810,28 +812,31 @@ Object.assign(GENS,{
   system(){ const x=R(2,15), y=R(1,x-1); const S=x+y, D=x-y;
     return {s:'algebra',q:bi(`إذا كان ⟦س + ص = ${S}⟧ و ⟦س − ص = ${D}⟧ فما قيمة ص؟`,`If ⟦x + y = ${S}⟧ and ⟦x − y = ${D}⟧, what is y?`),o:mkOpts(y,[x,S-D,y+1,D]),e:bi(`بالطرح: ⟦2ص = ${S} − ${D} = ${2*y} → ص = ${y}⟧`,`Subtract: ⟦2y = ${S} − ${D} = ${2*y} → y = ${y}⟧`)}; },
   consecutive(){ const n=pick([3,5]); const a=R(3,40); const sum=n*a+(n*(n-1))/2; const big=a+n-1;
-    return {s:'algebra',q:bi(`مجموع ${n===3?'ثلاثة':'خمسة'} أعداد صحيحة متتالية ${sum}. ما أكبرها؟`,`The sum of ${n} consecutive integers is ${sum}. What is the largest?`),o:mkOpts(big,[a,sum/n,big+1,big-1]),e:bi(`الأوسط ⟦${sum} ÷ ${n} = ${sum/n}⟧، والأكبر ⟦${big}⟧`,`Middle ⟦= ${sum} ÷ ${n} = ${sum/n}⟧, largest ⟦= ${big}⟧`)}; },
+    return {s:'algebra',q:bi(`مجموع ${n===3?'ثلاثة':'خمسة'} أعداد صحيحة متتالية يساوي ${sum}. ما أكبرها؟`,`The sum of ${n} consecutive integers is ${sum}. What is the largest?`),o:mkOpts(big,[a,sum/n,big+1,big-1]),e:bi(`الأوسط ⟦${sum} ÷ ${n} = ${sum/n}⟧، والأكبر ⟦${big}⟧`,`Middle ⟦= ${sum} ÷ ${n} = ${sum/n}⟧, largest ⟦= ${big}⟧`)}; },
   powerEq(){ const b=pick([2,3,4,5]); const x=R(2,b===2?7:4); const v=b**x;
     return {s:'algebra',q:bi(`إذا كان ⟦${b}^س = ${v}⟧ فما قيمة س؟`,`If ⟦${b}^x = ${v}⟧, what is x?`),o:mkOpts(x,[v/b,x+1,x-1,v/2]),e:bi(`⟦${b}^${x} = ${v}⟧`,`⟦${b}^${x} = ${v}⟧`)}; },
-  slope(){ const x1=R(-3,4), y1=R(-4,6), m=pick([-3,-2,-1,1,2,3,4]), dx=R(1,4); const x2=x1+dx, y2=y1+m*dx;
-    return {s:'algebra',q:bi(`ما ميل المستقيم المار بالنقطتين ⟦(${N(x1)}، ${N(y1)})⟧ و ⟦(${N(x2)}، ${N(y2)})⟧؟`,`What is the slope of the line through ⟦(${N(x1)}, ${N(y1)})⟧ and ⟦(${N(x2)}, ${N(y2)})⟧?`),o:mkOpts(m,[-m,m+1,dx,m*dx],N,true),e:bi(`⟦(${N(y2)} − ${N(y1)}) ÷ (${N(x2)} − ${N(x1)}) = ${N(m)}⟧`,`⟦(${N(y2)} − ${N(y1)}) ÷ (${N(x2)} − ${N(x1)}) = ${N(m)}⟧`)}; },
+  slope(){ const x1=R(-3,4), y1=R(-4,6), m=pick([-3,-2,-1,1,2,3,4]), dx=R(1,4); const x2=x1+dx, y2=y1+m*dx; const P=n=>n<0?`(${N(n)})`:N(n);
+    return {s:'algebra',q:bi(`ما ميل المستقيم المار بالنقطتين ⟦(${N(x1)}، ${N(y1)})⟧ و ⟦(${N(x2)}، ${N(y2)})⟧؟`,`What is the slope of the line through ⟦(${N(x1)}, ${N(y1)})⟧ and ⟦(${N(x2)}, ${N(y2)})⟧?`),o:mkOpts(m,[-m,m+1,dx,m*dx],N,true),e:bi(`⟦(${N(y2)} − ${P(y1)}) ÷ (${N(x2)} − ${P(x1)}) = ${N(m)}⟧`,`⟦(${N(y2)} − ${P(y1)}) ÷ (${N(x2)} − ${P(x1)}) = ${N(m)}⟧`)}; },
   polygon(){ const n=pick([5,6,8,9,10,12]); const sum=(n-2)*180; const names={5:['الخماسي','pentagon'],6:['السداسي','hexagon'],8:['الثماني','octagon'],9:['التساعي','nonagon'],10:['العشاري','decagon'],12:['الاثني عشري','dodecagon']}[n];
     if(rnd()<.5) return {s:'geometry',q:bi(`ما مجموع قياسات الزوايا الداخلية للمضلع ${names[0]}؟`,`What is the sum of the interior angles of a ${names[1]}?`),o:mkOpts(sum,[n*180,sum+180,sum-180,360],x=>N(x)+'°'),e:bi(`⟦(${n} − 2) × 180 = ${sum}⟧`,`⟦(${n} − 2) × 180 = ${sum}⟧`)};
     const each=sum/n; return {s:'geometry',q:bi(`ما قياس الزاوية الداخلية في ${names[0]} المنتظم؟`,`What is each interior angle of a regular ${names[1]}?`),o:mkOpts(each,[360/n,180-each+ (each===90?10:0),each+15,each-12],x=>N(x)+'°'),e:bi(`⟦(${n} − 2) × 180 ÷ ${n} = ${each}⟧`,`⟦(${n} − 2) × 180 ÷ ${n} = ${each}⟧`)}; },
-  cube(){ const a=R(2,9); const v=a**3, sa=6*a*a;
+  cube(){ const a=R(2,12); const v=a**3, sa=6*a*a;
     if(rnd()<.5) return {s:'geometry',q:bi(`مكعب طول حرفه ${a} سم. ما حجمه بالسنتيمتر المكعب؟`,`A cube has an edge of ${a} cm. What is its volume in cm³?`),o:mkOpts(v,[sa,a*a,3*a,v+a]),e:bi(`⟦${a}^3 = ${v}⟧`,`⟦${a}^3 = ${v}⟧`)};
     return {s:'geometry',q:bi(`مكعب طول حرفه ${a} سم. ما مساحته الكلية بالسنتيمتر المربع؟`,`A cube has an edge of ${a} cm. What is its total surface area in cm²?`),o:mkOpts(sa,[v,4*a*a,a*a,12*a]),e:bi(`⟦6 × ${a}^2 = ${sa}⟧`,`⟦6 × ${a}^2 = ${sa}⟧`)}; },
   clock(){ const h=R(1,11); let ang=30*h; if(ang>180) ang=360-ang;
+    if(rnd()<.4){ const ha=30*h+15, d=Math.abs(ha-180); /* h:30 → minute hand at 180°, hour hand halfway between h and h+1 */
+      return {s:'geometry',q:bi(`ما قياس الزاوية الصغرى بين عقربي الساعة عند الساعة ${h}:30؟`,`What is the smaller angle between the clock hands at ${h}:30?`),o:mkOpts(d,[Math.abs(30*h-180),d+30,360-d,d+15],x=>N(x)+'°'),e:bi(`عقرب الدقائق عند ⟦180°⟧، وعقرب الساعات في منتصف المسافة بين ${h} و ${h+1}: ⟦${h} × 30 + 15 = ${ha}°⟧، والفرق ⟦${d}°⟧`,`The minute hand is at ⟦180°⟧; the hour hand is halfway between ${h} and ${h+1}: ⟦${h} × 30 + 15 = ${ha}°⟧, so the angle is ⟦${d}°⟧`)}; }
     return {s:'geometry',q:bi(`ما قياس الزاوية الصغرى بين عقربي الساعة عند الساعة ${h}:00؟`,`What is the smaller angle between the clock hands at ${h}:00?`),o:mkOpts(ang,[360-ang,ang+30,ang-30,6*h],x=>N(x)+'°'),e:bi(`كل ساعة ⟦30°⟧ ، ⟦${h} × 30 = ${30*h}⟧${30*h>180?` ، والصغرى ⟦360 − ${30*h} = ${ang}⟧`:''}`,`Each hour is ⟦30°⟧, ⟦${h} × 30 = ${30*h}⟧${30*h>180?`; smaller angle ⟦= 360 − ${30*h} = ${ang}⟧`:''}`)}; },
   prob(){ const r=R(1,7), b=R(1,9); const t=r+b, g=gcd(r,t); const ans=`${r/g}/${t/g}`;
-    const f=(n,d)=>{const g=gcd(n,d);return `${n/g}/${d/g}`;}; const o=[ans]; [f(b,t),f(r,b),f(1,t),f(r,t+1)].forEach(c=>{ if(!o.includes(c)&&o.length<4) o.push(c); }); while(o.length<4) o.push(`${o.length}/${t+o.length}`);
+    const f=(n,d)=>{const g=gcd(n,d);return `${n/g}/${d/g}`;}; const o=[ans]; [f(b,t),r<b?f(r,b):null,f(1,t),f(r,t+1),f(r+1,t+1)].filter(Boolean).forEach(c=>{ if(!o.includes(c)&&o.length<4) o.push(c); }); while(o.length<4) o.push(`${o.length}/${t+o.length}`);
     return {s:'stats',q:bi(`صندوق فيه ${arC(r,['كرة حمراء واحدة','كرتان حمراوان','كرات حمراء','كرة حمراء'])} و ${arC(b,['كرة زرقاء واحدة','كرتان زرقاوان','كرات زرقاء','كرة زرقاء'])}. ما احتمال سحب كرة حمراء عشوائيًا؟`,`A box has ${r} red and ${b} blue ${b===1?'ball':'balls'}. What is the probability of drawing a red ball at random?`),o:o.map(x=>`⟦${x}⟧`),e:bi(`⟦${r} ÷ ${t} = ${ans}⟧`,`⟦${r} ÷ ${t} = ${ans}⟧`)}; },
   weightedAvg(){ let n1,n2,a1,a2,tot; do{ n1=R(3,8); n2=R(3,8); a1=10*R(5,8); a2=a1+pick([5,10,15]); tot=n1*a1+n2*a2; }while(tot%(n1+n2)); const ans=tot/(n1+n2);
     return {s:'stats',q:bi(`${n1} طلاب متوسط درجاتهم ${a1}، و ${n2} طلاب متوسطهم ${a2}. ما متوسط درجات الجميع؟`,`${n1} students averaged ${a1} and ${n2} students averaged ${a2}. What is the overall average?`),o:mkOpts(ans,[(a1+a2)/2,ans+2,ans-2,a2]),e:bi(`⟦(${n1*a1} + ${n2*a2}) ÷ ${n1+n2} = ${ans}⟧`,`⟦(${n1*a1} + ${n2*a2}) ÷ ${n1+n2} = ${ans}⟧`)}; },
-  lcm(){ const pairs=[[4,6],[6,8],[6,9],[8,12],[9,12],[10,15],[12,18],[4,10],[6,10],[15,20]]; const [a,b]=pick(pairs); const l=a*b/gcd(a,b); const SEC=['ثانية','ثانيتين','ثوانٍ','ثانية'];
+  lcm(){ const pairs=[[4,6],[6,8],[6,9],[8,12],[9,12],[10,15],[12,18],[4,10],[6,10],[15,20],[8,10],[10,12],[12,16],[14,21],[6,15]]; const [a,b]=pick(pairs); const l=a*b/gcd(a,b); const SEC=['ثانية','ثانيتين','ثوانٍ','ثانية'];
     return {s:'arith',q:bi(`تضيء إشارة كل ${arC(a,SEC)} وأخرى كل ${arC(b,SEC)}. إذا أضاءتا معًا الآن، فبعد كم ثانية تضيئان معًا مرة أخرى؟`,`One light flashes every ${a} seconds and another every ${b} seconds. If they flash together now, after how many seconds will they flash together again?`),o:mkOpts(l,[a*b,a+b,gcd(a,b),l*2]),e:bi(`المضاعف المشترك الأصغر لـ ${a} و ${b} هو ⟦${l}⟧`,`The least common multiple of ${a} and ${b} is ⟦${l}⟧`)}; },
   sqrtSimp(){ const a=pick([2,3,4,5,6]); let b=pick([2,3,5,6,7]); while(b===a) b=pick([2,3,5,6,7]); const n=a*a*b;
-    const o=[`${a}√${b}`,`${b}√${a}`,`${a*a}√${b}`,`${a}√${b*2}`];
+    const sq=k=>Number.isInteger(Math.sqrt(k)); const o=[`${a}√${b}`];
+    [[b,a],[a*a,b],[a,b*2],[a+1,b],[a,b+1],[2*a,b]].forEach(([c,k])=>{ const x=`${c}√${k}`; if(o.length<4&&!sq(k)&&!o.includes(x)) o.push(x); });
     return {s:'algebra',q:bi(`ما أبسط صورة للعدد ⟦√${n}⟧؟`,`What is the simplest form of ⟦√${n}⟧?`),o:o.map(x=>`⟦${x}⟧`),e:bi(`⟦√${n} = √(${a*a} × ${b}) = ${a}√${b}⟧`,`⟦√${n} = √(${a*a} × ${b}) = ${a}√${b}⟧`)}; },
   compareVar(){ const T=[
       ['⟦س > 1⟧<br>القيمة الأولى: ⟦س^2⟧<br>القيمة الثانية: ⟦س⟧','⟦x > 1⟧<br>Quantity A: ⟦x^2⟧<br>Quantity B: ⟦x⟧',0,'أي عدد أكبر من 1 يكبر بتربيعه.','Any number above 1 grows when squared.'],
@@ -1111,7 +1116,7 @@ const FLASH=[
  FC('e4','geometry','circle','الدائرة','المحيط = ٢πنق = π × القطر. المساحة = πنق². انتبه: القطر ضعف نصف القطر.','نق = ٣ ← المحيط ٦π والمساحة ٩π','The circle','C = 2πr = π × d. A = πr². Careful: diameter is twice the radius.','r = 3 → C = 6π, A = 9π'),
  FC('e5','geometry','rect','المستطيل والمربع','المساحة = الطول × العرض. المحيط = ٢(الطول + العرض). محيط المربع = ٤ل.','مربع محيطه ٣٦ ← ل = ٩ ← المساحة ٨١','Rectangle and square','Area = l × w. Perimeter = 2(l + w). Square perimeter = 4s.','Square with perimeter 36 → s = 9 → area 81'),
  FC('e6','geometry','cube','المكعب','الحجم = ل³ ، المساحة الكلية = ٦ل². الخلط بينهما أشهر فخ.','ل = ٤ ← الحجم ٦٤ والمساحة ٩٦','The cube','V = s³, surface area = 6s². Mixing them up is the classic trap.','s = 4 → V = 64, SA = 96'),
- FC('e7','geometry','clock','زاوية الساعة','كل ساعة = ٣٠° وكل دقيقة لعقرب الدقائق = ٦°. الزاوية الصغرى لا تتجاوز ١٨٠°.','٣:٠٠ ← ٩٠° ، ٨:٠٠ ← ١٢٠°','Clock angles','Each hour = 30°, each minute on the minute hand = 6°. The smaller angle is at most 180°.','3:00 → 90°, 8:00 → 120°'),
+ FC('e7','geometry','clock','زاوية الساعة','كل ساعة = ٣٠°، وعقرب الدقائق يتحرك ٦° كل دقيقة، وعقرب الساعات ½° كل دقيقة. الزاوية الصغرى لا تتجاوز ١٨٠°.','٣:٠٠ ← ٩٠° ، ٨:٠٠ ← ١٢٠° ، ٣:٣٠ ← ٧٥°','Clock angles','Each hour = 30°; the minute hand moves 6° a minute and the hour hand ½° a minute. The smaller angle is at most 180°.','3:00 → 90°, 8:00 → 120°, 3:30 → 75°'),
  FC('e8','geometry','triAngles','مثلثات خاصة','٣٠-٦٠-٩٠: الأضلاع ١ : √٣ : ٢ — ٤٥-٤٥-٩٠: الأضلاع ١ : ١ : √٢','وتر ١٠ في ٣٠-٦٠-٩٠ ← الضلع الأقصر ٥','Special triangles','30-60-90: sides 1 : √3 : 2 — 45-45-90: sides 1 : 1 : √2','Hypotenuse 10 in 30-60-90 → short side 5'),
  FC('s1','stats','mean','المتوسط','المجموع ÷ العدد. ومنه: المجموع = المتوسط × العدد (مفتاح أسئلة العدد المفقود).','متوسط ٤ أعداد ١٥ ← المجموع ٦٠','Mean','Sum ÷ count, so sum = mean × count (the key to missing-number questions).','Mean of 4 numbers is 15 → sum 60'),
  FC('s2','stats','median','الوسيط','رتّب أولًا ثم خذ الأوسط. إن كان العدد زوجيًا: متوسط القيمتين الوسطيين.','٣٢، ٨، ١٠، ٢٣، ٣١ ← ٢٣','Median','Sort first, then take the middle. Even count: average the two middle values.','32, 8, 10, 23, 31 → 23'),
@@ -1139,7 +1144,7 @@ const FLASH=[
  FC('x1','context','context','المرتكزان','كل جملة فيها كلمتان تبنيان معناها. الكلمة الخاطئة تصطدم بهما.','بذل جهدًا ... فتراجع ... وتألق ← «تراجع»','The two anchors','Every sentence has two words that fix its meaning. The wrong word collides with them.','trained hard ... declined ... shone → "declined"'),
  FC('x2','context','context','اختبار الاستبدال','ضع عكس الكلمة: إن استقام المعنى فهي الخطأ.','«ضعفت حصيلته» ← «زادت» ✓','Replacement test','Put in the opposite: if the sentence now works, that is the error.','"poorer vocabulary" → "richer" ✓'),
  FC('x3','context','context','أداة الربط قد تكون الخطأ','«لكن» مكان «فـ» خطأ سياقي شائع.','أدرك الحافلة لكنه وصل قبل الجميع','The linking word can be wrong','"but" where "and/so" belongs is a common contextual error.','caught the bus, but arrived first'),
- FC('x4','context','context','الحقائق العلمية','قد يكون الخطأ حقيقة معكوسة: الغليان، التجمد، الغروب، الأكسجين.','تغيب الشمس من الشرق ← الغرب','Scientific facts','The error may be a reversed fact: boiling, freezing, sunset, oxygen.','The sun sets in the east → west'),
+ FC('x4','context','context','الحقائق العلمية','قد يكون الخطأ حقيقة معكوسة: الغليان، التجمد، الغروب، الأكسجين.','تغرب الشمس في الشرق ← الغرب','Scientific facts','The error may be a reversed fact: boiling, freezing, sunset, oxygen.','The sun sets in the east → west'),
  FC('o1','odd','odd','ابحث عن أقوى رابط','التصنيف أولًا، ثم المعنى، ثم النوع النحوي، ثم الوظيفة.','صقر، حمامة، نسر، ذئب ← ذئب','Find the strongest link','Category first, then meaning, then part of speech, then function.','falcon, pigeon, eagle, wolf → wolf'),
  FC('o2','odd','odd','الأصناف القريبة','فواكه/خضار، معادن/أحجار كريمة، طيور/ثدييات، هجري/ميلادي.','محرم، رجب، شعبان، مارس ← مارس','Close categories','fruit/vegetable, metals/gems, birds/mammals, Hijri/Gregorian months.','ruby, emerald, diamond, copper → copper'),
  FC('o3','odd','odd','اسم أم فعل؟','أحيانًا الرابط نحوي: ثلاثة أفعال واسم.','قرأ، كتب، رسم، قلم ← قلم','Noun or verb?','Sometimes the link is grammatical: three verbs and a noun.','read, write, draw, pencil → pencil'),
@@ -1183,7 +1188,7 @@ const PATTERNS=[
  {sk:'arith',t:{ar:'أكبر أو أصغر كسر',en:'Largest or smallest fraction'},how:{ar:'قائمة كسور وأعداد عشرية والمطلوب الأكبر.',en:'A list of fractions and decimals; pick the largest.'},trick:{ar:'حوّل إلى عشري بخانتين، أو قارن كل كسر بـ ½.',en:'Convert to two decimal places, or compare each to ½.'},ex:{ar:'⅔ ، ⅝ ، ٠٫٧ ، ١٣/٢٠ ← ٠٫٧',en:'⅔, ⅝, 0.7, 13/20 → 0.7'}},
  {sk:'arith',t:{ar:'رقم الآحاد لقوة كبيرة',en:'Units digit of a big power'},how:{ar:'ما رقم الآحاد في عدد مرفوع لأس كبير؟',en:'What is the units digit of a number raised to a large power?'},trick:{ar:'آحاد القوى تتكرر كل ٤: اقسم الأس على ٤ وخذ الباقي.',en:'Units digits cycle every 4: divide the exponent by 4 and use the remainder.'},ex:{ar:'٧^٢٠ ← الباقي ٠ ← الآحاد ١',en:'7^20 → remainder 0 → units digit 1'}},
  {sk:'algebra',t:{ar:'الأعداد المتتالية',en:'Consecutive numbers'},how:{ar:'مجموع أعداد متتالية معروف والمطلوب أكبرها أو أصغرها.',en:'The sum of consecutive numbers is known; find the largest or smallest.'},trick:{ar:'الأوسط = المجموع ÷ العدد، ثم عُدّ للطرفين.',en:'Middle = sum ÷ count, then count outward.'},ex:{ar:'مجموع ٣ متتالية ٤٥ ← ١٤، ١٥، ١٦',en:'3 consecutive sum to 45 → 14, 15, 16'}},
- {sk:'analogy',t:{ar:'الخيار المعكوس',en:'The reversed choice'},how:{ar:'أحد الخيارات يحمل العلاقة نفسها بترتيب عكسي.',en:'One choice has the same relationship in reverse order.'},trick:{ar:'اقرأ جملة العلاقة من اليمين إلى اليسار في كل خيار.',en:'Read your relationship sentence in the same direction for every choice.'},ex:{ar:'إهمال : فشل ✓ ، نجاح : اجتهاد ✗',en:'negligence : failure ✓, success : effort ✗'}},
+ {sk:'analogy',t:{ar:'الخيار المعكوس',en:'The reversed choice'},how:{ar:'أحد الخيارات يحمل العلاقة نفسها بترتيب عكسي.',en:'One choice has the same relationship in reverse order.'},trick:{ar:'طبّق جملة العلاقة على كل خيار بالاتجاه نفسه: الكلمة الأولى ثم الثانية.',en:'Read your relationship sentence in the same direction for every choice.'},ex:{ar:'إهمال : فشل ✓ ، نجاح : اجتهاد ✗',en:'negligence : failure ✓, success : effort ✗'}},
  {sk:'completion',t:{ar:'أداة تضاد في أول الجملة',en:'A contrast word at the start'},how:{ar:'جملة تبدأ بـ «رغم» أو «على الرغم من».',en:'A sentence opening with "although" or "despite".'},trick:{ar:'الفراغ يحمل عكس معنى الجزء الثاني.',en:'The blank carries the opposite of the second half.'},ex:{ar:'رغم ... الإمكانات، حقق نتائج مبهرة ← محدودية',en:'Despite ___ resources, great results → limited'}},
  {sk:'context',t:{ar:'الخطأ في أداة الربط',en:'The error is the linking word'},how:{ar:'كل الكلمات منطقية لكن الربط بينها معكوس.',en:'Every word makes sense but the link between clauses is reversed.'},trick:{ar:'اسأل: هل الجزء الثاني نتيجة أم استدراك؟',en:'Ask: is the second part a result or a contrast?'},ex:{ar:'أدرك الحافلة لكنه وصل مبكرًا ← «لكنه»',en:'caught the bus, but arrived early → "but"'}},
  {sk:'odd',t:{ar:'هجري أم ميلادي',en:'Hijri or Gregorian'},how:{ar:'أسماء شهور من التقويمين.',en:'Month names from both calendars.'},trick:{ar:'احفظ الشهور الهجرية الاثني عشر بالترتيب.',en:'Learn the twelve Hijri months in order.'},ex:{ar:'محرم، صفر، رجب، مارس ← مارس',en:'Muharram, Safar, Rajab, March → March'}},
@@ -1229,7 +1234,7 @@ const T = {
   pDiag:'الاختبار التشخيصي', pDiagD:'سؤالان من كل مهارة · ٢٠ سؤالًا في ١٥ دقيقة.',
   pVerbal:'قسم لفظي', pVerbalD:'٢٤ سؤالًا · ٢٥ دقيقة بتوقيت الاختبار.',
   pQuant:'قسم كمي', pQuantD:'٢٤ سؤالًا · ٢٥ دقيقة بلا آلة حاسبة.',
-  pMock:'محاكاة عشوائية', pMockD:'٤ أقسام × ٢٤ سؤالًا × ٢٥ دقيقة، بأسئلة جديدة في كل مرة.', modelsTitle:'النماذج الكاملة', modelsIntro:'٣٠ نموذجًا ثابتًا بصيغة الاختبار المحوسب (٤ أقسام × ٢٤ سؤالًا × ٢٥ دقيقة)، تتبع توزيع أسئلة الاختبار وأنماطه المتكررة. أعد أي نموذج وقارن درجتك.', model:'نموذج', best:'أفضل', notTaken:'لم يُحل', modelsDone:'نماذج محلولة',
+  pMock:'محاكاة كاملة', pMockD:'٤ أقسام × ٢٤ سؤالًا × ٢٥ دقيقة، بأسئلة جديدة في كل مرة.', modelsTitle:'النماذج الكاملة', modelsIntro:'٣٠ نموذجًا ثابتًا بصيغة الاختبار المحوسب (٤ أقسام × ٢٤ سؤالًا × ٢٥ دقيقة)، تتبع توزيع أسئلة الاختبار وأنماطه المتكررة. أعد أي نموذج وقارن درجتك.', model:'نموذج', best:'أفضل', notTaken:'لم يُحل', modelsDone:'نماذج محلولة',
   bySkillTitle:'تدريب حسب المهارة', start:'ابدأ', questions:'سؤالًا', min:'دقيقة', sec:'ث', q:'سؤال', of:'من',
   due:'مستحقة', noDue:'لا مراجعات مستحقة اليوم',
   sectionLabel:'القسم', finishSection:'إنهاء القسم', finishTest:'إنهاء', prev:'السابق', next:'التالي', check:'تحقق', flag:'علّم للمراجعة', flagged:'معلَّم', map:'خريطة الأسئلة',
@@ -1296,7 +1301,7 @@ const T = {
   pDiag:'Diagnostic test', pDiagD:'Two questions from each skill · 20 questions in 15 minutes.',
   pVerbal:'Verbal section', pVerbalD:'24 questions · 25 minutes, on test timing.',
   pQuant:'Quant section', pQuantD:'24 questions · 25 minutes, no calculator.',
-  pMock:'Random simulation', pMockD:'4 sections × 24 questions × 25 minutes, with new questions every time.', modelsTitle:'Full model tests', modelsIntro:'30 fixed tests in the computer-based format (4 sections × 24 questions × 25 minutes) that follow the test’s question mix and recurring patterns. Retake any test and compare your scores.', model:'Test', best:'best', notTaken:'not taken', modelsDone:'tests completed',
+  pMock:'Full simulation', pMockD:'4 sections × 24 questions × 25 minutes, with new questions every time.', modelsTitle:'Full model tests', modelsIntro:'30 fixed tests in the computer-based format (4 sections × 24 questions × 25 minutes) that follow the test’s question mix and recurring patterns. Retake any test and compare your scores.', model:'Test', best:'best', notTaken:'not taken', modelsDone:'tests completed',
   bySkillTitle:'Practice by skill', start:'Start', questions:'questions', min:'min', sec:'s', q:'Question', of:'of',
   due:'due', noDue:'No reviews due today',
   sectionLabel:'Section', finishSection:'End section', finishTest:'Finish', prev:'Previous', next:'Next', check:'Check', flag:'Mark for review', flagged:'Marked', map:'Question map',
@@ -1379,7 +1384,7 @@ const yt = q=>'https://www.youtube.com/results?search_query='+encodeURIComponent
 Object.assign(T.ar,{
   proChip:'Pro', lockT:'للمشتركين', unlock:'افتح بالاشتراك', upgradeBtn:'اعرض الباقات', seePlans:'الباقات', later:'ليس الآن', dismiss:'إخفاء', loading:'جارٍ التحميل...', skill:'المهارة', minShort:'د',
   xpMin:n=>`${n} دقائق`,
-  ben:{test:'أقسام مؤقتة ومحاكاة كاملة بصيغة الاختبار المحوسب (٤ × ٢٤ × ٢٥).', models:'٣٠ نموذجًا كاملًا، ولكل نموذج مراجعة سؤالًا بسؤال.', skill:'تدريب موجّه على المهارة أو النمط الذي تختاره.', review:'راجع أي محاولة سابقة سؤالًا بسؤال.', analytics:'درجتك التقديرية وتحليل زمنك في كل مهارة.', est:'تطوّر درجتك التقديرية عبر الوقت.', detail:'تحليل تفصيلي للمهارات العشر كلها: الدقة والزمن.', causes:'تحليل أسباب أخطائك: قاعدة، تسرّع، وقت، فخ.', srs:'تكرار متباعد ذكي للأخطاء والبطاقات.', tech:'كل التقنيات والأنماط.', custom:'خصّص خطتك بموعد اختبارك ودرجتك المستهدفة.', plan:'الخطة كاملة حتى يوم اختبارك.', cards:'كل البطاقات والمفردات مع تكرار متباعد ذكي.', xp:'كل الشروحات المتحركة المسموعة.', daily:'تدريب يومي بلا حد.', mistakes:'صندوق أخطاء بلا حد، ومراجعة في مواعيد محسوبة.', diag:'أعد الاختبار التشخيصي متى شئت.'},
+  ben:{test:'أقسام مؤقتة ومحاكاة كاملة بصيغة الاختبار المحوسب: ٤ أقسام، في كل قسم ٢٤ سؤالًا و٢٥ دقيقة.', models:'٣٠ نموذجًا كاملًا، ولكل نموذج مراجعة سؤالًا بسؤال.', skill:'تدريب موجّه على المهارة أو النمط الذي تختاره.', review:'راجع أي محاولة سابقة سؤالًا بسؤال.', analytics:'درجتك التقديرية وتحليل زمنك في كل مهارة.', est:'تطوّر درجتك التقديرية عبر الوقت.', detail:'تحليل تفصيلي للمهارات العشر كلها: الدقة والزمن.', causes:'تحليل أسباب أخطائك: قاعدة، تسرّع، وقت، فخ.', srs:'تكرار متباعد ذكي للأخطاء والبطاقات.', tech:'كل التقنيات والأنماط.', custom:'خصّص خطتك بموعد اختبارك ودرجتك المستهدفة.', plan:'الخطة كاملة حتى يوم اختبارك.', cards:'كل البطاقات والمفردات مع تكرار متباعد ذكي.', xp:'كل الشروحات المتحركة المسموعة.', daily:'تدريب يومي بلا حد.', mistakes:'صندوق أخطاء بلا حد، ومراجعة في مواعيد محسوبة.', diag:'أعد الاختبار التشخيصي متى شئت.'},
   moreTech:n=>`${n} من التقنيات الأخرى مع الاشتراك`, morePat:n=>`${n} من الأنماط الأخرى مع الاشتراك`, moreCards:n=>`${n} من البطاقات الأخرى مع الاشتراك، ومعها تكرار متباعد ذكي`, moreWords:n=>`${n} من الكلمات الأخرى مع الاشتراك`,
   dailyLeft:(n,m)=>`بقي لك اليوم ${n} من أسئلتك المجانية الـ ${m}`, dailyOut:'أنهيت أسئلتك المجانية لهذا اليوم، وتتجدد غدًا.', mistCap:n=>`تحفظ الخطة المجانية آخر ${n} من أخطائك.`,
   detail2:'تفصيل أضعف مهارتين',
@@ -1410,7 +1415,7 @@ Object.assign(T.ar,{
 Object.assign(T.en,{
   proChip:'Pro', lockT:'Pro', unlock:'Unlock with Pro', upgradeBtn:'See plans', seePlans:'Plans', later:'Not now', dismiss:'Dismiss', loading:'Loading...', skill:'Skill', minShort:'min',
   xpMin:n=>`${n} min`,
-  ben:{test:'Timed sections and full mocks in the computer-based format (4 × 24 × 25).', models:'30 full model tests, each with question-by-question review.', skill:'Targeted practice on the skill or pattern you choose.', review:'Review any past attempt question by question.', analytics:'Your estimated score and time analysis per skill.', est:'Your estimated score over time.', detail:'Detailed analysis of all ten skills: accuracy and time.', causes:'Mistake-cause analysis: concept, careless, time, trap.', srs:'Smart spaced repetition for mistakes and cards.', tech:'Every technique and pattern.', custom:'Customize your plan with your test date and target score.', plan:'The full plan up to your test day.', cards:'Every flashcard and word, with smart spaced repetition.', xp:'Every animated, narrated explainer.', daily:'Unlimited daily practice.', mistakes:'An unlimited mistake box, with reviews on a smart schedule.', diag:'Retake the diagnostic any time.'},
+  ben:{test:'Timed sections and full mocks in the computer-based format: 4 sections, each with 24 questions in 25 minutes.', models:'30 full model tests, each with question-by-question review.', skill:'Targeted practice on the skill or pattern you choose.', review:'Review any past attempt question by question.', analytics:'Your estimated score and time analysis per skill.', est:'Your estimated score over time.', detail:'Detailed analysis of all ten skills: accuracy and time.', causes:'Mistake-cause analysis: concept, careless, time, trap.', srs:'Smart spaced repetition for mistakes and cards.', tech:'Every technique and pattern.', custom:'Customize your plan with your test date and target score.', plan:'The full plan up to your test day.', cards:'Every flashcard and word, with smart spaced repetition.', xp:'Every animated, narrated explainer.', daily:'Unlimited daily practice.', mistakes:'An unlimited mistake box, with reviews on a smart schedule.', diag:'Retake the diagnostic any time.'},
   moreTech:n=>`${n} more techniques with Pro`, morePat:n=>`${n} more patterns with Pro`, moreCards:n=>`${n} more cards with Pro, with smart spaced repetition`, moreWords:n=>`${n} more words with Pro`,
   dailyLeft:(n,m)=>`${n} of ${m} free questions left today`, dailyOut:'You used today\'s free questions. They refresh tomorrow.', mistCap:n=>`The free plan keeps your last ${n} mistakes.`,
   detail2:'Detail for your two weakest skills',
@@ -1430,12 +1435,12 @@ Object.assign(T.en,{
   youArePro:'You are on Pro', activeUntil:d=>`Pro until ${d}`, proForever:'Your plan is active.', goToday:'Go to Today', allOpen:'Everything is unlocked for you.',
   signupFirstT:'Sign up first', signupFirst:'Create your free account first, then choose a plan, so it’s linked to your account and works on any device.',
   errGeneric:'Something went wrong. Please try again.', errNet:'Could not connect. Check your internet and try again.', errAuth:'Your session ended. Please sign in again.',
-  ctxStart:'Start free, and go Pro when you’re ready for more.', ctxDaily:n=>`You finished today's ${n} free questions.`, ctxXp:n=>`You finished ${n} explainers.`, ctxAcc:(s,a,b)=>`Your ${s} accuracy rose from ${a}% to ${b}%.`, ctxDays:n=>`You have practiced on ${n} days.`, ctxMore:n=>`${n} more explainers are waiting.`,
+  ctxStart:'Start free, and go Pro when you’re ready for more.', ctxDaily:n=>`You finished today's ${n} free questions.`, ctxXp:n=>`You finished ${n} explainer${n==='1'?'':'s'}.`, ctxAcc:(s,a,b)=>`Your ${s} accuracy rose from ${a}% to ${b}%.`, ctxDays:n=>`You have practiced on ${n} day${n==='1'?'':'s'}.`, ctxMore:n=>n==='1'?'One more explainer is waiting.':`${n} more explainers are waiting.`,
   nudgeT:'Nice work!',
   subT:'My subscription', planFree:'Free', planFreeD:'Free plan, no time limit.', payHist:'Payment history', noPays:'No payments yet.', payStatus:{paid:'Paid',failed:'Not completed',refunded:'Refunded',initiated:'Pending'},
-  reportT:'Your progress report', reportIntro:n=>`It’s been ${n} days since you started. Here’s your journey in numbers: where you began, where you are now, and how far you are from your target.`, repNotYet:n=>`This is an early look. Days until your full report: ${n}.`,
+  reportT:'Your progress report', reportIntro:n=>`This is day ${n} of your journey. Here’s your journey in numbers: where you began, where you are now, and how far you are from your target.`, repNotYet:n=>`This is an early look. Days until your full report: ${n}.`,
   reportReadyE:'Your report is ready', reportReadyT:'Where you started, where you are now', reportReadyD:'Compare your diagnostic baseline with your level today, and see how far you are from your target.', reportOpen:'Open the report',
-  repStart:'Start', repNow:'Now', repChange:'Change', repXp:'Explainers finished', repDays:n=>`${n} active days`, repGap:'Gap to your target', repGapD:(e,t)=>`Estimate ${e} vs target ${t}`, repGapNone:'Practice more to get an estimate',
+  repStart:'Start', repNow:'Now', repChange:'Change', repXp:'Explainers finished', repDays:n=>`${n} active day${n==='1'?'':'s'}`, repGap:'Gap to your target', repGapD:(e,t)=>`Estimate ${e} vs target ${t}`, repGapNone:'Practice more to get an estimate',
   repSkills:'Your skills: start vs now', repNoDiag:'No diagnostic yet', repNoDiagD:'There is no baseline to compare with.', repNext:'Your next step', repProD:'Everything is unlocked for you. Keep up your daily session.'
 });
 
@@ -1544,6 +1549,11 @@ const T2={
     importQ:'سيحلّ التقدم الموجود في الملف أو الرمز محلّ تقدمك الحالي على هذا الجهاز. متابعة؟',importYes:'نعم، استورد',copyManual:'انسخ الرمز الظاهر في المربع',
     resumeT:'لديك اختبار لم يكتمل',resumeD:(ti,q,n)=>`«${ti}» · توقفت عند السؤال ${q} من ${n}. الوقت متوقف حتى تكمل.`,resumeBtn:'أكمل الاختبار',discardBtn:'تجاهله',resumed:'عدت إلى اختبارك',
     summaryOnly:'ملخص فقط',saved:'تم الحفظ',
+    mapLeg:(a,f,u)=>`أجبت عن ${a} · معلَّمة ${f} · بلا إجابة ${u}`,
+    signinT:'أهلًا بعودتك',signinWhy:'ادخل ببريدك وكلمة المرور لتكمل من حيث توقفت.',
+    welcomeIn:n=>n?`أهلًا ${n}! تقدمك يُحفظ الآن في حسابك.`:'أهلًا بك! تقدمك يُحفظ الآن في حسابك.',
+    nextRev:d=>`أقرب مراجعة: ${d}`,tomorrow:'غدًا',noMist:'ستظهر هنا الأسئلة التي تخطئ فيها في الاختبارات والتدريب.',
+    secDone:n=>`انتهى القسم ${n}`,secNext:(q,m)=>`${q} سؤالًا في ${m} دقيقة. يبدأ الوقت حين تضغط «ابدأ القسم».`,secNoBack:'لا يمكنك العودة إلى القسم السابق بعد الآن.',secStart:'ابدأ القسم',
     authErr:{'sync-first':'تعذّر حفظ آخر تقدمك في حسابك، فأبقيناك مسجّلًا حتى لا يضيع. تحقق من اتصالك ثم حاول مجددًا.'}},
   en:{emptyT:'No data yet',emptyD:'This page shows your actual numbers: estimated score, accuracy, time and the level of each skill. Start with the diagnostic (20 questions in 15 minutes) to find your starting point.',
     recoStartH:'Start with the diagnostic',recoStartP:'It measures your level in all ten skills, and your plan and daily sessions are built on it.',greetN:n=>'Your target: '+n,
@@ -1552,11 +1562,18 @@ const T2={
     importQ:'The progress in this file or code will replace your current progress on this device. Continue?',importYes:'Yes, import',copyManual:'Copy the code shown in the box',
     resumeT:'You have an unfinished test',resumeD:(ti,q,n)=>`“${ti}” · you stopped at question ${q} of ${n}. The clock is paused until you continue.`,resumeBtn:'Continue the test',discardBtn:'Discard it',resumed:'Back to your test',
     summaryOnly:'Summary only',saved:'Saved',
+    mapLeg:(a,f,u)=>`Answered ${a} · Flagged ${f} · Unanswered ${u}`,
+    signinT:'Welcome back',signinWhy:'Sign in with your email and password to pick up where you left off.',
+    welcomeIn:n=>n?`Welcome, ${n}! Your progress is now saved to your account.`:'Welcome! Your progress is now saved to your account.',
+    nextRev:d=>`Next review: ${d}`,tomorrow:'tomorrow',noMist:'Questions you get wrong in tests and practice will show up here.',
+    secDone:n=>`Section ${n} done`,secNext:(q,m)=>`${q} questions in ${m} minutes. The clock starts when you press “Start the section”.`,secNoBack:'You can no longer go back to the previous section.',secStart:'Start the section',
     authErr:{'sync-first':'We couldn’t save your latest progress to your account, so we kept you signed in to avoid losing it. Check your connection and try again.'}}
 };
 (()=>{ for(const l of ['ar','en']){ const d=T[l]; for(const [k,v] of Object.entries(T2[l])){ if(v&&typeof v==='object'&&!Array.isArray(v)&&typeof v!=='function'){ d[k]=d[k]||{}; for(const [k2,v2] of Object.entries(v)) if(!(k2 in d[k])) d[k][k2]=v2; } else if(!(k in d)) d[k]=v; } } })();
 const $=s=>document.querySelector(s);
 const dateH=d=>`<bdi dir="ltr" class="num">${numL(d||'')}</bdi>`;
+/* a readable date ("6 November 2026" / "٦ نوفمبر ٢٠٢٦"), Gregorian in both languages; falls back to the ISO form */
+const dateLong=d=>{ try{ const x=new Date(String(d).slice(0,10)+'T12:00:00'); if(isNaN(x)) throw 0; return `<bdi class="num">${x.toLocaleDateString(S.lang==='ar'?'ar-SA-u-ca-gregory-nu-arab':'en-GB',{day:'numeric',month:'long',year:'numeric'})}</bdi>`; }catch(e){ return dateH(String(d||'').slice(0,10)); } };
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 function M(str){ return String(str).replace(/⟦(.+?)⟧/g,(_,m)=>{ m=m.replace(/\^\(([^)]+)\)/g,'<sup>$1</sup>').replace(/\^([0-9A-Za-z؀-ۿ−-]+)/g,'<sup>$1</sup>'); m=m.replace(/([\u0600-\u06FF]+)/g,'$1\u200E'); return `<span class="m" dir="ltr">${m}</span>`; }); }
 const numL=n=>S.lang==='ar'?String(n).replace(/\d/g,d=>'٠١٢٣٤٥٦٧٨٩'[d]):String(n);
@@ -1590,7 +1607,7 @@ function rankSkills(){ return ALL_SKILLS.map(s=>skillInfo(s)).sort((a,b)=>(a.lev
 
 /* ============ PLANS: free / pro ============ */
 /* The standalone artifact has no accounts (no cloud.js): everything stays open there. */
-const CLOUD_BUILD=!!document.querySelector('script[src$="cloud.js"]');
+const CLOUD_BUILD=!!document.querySelector('script[src*="cloud.js"]');
 /* free-plan limits (overwritten by config.free from the server) */
 const FREE={xp:[],dailyQuestions:10,cardsFrac:.25,planWeeks:2,mistakesMax:15,techFrac:.25,diagnostic:true};
 function syncFree(){ const c=window.CLOUD?.config?.free; if(c&&typeof c==='object') Object.assign(FREE,c); }
@@ -1656,7 +1673,7 @@ function ctxMsg(k){ const f=progressFacts(), out=[];
 /* at most one unsolicited prompt per session */
 let NUDGE=null;
 function maybeNudge(reason){ if(PRO()||!CLOUD_BUILD||!window.CLOUD?.user) return; try{ if(sessionStorage.getItem('masar100_nudged')) return; sessionStorage.setItem('masar100_nudged','1'); }catch(e){ if(NUDGE) return; }
-  NUDGE={reason,msg:ctxMsg(reason)}; renderNudge(); }
+  NUDGE={reason,msg:ctxMsg(reason)}; { const tq=$('#toast'); if(tq){ clearTimeout(toastT); tq.hidden=true; } } /* the toast would cover the nudge's buttons */ renderNudge(); }
 function renderNudge(){ let el=$('#nudge'); if(!NUDGE){ if(el) el.remove(); return; }
   if(!el){ el=document.createElement('div'); el.id='nudge'; el.setAttribute('role','status'); document.body.appendChild(el); }
   el.dir=S.lang==='ar'?'rtl':'ltr'; el.lang=S.lang;
@@ -1754,21 +1771,25 @@ function startTest(kind,o={}){
   else if(kind==='review'){ const d=dueList(lang).slice(0,Math.min(20,dailyLeft())); if(!d.length){ toast(t('noDue')); return; } mode='learn'; title=t('pReview'); sections=[sec(title,d.map(m=>({...m})),Math.max(5,d.length*1.5))]; }
   X={kind,title,mode,sections,si:0,qi:0,lang,task:o.task||null,skill:o.skill||null,mk:o.k,qStart:Date.now(),confirm:null,showMap:false};
   try{ document.activeElement?.blur?.(); }catch(e){}
-  document.body.classList.add('exam-open'); $('#exam').hidden=false;
+  examShow(true);
   clearInterval(timer); timer=setInterval(tick,1000); renderExam();
   track('test_start',kind); if(kind==='diag') track('diag_start');
 }
+/* the test screen is a full-page dialog: the page behind it is made inert so Tab stays inside */
+function examShow(on){ const el=$('#exam'); document.body.classList.toggle('exam-open',on); el.hidden=!on;
+  ['header.top','#main','footer','#tabbar','#banner'].forEach(q=>{ const e=$(q); if(e) e.inert=on; });
+  if(on){ el.tabIndex=-1; setTimeout(()=>{ if(!el.contains(document.activeElement)) el.focus({preventScroll:true}); },0); } }
 const cur=()=>X.sections[X.si];
 const clock=s=>{ s=Math.max(0,Math.round(s)); return `${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`; };
-function tick(){ if(!X||X.result||X.reviewOnly) return; const s=cur(); s.left--; if(s.left%10===0) saveLive(); const el=$('#ex-timer'); if(el){ el.textContent=clock(s.left); el.classList.toggle('low',s.left<=180); } if(s.left<=0){ toast(t('timeUp')); closeSection(); } }
+function tick(){ if(!X||X.result||X.reviewOnly||X.between) return; const s=cur(); s.left--; if(s.left%10===0) saveLive(); const el=$('#ex-timer'); if(el){ el.textContent=clock(s.left); el.classList.toggle('low',s.left<=180); } if(s.left<=0){ toast(t('timeUp')); closeSection(); } }
 function logTime(){ const s=cur(); const n=Date.now(); if(!s.locked[X.qi]) s.tsp[X.qi]+=(n-X.qStart)/1000; X.qStart=n; }
 function go(i){ logTime(); X.qi=Math.max(0,Math.min(cur().qs.length-1,i)); X.confirm=null; X.showMap=false; renderExam(); $('#exam').scrollTop=0; }
 function choose(k){ const s=cur(); if(s.locked[X.qi]) return; s.ans[X.qi]=k; if(X.mode==='learn'){ logTime(); s.locked[X.qi]=true; } renderExam(); }
-function closeSection(){ logTime(); X.confirm=null; if(X.si<X.sections.length-1){ X.si++; X.qi=0; X.qStart=Date.now(); renderExam(); } else finishTest(); }
+function closeSection(){ logTime(); X.confirm=null; if(X.si<X.sections.length-1){ X.si++; X.qi=0; X.between=true; /* a pause screen before the next section; its clock starts on "start" */ renderExam(); } else finishTest(); }
 function answeredN(){ return X.sections.reduce((a,s)=>a+s.ans.filter(x=>x!=null).length,0); }
 function quitTest(){ if(X&&!X.result&&!X.reviewOnly&&(X.kind==='session'||X.kind==='review')){ addDaily(answeredN()); save(); }
   const nudge=X&&X.result&&!X.reviewOnly&&(X.kind==='session'||X.kind==='review')&&!PRO()&&dailyLeft()<=0;
-  clearInterval(timer); clearLive(); X=null; $('#exam').hidden=true; document.body.classList.remove('exam-open'); if(nudge) maybeNudge('daily'); }
+  clearInterval(timer); clearLive(); X=null; examShow(false); if(nudge) maybeNudge('daily'); }
 function finishTest(){
   if(!X||X.result||X.reviewOnly) return;
   clearInterval(timer); clearLive(); const d=todayStr(); const INT=[1,3,7,14];
@@ -1801,6 +1822,10 @@ function renderExam(){
   const el=$('#exam'); if(!X) return; el.dir=X.lang==='ar'?'rtl':'ltr'; el.lang=X.lang; el.setAttribute('role','dialog'); el.setAttribute('aria-modal','true'); el.setAttribute('aria-label',X.title||t('brand'));
   if(X.result) return renderResult(el);
   saveLive();
+  /* the screen is redrawn on every action: remember the focused control so keyboard users keep their place */
+  const ae=document.activeElement, fk=ae&&ae!==el&&el.contains(ae)?(ae.id?'#'+ae.id:ae.dataset.k!=null?`.opt[data-k="${ae.dataset.k}"]`:ae.dataset.i!=null?`.dot[data-i="${ae.dataset.i}"]`:null):null;
+  if(fk) setTimeout(()=>{ if(!X||X.result) return; const n=el.querySelector(fk); if(n&&!n.disabled) n.focus({preventScroll:true}); else if(!el.contains(document.activeElement)) el.focus({preventScroll:true}); },0);
+  if(X.between) return renderBetween(el);
   const s=cur(), q=s.qs[X.qi], tt=T[X.lang], L4=tt.letters, locked=s.locked[X.qi], a=s.ans[X.qi];
   const answered=s.ans.filter(x=>x!=null).length, last=X.qi===s.qs.length-1, lastSec=X.si===X.sections.length-1;
   const pct=Math.round(100*(X.qi+1)/s.qs.length);
@@ -1813,13 +1838,13 @@ function renderExam(){
   </div>
   <div class="ex-bar"><span style="inline-size:${pct}%"></span></div>
   ${X.confirm?`<div class="ex-confirm"><p>${X.confirm==='quit'?tt.quitConfirm:`<b>${lastSec?tt.finishQ:tt.endSecQ}</b> ${X.sections.length>1&&!lastSec?tt.confirmEnd:''} ${s.qs.length-answered?`${numL(s.qs.length-answered)} ${tt.unanswered}.`:''}`}</p><div class="row"><button class="btn ${X.confirm==='quit'?'danger':'primary'}" id="cf-yes">${X.confirm==='quit'?tt.yesQuit:(lastSec?tt.finishTest:tt.yesEnd)}</button><button class="btn ghost" id="cf-no">${tt.cancel}</button></div></div>`:''}
-  ${X.showMap?`<div class="ex-mapwrap"><div class="ex-map">${s.qs.map((_,i)=>`<button class="dot ${i===X.qi?'cur':''} ${s.ans[i]!=null?'ans':''} ${s.flag[i]?'fl':''}" data-i="${i}">${numL(i+1)}</button>`).join('')}</div></div>`:''}
+  ${X.showMap?`<div class="ex-mapwrap"><div class="ex-map">${s.qs.map((_,i)=>`<button class="dot ${i===X.qi?'cur':''} ${s.ans[i]!=null?'ans':''} ${s.flag[i]?'fl':''}" data-i="${i}" ${i===X.qi?'aria-current="true"':''}>${numL(i+1)}</button>`).join('')}</div><p class="ex-leg small">${tt.mapLeg(numL(answered),numL(s.flag.filter(Boolean).length),numL(s.qs.length-answered))}</p></div>`:''}
   <div class="ex-body ${q.passage?'with-passage':''}">
     ${q.passage?`<aside class="ex-passage"><div class="eyebrow">${tt.passage}</div><p>${esc(q.passage)}</p></aside>`:''}
     <section class="ex-q">
       <div class="ex-qhead"><span class="chip">${SKILLS[q.s][X.lang]}</span>${q.box!=null?`<span class="chip sand">${tt.kinds.review}</span>`:''}</div>
       <div class="ex-stem ${q.s==='analogy'?'analogy':''}">${stem(q.q)}</div>
-      <div class="ex-opts">${q.opts.map((o,k)=>`<button class="opt ${optClass(k)}" data-k="${k}" ${locked?'disabled':''}><span class="bub">${L4[k]}</span><span class="otx">${optH(o)}</span></button>`).join('')}</div>
+      <div class="ex-opts">${q.opts.map((o,k)=>`<button class="opt ${optClass(k)}" data-k="${k}" aria-pressed="${a===k}" ${locked?'disabled':''}><span class="bub">${L4[k]}</span><span class="otx">${optH(o)}</span></button>`).join('')}</div>
       ${X.mode==='learn'&&locked?`<div class="fb ${a===q.ans?'ok':'bad'}"><strong>${a===q.ans?tt.correctFb:tt.wrongFb+': '+L4[q.ans]}</strong><p>${M(esc(q.exp))}</p></div>`:''}
     </section>
   </div>
@@ -1838,12 +1863,20 @@ function renderExam(){
   on('#ex-end',()=>{ X.confirm='end'; renderExam(); }); on('#ex-quit',()=>{ X.confirm='quit'; renderExam(); });
   on('#cf-no',()=>{ X.confirm=null; renderExam(); }); on('#cf-yes',()=>X.confirm==='quit'?quitTest():closeSection());
 }
+function renderBetween(el){ const s=cur(), tt=T[X.lang];
+  el.innerHTML=`<div class="ex-top"><button class="icon-btn" id="ex-quit" aria-label="${tt.quit}">${ICON.x}</button><div class="ex-title"><strong>${esc(X.title)}</strong><span>${esc(s.name)}</span></div><div class="ex-timer" id="ex-timer">${clock(s.left)}</div></div>
+  <div class="rs ex-between">${X.confirm==='quit'?`<div class="ex-confirm"><p>${tt.quitConfirm}</p><div class="row"><button class="btn danger" id="cf-yes">${tt.yesQuit}</button><button class="btn ghost" id="cf-no">${tt.cancel}</button></div></div>`:''}
+    <section class="card center"><div class="eyebrow">${tt.secDone(numL(X.si))}</div><h2>${esc(s.name)}</h2><p>${tt.secNext(numL(s.qs.length),numL(Math.round(s.left/60)))}</p><p class="small muted">${tt.secNoBack}</p><button class="btn primary xl" id="ex-go">${tt.secStart}</button></section></div>`;
+  const on=(id,f)=>{ const b=el.querySelector(id); if(b) b.onclick=f; };
+  on('#ex-go',()=>{ X.between=false; X.confirm=null; X.qStart=Date.now(); renderExam(); el.scrollTop=0; });
+  on('#ex-quit',()=>{ X.confirm='quit'; renderExam(); }); on('#cf-no',()=>{ X.confirm=null; renderExam(); }); on('#cf-yes',quitTest);
+  setTimeout(()=>el.querySelector('#ex-go')?.focus(),0); }
 document.addEventListener('keydown',e=>{
-  if(!X||X.result||/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return;
+  if(!X||X.result||X.between||/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return;
   const map={'1':0,'2':1,'3':2,'4':3,'a':0,'b':1,'c':2,'d':3,'أ':0,'ب':1,'ج':2,'د':3};
   if(X.confirm||e.ctrlKey||e.metaKey||e.altKey) return;
   if(e.key in map){ e.preventDefault(); choose(map[e.key]); }
-  else if(e.key==='Enter'){ e.preventDefault(); if(X.qi<cur().qs.length-1) go(X.qi+1); }
+  else if(e.key==='Enter'&&!e.target.closest?.('button:not(.opt),a,summary')){ e.preventDefault(); if(X.qi<cur().qs.length-1) go(X.qi+1); } /* a focused button keeps its own Enter */
   else if(e.key==='ArrowLeft'){ e.preventDefault(); go(X.qi+(X.lang==='ar'?1:-1)); } else if(e.key==='ArrowRight'){ e.preventDefault(); go(X.qi+(X.lang==='ar'?-1:1)); }
 });
 function renderResult(el){
@@ -1990,7 +2023,7 @@ function pageToday(){
       <h1>${S.lang==='ar'?'الـ <em>١٠٠</em> ليست حظًا.<br>هي عشر مهارات تُتقن.':'<em>100</em> is not luck.<br>It is ten skills, mastered.'}</h1>
       <p>${t('heroLine')}</p>
       <div class="hero-meta">
-        <span class="pill">${dl!=null?`<b class="num">${numL(Math.max(0,dl))}</b> ${t('daysLeft')}`:`<a href="#plan">${t('setDate')}</a>`}</span>
+        ${dl!=null?`<span class="pill"><b class="num">${numL(Math.max(0,dl))}</b> ${t('daysLeft')}</span>`:PRO()?`<span class="pill"><a href="#plan">${t('setDate')}</a></span>`:`<button class="pill link pill-lock" data-lock="custom">${t('setDate')} ${LOCKSVG}</button>`}
         ${PRO()?`<span class="pill">${t('estScore')} <b class="num">${est==null?'—':numL(est)}</b></span>`:`<button class="pill link pill-lock" data-lock="analytics">${t('estScore')} ${LOCKSVG}</button>`}
         <a class="pill link" href="#plan">${ICON.gear} ${t('settings')}</a>
       </div>
@@ -2133,12 +2166,14 @@ function pagePractice(){
     const out=!pro&&(k==='session'||k==='review')&&dl<=0;
     return `<article class="pcard ${cls}"><div><h3>${title}</h3><p>${desc}</p>${meta}</div>${out?`<button class="btn ${cls==='feature'?'primary':'soft'}" data-lock="daily">${LOCKSVG} ${t('unlock')}</button>`:`<button class="btn ${cls==='feature'?'primary':cls==='dark'?'sand':'soft'}" data-start="${k}" ${k==='review'&&!due?'disabled':''}>${t('start')}</button>`}</article>`; };
   const nMist=S.mistakes.filter(m=>m.lang===S.lang).length;
+  const nd=!due&&nMist?S.mistakes.filter(m=>m.lang===S.lang).map(m=>m.due||'').sort()[0]:null;
+  const revHint=!nMist?`<p class="small muted">${t('noMist')}</p>`:nd?`<p class="small muted">${t('nextRev')(nd===addDays(todayStr(),1)?t('tomorrow'):dateH(nd))}</p>`:'';
   const dmeta=dl!==Infinity?`<p class="small daily-left">${dl>0?t('dailyLeft')(numL(dl),numL(FREE.dailyQuestions)):t('dailyOut')}</p>`:'';
   return `<header class="page-h"><h1>${t('practiceTitle')}</h1><p>${t('practiceIntro')}</p></header>
   <div class="pgrid">
     ${card('session',t('pSession'),t('pSessionD'),'feature',dmeta)}
     ${card('diag',t('pDiag'),t('pDiagD'),'',dt&&!pro?`<p class="small">✓ ${t('diagDone')}</p>`:'')}
-    ${card('review',t('pReview'),t('pReviewD'),'',`<p class="due-n"><b class="num">${numL(due)}</b> ${t('due')}</p>${!pro&&nMist>(+FREE.mistakesMax||0)?`<p class="small muted">${t('mistCap')(numL(FREE.mistakesMax))}</p>`:''}`)}
+    ${card('review',t('pReview'),t('pReviewD'),'',`<p class="due-n"><b class="num">${numL(due)}</b> ${t('due')}</p>${revHint}${!pro&&nMist>(+FREE.mistakesMax||0)?`<p class="small muted">${t('mistCap')(numL(FREE.mistakesMax))}</p>`:''}`)}
     ${card('mock',t('pMock'),t('pMockD'),'dark',`<p class="small">${S.track==='sci'?(S.lang==='ar'?'علمي: لفظي، كمي، لفظي، كمي':'Science: V, Q, V, Q'):(S.lang==='ar'?'نظري: لفظي، لفظي، كمي، لفظي':'Humanities: V, V, Q, V')}</p>`)}
     ${card('verbal',t('pVerbal'),t('pVerbalD'))}
     ${card('quant',t('pQuant'),t('pQuantD'))}
@@ -2245,7 +2280,7 @@ function payState(){ const C=window.CLOUD, p=curPlan(), q=UP.quote&&p&&UP.quote.
   if(!pays) return {label:t('payOff'),dis:true};
   return {label:UP.busy?t('payBusy'):t('payBtn'),dis:UP.busy}; }
 function upgradeBody(sheet){ const C=window.CLOUD, cfg=CFG(), p=curPlan(), pro=PRO(), pays=!!cfg?.payments, ps=payState();
-  if(pro&&C?.user){ const u=C.plan?.until; return `<div class="up-pro card"><span class="pro-chip big">${t('proChip')}</span><h2>${t('youArePro')}</h2><p class="muted">${u?t('activeUntil')(dateH(String(u).slice(0,10))):t('proForever')}</p><div class="row"><a class="btn primary" href="#today">${t('goToday')}</a>${sheet?'':`<button class="btn ghost" data-acct="1">${t('subT')}</button>`}</div></div>${sheet?'':`<section class="up-inc"><h2 class="sec-h hl">${t('incT')}</h2>${compareTable()}</section>`}`; }
+  if(pro&&C?.user){ const u=C.plan?.until; return `<div class="up-pro card"><span class="pro-chip big">${t('proChip')}</span><h2>${t('youArePro')}</h2><p class="muted">${u?t('activeUntil')(dateLong(u)):t('proForever')}</p><div class="row"><a class="btn primary" href="#today">${t('goToday')}</a>${sheet?'':`<button class="btn ghost" data-acct="1">${t('acctManage')}</button>`}</div></div>${sheet?'':`<section class="up-inc"><h2 class="sec-h hl">${t('incT')}</h2>${compareTable()}</section>`}`; }
   return `${UP.k||sheet?`<p class="up-ctx">${esc(ctxMsg(UP.k))}</p>`:''}
     ${planCards(p)}
     <form class="up-coupon" id="up-cf" novalidate><label for="up-cp">${t('couponL')}</label><div class="up-cp-row"><input id="up-cp" type="text" dir="ltr" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="40" placeholder="${t('couponPh')}" value="${esc(UP.coupon)}"><button class="btn ghost sm" type="submit">${t('applyBtn')}</button></div><p class="up-qerr small" id="up-qerr" role="alert">${UP.qerr?esc(UP.qerr):''}</p></form>
@@ -2292,7 +2327,8 @@ function renderUpsheet(){ const el=$('#upsheet'); if(!el) return; el.dir=S.lang=
     <div class="up-head">${lockBadge()}<h2 id="up-h">${ben?esc(ben):t('upTitle')}</h2><p class="muted small">${t('upIntro')}</p></div>${upgradeBody(true)}</div>`;
   el.querySelector('#up-x').onclick=closeUpgrade; bindUpgrade(el,true); }
 function pageUpgrade(q){ const paid=/(^|&)paid=1/.test(q), failed=/(^|&)failed=1/.test(q); { const m=/(^|&)plan=([\w-]+)/.exec(q); if(m&&!UP.plan) UP.plan=m[2]; }
-  return `<header class="page-h"><a class="back" href="#today">${t('nav.today')}</a><h1><span class="hl">${t('upTitle')}</span></h1><p>${t('upIntro')}</p></header>
+  const proNow=PRO()&&!!window.CLOUD?.user;
+  return `<header class="page-h"><a class="back" href="#today">${t('nav.today')}</a><h1><span class="hl">${proNow?t('subT'):t('upTitle')}</span></h1>${proNow?'':`<p>${t('upIntro')}</p>`}</header>
   ${paid?`<div class="up-banner ok" role="status"><b>${t('paidT')}</b><span>${PRO()?t('paidD'):t('paidWait')}</span></div>`:''}
   ${failed?`<div class="up-banner bad" role="alert"><b>${t('failedT')}</b><span>${t('failedD')}</span></div>`:''}
   ${window.CLOUD?`<div class="up-page">${upgradeBody(false)}</div>`:`<div class="card"><p>${t('allOpen')}</p></div>`}`; }
@@ -2302,7 +2338,7 @@ function pageReport(){ const ar=S.lang==='ar', d=S.diag, since=startDate(), n=da
   const rows=ALL_SKILLS.map(s=>{ const b=d&&d.skills&&d.skills[s], a=b&&b.t?Math.round(100*b.c/b.t):null, i=skillInfo(s), c=i.acc==null?null:Math.round(100*i.acc), dl=a!=null&&c!=null?c-a:null;
     return `<tr><th scope="row">${SKILLS[s][S.lang]}</th><td class="num">${a==null?'—':numL(a)+'%'}</td><td class="num">${c==null?'—':numL(c)+'%'}</td><td class="num rep-d ${dl==null?'':dl>0?'up':dl<0?'down':''}">${dl==null?'—':(dl>0?'+':dl<0?'−':'')+numL(Math.abs(dl))}</td></tr>`; }).join('');
   const gap=est==null?null:Math.max(0,S.target-est);
-  return `<header class="page-h"><a class="back" href="#today">${t('nav.today')}</a><h1><span class="hl">${t('reportT')}</span></h1><p>${t('reportIntro')(numL(n))}</p></header>
+  return `<header class="page-h"><a class="back" href="#today">${t('nav.today')}</a><h1><span class="hl">${t('reportT')}</span></h1><p>${t('reportIntro')(numL(n+1))}</p></header>
   ${ready?'':`<div class="demo"><span>${t('repNotYet')(numL(left))}</span></div>`}
   <div class="kpis rep-k">
     <div class="kpi"><span class="kl">${t('repStart')}</span><b class="kv num">${d?numL(d.pct)+'%':'—'}</b><span class="ks">${d?dateH(d.date):t('repNoDiag')}</span></div>
@@ -2327,7 +2363,7 @@ function renderProChip(){ const ab=$('#acct-btn'); if(!ab) return; let c=$('#pro
 function subSection(){ const C=window.CLOUD, pi=AC.planInfo, p=C.plan||{tier:'free'}, pro=C.isPro();
   const st=t('payStatus'), pays=(pi&&pi.payments)||[];
   return `<details class="acct-priv acct-sub" open><summary>${t('subT')}</summary>
-    <div class="sub-row"><span class="${pro?'pro-chip':'chip'}">${pro?t('proChip'):t('planFree')}</span><span class="small">${pro?(p.until?t('activeUntil')(dateH(String(p.until).slice(0,10))):t('proForever')):t('planFreeD')}</span></div>
+    <div class="sub-row"><span class="${pro?'pro-chip':'chip'}">${pro?t('proChip'):t('planFree')}</span><span class="small">${pro?(p.until?t('activeUntil')(dateLong(p.until)):t('proForever')):t('planFreeD')}</span></div>
     <a class="btn ${pro?'ghost':'primary'} sm" href="#upgrade" id="ac-up">${pro?t('seePlans'):t('upgradeBtn')}</a>
     <div class="sub-pays"><b class="small">${t('payHist')}</b>${!pi?`<p class="small muted">${t('loading')}</p>`:pays.length?`<ul>${pays.map(x=>`<li><span class="num">${dateH(String(x.paid_at||x.created_at).slice(0,10))}</span><span>${esc((plansOf().find(q=>q.id===x.plan_id)||{})[S.lang]||x.plan_id||'')}</span><b class="num">${money(+x.amount)} ${S.lang==='ar'?'ريال':esc(x.currency||'')}</b><span class="chip ${x.status==='paid'?'':'sand'}">${st[x.status]||esc(x.status)}</span></li>`).join('')}</ul>`:`<p class="small muted">${t('noPays')}</p>`}</div></details>`; }
 
@@ -2414,11 +2450,12 @@ function authIntent(){ const C=window.CLOUD; if(!AUTHQ||!C||!C.ready) return; co
 function openAcct(){ AC.err=''; AC.info=''; AC.confirmDel=false; closeUpgrade(); $('#acct').hidden=false; AC.planInfo=null;
   const C=window.CLOUD; if(C?.user&&C.planInfo) C.planInfo().then(r=>{ AC.planInfo=r; if(!$('#acct').hidden) renderAcct(); }).catch(()=>{ AC.planInfo={payments:[]}; if(!$('#acct').hidden) renderAcct(); });
   renderAcct(); setTimeout(()=>($('#ac-email')||$('#ac-x')||$('#acct button'))?.focus(),0); }
-function closeAcct(){ PEND=null; AC.gate=false; AC.gateUp=false; $('#acct').hidden=true; $('#acct-btn')?.focus(); }
+function closeAcct(){ AC.fPass=''; { const pw=$('#ac-pass'); if(pw) pw.value=''; } PEND=null; AC.gate=false; AC.gateUp=false; $('#acct').hidden=true; $('#acct-btn')?.focus(); }
 document.addEventListener('keydown',e=>{ if(e.key!=='Escape') return; const a=$('#acct'), p=$('#theme-pop'), us=$('#upsheet'); if(us&&!us.hidden&&(!a||a.hidden)){ closeUpgrade(); return; } if(a&&!a.hidden){ closeAcct(); return; } if(p&&!p.hidden){ p.hidden=true; $('#theme-btn').setAttribute('aria-expanded','false'); $('#theme-btn').focus(); } });
 const authMsg=c=>c==='cur-pw'?t('curPwWrong'):(t('authErr')[String(c||'').replace('auth/','')]||t('authErr').other);
 function renderAcct(){
   const el=$('#acct'), C=window.CLOUD; if(!el||!C) return; const u=C.user;
+  if(!u){ const v=q=>el.querySelector(q); if(v('#ac-email')) AC.fEmail=v('#ac-email').value; if(v('#ac-pass')) AC.fPass=v('#ac-pass').value; if(v('#ac-name')) AC.fName=v('#ac-name').value; if(v('#ac-ok')) AC.fOk=v('#ac-ok').checked; } /* a re-render keeps what was typed */
   el.innerHTML=`<div class="acct-box" role="dialog" aria-modal="true" aria-labelledby="acct-h">
     <button class="icon-btn acct-x" id="ac-x" aria-label="${t('close')}">${ICON.x}</button>
     ${u?`<h2 id="acct-h">${u.name?`${t('hello')}${S.lang==='ar'?'، ':', '}${esc(u.name)}`:t('acctTitle')}</h2>
@@ -2431,7 +2468,7 @@ function renderAcct(){
       ${C.changePassword?`<details class="acct-priv" ${AC.pwOpen?'open':''}><summary>${t('chPw')}</summary><form id="ac-pwf" class="acct-form" novalidate><label>${t('curPw')}<input type="password" id="ac-cur" autocomplete="current-password" dir="ltr"></label><label>${t('newPw')}<input type="password" id="ac-new" autocomplete="new-password" minlength="8" dir="ltr"></label><button class="btn ghost" type="submit">${t('chPwBtn')}</button></form></details>`:''}
       <details class="acct-priv"><summary>${t('privT')}</summary><p class="small">${t('privD')}</p></details>
       ${AC.confirmDel?`<div class="ex-confirm inline"><p>${t('delConfirm')}</p><div class="row"><button class="btn danger" id="ac-del2">${t('delYes')}</button><button class="btn ghost" id="ac-nodel">${t('cancel')}</button></div></div>`:`<button class="btn danger-ghost sm" id="ac-del">${t('delAcct')}</button>`}
-      `:`<h2 id="acct-h">${AC.gateUp?t('signupFirstT'):AC.gate?t('gateT'):t('acctJoinT')}</h2><p class="small ${AC.gate?'gate-msg':'muted'}">${AC.gateUp?t('signupFirst'):AC.gate?t('gateMsg'):t('acctWhy')}</p>
+      `:`<h2 id="acct-h">${AC.gateUp?t('signupFirstT'):AC.gate?t('gateT'):AC.tab==='signin'?t('signinT'):t('acctJoinT')}</h2><p class="small ${AC.gate?'gate-msg':'muted'}">${AC.gateUp?t('signupFirst'):AC.gate?t('gateMsg'):AC.tab==='signin'?t('signinWhy'):t('acctWhy')}</p>
       <div class="seg acct-seg"><button class="${AC.tab==='signup'?'on':''}" data-tab="signup">${t('signUp')}</button><button class="${AC.tab==='signin'?'on':''}" data-tab="signin">${t('signIn')}</button></div>
       ${(()=>{ const so=(C.config&&C.config.social)||{}; if(!so.google&&!so.facebook) return ''; const nx=encodeURIComponent('/app'+(location.hash&&!/^#sign/.test(location.hash)?location.hash:''));
         return `<div class="acct-social">${so.google?`<a class="btn social" href="/auth/google?next=${nx}"><svg class="sic" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.3 0-9.7-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg><span>${t('withGoogle')}</span></a>`:''}${so.facebook?`<a class="btn social" href="/auth/facebook?next=${nx}"><svg class="sic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="12" fill="#1877F2"/><path fill="#fff" d="M15.1 12.9l.4-2.9h-2.8V8.1c0-.8.4-1.6 1.7-1.6h1.3V4c0 0-1.2-.2-2.3-.2-2.3 0-3.8 1.4-3.8 3.9V10H7v2.9h2.6V20h3.1v-7.1h2.4z"/></svg><span>${t('withFacebook')}</span></a>`:''}
@@ -2439,30 +2476,34 @@ function renderAcct(){
       <form id="ac-form" class="acct-form" novalidate>
         ${AC.tab==='signup'&&C.setName?`<label>${t('fullName')}<input type="text" id="ac-name" autocomplete="name" maxlength="60" required placeholder="${t('namePh')}" value="${esc(AC.fName||'')}"></label>`:''}
         <label>${t('email')}<input type="email" id="ac-email" autocomplete="email" required dir="ltr" value="${esc(AC.fEmail||'')}"></label>
-        <label>${t('password')}<input type="password" id="ac-pass" autocomplete="${AC.tab==='signup'?'new-password':'current-password'}" minlength="8" required dir="ltr"></label>
-        ${AC.tab==='signup'?`<label class="chkl"><input type="checkbox" id="ac-ok"> <span>${t('consent')}</span></label>`:''}
+        <label>${t('password')}<input type="password" id="ac-pass" autocomplete="${AC.tab==='signup'?'new-password':'current-password'}" minlength="8" required dir="ltr" value="${esc(AC.fPass||'')}"></label>
+        ${AC.tab==='signup'?`<label class="chkl"><input type="checkbox" id="ac-ok" ${AC.fOk?'checked':''}> <span>${t('consent')}</span></label>`:''}
+        ${AC.err?`<p class="acct-err" role="alert">${esc(AC.err)}</p>`:''}
         <button class="btn primary block" type="submit" ${AC.busy?'disabled':''}>${AC.tab==='signup'?t('signUp'):t('signIn')}</button>
       </form>
       ${C.google?`<button class="btn ghost block" id="ac-google">${t('withGoogle')}</button>`:''}
       ${AC.tab==='signin'?`<button class="linkbtn" id="ac-reset">${t('forgot')}</button>`:''}
       <details class="acct-priv"><summary>${t('privT')}</summary><p class="small">${t('privD')}</p></details>`}
-    ${AC.err?`<p class="acct-err" role="alert">${esc(AC.err)}</p>`:''}${AC.info?`<p class="acct-info" role="status">${esc(AC.info)}</p>`:''}
+    ${AC.err&&u?`<p class="acct-err" role="alert">${esc(AC.err)}</p>`:''}${AC.info?`<p class="acct-info" role="status">${esc(AC.info)}</p>`:''}
   </div>`;
   const on=(id,f)=>{ const b=el.querySelector(id); if(b) b.onclick=f; };
   on('#ac-x',closeAcct); on('#ac-up',()=>closeAcct());
   el.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{ AC.tab=b.dataset.tab; AC.err=''; renderAcct(); });
-  const run=async fn=>{ AC.busy=true; AC.err=''; AC.info=''; renderAcct(); let ok=false; try{ await fn(); ok=true; }catch(e){ AC.err=authMsg(e&&e.code); } AC.busy=false; renderAcct(); renderRoute();
-    if(ok&&PEND&&C.user){ const p=PEND; closeAcct(); if(p.fn) p.fn(); else startTest(p.kind,p.o); } };
-  const f=el.querySelector('#ac-form'); if(f) f.onsubmit=e=>{ e.preventDefault(); const em=el.querySelector('#ac-email').value.trim(), pw=el.querySelector('#ac-pass').value; AC.fEmail=em; { const n0=el.querySelector('#ac-name'); if(n0) AC.fName=n0.value; }
+  const run=async fn=>{ AC.busy=true; AC.err=''; AC.info=''; renderAcct(); let ok=false; try{ await fn(); ok=true; AC.fPass=''; }catch(e){ AC.err=authMsg(e&&e.code); } AC.busy=false; renderAcct(); renderRoute();
+    if(ok&&PEND&&C.user){ const p=PEND; closeAcct(); if(p.fn) p.fn(); else startTest(p.kind,p.o); }
+    else if(ok&&AC.justIn&&C.user){ closeAcct(); toast(t('welcomeIn')(String(C.user.name||'').split(' ')[0])); }
+    AC.justIn=false; };
+  const f=el.querySelector('#ac-form'); if(f) f.onsubmit=e=>{ e.preventDefault(); const em=el.querySelector('#ac-email').value.trim(), pw=el.querySelector('#ac-pass').value; AC.fEmail=em; AC.fPass=pw; { const ok0=el.querySelector('#ac-ok'); if(ok0) AC.fOk=ok0.checked; } { const n0=el.querySelector('#ac-name'); if(n0) AC.fName=n0.value; }
     if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)){ AC.err=t('authErr')['invalid-email']; return renderAcct(); }
     if(pw.length<8){ AC.err=t('authErr')['weak-password']; return renderAcct(); }
     const nmEl=el.querySelector('#ac-name'), nm=nmEl?nmEl.value.replace(/\s+/g,' ').trim():''; AC.fEmail=em; if(nmEl) AC.fName=nm;
     if(nmEl&&(nm.length<2||nm.length>60)){ AC.err=t('authErr')['invalid-name']; return renderAcct(); }
-    if(AC.tab==='signup'&&!el.querySelector('#ac-ok').checked){ AC.err=t('needConsent'); return renderAcct(); }
-    run(()=>AC.tab==='signup'?C.signUp(em,pw,nm):C.signIn(em,pw)); };
+    if(AC.tab==='signup'&&!el.querySelector('#ac-ok').checked){ AC.err=t('authErr').consent||t('needConsent'); return renderAcct(); }
+    run(async()=>{ await (AC.tab==='signup'?C.signUp(em,pw,nm):C.signIn(em,pw)); AC.justIn=true; }); };
   const nf=el.querySelector('#ac-namef'); if(nf) nf.onsubmit=e=>{ e.preventDefault(); const v=el.querySelector('#ac-nm').value.replace(/\s+/g,' ').trim(); if(v.length<2||v.length>60){ AC.err=t('authErr')['invalid-name']; AC.nameOpen=true; return renderAcct(); } run(async()=>{ await C.setName(v); AC.nameOpen=false; AC.info=t('nameSaved'); }); };
   on('#ac-google',()=>run(()=>C.signInGoogle()));
-  on('#ac-reset',()=>{ const em=el.querySelector('#ac-email').value.trim(); if(!em){ AC.err=t('authErr')['invalid-email']; return renderAcct(); } run(async()=>{ await C.reset(em); AC.info=t('resetSent'); }); });
+  on('#ac-reset',()=>{ const em=el.querySelector('#ac-email').value.trim(); if(C.resetByAdmin){ AC.err=''; AC.info=t('authErr')['reset-admin']; return renderAcct(); } /* reset by email to the team: a how-to, not an error */
+    if(!em){ AC.err=t('authErr')['invalid-email']; return renderAcct(); } run(async()=>{ await C.reset(em); AC.info=t('resetSent'); }); });
   on('#ac-sync',()=>run(()=>C.pushNow()));
   const pwf=el.querySelector('#ac-pwf'); if(pwf) pwf.onsubmit=e=>{ e.preventDefault(); AC.pwOpen=true; const cu=el.querySelector('#ac-cur').value, nw=el.querySelector('#ac-new').value; if(nw.length<8){ AC.err=t('authErr')['weak-password']; return renderAcct(); }
     run(async()=>{ try{ await C.changePassword(cu,nw); }catch(x){ if(x&&x.code==='invalid-credential'){ const y=new Error('cur'); y.code='cur-pw'; throw y; } throw x; } AC.info=t('pwChanged'); AC.pwOpen=false; }); };
@@ -2538,13 +2579,13 @@ function openReview(id){
     const tt=T[S.lang], title=(tt.kinds[a.kind]||a.kind)+(a.mk?' '+numL(a.mk):'')+(a.skill&&SKILLS[a.skill]?' · '+SKILLS[a.skill][S.lang]:'');
     clearInterval(timer);
     X={kind:a.kind,title,lang:S.lang,mk:a.mk?a.mk-1:null,skill:a.skill||null,reviewOnly:true,sections:[],result:{all:[],bySkill:{},correct:a.correct,skipped:null,att:{...a,total:a.total||0,time:a.time||0},filter:'wrong',noDetail:true}};
-    document.body.classList.add('exam-open'); $('#exam').hidden=false; renderExam(); return; }
+    examShow(true); renderExam(); return; }
   const all=d.qs.map(x=>({q:{...x,area:SKILLS[x.s].area,passage:x.pkey?(PASSAGES[d.lang]||{})[x.pkey]:x.passage},your:x.your,time:x.t}));
   const bySkill={}; all.forEach(({q,your})=>{ const b=bySkill[q.s]||(bySkill[q.s]={c:0,t:0}); b.t++; if(your===q.ans) b.c++; });
   const correct=all.filter(x=>x.your===x.q.ans).length, skipped=all.filter(x=>x.your==null).length;
   clearInterval(timer);
   X={kind:d.kind,title:d.title,lang:d.lang,mk:d.mk,skill:d.skill,reviewOnly:true,sections:[],result:{all,bySkill,correct,skipped,att:d.att,filter:'wrong'}};
-  document.body.classList.add('exam-open'); $('#exam').hidden=false; renderExam();
+  examShow(true); renderExam();
 }
 /* unfinished test: survives a reload (clock paused while away) */
 const LKEY='masar100_live';
@@ -2554,10 +2595,10 @@ function checkLive(){
   let L=null; try{ L=JSON.parse(localStorage.getItem(LKEY)); }catch(e){}
   if(!L||!L.X||!L.X.sections||Date.now()-(L.at||0)>864e5){ clearLive(); return; }
   const tt=T[S.lang], lx=L.X, sec=lx.sections[lx.si]||lx.sections[0];
-  const el=$('#exam'); el.dir=S.lang==='ar'?'rtl':'ltr'; el.lang=S.lang; document.body.classList.add('exam-open'); el.hidden=false;
+  const el=$('#exam'); el.dir=S.lang==='ar'?'rtl':'ltr'; el.lang=S.lang; examShow(true);
   el.innerHTML=`<div class="ex-top"><div class="ex-title"><strong>${esc(tt.resumeT)}</strong></div></div><div class="rs"><div class="ex-confirm"><p>${esc(tt.resumeD(lx.title,numL(lx.qi+1),numL(sec.qs.length)))}</p><div class="row"><button class="btn primary" id="lv-yes">${tt.resumeBtn}</button><button class="btn ghost" id="lv-no">${tt.discardBtn}</button></div></div></div>`;
   el.querySelector('#lv-yes').onclick=()=>{ X={...lx,confirm:null,showMap:false,qStart:Date.now()}; clearInterval(timer); timer=setInterval(tick,1000); renderExam(); toast(tt.resumed); };
-  el.querySelector('#lv-no').onclick=()=>{ clearLive(); el.hidden=true; el.innerHTML=''; document.body.classList.remove('exam-open'); };
+  el.querySelector('#lv-no').onclick=()=>{ clearLive(); el.innerHTML=''; examShow(false); };
 }
 /* selective reset */
 function resetParts(parts){

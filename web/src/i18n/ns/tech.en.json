@@ -1,0 +1,164 @@
+{
+  "nav": { "today": "My jobs", "me": "Me" },
+  "net": {
+    "offline": "No connection. Your changes are saved on this phone and sent when you're back online.",
+    "pending": "{n} change(s) waiting to send",
+    "syncing": "Sending changes…",
+    "syncNow": "Send now",
+    "synced": "All changes sent",
+    "rejected": "The server rejected a change: {label}",
+    "dismiss": "OK",
+    "savedOffline": "Saved on phone, will send when online",
+    "cachedAt": "Showing data from {time}"
+  },
+  "today": {
+    "morning": "Good morning, {name}",
+    "evening": "Good evening, {name}",
+    "summary": "{total} jobs · {done} done",
+    "today": "Today",
+    "tomorrow": "Tomorrow",
+    "refresh": "Refresh",
+    "emptyToday": "No jobs for you today",
+    "emptyTodayBody": "When the dispatcher assigns you a job it shows up here right away.",
+    "emptyTomorrow": "Nothing scheduled for tomorrow yet",
+    "emptyTomorrowBody": "Check again this evening; visits get added during the day.",
+    "next": "Next",
+    "noTime": "No time set",
+    "loadError": "Couldn't load your jobs. Check the internet, then tap Refresh."
+  },
+  "contact": {
+    "map": "Map",
+    "call": "Call",
+    "whatsapp": "WhatsApp",
+    "noLocation": "No location",
+    "waGreeting": "Hello {name}, this is {tech}, your maintenance technician, about job #{number}."
+  },
+  "job": {
+    "back": "My jobs",
+    "number": "Job #{n}",
+    "customer": "Customer",
+    "address": "Address",
+    "problem": "Problem",
+    "unit": "Unit",
+    "btu": "{n} BTU",
+    "notFound": "We couldn't find this job. It may have been reassigned.",
+    "offlineCopy": "Saved copy on this phone",
+    "steps": { "scheduled": "Scheduled", "on_the_way": "On the way", "in_progress": "Working", "completed": "Done" },
+    "action": {
+      "on_the_way": "On my way",
+      "in_progress": "Start work",
+      "completed": "Finish job"
+    },
+    "statusDone": {
+      "on_the_way": "On the way. The customer got the tracking link",
+      "in_progress": "Work started",
+      "completed": "Job finished"
+    },
+    "notStarted": "This job isn't scheduled yet. Contact the dispatcher.",
+    "cancelled": "This job was cancelled.",
+    "finish": {
+      "title": "Finish job",
+      "body": "Check these before finishing:",
+      "checklist": "Checklist ({done} of {total})",
+      "afterPhotos": "After photos ({n})",
+      "signature": "Customer signature",
+      "missing": "You can finish anyway, but photos and a signature protect you and the company.",
+      "confirm": "Confirm finish"
+    }
+  },
+  "checklist": {
+    "title": "Checklist",
+    "progress": "{done} of {total}",
+    "add": "Add item",
+    "addPlaceholder": "e.g. Check capacitor",
+    "value": "Reading",
+    "remove": "Remove item",
+    "items": {
+      "gas_pressure": "Gas pressure",
+      "filter": "Filters cleaned",
+      "drain": "Drain line checked",
+      "amps": "Amps reading",
+      "thermostat": "Thermostat test",
+      "supply_temp": "Supply air temperature"
+    }
+  },
+  "items": {
+    "title": "Services & parts",
+    "add": "Add from price list",
+    "custom": "Other item",
+    "customDesc": "Description",
+    "customPrice": "Price (excl. VAT)",
+    "addCustom": "Add item",
+    "search": "Search the price list",
+    "empty": "Nothing added yet. Add what you actually did so it appears on the invoice.",
+    "lockedHint": "Items can be edited only while working. Tap \"Start work\" first.",
+    "qty": "Qty",
+    "remove": "Remove",
+    "subtotal": "Subtotal excl. VAT",
+    "vat": "VAT 15%",
+    "total": "Total incl. VAT",
+    "noServices": "The price list is empty. Ask the dispatcher to add services."
+  },
+  "photos": {
+    "title": "Photos",
+    "before": "Before",
+    "after": "After",
+    "take": "Take photo",
+    "compressing": "Preparing photo…",
+    "uploaded": "Photo uploaded",
+    "pending": "Waiting to send",
+    "remove": "Delete photo",
+    "removeConfirm": "Delete this photo?",
+    "failed": "Couldn't prepare the photo. Try again."
+  },
+  "notes": {
+    "title": "Notes",
+    "placeholder": "Write a note for the dispatcher or the record…",
+    "add": "Add note",
+    "added": "Note added",
+    "empty": "No notes yet."
+  },
+  "signature": {
+    "title": "Customer signature",
+    "hint": "Ask the customer to sign inside the box with a finger",
+    "clear": "Clear",
+    "save": "Save signature",
+    "saved": "Signature saved",
+    "redo": "Sign again",
+    "empty": "The box is empty. Ask the customer to sign first."
+  },
+  "complete": {
+    "title": "Completion summary",
+    "done": "You finished this job",
+    "collect": "Collect payment",
+    "cash": "I received cash",
+    "cashConfirm": "Confirm you received {amount} in cash from the customer?",
+    "cashRecorded": "Recorded {amount} cash",
+    "cashNote": "Cash collected from customer: {amount}",
+    "sendLink": "Send payment link on WhatsApp",
+    "linkMsg": "Hello {name}, thank you. Details, invoice and payment for job #{number}: {url}",
+    "linkMsgNoInvoice": "Hello {name}, job #{number} is done. Details and rating: {url}",
+    "invoice": "Invoice #{n}",
+    "noInvoice": "The office will issue the invoice and the customer will get a payment link.",
+    "paid": "Paid",
+    "unpaid": "Unpaid",
+    "linkSent": "WhatsApp opened with a ready message"
+  },
+  "profile": {
+    "title": "Me",
+    "language": "App language",
+    "stats": "Today so far",
+    "jobsToday": "Jobs today",
+    "completed": "Done",
+    "remaining": "Left",
+    "value": "Value done",
+    "sync": "Sync",
+    "allSynced": "Everything is saved on the server",
+    "install": "Install the app on your home screen",
+    "installBody": "From the browser menu choose \"Add to Home screen\" so it opens directly, without the address bar.",
+    "installNow": "Install",
+    "logout": "Log out",
+    "logoutPending": "You have changes that haven't been sent. They'll be lost if you log out now. Continue?",
+    "langSaved": "Language changed"
+  }
+}

@@ -1,0 +1,248 @@
+{
+  "meta": {
+    "landingTitle": "Dawra | Field-service software for Saudi maintenance companies",
+    "landingDesc": "Dawra runs your maintenance company from the first WhatsApp message to a ZATCA QR tax invoice: technician dispatch board, technician app, WhatsApp customer updates and self-scheduling maintenance contracts. Free for 14 days.",
+    "pricingTitle": "Pricing | Dawra",
+    "pricingDesc": "Dawra plans in SAR: Starter 149, Pro 449, Business 999 per month. Two months free on yearly billing, 14-day trial with no card.",
+    "loginTitle": "Sign in | Dawra",
+    "loginDesc": "Sign in to your company's Dawra account.",
+    "signupTitle": "Start your free trial | Dawra",
+    "signupDesc": "Create your company account in two minutes: 14 days free with every Pro feature, no card needed."
+  },
+  "nav": {
+    "features": "Features",
+    "how": "How it works",
+    "pricing": "Pricing",
+    "faq": "FAQ",
+    "login": "Sign in",
+    "start": "Start free",
+    "menu": "Menu",
+    "openApp": "Open dashboard"
+  },
+  "demo": {
+    "button": "Try the live demo",
+    "busy": "Opening the demo…",
+    "failed": "The live demo isn't available right now. Create a free trial account instead.",
+    "hint": "A ready-made demo AC company in Riyadh"
+  },
+  "hero": {
+    "kicker": "For AC, cleaning, pest control, plumbing and electrical contractors",
+    "title": "Know where every technician is, and where every riyal went.",
+    "sub": "Dawra runs your maintenance company from the first WhatsApp message to a paid tax invoice: technician dispatch, automatic customer updates, and maintenance contracts that schedule themselves.",
+    "cta": "Start your 14-day trial",
+    "note": "No card · 10-minute setup · Arabic first"
+  },
+  "mock": {
+    "board": "Dispatch board",
+    "today": "Sunday",
+    "queue": "Unassigned",
+    "techs": ["Ahmed", "Iqbal", "Yaser"],
+    "jobTitle": "AC leaking water",
+    "jobPlace": "Al Narjis",
+    "ai": "AI triage: drain unclogging · SAR 100–250",
+    "other": ["Clean 3 AC units", "Contract visit — clinic", "Freon refill", "Cold room check", "Install 24k split"],
+    "chatName": "Al Naseem AC Co.",
+    "chatStatus": "Business account",
+    "msgs": [
+      "Hi, the AC in the living room is leaking water and keeps switching off",
+      "Hello Fahad, your drain-line unclogging is confirmed for Sunday at 10:00 AM with technician Ahmed.",
+      "Ahmed is on his way to you now. Track him live:",
+      "Job done, thank you for trusting us. Rate the service in one tap:",
+      "Your invoice #1042 for SAR 138.00 incl. VAT is ready."
+    ],
+    "track": "Track technician",
+    "pay": "Pay with mada or Apple Pay",
+    "paid": "Paid",
+    "time": "10:00"
+  },
+  "leaks": {
+    "title": "Four leaks draining your maintenance company",
+    "sub": "None of them is a refrigerant problem. They're operations problems, and each one has a clear fix.",
+    "before": "Today",
+    "after": "With Dawra",
+    "items": [
+      {
+        "pain": "Contract visits live in a notebook, and you remember them when an angry customer calls in the middle of summer.",
+        "fix": "Every contract schedules its own visits: two weeks ahead the job is created automatically and the customer gets a WhatsApp reminder."
+      },
+      {
+        "pain": "Technicians collect cash, invoices are on paper, and the numbers don't match at month end.",
+        "fix": "Every job ends in an invoice priced from your list, paid in cash or by mada / Apple Pay link, with unpaid totals in front of you."
+      },
+      {
+        "pain": "E-invoicing Wave 25 covers every business with revenue above SAR 187,500 in any year from 2022 to 2025, with an integration deadline of 1 February 2027. Excel invoices won't cut it.",
+        "fix": "Simplified and standard tax invoices with 15% VAT, a QR code and sequential numbers from day one, with your data organised for Fatoora integration."
+      },
+      {
+        "pain": "Twenty WhatsApp groups, and customers calling every hour: “where's the technician?”",
+        "fix": "One timeline per job. The customer gets the confirmation, then “technician on the way” with a tracking link, then the invoice. All automatic."
+      }
+    ]
+  },
+  "features": {
+    "title": "Everything the company needs, in one system",
+    "sub": "Built for field work in Saudi Arabia: WhatsApp first, riyals, VAT, and the heat.",
+    "board": {
+      "title": "Dispatch board",
+      "body": "A lane per technician across the day, plus a queue of unassigned requests. Assign and reschedule in seconds."
+    },
+    "tech": {
+      "title": "Technician app",
+      "body": "Today's jobs, one-tap call and maps, before/after photos, customer signature and payment collection. Works on any phone and installs like an app, in Arabic and English."
+    },
+    "whatsapp": {
+      "title": "WhatsApp customer updates",
+      "body": "Appointment confirmed, technician on the way, rating, and invoice. Approved messages sent from your company's number."
+    },
+    "zatca": {
+      "title": "ZATCA QR invoices",
+      "body": "Simplified invoices for individuals and standard invoices for businesses, 15% VAT calculated, Arabic PDF."
+    },
+    "contracts": {
+      "title": "Contracts that schedule themselves",
+      "body": "Set the visits per year and Dawra creates each visit two weeks ahead and reminds the customer.",
+      "ring": "Quarterly contract: 4 visits, the first before summer"
+    },
+    "ai": {
+      "title": "AI triage of customer messages",
+      "body": "“Leaking water and switching off” becomes: drain issue, unclogging service, likely parts and a price range. Understands Saudi dialect."
+    },
+    "pay": {
+      "title": "mada and Apple Pay links",
+      "body": "A payment link with every invoice; the status flips to “paid” automatically."
+    },
+    "booking": {
+      "title": "Booking page in your name",
+      "body": "One link for your bio and Google Maps. Customers book without calling, and the request reaches your dispatcher triaged and ready."
+    }
+  },
+  "how": {
+    "title": "Up and running on day one",
+    "steps": [
+      { "title": "Set up your company and team", "body": "VAT number, price list, and technicians with their colours. Ten minutes and you're ready." },
+      { "title": "Take requests from anywhere", "body": "Phone, WhatsApp or your booking page. Turn the request into a job and assign the nearest technician." },
+      { "title": "The technician finishes, the customer pays", "body": "Photos and signature on site, an invoice in one tap, and a payment link sent over WhatsApp." }
+    ]
+  },
+  "compare": {
+    "title": "Why Dawra?",
+    "sub": "An honest comparison with how you work today and with global tools.",
+    "colDawra": "Dawra",
+    "colExcel": "Excel + WhatsApp groups",
+    "colGlobal": "Global tools",
+    "yes": "Yes",
+    "no": "No",
+    "partial": "Partly",
+    "rows": [
+      { "label": "Right-to-left Arabic interface", "dawra": "yes", "excel": "partial", "global": "no" },
+      { "label": "ZATCA tax invoices with QR", "dawra": "yes", "excel": "no", "global": "no" },
+      { "label": "Automatic WhatsApp customer updates", "dawra": "yes", "excel": "partial", "global": "partial" },
+      { "label": "Auto-scheduled maintenance contract visits", "dawra": "yes", "excel": "no", "global": "yes" },
+      { "label": "Technician app with photos and signature", "dawra": "yes", "excel": "no", "global": "yes" },
+      { "label": "mada and Apple Pay", "dawra": "yes", "excel": "no", "global": "partial" },
+      { "label": "SAR pricing, no annual lock-in", "dawra": "yes", "excel": "yes", "global": "no" }
+    ],
+    "note": "Global tools like Jobber and ServiceTitan are strong products, but they're English-only, priced in USD, and don't handle Saudi invoicing requirements."
+  },
+  "pricing": {
+    "title": "Clear pricing in riyals",
+    "sub": "Every plan starts with a 14-day trial with all Pro features, no card needed.",
+    "monthly": "Monthly",
+    "yearly": "Yearly",
+    "yearlySave": "2 months free",
+    "perMonth": "per month",
+    "perYear": "per year",
+    "equiv": "Equals SAR {amount} per month",
+    "currency": "SAR",
+    "vat": "Prices exclude 15% VAT.",
+    "popular": "Most popular",
+    "cta": "Start trial",
+    "techs": "Up to {n} technicians",
+    "techs25": "Up to 25 technicians",
+    "extra": "+SAR 39 per extra technician",
+    "plans": {
+      "starter": {
+        "name": "Starter",
+        "for": "For a small workshop getting organised",
+        "features": ["Jobs and dispatch board", "Technician app", "Tax invoices with QR", "Booking page in your name"]
+      },
+      "pro": {
+        "name": "Pro",
+        "for": "For a company with contracts and a field team",
+        "features": ["Everything in Starter", "Self-scheduling maintenance contracts", "WhatsApp customer updates", "AI triage of customer requests", "mada and Apple Pay links"]
+      },
+      "business": {
+        "name": "Business",
+        "for": "For larger companies with several teams",
+        "features": ["Everything in Pro", "Priority support", "Custom checklist templates", "Data export"]
+      }
+    },
+    "pageTitle": "A plan for every company size",
+    "pageSub": "Pay for the team you have. Upgrade or downgrade whenever you need."
+  },
+  "faq": {
+    "title": "Frequently asked questions",
+    "items": [
+      {
+        "q": "Are Dawra invoices ZATCA compliant?",
+        "a": "Dawra issues simplified and standard tax invoices with 15% VAT, a QR code and sequential numbers, per the Phase 1 (generation) requirements. Phase 2, integration with the Fatoora platform, is rolled out in waves; Wave 25's deadline is 1 February 2027 for businesses whose revenue exceeded SAR 187,500 in any year from 2022 to 2025. Fatoora integration is in development at Dawra, and we'll announce its date to customers before launch."
+      },
+      {
+        "q": "Where is our data stored?",
+        "a": "The hosting region is configurable to your company's needs. We follow practices aligned with the Saudi Personal Data Protection Law: encrypted connections, role-based access (owner, dispatcher, technician), full isolation of each company's data, and deletion on request. We don't advertise certifications we haven't obtained yet."
+      },
+      {
+        "q": "Do I need a dedicated WhatsApp number?",
+        "a": "You can start without one: every message is logged and you can see its text. When you're ready, we connect your company number to the WhatsApp Business Platform and messages go out in your name."
+      },
+      {
+        "q": "Our technicians have basic phones. Will it work?",
+        "a": "Yes. The technician app is a light web app that opens in the browser and installs on the home screen. It runs on any Android or iPhone, and photos are compressed before upload for weak rooftop signal."
+      },
+      {
+        "q": "What happens when the trial ends?",
+        "a": "Pick a plan and carry on with your data as it is. If you don't pick one, your account and data stay saved and we remind you before anything is paused."
+      },
+      {
+        "q": "Is there a contract or commitment?",
+        "a": "No. Billing is monthly and you can cancel any time. Yearly billing is optional and gives you two months free."
+      }
+    ]
+  },
+  "final": {
+    "title": "Next summer, let the contracts remind you.",
+    "sub": "Start today, and within a week your whole team is on Dawra.",
+    "cta": "Create your company account"
+  },
+  "footer": {
+    "tagline": "Field-service management for maintenance companies in Saudi Arabia and the Gulf.",
+    "product": "Product",
+    "company": "Account",
+    "rights": "© {year} Dawra. All rights reserved.",
+    "made": "Made in Riyadh"
+  },
+  "auth": {
+    "loginTitle": "Welcome back",
+    "loginSub": "Sign in to your company account.",
+    "email": "Email",
+    "password": "Password",
+    "submit": "Sign in",
+    "wrong": "Wrong email or password",
+    "noAccount": "No account yet?",
+    "tryFree": "Try Dawra free for 14 days",
+    "or": "or",
+    "signupTitle": "Create your company account",
+    "signupSub": "14 days free with every Pro feature, no card needed.",
+    "company": "Company name",
+    "name": "Your name",
+    "mobile": "Mobile",
+    "passwordHint": "At least 8 characters",
+    "start": "Start trial",
+    "haveAccount": "Have an account?",
+    "signIn": "Sign in",
+    "terms": "By creating an account you agree to the terms of use and privacy policy.",
+    "asideTitle": "From the first WhatsApp message to a paid invoice.",
+    "asidePoints": ["A dispatch board for all your technicians", "Customers know where the technician is without calling", "Maintenance contracts schedule themselves", "Tax invoices with QR"],
+    "back": "Home"
+  }
+}

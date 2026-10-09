@@ -1,0 +1,27 @@
+{
+  "brand": { "name": "دورة", "tagline": "كل طلب صيانة، من الاتصال حتى الفاتورة" },
+  "common": {
+    "save": "حفظ", "cancel": "إلغاء", "delete": "حذف", "edit": "تعديل", "add": "إضافة", "close": "إغلاق",
+    "search": "بحث", "loading": "جارٍ التحميل…", "back": "رجوع", "next": "التالي", "confirm": "تأكيد",
+    "yes": "نعم", "no": "لا", "all": "الكل", "none": "لا يوجد", "optional": "اختياري", "required": "مطلوب",
+    "retry": "إعادة المحاولة", "error": "تعذّر إكمال الطلب", "saved": "تم الحفظ", "deleted": "تم الحذف",
+    "sar": "ر.س", "currency": "{amount} ر.س", "today": "اليوم", "tomorrow": "غداً", "yesterday": "أمس",
+    "language": "English", "logout": "تسجيل الخروج", "login": "تسجيل الدخول", "signup": "ابدأ مجاناً",
+    "notFound": "الصفحة غير موجودة", "goHome": "العودة للرئيسية", "comingSoon": "قيد الإنشاء"
+  },
+  "status": {
+    "new": "جديد", "scheduled": "مجدول", "on_the_way": "في الطريق", "in_progress": "قيد التنفيذ",
+    "completed": "مكتمل", "cancelled": "ملغى"
+  },
+  "priority": { "low": "منخفضة", "normal": "عادية", "urgent": "عاجلة" },
+  "role": { "owner": "مالك", "dispatcher": "منسق", "technician": "فني" },
+  "invoiceStatus": { "unpaid": "غير مدفوعة", "paid": "مدفوعة", "void": "ملغاة" },
+  "contractStatus": { "active": "ساري", "expired": "منتهي", "cancelled": "ملغى" },
+  "assetKind": { "split_ac": "مكيف سبليت", "central_ac": "مكيف مركزي", "window_ac": "مكيف شباك", "cold_room": "غرفة تبريد", "other": "أخرى" },
+  "category": { "ac": "تكييف", "cleaning": "نظافة", "pest": "مكافحة حشرات", "plumbing": "سباكة", "electrical": "كهرباء", "other": "أخرى" },
+  "errors": {
+    "unauthorized": "انتهت الجلسة، سجّل الدخول من جديد", "forbidden": "ليست لديك صلاحية لهذا الإجراء",
+    "not_found": "العنصر غير موجود", "conflict": "البيانات موجودة مسبقاً", "bad_request": "تحقق من البيانات المدخلة",
+    "network": "تعذّر الاتصال بالخادم، تحقق من الإنترنت", "internal": "حدث خطأ في الخادم", "plan_limit": "وصلت إلى حد باقتك"
+  }
+}

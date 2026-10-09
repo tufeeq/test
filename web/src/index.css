@@ -1,0 +1,14 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html { -webkit-tap-highlight-color: transparent; }
+  body { font-feature-settings: 'kern'; min-height: 100dvh; }
+  :lang(ar) body { letter-spacing: 0; }
+  /* numbers / phones / emails inside RTL text */
+  .ltr-nums { direction: ltr; unicode-bidi: isolate; }
+  ::selection { background: theme('colors.saffron.200'); color: theme('colors.petrol.900'); }
+  :focus-visible { outline: 2px solid theme('colors.saffron.400'); outline-offset: 2px; }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
+}

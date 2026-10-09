@@ -1,0 +1,27 @@
+{
+  "brand": { "name": "Dawra", "tagline": "Every service call, from first ring to paid invoice" },
+  "common": {
+    "save": "Save", "cancel": "Cancel", "delete": "Delete", "edit": "Edit", "add": "Add", "close": "Close",
+    "search": "Search", "loading": "Loading…", "back": "Back", "next": "Next", "confirm": "Confirm",
+    "yes": "Yes", "no": "No", "all": "All", "none": "None", "optional": "Optional", "required": "Required",
+    "retry": "Try again", "error": "Couldn't complete the request", "saved": "Saved", "deleted": "Deleted",
+    "sar": "SAR", "currency": "SAR {amount}", "today": "Today", "tomorrow": "Tomorrow", "yesterday": "Yesterday",
+    "language": "العربية", "logout": "Sign out", "login": "Sign in", "signup": "Start free",
+    "notFound": "Page not found", "goHome": "Back to home", "comingSoon": "Under construction"
+  },
+  "status": {
+    "new": "New", "scheduled": "Scheduled", "on_the_way": "On the way", "in_progress": "In progress",
+    "completed": "Completed", "cancelled": "Cancelled"
+  },
+  "priority": { "low": "Low", "normal": "Normal", "urgent": "Urgent" },
+  "role": { "owner": "Owner", "dispatcher": "Dispatcher", "technician": "Technician" },
+  "invoiceStatus": { "unpaid": "Unpaid", "paid": "Paid", "void": "Void" },
+  "contractStatus": { "active": "Active", "expired": "Expired", "cancelled": "Cancelled" },
+  "assetKind": { "split_ac": "Split AC", "central_ac": "Central AC", "window_ac": "Window AC", "cold_room": "Cold room", "other": "Other" },
+  "category": { "ac": "AC", "cleaning": "Cleaning", "pest": "Pest control", "plumbing": "Plumbing", "electrical": "Electrical", "other": "Other" },
+  "errors": {
+    "unauthorized": "Your session ended. Sign in again.", "forbidden": "You don't have permission for this.",
+    "not_found": "Not found", "conflict": "This already exists", "bad_request": "Check the highlighted fields",
+    "network": "Can't reach the server. Check your connection.", "internal": "Server error", "plan_limit": "You've reached your plan limit"
+  }
+}

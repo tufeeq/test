@@ -324,7 +324,7 @@ app.get("/robots.txt", (req, res) => {
 app.get("/sitemap.xml", (req, res) => { // /app is a signed-in web app (noindex), so it is not listed
   const base = "https://" + SITE_HOST;
   res.type("application/xml").set("Cache-Control", "public, max-age=86400")
-    .send(`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>${base}/</loc></url><url><loc>${base}/privacy</loc></url><url><loc>${base}/terms</loc></url></urlset>\n`);
+    .send(`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml"><url><loc>${base}/</loc><xhtml:link rel="alternate" hreflang="ar" href="${base}/"/><xhtml:link rel="alternate" hreflang="en" href="${base}/?lang=en"/></url><url><loc>${base}/?lang=en</loc><xhtml:link rel="alternate" hreflang="ar" href="${base}/"/><xhtml:link rel="alternate" hreflang="en" href="${base}/?lang=en"/></url><url><loc>${base}/privacy</loc></url><url><loc>${base}/terms</loc></url></urlset>\n`);
 });
 // ---------- AI examiner + premium content ----------
 require("./ai")(app, { pool, wrap, fail, needUser, C, limited });
@@ -530,13 +530,12 @@ async function sendPage(req, res, name, status) {
     c = { key: f + ":" + st.mtimeMs + ":" + st.size + ":" + v2 + ":" + extraKey, body: Buffer.from(html), assets };
     htmlCache.set(ck, c);
   }
-  if (name === "index.html") res.set("Vary", "Accept-Encoding"); // ?lang= is part of the URL, so no Vary on language is needed
   return sendText(req, res, { body: c.body, key: c.key, type: "html" }, "no-cache", status);
 }
 // "/" is the marketing page for visitors; signed-in students go straight to the app at /app
 app.get("/", wrap(async (req, res) => {
   const tok = parseCookies(req)[COOKIE];
-  if (tok && req.query.home === undefined) { const r = await pool.query("SELECT 1 FROM sessions WHERE token_hash=$1 AND expires_at>now()", [sha(tok)]); if (r.rows[0]) return res.redirect(302, "/app"); }
+  if (tok && req.query.home === undefined) { const r = await pool.query("SELECT 1 FROM sessions WHERE token_hash=$1 AND expires_at>now()", [sha(tok)]); if (r.rows[0]) return res.redirect(302, "/app" + (req.query.lang === "en" ? "?lang=en" : "")); }
   return sendPage(req, res, "index.html");
 }));
 app.get(["/app", "/app/"], wrap((req, res) => sendPage(req, res, "app.html")));

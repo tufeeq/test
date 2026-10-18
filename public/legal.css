@@ -17,7 +17,7 @@ html:has(body.lg){scroll-padding-top:84px;scroll-behavior:smooth}
 .lg .skip:focus{top:10px}
 
 /* ---------- header ---------- */
-.lg .lg-top{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--paper) 88%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1.5px solid var(--line)}
+.lg .lg-top{position:sticky;top:0;z-index:20;background:var(--paper);background:color-mix(in srgb,var(--paper) 88%,transparent);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border-bottom:1.5px solid var(--line)}
 .lg .lg-top-in{max-width:1120px;margin:0 auto;padding-inline:var(--gut);display:flex;align-items:center;gap:14px;min-height:64px}
 .lg .lg-brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--ink);flex-shrink:0;margin-inline-end:auto}
 .lg .lg-brand b{font-family:var(--f-head);font-size:1.1rem;display:block;line-height:1.2;font-weight:800}
@@ -70,7 +70,7 @@ html:has(body.lg){scroll-padding-top:84px;scroll-behavior:smooth}
 
 /* the "in short" sticky note */
 .lg .lg-tldr{position:relative;background:var(--n0);color:var(--note-ink);border:2px solid var(--edge);border-radius:8px 8px 18px 8px;box-shadow:4px 4px 0 var(--edge);padding:20px 22px 18px;margin-block-start:8px;transform:rotate(-.4deg)}
-.lg .lg-tldr::before{content:"";position:absolute;top:-12px;inset-inline-start:42px;inline-size:74px;block-size:22px;background:color-mix(in srgb,var(--pink) 55%,transparent);border-radius:3px;transform:rotate(-4deg)}
+.lg .lg-tldr::before{content:"";position:absolute;top:-12px;inset-inline-start:42px;inline-size:74px;block-size:22px;background:var(--pink-soft);background:color-mix(in srgb,var(--pink) 55%,transparent);border-radius:3px;transform:rotate(-4deg)}
 .lg .lg-tldr h2{font-family:var(--f-hand);font-weight:700;font-size:1.4rem;margin-block-end:6px;color:var(--note-ink)}
 .lg .lg-tldr ul{margin:0;padding:0;list-style:none;display:grid;gap:8px 28px}
 @media (min-width:760px){.lg .lg-tldr ul{grid-template-columns:1fr 1fr}}
@@ -131,7 +131,7 @@ html:has(body.lg){scroll-padding-top:84px;scroll-behavior:smooth}
 .lg .lg-top-link:hover{color:var(--pri)}
 
 /* ---------- footer ---------- */
-.lg .lg-foot{border-top:1.5px solid var(--line);background:color-mix(in srgb,var(--paper) 85%,transparent);padding:26px var(--gut) 30px;font-size:.88rem;color:var(--muted)}
+.lg .lg-foot{border-top:1.5px solid var(--line);background:var(--paper);background:color-mix(in srgb,var(--paper) 85%,transparent);padding:26px var(--gut) 30px;font-size:.88rem;color:var(--muted)}
 .lg .lg-foot-in{max-width:1120px;margin:0 auto;display:grid;gap:14px}
 .lg .lg-foot nav{display:flex;flex-wrap:wrap;gap:6px 18px}
 .lg .lg-foot nav a{color:var(--ink2);text-decoration:none;font-weight:700}

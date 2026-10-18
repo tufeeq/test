@@ -68,7 +68,7 @@ async function pagePara() {
 }
 function ptRender() {
   const el = $('#pt'); if (!el) return;
-  if (PT.i >= PT.list.length) { el.innerHTML = `<div class="center grid"><div class="stamp c-R" style="margin:auto"><b>${numL(PT.score)}/${numL(PT.list.length)}</b><small>${_('النتيجة', 'score')}</small></div><a class="btn primary" href="#para">${_('جولة جديدة', 'New round')}</a></div>`; return; }
+  if (PT.i >= PT.list.length) { el.innerHTML = `<div class="center grid"><div class="stamp c-R" style="margin:auto"><b>${numL(PT.score)}/${numL(PT.list.length)}</b><small>${_('النتيجة', 'score')}</small></div><button class="btn primary" id="pt-again">${_('جولة جديدة', 'New round')}</button></div>`; $('#pt-again').onclick = () => renderRoute(); return; } // a link to #para would do nothing: the page is already on #para
   if (!PRO() && dailyLeft() <= 0) { el.innerHTML = `<div class="notice gold">${_('أنهيت أسئلتك المجانية لليوم. اشترك لتمارين غير محدودة.', 'You have used today’s free questions. Subscribe for unlimited practice.')} <a href="#upgrade">${_('الباقات', 'Plans')}</a></div>`; return; }
   const p = PT.list[PT.i], opts = shuffle([p.t, ...p.d]);
   el.innerHTML = `<p class="small muted">${numL(PT.i + 1)} / ${numL(PT.list.length)}</p><div class="src">${esc(p.q)}</div><p class="small">${_('أي عبارة تعني الشيء نفسه؟', 'Which sentence means the same?')}</p><div class="opt-btns ltr-text">${opts.map((o, i) => `<button class="opt-btn" data-o="${esc(o)}"><span class="L">${LET[i]}</span>${esc(o)}</button>`).join('')}</div><div id="pt-fb"></div>`;
@@ -117,6 +117,25 @@ async function pageMReview() {
   MR = { list: due, i: 0 }; setTimeout(mrRender, 0);
   return `<div class="spread"><a href="#mistakes" class="btn ghost sm">${BK()}${_('صندوق الأخطاء', 'Mistake box')}</a></div><div id="mr"></div>`;
 }
+/* the question as the learner saw it: stem + options, or the line / cell / sentence that holds the gap */
+function mrStem(g, q) {
+  const gaps = s => esc(s).replace(new RegExp(`\\{\\{${q.n}\\}\\}`, 'g'), `<u>${q.n} _____</u>`).replace(/\{\{\d+\}\}/g, '_____');
+  const opts = o => o ? '<br>' + o.map((x, i) => typeof x === 'string' ? `${LET[i]}. ${esc(x)}` : `${esc(x.k)}. ${esc(x.t)}`).join('<br>') : '';
+  const has = s => typeof s === 'string' && s.includes(`{{${q.n}}}`);
+  const sentence = t => { const i = t.indexOf(`{{${q.n}}}`); const a = t.lastIndexOf('. ', i), b = t.indexOf('. ', i); return t.slice(a < 0 ? 0 : a + 2, b < 0 ? t.length : b + 1); };
+  switch (g.type) {
+    case 'mcq': return esc(q.q) + opts(q.opts);
+    case 'mcq2': return esc(g.q) + opts(g.opts);
+    case 'headings': case 'features': case 'endings': case 'matching': return esc(q.q) + opts(g.opts);
+    case 'map': return esc(q.q) + ' — ' + esc(g.map && g.map.title || '') + ' (' + esc(g.opts.map(o => typeof o === 'string' ? o : o.k).join(', ')) + ')';
+    case 'summary_bank': return gaps(sentence(g.text)) + opts(g.bank);
+    case 'notes': case 'form': { const l = (g.lines || []).map(x => typeof x === 'string' ? x : x.b || '').find(has); return l ? (g.title ? `<span class="small muted">${esc(g.title)}</span><br>` : '') + gaps(l) : ''; }
+    case 'table': { const row = (g.table || []).find(r => r.some(has)); return row ? gaps(row.filter(c => c).join(' · ')) : ''; }
+    case 'flow': { const st = (g.steps || []).find(has); return st ? gaps(st) : ''; }
+    case 'summary': return g.text ? gaps(sentence(g.text)) : '';
+    default: return q.q ? gaps(q.q) : '';
+  }
+}
 function findQ(d, m) {
   const part = m.skill === 'L' ? d.parts[m.pi] : d.passages[m.pi]; if (!part) return null;
   for (const g of part.groups) { if (m.n < g.from || m.n > g.to) continue; const q = groupQs(g).find(x => x.n === m.n); return { part, g, q }; }
@@ -131,9 +150,9 @@ async function mrRender() {
   let context = '';
   if (m.skill === 'R' && q.ev) context = `<div class="src">…${esc(q.ev)}…</div>`;
   if (m.skill === 'L' && Number.isInteger(q.ev)) { const l = part.script[q.ev]; context = `<div class="src"><b>${esc(part.speakers[l.s].name)}:</b> ${esc(l.t)}</div><button class="btn ghost sm" id="mr-play">▶ ${_('استمع للسطر', 'Play the line')}</button>`; }
-  const stem = g.type === 'mcq' ? `${esc(q.q)}<br>${q.opts.map((o, i) => `${LET[i]}. ${esc(o)}`).join('<br>')}` : g.type === 'mcq2' ? esc(g.q) + '<br>' + g.opts.map((o, i) => `${LET[i]}. ${esc(o)}`).join('<br>') : q.q ? esc(q.q).replace(/\{\{\d+\}\}/g, '_____') : `${esc(qtName(g.type))} · Q${q.n}`;
+  const stem = mrStem(g, q);
   el.innerHTML = `<div class="card"><div class="spread"><span class="chip">${skName(m.skill)} · ${esc(qtName(g.type))}</span><span class="small muted">${numL(MR.i + 1)} / ${numL(MR.list.length)}</span></div>
-  <div class="ltr-text" style="font-weight:600">${stem}</div>
+  <div class="ltr-text" style="font-weight:600">${stem || `${esc(qtName(g.type))} · Q${q.n}`}</div>
   <div id="mr-hid" hidden class="grid"><div class="notice teal">${_('الإجابة', 'Answer')}: <b class="ltr-text">${esc(right)}</b></div>${context}<p>${esc(L(q.why || {}))}</p>
     <div class="row"><button class="btn" data-mr="0">${_('ما زلت أخطئ فيه', 'Still unsure')}</button><button class="btn teal" data-mr="1">${_('فهمته الآن', 'I’ve got it')}</button></div></div>
   <button class="btn primary" id="mr-show">${_('فكّر في الإجابة ثم اضغط', 'Think of the answer, then reveal')}</button></div>`;

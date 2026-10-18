@@ -80,8 +80,9 @@
         setLang(LANG === 'ar' ? 'en' : 'ar', true);
         if (cur) {
           var el = D.getElementById(LANG + '-' + cur);
-          if (el) el.scrollIntoView({ block: 'start', behavior: 'instant' });
-        } else { window.scrollTo({ top: 0, behavior: 'instant' }); }
+          // behavior:'instant' is unknown to Safari < 15.4 (throws on an invalid enum): fall back to a plain jump
+          if (el) { try { el.scrollIntoView({ block: 'start', behavior: 'instant' }); } catch (e) { el.scrollIntoView(true); } }
+        } else { try { window.scrollTo({ top: 0, behavior: 'instant' }); } catch (e) { window.scrollTo(0, 0); } }
         observe();
       });
     }

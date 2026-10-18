@@ -444,6 +444,10 @@ async function vOverview(tok) {
   </div>
   <section class="card"><div class="card-h"><h2>${_("توزيع الإيراد حسب الباقة", "Revenue by plan")}</h2><span class="sub">${_("كل الفترات · الدفعات المكتملة", "all time · completed payments")}</span></div>
     ${byPlan.length ? hbars(byPlan.map(p => ({ label: planName(p.plan_id), sub: p.plan_id, v: anyAmt ? p.amount : p.n, vlabel: fmtMoney(p.amount), vsub: _(`${fmtN(p.n)} طلب`, `${fmtN(p.n)} orders`), tipH: planName(p.plan_id), tip: `${fmtMoney(p.amount)} · ${fmtN(p.n)} ${_("طلب", "orders")} · ${fmtPct(anyAmt ? p.amount / (totAmt || 1) : p.n / (totN || 1))}` })), { cls: "butter" }) : `<p class="empty">${_("لا مدفوعات بعد.", "No payments yet.")}</p>`}
+  </section>
+  <section class="card"><div class="card-h"><h2>${_("أخطاء المتصفح", "Browser errors")}</h2><span class="sub">${_(`آخر ٥٠ · ${fmtN((o.errTot || {}).today)} خلال ٢٤ ساعة · ${fmtN((o.errTot || {}).n)} خلال ٣٠ يومًا`, `last 50 · ${fmtN((o.errTot || {}).today)} in 24h · ${fmtN((o.errTot || {}).n)} in 30 days`)}</span></div>
+    ${(o.errors || []).length ? `<div class="tbl"><table><thead><tr><th scope="col">${_("الوقت", "Time")}</th><th scope="col">${_("الخطأ", "Error")}</th><th scope="col" class="hide-sm">${_("المتصفح", "Browser")}</th></tr></thead><tbody>
+    ${o.errors.map(e => `<tr><td class="nowrap"><time datetime="${esc(e.at)}" title="${esc(fmtDT(e.at))}">${esc(rel(e.at))}</time></td><td class="wrap"><code class="mono small ltr">${esc(e.k)}</code>${e.email ? `<br><small class="muted ltr">${esc(e.email)}</small>` : ""}</td><td class="hide-sm wrap"><small class="muted ltr">${esc(String(e.ua || "").slice(0, 60))}</small></td></tr>`).join("")}</tbody></table></div>` : `<p class="empty">${_("لم تُسجَّل أخطاء.", "No errors recorded.")}</p>`}
   </section>`;
   onSeg("ov-p", v => { S.ovDays = +v; LS.set("adm_ovDays", S.ovDays); route(); });
   onRefresh(route);

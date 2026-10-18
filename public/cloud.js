@@ -86,6 +86,25 @@ async function afterLogin(u) {
   await pull();
 }
 let checked = false; // true once the first /api/me answer (or failure) has arrived
+/* ---------- client-side error reporting ---------- */
+// Uncaught errors and unhandled rejections are posted as js_error events (also when signed out): at most 5 per page
+// load, each distinct message once. The admin overview lists the latest ones.
+(function () {
+  const seen = new Set(); let n = 0;
+  const file = u => { try { const x = new URL(String(u || ""), location.href); return x.origin === location.origin ? x.pathname : x.host + x.pathname; } catch (e) { return String(u || "").slice(0, 60); } };
+  function report(msg, src, line) {
+    const k = (String(msg || "error").slice(0, 140) + (src ? " @ " + file(src) + (line ? ":" + line : "") : "")).slice(0, 200);
+    if (n >= 5 || seen.has(k)) return; seen.add(k); n++;
+    try { fetch("/api/events", { method: "POST", headers: H, credentials: "same-origin", keepalive: true, body: JSON.stringify({ events: [{ type: "js_error", k, ua: navigator.userAgent.slice(0, 80) }] }) }).catch(() => {}); } catch (e) {}
+  }
+  window.addEventListener("error", e => {
+    if (e && e.message) return report(e.message, e.filename, e.lineno);
+    const t = e && e.target, u = t && t !== window && t.tagName && (t.src || t.href); // our own script/style/audio failing to load is worth knowing; blocked third-party fonts are not
+    if (u && String(u).indexOf(location.origin + "/") === 0) report("resource failed: " + t.tagName.toLowerCase(), u);
+  }, true);
+  window.addEventListener("unhandledrejection", e => { const r = e && e.reason; report(r && r.message ? r.message : "unhandled rejection: " + String(r).slice(0, 100), r && r.stack ? (String(r.stack).match(/https?:\/\/[^\s)]+/) || [])[0] : "", 0); });
+  window.__reportError = report; // used by tests
+})();
 window.CLOUD = {
   get user() { return user; }, get ready() { return checked; }, get status() { return status; }, get lastSync() { return lastSync; }, google: false, resetByAdmin: true,
   queue() { if (!user) return; clearTimeout(timer); timer = setTimeout(push, 2500); },

@@ -1,0 +1,18 @@
+{
+  "name": "أكاديمية الآيلتس",
+  "short_name": "IELTS",
+  "description": "تحضير للآيلتس بالعربية والإنجليزية: اختبارات محوسبة، مصحح ذكي للكتابة والمحادثة، وخطة يومية حتى موعد اختبارك.",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "/app",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#CC4A22",
+  "background_color": "#FBF8F2",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

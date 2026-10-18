@@ -127,7 +127,7 @@ async function extraItems(skill) {
 }
 
 /* ---------- drill sessions ---------- */
-let DS = null;
+var DS = null; // var, not let: the router runs once before this file is evaluated (a reload on #drill must not hit the TDZ)
 async function poolFor(skill) { await skillsData(); return [...DRL.filter(d => d.sk === skill), ...(await extraItems(skill))]; }
 function pickItems(pool, n) {
   const now = todayStr(), st = id => S.dr[id] || null;

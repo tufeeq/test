@@ -7,7 +7,7 @@ const xpbundle = require("./xpbundle");
 const FREE_XP_DEFAULT = ["xp-L-detail", "xp-R-tfng", "xp-W-t1", "xp-S-p1"];
 // event types the browser may post. Server-recorded types (ai_writing, ai_speaking, ai_placement — which also count
 // against AI quotas — and checkout_start) are deliberately absent: the client can't fake funnel steps or burn quota.
-const EVENT_TYPES = new Set(["open", "diag_start", "diag_w_start", "diag_s_start", "diag_done", "xp_start", "xp_done", "limit_hit", "upgrade_view", "test_start", "test_done", "report_view", "lesson_done", "xlang", "pw_forgot", "pw_reset"]);
+const EVENT_TYPES = new Set(["open", "diag_start", "diag_w_start", "diag_s_start", "diag_done", "xp_start", "xp_done", "limit_hit", "upgrade_view", "test_start", "test_done", "report_view", "lesson_done", "xlang", "pw_forgot", "pw_reset", "js_error"]);
 
 // Defaults: every value here can be changed from the admin dashboard (settings table).
 const DEFAULTS = {
@@ -62,6 +62,8 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
       ALTER TABLE payments ADD COLUMN IF NOT EXISTS coupon_held BOOLEAN NOT NULL DEFAULT false;
       CREATE INDEX IF NOT EXISTS pay_coupon_idx ON payments(coupon) WHERE coupon IS NOT NULL;
       INSERT INTO coupons(code,pct,expires_at,note) VALUES ('LAUNCH30',30,'2026-11-15T23:59:59+03:00','launch offer') ON CONFLICT (code) DO NOTHING;
+      ALTER TABLE events ADD COLUMN IF NOT EXISTS ua TEXT; -- js_error: browser user agent (first 80 chars)
+      CREATE INDEX IF NOT EXISTS events_type_at_idx ON events(type, at DESC);
       CREATE TABLE IF NOT EXISTS admin_audit (
         id BIGSERIAL PRIMARY KEY, admin_email TEXT NOT NULL, action TEXT NOT NULL, target TEXT, meta JSONB, at TIMESTAMPTZ NOT NULL DEFAULT now());
     `);
@@ -122,17 +124,27 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
   }));
 
   // ---------- usage events (for the conversion funnel and content analytics) ----------
-  app.post("/api/events", needUser, wrap(async (req, res) => {
-    if (limited("ev:" + req.user.id, 600, 3600e3)) return fail(res, 429, "too-many-requests");
+  // js_error is accepted from signed-out visitors too (user_id NULL) under a strict per-IP limit; everything else needs a session
+  app.post("/api/events", wrap(async (req, res) => {
     const list = Array.isArray(req.body.events) ? req.body.events.slice(0, 50) : [];
+    if (!req.user) {
+      const errs = list.filter(e => e && e.type === "js_error").slice(0, 5);
+      if (!errs.length) return fail(res, 401, "unauthenticated");
+      if (limited("jse:" + req.ip, 30, 3600e3)) return fail(res, 429, "too-many-requests");
+      for (const e of errs) await pool.query("INSERT INTO events(user_id,type,k,ua) VALUES(NULL,'js_error',$1,$2)", [String(e.k || "error").slice(0, 200), String(e.ua || req.get("user-agent") || "").slice(0, 80)]);
+      return res.json({ ok: true });
+    }
+    if (limited("ev:" + req.user.id, 600, 3600e3)) return fail(res, 429, "too-many-requests");
     for (const e of list) {
       if (!e || !EVENT_TYPES.has(e.type)) continue;
+      if (e.type === "js_error") { if (limited("jse:" + req.ip, 30, 3600e3)) continue; await pool.query("INSERT INTO events(user_id,type,k,ua) VALUES($1,'js_error',$2,$3)", [req.user.id, String(e.k || "error").slice(0, 200), String(e.ua || req.get("user-agent") || "").slice(0, 80)]); continue; }
       const k = e.k == null ? null : String(e.k).slice(0, 64), v = typeof e.v === "number" && isFinite(e.v) ? e.v : null;
       if (e.type === "open") await pool.query("INSERT INTO events(user_id,type) VALUES($1,'open') ON CONFLICT DO NOTHING", [req.user.id]);
       else await pool.query("INSERT INTO events(user_id,type,k,v) VALUES($1,$2,$3,$4)", [req.user.id, e.type, k, v]);
     }
     res.json({ ok: true });
   }));
+  setInterval(() => pool.query("DELETE FROM events WHERE type='js_error' AND at<now()-interval '30 days'").catch(() => {}), 6 * 3600e3).unref(); // keep the error log short
 
   // ---------- checkout with Tap ----------
   const money = n => Math.round(Number(n) * 100) / 100;
@@ -155,6 +167,7 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
     return { plan, amount, pct, coupon, currency: c.currency };
   }
   app.post("/api/billing/quote", needUser, wrap(async (req, res) => {
+    if (limited("qt:" + req.user.id, 120, 3600e3)) return fail(res, 429, "too-many-requests"); // a render loop must not turn into a DB flood
     const q = await priceFor(String(req.body.plan || ""), req.body.coupon, req.user.id);
     if (q.error) return fail(res, 400, q.error);
     res.json({ plan: q.plan.id, amount: q.amount, currency: q.currency, pct: q.pct, coupon: q.coupon });
@@ -311,8 +324,11 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
     const active = await q(`SELECT day d, count(DISTINCT user_id)::int n FROM events WHERE type='open' AND day>CURRENT_DATE-$1::int GROUP BY 1 ORDER BY 1`, [days]);
     const revenue = await q(`SELECT paid_at::date d, sum(amount-COALESCE(refunded_amount,0))::float n FROM payments WHERE status IN ('paid','refunded') AND paid_at>now()-($1||' days')::interval GROUP BY 1 ORDER BY 1`, [String(days)]);
     const byPlan = await q(`SELECT plan_id, count(*)::int n, sum(amount)::float amount FROM payments WHERE status='paid' GROUP BY 1`);
+    const errors = await q(`SELECT e.at, e.k, e.ua, u.email FROM events e LEFT JOIN users u ON u.id=e.user_id WHERE e.type='js_error' ORDER BY e.at DESC LIMIT 50`);
+    const [errTot] = await q(`SELECT count(*)::int n, count(*) FILTER (WHERE at>now()-interval '24 hours')::int today FROM events WHERE type='js_error' AND at>now()-interval '30 days'`);
     res.json({ days, totals: { ...tot, free: tot.users - tot.pro, conversion: tot.users ? tot.pro / tot.users : 0 },
-      series: { signups: signups.map(r => ({ d: day(r.d), n: r.n })), active: active.map(r => ({ d: day(r.d), n: r.n })), revenue: revenue.map(r => ({ d: day(r.d), n: r.n })) }, byPlan });
+      series: { signups: signups.map(r => ({ d: day(r.d), n: r.n })), active: active.map(r => ({ d: day(r.d), n: r.n })), revenue: revenue.map(r => ({ d: day(r.d), n: r.n })) }, byPlan,
+      errors, errTot });
   });
 
   A("get", "/funnel", async (req, res) => {

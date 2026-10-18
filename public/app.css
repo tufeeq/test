@@ -508,7 +508,7 @@ body.xp-open{overflow:hidden}
 .xp-stage .hot:focus-visible .hot-ring{stroke:var(--pri);stroke-width:4}
 .xp-quiz{position:absolute;inset:0;overflow:auto;background:var(--surface);padding:18px;display:grid;align-content:start;gap:12px}
 /* phone in landscape: keep the board short enough that the captions and controls stay on screen */
-@media (max-height:520px) and (orientation:landscape){.xp-stage{block-size:calc(100vh - 168px);min-block-size:150px;inline-size:auto;max-inline-size:100%;margin-inline:auto}.xp-cap{min-block-size:0;font-size:.95rem;line-height:1.6;padding:8px 12px}.xp-top{margin-block:0 6px}.xp-in{padding-block-start:6px}}
+@media (max-height:520px) and (orientation:landscape){.xp-stage{block-size:calc(100vh - 178px);min-block-size:140px;inline-size:auto;max-inline-size:100%;margin-inline:auto}.xp-cap{min-block-size:0;font-size:.92rem;line-height:1.55;padding:6px 12px}.xp-top{margin-block:0 4px}.xp-top h2{font-size:1rem}.xp-eyebrow{display:none}.xp-in{padding-block-start:4px}.xp-ctl{padding:6px 10px}.xp-ib{inline-size:36px;block-size:36px}.xp-ib.main{inline-size:44px;block-size:44px}.xp-speed button{block-size:36px}}
 /* phones: the 16:9 board is too small for a question + options, so the challenge takes its natural height */
 @media (max-width:640px){.xp-stage-wrap.quiz-on .xp-stage,.xp-stage-wrap.quiz-on .xp-scene-t{display:none}.xp-stage-wrap.quiz-on .xp-quiz{position:relative;inset:auto;min-block-size:220px}}
 .xp-qn{font-family:var(--f-hand);color:var(--pink-t);font-size:1.1rem;margin:0}

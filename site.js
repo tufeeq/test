@@ -162,24 +162,24 @@ module.exports = function site(app, { PUB, loadConfig }) {
 
   // ---------- landing page: English rendered on the server, JSON-LD ----------
   const ORIGIN = "https://gat.academy";
-  let enDict = { sig: "", EN: {}, META: {} };
+  let enDict = { sig: "", EN: {}, META: {}, PAY: {} };
   function landingDict() {
     const c = readFile(path.join(PUB, "landing.js"));
     if (!c) return enDict;
     if (enDict.sig === c.hash) return enDict;
-    const src = c.buf.toString("utf8"), out = { sig: c.hash, EN: {}, META: {} };
+    const src = c.buf.toString("utf8"), out = { sig: c.hash, EN: {}, META: {}, PAY: {} };
     try {
       const ast = acorn.parse(src, { ecmaVersion: "latest" });
       const decl = {}; // name → source of the initialiser
       (function walk(n) {
         if (!n || typeof n.type !== "string") return;
-        if (n.type === "VariableDeclarator" && n.id.type === "Identifier" && ["SCRIB", "EN", "META"].includes(n.id.name) && n.init) decl[n.id.name] = src.slice(n.init.start, n.init.end);
+        if (n.type === "VariableDeclarator" && n.id.type === "Identifier" && ["SCRIB", "EN", "META", "M", "MA", "PAY"].includes(n.id.name) && n.init) decl[n.id.name] = src.slice(n.init.start, n.init.end);
         for (const k in n) { const v = n[k]; if (Array.isArray(v)) v.forEach(walk); else if (v && typeof v.type === "string" && k !== "loc") walk(v); }
       })(ast);
       // the dictionaries are plain literals (string concatenation with SCRIB only); evaluate them without any globals
       const vm = require("vm");
-      const r = vm.runInNewContext(`var SCRIB=${decl.SCRIB || "''"};({EN:${decl.EN || "{}"},META:${decl.META || "{}"}})`, Object.create(null), { timeout: 500 });
-      out.EN = r.EN || {}; out.META = r.META || {};
+      const r = vm.runInNewContext(`var SCRIB=${decl.SCRIB || "''"},M=${decl.M || "''"},MA=${decl.MA || "''"};({EN:${decl.EN || "{}"},META:${decl.META || "{}"},PAY:${decl.PAY || "{}"}})`, Object.create(null), { timeout: 500 });
+      out.EN = r.EN || {}; out.META = r.META || {}; out.PAY = r.PAY || {};
     } catch (e) { console.error("landing: cannot read the English copy", e.message); }
     enDict = out;
     return out;
@@ -249,11 +249,15 @@ module.exports = function site(app, { PUB, loadConfig }) {
   async function sendLanding(req, res) {
     const lang = req.query.lang === "en" ? "en" : "ar";
     let cfg = null; try { cfg = await loadConfig(); } catch (e) { cfg = null; }
-    const { EN, META, sig } = landingDict();
-    const key = lang + "|" + sig + "|" + sha1(JSON.stringify(cfg && { p: cfg.plans, c: cfg.currency, r: cfg.refund }));
+    const { EN, META, PAY, sig } = landingDict();
+    // the payment gateway named on the page is the one that takes payments now (moyasar / tap), else neutral wording
+    const prov = cfg && PAY[cfg.provider] ? cfg.provider : "none";
+    const key = lang + "|" + sig + "|" + prov + "|" + sha1(JSON.stringify(cfg && { p: cfg.plans, c: cfg.currency, r: cfg.refund }));
     sendPage(req, res, "index.html", { key, transform: html => {
+      html = html.replace(/<html lang="ar" dir="rtl"/, `<html lang="ar" dir="rtl" data-pay="${prov}"`);
+      const pay = PAY[prov] && PAY[prov][lang]; if (pay) html = translateHtml(html, pay);
       if (lang === "en") {
-        html = translateHtml(html, EN);
+        html = translateHtml(html, { ...EN, ...(pay || {}) });
         html = html.replace(/<html lang="ar" dir="rtl"/, '<html lang="en" dir="ltr" data-ssr="en"');
         const t = META.en && META.en.title, d = META.en && META.en.desc;
         if (t) html = html.replace(/<title>[^<]*<\/title>/, `<title>${escText(t)}</title>`).replace(/(<meta property="og:title" content=")[^"]*/, "$1" + escAttr(t)).replace(/(<meta name="twitter:title" content=")[^"]*/, "$1" + escAttr(t));

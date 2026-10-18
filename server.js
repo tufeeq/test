@@ -29,10 +29,15 @@ function dbConfig(raw) {
   if (process.env.PGSSL === "0" || mode === "disable") ssl = false;
   else if (mode === "verify-full") ssl = true;
   else if (mode || process.env.PGSSL === "1") ssl = { rejectUnauthorized: false };
-  return { connectionString: url, ssl, max: 10, connectionTimeoutMillis: 10000, idleTimeoutMillis: 30000 };
+  const max = Math.max(2, Math.min(50, Number(process.env.PG_POOL_MAX) || 10));
+  return { connectionString: url, ssl, max, connectionTimeoutMillis: 10000, idleTimeoutMillis: 30000 };
 }
 const pool = new Pool(dbConfig(process.env.DATABASE_URL));
 pool.on("error", e => console.error("pg pool error (idle client):", e.message)); // don't crash when the DB restarts
+// a stray rejection or exception must not take every student's session down with it: log it (with no request data),
+// and on an uncaught exception shut down cleanly so Railway restarts the instance (restartPolicyType ON_FAILURE)
+process.on("unhandledRejection", e => console.error("unhandledRejection", e && e.stack || e));
+process.on("uncaughtException", e => { console.error("uncaughtException", e && e.stack || e); shutdown(1); });
 
 async function migrate() {
   await pool.query(`
@@ -64,6 +69,32 @@ async function migrate() {
   `);
   await C.migrate();
   await O.migrate();
+  await checkSchema();
+}
+// Every column the code reads or writes. The migrations above are idempotent (IF NOT EXISTS everywhere), but a column
+// dropped by hand is not recreated by CREATE TABLE IF NOT EXISTS; instead of serving 500s to every student, refuse to
+// start with a message that names the problem (Railway then keeps the previous deployment running).
+const SCHEMA = {
+  users: "id email pass_hash created_at name google_id facebook_id",
+  progress: "user_id track target lang exam_date p summary updated_at",
+  sessions: "token_hash user_id expires_at",
+  narration: "id mime data updated_at",
+  settings: "key value updated_at",
+  subscriptions: "id user_id plan_id source starts_at ends_at payment_id note created_by revoked_at created_at",
+  payments: "id user_id email plan_id amount currency coupon status tap_id tap_status refunded_amount refund_id created_at paid_at provider ext_id days refunded_at",
+  coupons: "code pct max_uses used expires_at plan_ids active note created_at",
+  events: "id user_id type k v day at",
+  admin_audit: "id admin_email action target meta at"
+};
+async function checkSchema() {
+  const r = await pool.query("SELECT table_name t, column_name c FROM information_schema.columns WHERE table_schema='public'");
+  const have = new Set(r.rows.map(x => x.t + "." + x.c));
+  const missing = [];
+  for (const t in SCHEMA) for (const c of SCHEMA[t].split(" ")) if (!have.has(t + "." + c)) missing.push(t + "." + c);
+  if (!missing.length) return;
+  throw new Error(`database schema check failed: missing ${missing.join(", ")}. ` +
+    `A column the server needs was dropped or renamed. Restore it (for example ALTER TABLE ${missing[0].split(".")[0]} ADD COLUMN ${missing[0].split(".")[1]} …) ` +
+    `or restore the database from a backup, then redeploy. Refusing to start so the previous deployment keeps serving.`);
 }
 
 const app = express();
@@ -82,10 +113,33 @@ app.use((req, res, next) => {
   next();
 });
 app.disable("x-powered-by");
+// request log: one line for anything that failed on our side or was slow (Railway's HTTP logs already cover the rest);
+// never the body, never an email
+let closing = false, reqSeq = 0;
+app.use((req, res, next) => {
+  const t0 = Date.now(), id = (++reqSeq).toString(36);
+  req.rid = id;
+  if (closing) res.set("Connection", "close"); // draining: don't keep this socket open after the response
+  res.on("finish", () => { const ms = Date.now() - t0; if ((res.statusCode >= 500 && res.statusCode !== 503) || ms > 2000) console.log(`req ${id} ${req.method} ${req.path} ${res.statusCode} ${ms}ms`); });
+  next();
+});
+// a NUL byte cannot be stored in Postgres text and has no legitimate use in a URL: reject it before any handler runs
+app.use((req, res, next) => (/%00/i.test(req.url) ? res.status(400).json({ error: "bad-request" }) : next()));
 // JSON bodies: 2 MB only where it is needed (progress p may be up to 900k chars, and JSON escaping inflates it;
 // admin settings can be large); everything else is small, so a 100 KB cap keeps anonymous requests cheap
 const bigJson = express.json({ limit: "2mb" }), smallJson = express.json({ limit: "100kb" });
 app.use((req, res, next) => (req.path === "/api/progress" || req.path.startsWith("/api/admin/") ? bigJson : smallJson)(req, res, next));
+// strings inside the parsed body and query: drop NUL bytes (Postgres rejects them in text and jsonb) without recursion,
+// so a deeply nested or very wide body cannot blow the stack; past the budget the rest is left as is (handlers only read known keys)
+function stripNul(root) {
+  if (!root || typeof root !== "object") return;
+  const stack = [root]; let budget = 20000;
+  while (stack.length && budget-- > 0) {
+    const o = stack.pop();
+    for (const k of Object.keys(o)) { const v = o[k]; if (typeof v === "string") { if (v.includes("\0")) o[k] = v.replace(/\0/g, ""); } else if (v && typeof v === "object") stack.push(v); }
+  }
+}
+app.use((req, res, next) => { stripNul(req.body); stripNul(req.query); next(); });
 
 // security headers
 app.use((req, res, next) => {
@@ -117,6 +171,28 @@ function setCookie(req, res, token, maxAgeSec) {
 const fail = (res, status, code) => res.status(status).json({ error: code });
 const validEmail = e => typeof e === "string" && e.length <= 254 && /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e);
 const DUMMY_HASH = bcrypt.hashSync("not-a-real-password", 11);
+// bcryptjs is pure JavaScript: one cost-11 hash is ~150 ms of CPU, and on the main thread a class signing in together
+// stalls every other request (measured: 50 simultaneous sign-ups took 10 s each, p95 of all API calls ~2 s).
+// Hashing runs in a small worker pool instead (same library, same hashes); if a worker fails, we fall back in-thread.
+const PW = (() => {
+  const { Worker } = require("worker_threads");
+  const n = Math.max(1, Math.min(4, (require("os").availableParallelism ? require("os").availableParallelism() : 2) - 1, Number(process.env.BCRYPT_WORKERS) || 4));
+  const code = `const b=require(${JSON.stringify(require.resolve("bcryptjs"))}),{parentPort}=require("worker_threads");
+    parentPort.on("message",m=>{let r,err;try{r=m.op==="hash"?b.hashSync(m.a,m.b):b.compareSync(m.a,m.b);}catch(e){err=String(e&&e.message||e);}parentPort.postMessage({id:m.id,r,err});});`;
+  const workers = [], waiting = new Map(); let seq = 0, rr = 0;
+  const spawnOne = i => { const w = new Worker(code, { eval: true }); w.unref();
+    w.on("message", m => { const p = waiting.get(m.id); if (!p) return; waiting.delete(m.id); m.err ? p.reject(new Error(m.err)) : p.resolve(m.r); });
+    w.on("error", e => { console.error("bcrypt worker", e.message); workers[i] = null; for (const [id, p] of waiting) if (p.w === w) { waiting.delete(id); p.fallback(); } });
+    workers[i] = w; };
+  for (let i = 0; i < n; i++) spawnOne(i);
+  const run = (op, a, b) => new Promise((resolve, reject) => {
+    const fallback = () => (op === "hash" ? bcrypt.hash(a, b) : bcrypt.compare(a, b)).then(resolve, reject);
+    const live = workers.filter(Boolean); if (!live.length) return fallback();
+    const w = live[rr++ % live.length], id = ++seq;
+    waiting.set(id, { resolve, reject, fallback, w }); w.postMessage({ id, op, a, b });
+  });
+  return { hash: (pw, cost) => run("hash", String(pw), cost), compare: (pw, h) => run("compare", String(pw), String(h)), size: n };
+})();
 // student's display name: 2–60 visible characters, control/format characters removed, spaces collapsed
 const cleanName = v => String(v == null ? "" : v).normalize("NFC").replace(/[\u0000-\u001f\u007f-\u009f\u200b-\u200f\u202a-\u202e\u2066-\u2069<>]/g, "").replace(/\s+/g, " ").trim();
 const validName = n => n.length >= 2 && n.length <= 60;
@@ -138,9 +214,18 @@ async function createSession(req, res, userId) {
 }
 async function auth(req, res, next) {
   const tok = parseCookies(req)[COOKIE];
-  if (tok) {
-    const r = await pool.query("SELECT u.id,u.email,u.name FROM sessions s JOIN users u ON u.id=s.user_id WHERE s.token_hash=$1 AND s.expires_at>now()", [sha(tok)]);
-    if (r.rows[0]) req.user = r.rows[0];
+  if (tok && tok.length <= 200) {
+    const r = await pool.query("SELECT u.id,u.email,u.name,s.expires_at FROM sessions s JOIN users u ON u.id=s.user_id WHERE s.token_hash=$1 AND s.expires_at>now()", [sha(tok)]);
+    const row = r.rows[0];
+    if (row) {
+      req.user = { id: row.id, email: row.email, name: row.name };
+      // sliding expiry: a session used in its second half is renewed for another full period, so an active student is
+      // never logged out mid-preparation; an abandoned device still expires after SESSION_DAYS
+      if (new Date(row.expires_at).getTime() - Date.now() < SESSION_DAYS * 43200e3) {
+        await pool.query("UPDATE sessions SET expires_at=now() + ($2 || ' days')::interval WHERE token_hash=$1", [sha(tok), String(SESSION_DAYS)]);
+        setCookie(req, res, tok, SESSION_DAYS * 86400);
+      }
+    }
   }
   next();
 }
@@ -178,24 +263,29 @@ app.post("/api/signup", wrap(async (req, res) => {
   const name = cleanName(req.body.name);
   if (!validName(name)) return fail(res, 400, "invalid-name");
   if (req.body.consent !== true) return fail(res, 400, "consent");
-  const id = crypto.randomUUID(), hash = await bcrypt.hash(pw, 11);
+  // a taken address answers before the (slow) hash, so a flood of sign-ups for one address cannot burn CPU
+  if ((await pool.query("SELECT 1 FROM users WHERE email=$1", [email])).rows[0]) return fail(res, 409, "email-already-in-use");
+  const id = crypto.randomUUID(), hash = await PW.hash(pw, 11);
   try { await pool.query("INSERT INTO users(id,email,pass_hash,name) VALUES($1,$2,$3,$4)", [id, email, hash, name]); }
   catch (e) { if (e.code === "23505") return fail(res, 409, "email-already-in-use"); throw e; }
+  if (isAdminEmail(email)) console.log(`admin account claimed: ${email}`);
   await createSession(req, res, id);
   res.json({ user: { ...pub({ email, name }), plan: await C.planOf({ id, email }) } });
 }));
 
 app.post("/api/login", wrap(async (req, res) => {
   const email = String(req.body.email || "").trim().toLowerCase(), pw = String(req.body.password || "");
+  if (email.length > 254 || pw.length > 200) return fail(res, 401, "invalid-credential"); // nothing that long was ever accepted at sign-up
   // Limits: 150 attempts / 15 min per IP (classrooms share one IP).
   // Failed attempts are counted per email+IP (10 / 15 min), so someone guessing from their own device
-  // cannot lock the real student out on another device. A high per-email ceiling (100 / 15 min)
-  // still stops distributed guessing against one account.
+  // cannot lock the real student out on another device. A per-email ceiling (100 failures / 15 min) still stops
+  // distributed guessing, but it only applies to IPs that have already failed on that account: an attacker spraying
+  // wrong passwords from many addresses cannot lock the real student (whose own device has no failures) out.
   const ek = "le:" + email + "|" + req.ip, eg = "lg:" + email;
-  if (limited("li:" + req.ip, 150, 900e3) || over(ek, 10, 900e3) || over(eg, 100, 900e3)) return fail(res, 429, "too-many-requests");
+  if (limited("li:" + req.ip, 150, 900e3) || over(ek, 10, 900e3) || (recent(ek, 900e3).length && over(eg, 100, 900e3))) return fail(res, 429, "too-many-requests");
   const r = await pool.query("SELECT id,email,name,pass_hash FROM users WHERE email=$1", [email]);
   const u = r.rows[0];
-  const ok = u ? await bcrypt.compare(pw, u.pass_hash) : await bcrypt.compare(pw, DUMMY_HASH);
+  const ok = await PW.compare(pw, u ? u.pass_hash : DUMMY_HASH);
   if (!u || !ok) { hit(ek); hit(eg); return fail(res, 401, "invalid-credential"); }
   hits.delete(ek);
   await createSession(req, res, u.id);
@@ -206,14 +296,24 @@ app.post("/api/logout", wrap(async (req, res) => {
   const tok = parseCookies(req)[COOKIE]; if (tok) await pool.query("DELETE FROM sessions WHERE token_hash=$1", [sha(tok)]);
   setCookie(req, res, "", 0); res.json({ ok: true });
 }));
+// sign out everywhere: every session of this account is removed. With {keep:true} the current one stays
+// ("sign out my other devices"); otherwise the cookie is cleared too and the student signs in again.
+app.post("/api/logout-all", needUser, wrap(async (req, res) => {
+  const tok = parseCookies(req)[COOKIE] || "";
+  const keep = req.body && req.body.keep === true;
+  const r = keep ? await pool.query("DELETE FROM sessions WHERE user_id=$1 AND token_hash<>$2", [req.user.id, sha(tok)])
+    : await pool.query("DELETE FROM sessions WHERE user_id=$1", [req.user.id]);
+  if (!keep) setCookie(req, res, "", 0);
+  res.json({ ok: true, removed: r.rowCount });
+}));
 
 app.post("/api/password", needUser, wrap(async (req, res) => {
   const cur = String(req.body.current || ""), next = String(req.body.next || "");
   if (next.length < 8 || next.length > 200) return fail(res, 400, "weak-password");
   if (over("pw:" + req.user.id, 10, 900e3)) return fail(res, 429, "too-many-requests");
   const r = await pool.query("SELECT pass_hash FROM users WHERE id=$1", [req.user.id]);
-  if (!(await bcrypt.compare(cur, r.rows[0].pass_hash))) { hit("pw:" + req.user.id); return fail(res, 401, "invalid-credential"); }
-  await pool.query("UPDATE users SET pass_hash=$1 WHERE id=$2", [await bcrypt.hash(next, 11), req.user.id]);
+  if (!(await PW.compare(cur, r.rows[0].pass_hash))) { hit("pw:" + req.user.id); return fail(res, 401, "invalid-credential"); }
+  await pool.query("UPDATE users SET pass_hash=$1 WHERE id=$2", [await PW.hash(next, 11), req.user.id]);
   const tok = parseCookies(req)[COOKIE];
   await pool.query("DELETE FROM sessions WHERE user_id=$1 AND token_hash<>$2", [req.user.id, sha(tok || "")]);
   res.json({ ok: true });
@@ -229,22 +329,36 @@ app.get("/api/progress", needUser, wrap(async (req, res) => {
   const r = await pool.query("SELECT p, updated_at FROM progress WHERE user_id=$1", [req.user.id]);
   res.json(r.rows[0] ? { p: r.rows[0].p, updatedAt: r.rows[0].updated_at } : { p: null });
 }));
+// Saving is one atomic UPSERT (never a partial row). Optional optimistic concurrency: when the client sends `base`
+// (the updatedAt it last received from GET or PUT) and the stored copy is newer, nothing is written and the server
+// answers 409 {error:"conflict", p, updatedAt} so the client can merge and save again. Without `base` the last
+// writer wins (the behaviour older clients rely on). updated_at is compared at millisecond precision (JSON dates).
 app.put("/api/progress", needUser, wrap(async (req, res) => {
+  if (limited("pg:" + req.user.id, 60, 60e3)) return fail(res, 429, "too-many-requests");
   const b = req.body || {};
   const p = typeof b.p === "string" ? b.p : null;
   if (!p || p.length > 900000) return fail(res, 400, "bad-progress");
   try { JSON.parse(p); } catch (e) { return fail(res, 400, "bad-progress"); }
   const track = b.track === "lit" ? "lit" : "sci", lang = b.lang === "en" ? "en" : "ar";
   const target = Math.max(0, Math.min(100, Number(b.target) || 100));
-  const examDate = /^\d{4}-\d{2}-\d{2}$/.test(b.examDate || "") ? b.examDate : "";
-  const s = b.summary && typeof b.summary === "object" ? b.summary : {};
+  const isDay = v => typeof v === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v);
+  const examDate = isDay(b.examDate) ? b.examDate : "";
+  const s = b.summary && typeof b.summary === "object" && !Array.isArray(b.summary) ? b.summary : {};
   const num = v => (typeof v === "number" && isFinite(v)) ? v : null;
   const summary = { est: num(s.est), readiness: num(s.readiness), solved: num(s.solved), acc: num(s.acc), models: num(s.models), streak: num(s.streak),
-    lastActive: /^\d{4}-\d{2}-\d{2}$/.test(s.lastActive || "") ? s.lastActive : "" };
-  await pool.query(`INSERT INTO progress(user_id,track,target,lang,exam_date,p,summary,updated_at) VALUES($1,$2,$3,$4,$5,$6,$7,now())
-    ON CONFLICT (user_id) DO UPDATE SET track=$2,target=$3,lang=$4,exam_date=$5,p=$6,summary=$7,updated_at=now()`,
-    [req.user.id, track, target, lang, examDate, p, summary]);
-  res.json({ ok: true });
+    lastActive: isDay(s.lastActive) ? s.lastActive : "" };
+  let base = null;
+  if (typeof b.base === "string" && b.base) { const d = new Date(b.base); if (isNaN(d)) return fail(res, 400, "bad-base"); base = d.toISOString(); }
+  const r = await pool.query(`INSERT INTO progress(user_id,track,target,lang,exam_date,p,summary,updated_at) VALUES($1,$2,$3,$4,$5,$6,$7,now())
+    ON CONFLICT (user_id) DO UPDATE SET track=$2,target=$3,lang=$4,exam_date=$5,p=$6,summary=$7,updated_at=now()
+    WHERE $8::timestamptz IS NULL OR date_trunc('milliseconds', progress.updated_at) <= $8::timestamptz
+    RETURNING updated_at`,
+    [req.user.id, track, target, lang, examDate, p, summary, base]);
+  if (!r.rows[0]) {
+    const cur = (await pool.query("SELECT p, updated_at FROM progress WHERE user_id=$1", [req.user.id])).rows[0];
+    return res.status(409).json({ error: "conflict", p: cur ? cur.p : null, updatedAt: cur ? cur.updated_at : null });
+  }
+  res.json({ ok: true, updatedAt: r.rows[0].updated_at });
 }));
 
 // ---------- admin ----------
@@ -257,7 +371,7 @@ app.delete("/api/admin/users/:id", needAdmin, wrap(async (req, res) => {
 app.post("/api/admin/users/:id/reset-password", needAdmin, wrap(async (req, res) => {
   const AL = "abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // no 0/O, 1/l/I, -/_ : easy to read aloud
   const temp = Array.from(crypto.randomBytes(10), b => AL[b % AL.length]).join("");
-  const r = await pool.query("UPDATE users SET pass_hash=$1 WHERE id=$2 RETURNING email", [await bcrypt.hash(temp, 11), req.params.id]);
+  const r = await pool.query("UPDATE users SET pass_hash=$1 WHERE id=$2 RETURNING email", [await PW.hash(temp, 11), req.params.id]);
   if (!r.rows[0]) return fail(res, 404, "not-found");
   await pool.query("DELETE FROM sessions WHERE user_id=$1", [req.params.id]);
   await pool.query("INSERT INTO admin_audit(admin_email,action,target) VALUES($1,'reset_password',$2)", [req.user.email, r.rows[0].email]);
@@ -339,7 +453,16 @@ async function importNarration() {
   }
   console.log(`narration import: ${ok} stored, ${skip} already present, ${bad} failed`);
 }
-app.get("/healthz", (req, res) => { res.set("Cache-Control", "no-store"); res.send("ok"); });
+// health: a cheap SELECT 1 with a short deadline, so a wedged database or an exhausted pool shows up as 503 instead of
+// a green check on a server that cannot serve anyone; 503 while shutting down so no new traffic is routed here
+app.get("/healthz", (req, res) => {
+  res.set("Cache-Control", "no-store");
+  if (closing) return res.status(503).type("text").send("shutting down");
+  let done = false;
+  const t = setTimeout(() => { if (!done) { done = true; res.status(503).type("text").send("db timeout"); } }, 3000);
+  pool.query("SELECT 1").then(() => { if (!done) { done = true; clearTimeout(t); res.type("text").send("ok"); } },
+    e => { if (!done) { done = true; clearTimeout(t); console.error("healthz db", e.message); res.status(503).type("text").send("db error"); } });
+});
 
 // ---------- static site ----------
 app.use((req, res, next) => { if (/^\/admin(\.html)?$/.test(req.path)) res.set("X-Robots-Tag", "noindex"); next(); });
@@ -367,25 +490,52 @@ app.use(express.static(PUB, { index: false, setHeaders: (res, f) => {
 app.use("/api", (req, res) => fail(res, 404, "not-found"));
 app.use((req, res) => { if (!S.sendPage(req, res, "404.html", { status: 404 })) res.status(404).type("text").send("Not found"); });
 app.use((err, req, res, next) => {
+  if (res.headersSent) return next(err);
+  // body-parser / raw-body problems are the client's: a stable code, no log line
   if (err && (err.type === "entity.parse.failed" || err.type === "entity.too.large" || err.type === "encoding.unsupported" || err.type === "charset.unsupported")) {
     const tooBig = err.type === "entity.too.large";
     return fail(res, tooBig ? 413 : 400, tooBig ? "too-large" : "bad-json");
   }
-  console.error(err);
+  const st = err && (err.status || err.statusCode);
+  if (st >= 400 && st < 500) return fail(res, st, "bad-request"); // e.g. a malformed or aborted body stream
+  console.error(`req ${req.rid || "-"} ${req.method} ${req.path} failed:`, err && err.stack || err);
   if (req.path.startsWith("/api")) return fail(res, 500, "server");
-  res.status(500).send("Server error");
+  res.status(500).type("text").send("Server error");
 });
 
 // hourly cleanup of expired sessions
 setInterval(() => pool.query("DELETE FROM sessions WHERE expires_at<now()").catch(() => {}), 3600e3).unref();
 
+// Admin access is granted to whoever owns an ADMIN_EMAILS address, so an address without an account is a standing
+// invitation: say so loudly at every start until the owner has signed up with it.
+async function checkAdmins() {
+  for (const e of ADMIN_EMAILS) {
+    const r = await pool.query("SELECT 1 FROM users WHERE email=$1", [e]).catch(() => ({ rows: [] }));
+    if (!r.rows[0]) console.warn(`WARNING: ADMIN_EMAILS lists ${e} but no account with that address exists yet. The first person to sign up with it becomes an admin: sign up now to claim it.`);
+  }
+}
+
+// Graceful shutdown (Railway sends SIGTERM on every deploy, then SIGKILL after the service's draining time):
+// stop accepting connections, let in-flight requests finish, close the pool, exit. SHUTDOWN_GRACE_MS caps the wait.
+let srv = null;
+function shutdown(code = 0) {
+  if (closing) return; closing = true;
+  const grace = Math.max(1000, Number(process.env.SHUTDOWN_GRACE_MS) || 8000);
+  const finish = () => pool.end().catch(() => {}).finally(() => process.exit(code));
+  if (!srv) return finish();
+  srv.close(finish);
+  // keep-alive sockets of requests that finish during the drain become idle afterwards: sweep them so we exit promptly
+  if (srv.closeIdleConnections) { srv.closeIdleConnections(); setInterval(() => srv.closeIdleConnections(), 200).unref(); }
+  setTimeout(() => { console.error(`shutdown: in-flight requests still open after ${grace} ms, exiting`); process.exit(code); }, grace).unref();
+}
+
 migrate().then(() => {
-  const srv = app.listen(PORT, () => { console.log(`GAT Academy running on :${PORT}`); S.warm(); });
+  srv = app.listen(PORT, () => { console.log(`GAT Academy running on :${PORT} (node ${process.version}, pool max ${pool.options.max}, ${PW.size} hash worker(s))`); S.warm(); });
   // keep idle connections open longer than the platform's proxy does, so it never reuses a socket we just closed (sporadic 502s)
   srv.keepAliveTimeout = 65e3; srv.headersTimeout = 66e3;
   importNarration().catch(e => console.error("narration import", e.message));
-  const bye = () => { srv.close(() => pool.end().finally(() => process.exit(0))); setTimeout(() => process.exit(0), 8000).unref(); };
-  process.on("SIGTERM", bye); process.on("SIGINT", bye);
-}).catch(e => { console.error("Migration failed", e); process.exit(1); });
+  checkAdmins().catch(() => {});
+  process.on("SIGTERM", () => shutdown(0)); process.on("SIGINT", () => shutdown(0));
+}).catch(e => { console.error("Startup failed:", e && e.message || e); process.exit(1); });
 
 module.exports = { app, pool };

@@ -867,3 +867,22 @@ body.sheet-open{overflow:hidden}
   .top-in>.pro-chip{padding-inline:7px;font-size:.74rem}#lang-btn{padding-inline:7px}}
 @media (max-width:379px){#acct-btn .acct-name{display:none}#acct-btn.has-name{inline-size:38px;padding:0;display:grid;place-items:center}}
 .ex-leg{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:8px 4px 0;color:var(--muted);font-weight:700}
+/* boot skeleton (replaced by the first render), device/session notices, error card */
+.boot{min-block-size:50vh;display:grid;place-content:center;justify-items:center;gap:8px;text-align:center;color:var(--muted);font-weight:700}
+.boot p{margin:0}
+.boot-dot{inline-size:14px;block-size:14px;border-radius:50%;background:var(--pri);box-shadow:0 0 0 4px var(--pri-soft);animation:bootpulse 1.1s ease-in-out infinite}
+@keyframes bootpulse{0%,100%{transform:scale(.8);opacity:.6}50%{transform:scale(1.1);opacity:1}}
+.notice{margin-block-end:14px;align-items:center}
+.notice>span:first-child{flex:1;min-inline-size:200px;line-height:1.7}
+.notice .row{align-items:center;gap:8px;flex-wrap:nowrap}
+.notice .icon-btn.sm{inline-size:34px;block-size:34px;border-width:1.5px;background:transparent;flex-shrink:0}
+.rep-line{background:var(--pri-soft);border-color:var(--pri)}
+.err-card{margin:24px auto;max-width:560px;display:grid;gap:12px;justify-items:center}
+.err-card .row{justify-content:center}
+.mail-link{color:inherit;font-weight:700;text-decoration:underline;text-decoration-color:var(--pri);text-underline-offset:3px;overflow-wrap:anywhere}
+.sr-only{position:absolute!important;inline-size:1px;block-size:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.mcard h3{font-size:1rem}
+.restart h2{font-size:1.06rem}
+
+/* long math in explanations may wrap */
+.fb p .m,.rev-exp .m{white-space:normal}

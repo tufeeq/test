@@ -15,9 +15,16 @@ const UI={
  en:{close:'Close',of:(a,b)=>`Explainer ${a} of ${b}`,start:'Start the explainer',startSub:'Turn your sound on. The explainer pauses at interactive stops so you can try it yourself.',play:'Play',pause:'Pause',prev:'Previous scene',rep:'Replay scene',next:'Next scene',speed:'Speed',voice:'Voice',cc:'Captions',scenes:'Scenes',after:'After this explainer',press:'Press “Start the explainer”.',inter:'Interactive',final:'Final challenge',yourTurn:'Your turn: try it on the board.',clipEnd:'Clip finished',fullQ:'Want the full explainer with the challenge?',openFull:'Open the full explainer',again:'Replay clip',quizIntro:'Final challenge: quick questions on the same idea.',qn:(a,b)=>`Challenge ${a} of ${b}`,right:'Correct.',wrong:'Not quite.',nextQ:'Next',result:'Result',passed:'Explainer complete.',failed:'Review the idea, then retry the challenge.',nextL:'Next explainer: ',done:'Done',retry:'Retry the challenge',rewatch:'Rewatch',bravo:'Well done!',retryCap:'Try again after reviewing the scene you missed.',sp:['0.85×','1×','1.25×']}};
 const u=k=>UI[LG][k];
 const escx=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const escq=s=>LG==='ar'?escx(s).replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹]+/g,m=>'<sup>'+m.replace(/./g,c=>SUP[c]||c)+'</sup>'):escx(s);  /* quiz text: Arabic exponents as raised Arabic-Indic digits */
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const RM=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
-function el(tag,attrs={},parent){ const e=document.createElementNS(NS,tag); for(const k in attrs){ if(k==='text') e.textContent=attrs[k]; else e.setAttribute(k,attrs[k]); } if(parent) parent.appendChild(e); return e; }
+/* Arabic labels: Unicode superscript digits (²³⁵…) only exist in Western shapes, so exponents like ٢⁵ are drawn as a raised
+   Arabic-Indic digit instead (٢ with a small ٥), the way Saudi textbooks print them */
+const SUP={'⁰':'٠','¹':'١','²':'٢','³':'٣','⁴':'٤','⁵':'٥','⁶':'٦','⁷':'٧','⁸':'٨','⁹':'٩'};
+function setLabel(e,s){ s=String(s); if(LG!=='ar'||!/[⁰¹²³⁴⁵⁶⁷⁸⁹]/.test(s)){ e.textContent=s; return; }
+  e.textContent=''; let i=0; const parts=s.split(/([⁰¹²³⁴⁵⁶⁷⁸⁹]+)/);
+  parts.forEach((p,j)=>{ if(!p) return; if(j%2){ const t=document.createElementNS(NS,'tspan'); t.setAttribute('dy','-0.5em'); t.setAttribute('font-size','64%'); t.textContent=p.replace(/./g,c=>SUP[c]||c); e.appendChild(t); const r=document.createElementNS(NS,'tspan'); r.setAttribute('dy','0.5em'); r.setAttribute('font-size','64%'); r.textContent='\u200b'; e.appendChild(r); } else e.appendChild(document.createTextNode(p)); }); }
+function el(tag,attrs={},parent){ const e=document.createElementNS(NS,tag); for(const k in attrs){ if(k==='text'){ if(tag==='text') setLabel(e,attrs[k]); else e.textContent=attrs[k]; } else e.setAttribute(k,attrs[k]); } if(parent) parent.appendChild(e); return e; }
 const tl=()=>gsap.timeline();
 function note(p,{x,y,w=120,h=70,c='n0',text='',size=28,rot=0,cls='t-note'}){
   const g=el('g',{},p); el('rect',{x:x-w/2+4,y:y-h/2+4,width:w,height:h,rx:6,class:'f-edge'},g); el('rect',{x:x-w/2,y:y-h/2,width:w,height:h,rx:6,class:'f-'+c,stroke:'var(--edge)','stroke-width':2},g);
@@ -76,7 +83,7 @@ function compileScene(sc){
   out.beats=(sc.beats||[]).map((b,bi,arr)=>{ const beat={say:b.say};
     beat.run=ctx=>{ const t=tl(); let at=0;
       (b.hide||[]).forEach(k=>ctx[k]&&t.to(ctx[k].g,{opacity:0,duration:.3},0));
-      (b.set?Object.entries(b.set):[]).forEach(([k,v])=>{ const o=ctx[k]; if(!o||!o.label) return; t.to(o.label,{opacity:0,duration:.2},at).call(()=>{ o.label.textContent=v; },null,at+.2).to(o.label,{opacity:1,duration:.25},at+.2); });
+      (b.set?Object.entries(b.set):[]).forEach(([k,v])=>{ const o=ctx[k]; if(!o||!o.label) return; t.to(o.label,{opacity:0,duration:.2},at).call(()=>{ setLabel(o.label,v); },null,at+.2).to(o.label,{opacity:1,duration:.25},at+.2); });
       (b.move?Object.entries(b.move):[]).forEach(([k,[dx,dy]])=>ctx[k]&&t.to(ctx[k].g,{x:`+=${dx}`,y:`+=${dy}`,duration:.7,ease:'power2.inOut'},at));
       (b.show||[]).forEach((k,i)=>{ const o=ctx[k]; if(!o) return; revealTl(o,t,at+i*(b.gap??.45)); });
       (b.hl||[]).forEach(k=>ctx[k]&&t.to(ctx[k].g,{scale:1.1,transformOrigin:'50% 50%',duration:.22,yoyo:true,repeat:1},'>'));
@@ -84,7 +91,7 @@ function compileScene(sc){
       return t; };
     if(sc.ask&&bi===arr.length-1){ const A=sc.ask; beat.right=A.right; beat.wrong=A.wrong;
       beat.wait=ctx=>askChoice(ctx._stage,A);
-      beat.after=(ctx,ok)=>{ const t=tl(); (A.show||[]).forEach((k,i)=>ctx[k]&&revealTl(ctx[k],t,.3+i*.4)); return t; }; }
+      beat.after=(ctx,ok)=>{ const t=tl(); (A.show||[]).forEach((k,i)=>ctx[k]&&revealTl(ctx[k],t,1.9+i*.4)); return t; }; }  /* revealed once the option buttons have faded (1.4s + .4s) */
     return beat; });
   return out;
 }
@@ -97,7 +104,7 @@ function askChoice(stage,A){ return new Promise(res=>{
     txt(g,{x:cx,y:cy+7,s:A.s||21,text:t,dir:(A.ltr||LG==='en')?'ltr':undefined}); return {g,r}; });
   gsap.from(gs.map(o=>o.g),{opacity:0,y:18,stagger:.1,duration:.3});
   gs.forEach((o,i)=>{ const pick=()=>{ gs.forEach(x=>x.g.style.pointerEvents='none'); o.r.setAttribute('class',(i===A.a?'f-oksoft':'f-badsoft')+' hot-ring'); if(i!==A.a) gs[A.a].r.setAttribute('class','f-oksoft hot-ring');
-      gsap.to(gs.filter((x,j)=>j!==A.a&&j!==i).map(x=>x.g),{opacity:.35,duration:.3}); setTimeout(()=>{ if(A.show&&A.show.length) gsap.to(gs.map(x=>x.g),{opacity:0,duration:.4}); },1400); res(i===A.a); };
+      gsap.to(gs.filter((x,j)=>j!==A.a&&j!==i).map(x=>x.g),{opacity:.35,duration:.3}); gsap.delayedCall(1.4,()=>{ if(A.show&&A.show.length) gsap.to(gs.map(x=>x.g),{opacity:0,duration:.4}); }); res(i===A.a); };
     o.g.addEventListener('click',pick); o.g.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); pick(); } }); });
 }); }
 
@@ -128,7 +135,9 @@ const TTS={ ok:'speechSynthesis' in window, voice:null, on:true, rate:1, cur:nul
       u.onboundary=e=>{ if(e.name&&e.name!=='word') return; bounded=true; captionAt(job.text,e.charIndex); };
       u.onend=()=>{ if(this.cur===job&&!job.stopped){ captionAll(); this.cur=null; job.resolve(); } };
       u.onerror=()=>{ if(this.cur===job&&!job.stopped){ this.cur=null; job.resolve(); } };
-      speechSynthesis.speak(u); const est=this._est(job.text); job.timers.push(setTimeout(()=>{ if(!bounded) this._timedWords(job,est); },500)); }
+      speechSynthesis.speak(u); const est=this._est(job.text); job.timers.push(setTimeout(()=>{ if(!bounded) this._timedWords(job,est); },500));
+      /* some browsers never fire onend/onerror (muted tab, broken voice): never let one sentence freeze the lesson */
+      job.timers.push(setTimeout(()=>{ if(this.cur===job&&!job.stopped){ captionAll(); this.cur=null; try{ speechSynthesis.cancel(); }catch(e){} job.resolve(); } },est*2+2500)); }
     else { const est=this._est(job.text); this._timedWords(job,est); job.timers.push(setTimeout(()=>{ if(this.cur===job&&!job.stopped){ captionAll(); this.cur=null; job.resolve(); } },est+250)); } },
   _est(t){ return Math.max(1500,(t.length/(LG==='en'?15:13))*1000/this.rate); },
   _timedWords(job,ms){ const n=job.text.split(/\s+/).length; for(let i=0;i<n;i++) job.timers.push(setTimeout(()=>{ if(this.cur===job&&!job.stopped) captionIdx(i); },(ms*i)/n)); },
@@ -148,16 +157,24 @@ const IC={
   x:'<svg class="xp-ic" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>',
   check:'<svg class="xp-ic" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7"/></svg>' };
 let P=null, RUN=0;
-function stopTrack(){ const k=P&&P.trk; if(k){ k.dead=true; if(k.audio){ k.audio.pause(); k.audio.removeAttribute('src'); } cancelAnimationFrame(k.raf); } if(P) P.trk=null; }
+/* One <audio> element per player session. Mobile browsers only let an element make sound after it was started from a tap,
+   so the first tap inside the player calls play() on it (no source yet: it fails harmlessly) and every clip reuses it. */
+function audioEl(){ if(!P.au){ P.au=new Audio(); P.au.preload='auto'; } return P.au; }
+function primeAudio(){ if(!P||P.primed||!trackFor(P.key)) return; P.primed=true; try{ const p=audioEl().play(); if(p&&p.catch) p.catch(()=>{}); }catch(e){} }
+function stopTrack(){ const k=P&&P.trk; if(k){ k.dead=true; clearTimeout(k.wd); if(k.audio){ const a=k.audio; a.onended=a.onerror=a.onloadedmetadata=null; a.pause(); a.removeAttribute('src'); try{ a.load(); }catch(e){} } cancelAnimationFrame(k.raf); } if(P) P.trk=null; }
 function stopPlayer(){ RUN++; TTS.stop(); if(P){ stopTrack(); if(P.tl) P.tl.kill(); } if(HAS_GSAP){ gsap.killTweensOf('*'); gsap.globalTimeline.resume(); } P=null; }
 function trackFor(key){ const T=TRACKS[key]; return T&&T.segs&&T.segs.length?T:null; }
 function close(){ stopPlayer(); const o=$x('#xp'); if(o) o.remove(); document.body.classList.remove('xp-open'); document.removeEventListener('keydown',onKey); HOOKS.onClose(); }
-function onKey(e){ if(!P) return; if(e.key==='Escape'){ close(); return; } if(e.key===' '&&!e.target.closest('button,input,textarea')){ e.preventDefault(); $x('#xp-pp').click(); } }
+function onKey(e){ if(!P) return; if(e.key==='Escape'){ close(); return; }
+  if(e.key===' '&&!e.target.closest('button,input,textarea,[role=button],.hot')){ e.preventDefault(); $x('#xp-pp').click(); return; }
+  if(e.key==='Tab'){ /* keep keyboard focus inside the dialog */ const o=$x('#xp'); if(!o) return; const f=[...o.querySelectorAll('button:not([disabled]),[tabindex="0"],a[href]')].filter(x=>x.offsetParent!==null||x.getClientRects().length); if(!f.length) return;
+    const first=f[0], last=f[f.length-1], a=document.activeElement; if(e.shiftKey&&(a===first||!o.contains(a))){ e.preventDefault(); last.focus(); } else if(!e.shiftKey&&(a===last||!o.contains(a))){ e.preventDefault(); first.focus(); } } }
 function open(key,opt={}){
   if(!HAS_GSAP) return; stopPlayer(); const L=LESSONS[key]; if(!L) return; LG=L.lang; TTS.pick();
   const only=opt.only; const scenes=only!=null?[only]:L.scenes.map((_,i)=>i);
-  P={L,key,scenes,idx:0,playing:false,started:false,only,tl:null,cc:true,waiting:false};
-  let o=$x('#xp'); if(!o){ o=document.createElement('div'); o.id='xp'; o.className='xp'; o.setAttribute('role','dialog'); o.setAttribute('aria-modal','true'); document.body.appendChild(o); }
+  P={L,key,scenes,idx:0,playing:false,started:false,only,tl:null,cc:true,waiting:false,au:null,primed:false,noTrack:false};
+  let o=$x('#xp'); if(!o){ o=document.createElement('div'); o.id='xp'; o.className='xp'; o.setAttribute('role','dialog'); o.setAttribute('aria-modal','true'); document.body.appendChild(o);
+    o.addEventListener('click',primeAudio,true); /* the first tap anywhere in the player unlocks sound on mobile */ }
   o.setAttribute('dir',LG==='en'?'ltr':'rtl'); o.setAttribute('lang',LG);
   document.body.classList.add('xp-open'); o.setAttribute('aria-label',L.title);
   const sibs=forSkill(L.sk,L.lang), ix=sibs.indexOf(L);
@@ -212,8 +229,8 @@ function setupSceneAt(pi){ if(P.tl) P.tl.kill(); gsap.killTweensOf('*'); gsap.gl
   P.idx=pi; renderChapters(); setSceneTitle();
   const sc=P.L.scenes[P.scenes[pi]], stage=$x('#xp-stage'); stage.innerHTML=''; P.ctx=sc.setup(stage); P.ctx._stage=stage; P.ctxScene=P.scenes[pi]; gsap.fromTo(stage,{opacity:0},{opacity:1,duration:.25}); return P.ctx; }
 async function playScene(i){
-  if(TTS.on&&trackFor(P.key)) return playTrack(i);
-  const my=++RUN; TTS.stop(); stopTrack();
+  if(TTS.on&&!P.noTrack&&trackFor(P.key)) return playTrack(i);
+  const my=++RUN; TTS.stop(); stopTrack(); P.waiting=false;
   setPlaying(true); const ctx=setupSceneAt(i); const sc=P.L.scenes[P.scenes[i]]; const n=sc.beats.length;
   for(let b=0;b<n;b++){
     if(my!==RUN) return; const beat=sc.beats[b]; segProgress(i,b/n);
@@ -228,17 +245,21 @@ async function playScene(i){
 }
 /* continuous track: beats fire at their time in the recording */
 function beatById(L,id){ for(let si=0;si<L.scenes.length;si++){ const bi=L.scenes[si].beats.findIndex(b=>b.id===id); if(bi>=0) return {si,bi,beat:L.scenes[si].beats[bi]}; } return null; }
-function playClip(src,onTick,start=0){ return new Promise((resolve,reject)=>{ const a=new Audio(); a.preload='auto'; a.src=src; a.playbackRate=TTS.rate; a.preservesPitch=true; P.trk.audio=a; const k=P.trk;
+/* plays one recorded clip on the session's shared element; onTick gets the time in the recording's own timeline:
+   if the served file is not the length the track was built for (a re-recorded clip), the beat times are scaled to fit */
+function playClip(src,onTick,start=0,dur=0){ return new Promise((resolve,reject)=>{ const a=audioEl(), k=P.trk; k.audio=a; k.scale=1;
   a.onended=()=>{ cancelAnimationFrame(k.raf); resolve(); }; a.onerror=()=>reject(new Error('audio'));
-  const tick=()=>{ if(k.dead) return; onTick&&onTick(a.currentTime); k.raf=requestAnimationFrame(tick); };
-  const goPlay=()=>{ if(start) a.currentTime=start; a.play().then(()=>{ k.raf=requestAnimationFrame(tick); }).catch(reject); };
-  if(a.readyState>=1) goPlay(); else a.addEventListener('loadedmetadata',goPlay,{once:true}); }); }
+  k.wd=setTimeout(()=>reject(new Error('timeout')),15000);   /* never playable (offline, 402, 404, stalled): the lesson goes on without the recording */
+  const tick=()=>{ if(k.dead) return; onTick&&onTick(a.currentTime/k.scale); k.raf=requestAnimationFrame(tick); };
+  const goPlay=()=>{ clearTimeout(k.wd); if(dur&&isFinite(a.duration)&&a.duration>1&&Math.abs(a.duration-dur)>1.5) k.scale=a.duration/dur;
+    a.playbackRate=TTS.rate; if(start) a.currentTime=start*k.scale; a.play().then(()=>{ k.raf=requestAnimationFrame(tick); }).catch(reject); };
+  a.onloadedmetadata=goPlay; a.preservesPitch=true; a.defaultPlaybackRate=TTS.rate; a.src=src; a.load(); }); }
 function capBeat(text,frac){ const w=text.split(/\s+/); if(CAPW.join(' ')!==w.join(' ')) captionWords(w); captionIdx(Math.min(w.length-1,Math.max(0,Math.floor(frac*w.length)))); }
 async function playTrack(pi){
   const my=++RUN; TTS.stop(); stopTrack(); const T=trackFor(P.key), L=P.L, sceneIdx=P.scenes[pi];
-  P.trk={dead:false}; P.ctx=null; P.ctxScene=null; setPlaying(true);
+  P.trk={dead:false}; P.ctx=null; P.ctxScene=null; P.waiting=false; setPlaying(true);
   let si=T.segs.findIndex(g=>g.beats.some(b=>{ const l=beatById(L,b.id); return l&&l.si===sceneIdx; }));
-  if(si<0){ P.trk=null; TTS.on=false; return playScene(pi); }
+  if(si<0){ P.trk=null; P.noTrack=true; return playScene(pi); }
   let startBeat=T.segs[si].beats.findIndex(b=>beatById(L,b.id).si===sceneIdx);
   const only=P.only!=null;
   try{
@@ -253,7 +274,7 @@ async function playTrack(pi){
         if(stopAt!=null&&t>=stopAt){ k.audio.pause(); k.resolveStop&&k.resolveStop(); return; }
         while(next<seg.beats.length&&t+0.05>=seg.beats[next].t0){ fire(seg.beats[next]); next++; }
         if(cur) capBeat(cur.loc.beat.say,(t-cur.b.t0)/Math.max(.3,cur.b.t1-cur.b.t0));
-      },firstT);
+      },firstT,seg.dur);
       await Promise.race([p,new Promise(r=>{ k.resolveStop=r; })]); if(my!==RUN) return;
       while(next<seg.beats.length){ fire(seg.beats[next]); next++; }
       if(only) break;
@@ -261,13 +282,14 @@ async function playTrack(pi){
       if(last&&last.beat.wait){ P.waiting=true; setPlaying(false); captionText(u('yourTurn'));
         const ok=await last.beat.wait(P.ctx); P.waiting=false; if(my!==RUN) return; setPlaying(true);
         P.tl=last.beat.after?last.beat.after(P.ctx,ok):null; const fb=T.fb&&T.fb[last.beat.id], text=ok?last.beat.right:last.beat.wrong;
-        if(fb&&fb[ok?'ok':'no']){ captionWords(text.split(/\s+/)); await playClip(fb[ok?'ok':'no'],t=>{ const a=P.trk.audio; if(a.duration) capBeat(text,t/a.duration); }); }
-        else { const was=TTS.on; TTS.on=false; await TTS.say(text); TTS.on=was; }  /* no recording: captions only, keep one voice per lesson */
+        let said=false;
+        if(fb&&fb[ok?'ok':'no']){ captionWords(text.split(/\s+/)); try{ await playClip(fb[ok?'ok':'no'],t=>{ const a=P.trk.audio; if(a.duration) capBeat(text,t/a.duration); }); said=true; }catch(e){ if(my!==RUN) return; stopTrack(); P.trk={dead:false}; } }
+        if(!said){ const was=TTS.on; TTS.on=false; await TTS.say(text); TTS.on=was; }  /* no recording: captions only, keep one voice per lesson */
         await tlDone(P.tl); if(my!==RUN) return; await sleep(300); }
       else await sleep(250);
       while(P&&!P.playing&&my===RUN) await sleep(120);
     }
-  }catch(e){ if(my!==RUN) return; P.trk=null; TTS.on=false; $x('#xp-vo')?.setAttribute('aria-pressed','false'); return playScene(P.idx); }
+  }catch(e){ if(my!==RUN) return; stopTrack(); P.noTrack=true; return playScene(P.idx); }  /* recording unavailable: this lesson continues with the browser voice or captions */
   if(my!==RUN) return; P.trk=null; segProgress(P.scenes.length,0);
   only?finishQuick():showQuiz();
 }
@@ -279,15 +301,16 @@ function showQuiz(){
   RUN++; TTS.stop(); stopTrack(); if(P.tl) P.tl.kill(); setPlaying(false); P.idx=P.scenes.length; renderChapters(); segProgress(P.scenes.length,0); $x('#xp-scene-t').textContent='';
   const Q=P.L.quiz||[]; if(!Q.length){ close(); return; } let k=0, score=0; let d=$x('#xp-quiz'); if(!d){ d=document.createElement('div'); d.className='xp-quiz'; d.id='xp-quiz'; $x('#xp-sw').appendChild(d); }
   captionText(u('quizIntro'));
-  const show=()=>{ const it=Q[k]; d.innerHTML=`<p class="xp-qn">${u('qn')(AD(k+1),AD(Q.length))}</p><h3 ${it.ltr||LG==='en'?'dir="ltr"':''}>${escx(it.q)}</h3><div class="xp-opts">${it.o.map((o,i)=>`<button class="xp-opt" data-i="${i}">${escx(o)}</button>`).join('')}</div><div id="xp-fb"></div>`;
+  const show=()=>{ const it=Q[k]; d.innerHTML=`<p class="xp-qn">${u('qn')(AD(k+1),AD(Q.length))}</p><h3 ${it.ltr||LG==='en'?'dir="ltr"':''}>${escq(it.q)}</h3><div class="xp-opts">${it.o.map((o,i)=>`<button class="xp-opt" data-i="${i}">${escq(o)}</button>`).join('')}</div><div id="xp-fb"></div>`;
     d.querySelectorAll('.xp-opt').forEach(b=>b.onclick=()=>{ const i=+b.dataset.i, ok=i===it.a; if(ok) score++; d.querySelectorAll('.xp-opt').forEach((x,j)=>{ x.disabled=true; if(j===it.a) x.classList.add('right'); else if(j===i) x.classList.add('wrong'); });
-      $x('#xp-fb').innerHTML=`<p class="xp-why"><b>${ok?u('right'):u('wrong')}</b> ${escx(it.e)}</p><div class="xp-row"><button class="xp-btn pri" id="xp-qn">${k<Q.length-1?u('nextQ'):u('result')}</button></div>`; $x('#xp-qn').focus(); $x('#xp-qn').onclick=()=>{ k++; k<Q.length?show():end(); }; }); };
+      $x('#xp-fb').innerHTML=`<p class="xp-why"><b>${ok?u('right'):u('wrong')}</b> ${escq(it.e)}</p><div class="xp-row"><button class="xp-btn pri" id="xp-qn">${k<Q.length-1?u('nextQ'):u('result')}</button></div>`; $x('#xp-qn').focus(); $x('#xp-qn').onclick=()=>{ k++; k<Q.length?show():end(); }; }); };
   const end=()=>{ const need=Math.ceil(Q.length*2/3), pass=score>=need; if(pass) HOOKS.onDone(P.key,score,Q.length);
     const sibs=forSkill(P.L.sk,P.L.lang), nx=sibs[sibs.indexOf(P.L)+1];
     d.innerHTML=`<p class="xp-qn">${u('result')}</p><div class="xp-score">${AD(score)} / ${AD(Q.length)}</div><h3>${pass?u('passed'):u('failed')}</h3>
       <div class="xp-row">${pass?(nx?`<button class="xp-btn pri" id="xp-nx">${u('nextL')}${escx(nx.title)}</button>`:`<button class="xp-btn pri" id="xp-done">${u('done')}</button>`):`<button class="xp-btn pri" id="xp-retry">${u('retry')}</button>`}<button class="xp-btn" id="xp-rw">${u('rewatch')}</button><button class="xp-btn" id="xp-bk">${u('close')}</button></div>`;
     captionText(pass?u('bravo'):u('retryCap'));
-    const on=(id,f)=>{ const b=$x(id); if(b) b.onclick=f; }; on('#xp-nx',()=>open(nx.key)); on('#xp-done',close); on('#xp-retry',showQuiz); on('#xp-rw',()=>playScene(0)); on('#xp-bk',close); };
+    const on=(id,f)=>{ const b=$x(id); if(b) b.onclick=f; }; on('#xp-nx',()=>open(nx.key)); on('#xp-done',close); on('#xp-retry',showQuiz); on('#xp-rw',()=>playScene(0)); on('#xp-bk',close);
+    d.querySelector('.xp-btn.pri')?.focus(); };
   show();
 }
 

@@ -3,18 +3,20 @@
 const H = { "Content-Type": "application/json", "X-Masar": "1" };
 const OWNER = "masar100_owner"; // email of the account whose progress is in this browser's localStorage
 const ls = { get: k => { try { return localStorage.getItem(k); } catch (e) { return null; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} }, del: k => { try { localStorage.removeItem(k); } catch (e) {} } };
-async function api(method, url, body) {
+async function call(method, url, body) {
   let r;
   try { r = await fetch(url, { method, headers: H, credentials: "same-origin", cache: "no-store", body: body ? JSON.stringify(body) : undefined }); }
   catch (e) { const x = new Error("network"); x.code = "network-request-failed"; throw x; }
-  const j = await r.json().catch(() => ({}));
-  if (!r.ok) { const x = new Error(j.error || "server"); x.code = j.error || (r.status === 413 ? "too-large" : "other"); x.status = r.status; throw x; }
-  return j;
+  const j = method === "HEAD" ? {} : await r.json().catch(() => ({}));
+  if (!r.ok) { const x = new Error(j.error || "server"); x.code = j.error || (r.status === 413 ? "too-large" : r.status === 401 ? "unauthenticated" : r.status === 429 ? "too-many-requests" : "other"); x.status = r.status;
+    const ra = +(r.headers.get("Retry-After") || j.retryAfter || 0); if (ra) x.retryAfter = ra; throw x; }
+  return { r, j };
 }
-let user = null, timer = null, status = "idle", lastSync = null, retry = 0, pulled = false;
+const api = async (method, url, body) => (await call(method, url, body)).j;
+let user = null, timer = null, status = "idle", lastSync = null, retry = 0, pulled = false, etag = null; // etag: the cloud copy as this tab last saw it
 const A = () => window.__app;
 const safe = f => { try { f(); } catch (e) {} };
-function reset() { clearTimeout(timer); timer = null; user = null; status = "idle"; lastSync = null; retry = 0; pulled = false; }
+function reset() { clearTimeout(timer); timer = null; user = null; status = "idle"; lastSync = null; retry = 0; pulled = false; etag = null; }
 /* ---------- plan, config, usage events ---------- */
 const PLAN_KEY = "masar100_plan"; // last known tier (cosmetic only, avoids a flash of locks; premium content is enforced by the server)
 const FREE_PLAN = { tier: "free", until: null, source: null };
@@ -41,38 +43,51 @@ function openOnce() { // one "open" per account per day
 }
 document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden") flush(true); });
 window.addEventListener("pagehide", () => flush(true));
-function expired() { reset(); setPlan(null); safe(() => A().render()); } // session gone (expired / password changed elsewhere / account deleted)
+/* session gone (expired / password changed elsewhere / account deleted): the app keeps working on the local copy and asks to sign in again */
+function expired() { reset(); setPlan(null); safe(() => A().sessionLost ? A().sessionLost() : A().render()); }
+const transient = e => e.code === "network-request-failed" || !e.status || e.status >= 500 || e.status === 429;
+const backoff = () => Math.min(60000, 4000 * 2 ** Math.min(4, retry - 1));
+async function head() { const { r } = await call("HEAD", "/api/progress"); return r.headers.get("ETag") || ""; }
 async function push() {
   clearTimeout(timer); timer = null;
   if (!user) return;
   if (!pulled) return pull(); // never overwrite the cloud copy before we have read it
-  const S = A().getS(); const p = JSON.stringify(S);
-  if (p.length > 900000) { status = "error"; A().cloudStatus(); return; }
   status = "saving"; A().cloudStatus();
   try {
+    // another device or tab may have saved since this tab last read the cloud copy: take that in first, so nothing of theirs is overwritten
+    try { const e = await head(); if (etag != null && e && e !== etag) await pull(false); }
+    catch (e) { if (e.code === "unauthenticated") return expired(); }
+    let S = A().getS(), p = JSON.stringify(S);
+    if (p.length > 900000 || bytes(p) > 1500000) { if (A().shrink && A().shrink()) { S = A().getS(); p = JSON.stringify(S); } }
+    if (p.length > 900000 || bytes(p) > 1500000) { status = "error"; A().cloudStatus(); return; }
     await api("PUT", "/api/progress", { p, track: S.track, target: S.target, lang: S.lang, examDate: S.examDate || "", summary: A().summary() });
     status = "ok"; lastSync = Date.now(); retry = 0;
+    try { etag = await head(); } catch (e) { etag = null; }
   } catch (e) {
     if (e.code === "unauthenticated") return expired();
     status = "error";
-    // retry transient failures (network / 5xx / rate limit) with backoff; a 4xx like bad-progress/too-large won't fix itself
-    if ((e.code === "network-request-failed" || !e.status || e.status >= 500 || e.status === 429) && retry < 5) { retry++; timer = setTimeout(push, Math.min(60000, 4000 * 2 ** (retry - 1))); }
+    if ((e.code === "too-large" || e.code === "bad-progress") && A().shrink && A().shrink() && retry < 2) { retry++; timer = setTimeout(push, 500); }
+    // retry transient failures (network / 5xx / rate limit) with backoff, for up to about 20 minutes; coming back online or to the tab retries at once
+    else if (transient(e) && retry < 20) { retry++; timer = setTimeout(push, backoff()); }
   }
   A().cloudStatus();
 }
-async function pull() {
+const bytes = s => { try { return new TextEncoder().encode(s).length; } catch (e) { return s.length * 2; } };
+let guestLogin = false; // this sign-in happened on a device that had no account before (its progress is merged into the account, and the student is told)
+async function pull(andPush = true) {
   try {
-    const r = await api("GET", "/api/progress");
-    if (r.p) { try { A().mergeCloud(JSON.parse(r.p)); } catch (e) {} }
-    pulled = true; retry = 0;
+    const { r, j } = await call("GET", "/api/progress");
+    etag = r.headers.get("ETag") || null;
+    if (j.p) { try { A().mergeCloud(JSON.parse(j.p), guestLogin); } catch (e) {} }
+    guestLogin = false; pulled = true; retry = 0;
   } catch (e) {
     if (e.code === "unauthenticated") return expired();
     // couldn't read the cloud copy (flaky network): keep local data, don't push, try again later
     status = "error"; A().cloudStatus();
-    if (retry < 5) { retry++; clearTimeout(timer); timer = setTimeout(pull, Math.min(60000, 4000 * 2 ** (retry - 1))); }
+    if (retry < 20) { retry++; clearTimeout(timer); timer = setTimeout(pull, backoff()); }
     return;
   }
-  await push(); safe(() => A().render());
+  if (andPush) { await push(); safe(() => A().render()); }
 }
 /* What the student was about to do when the sign-in prompt appeared (start a test, open the plans). If signing in
    reloads the page (another account's progress was on this device), it is kept for this tab and resumed after the reload. */
@@ -100,19 +115,20 @@ async function afterLogin(u) {
   // progress in this browser belongs to a different account (shared device): don't merge it into this one
   if (owner && owner !== email) {
     const pa = pendingAction(); if (pa) ss.set(RESUME, JSON.stringify({ ...pa, email, at: Date.now() }));
-    ls.del("masar100_v1"); ls.del("masar100_details"); ls.set(OWNER, email); location.reload(); return new Promise(() => {});
+    ls.del("masar100_v1"); ls.del("masar100_details"); ls.del("masar100_live"); ls.set(OWNER, email); location.reload(); return new Promise(() => {});
   }
+  guestLogin = !owner;
   ls.set(OWNER, email);
-  reset(); user = { email: u.email, name: u.name || "", emailVerified: true, isAdmin: !!u.isAdmin };
+  reset(); offline = false; user = { email: u.email, name: u.name || "", emailVerified: true, isAdmin: !!u.isAdmin };
   setPlan(u.isAdmin && (!u.plan || u.plan.tier !== "pro") ? { tier: "pro", until: null, source: "admin" } : u.plan);
   openOnce(); flush();
   if (!u.plan) { try { const r = await api("GET", "/api/me"); if (r.config) config = r.config; if (r.user) setPlan(r.user.isAdmin && (!r.user.plan || r.user.plan.tier !== "pro") ? { tier: "pro", until: null, source: "admin" } : r.user.plan); } catch (e) {} } // sign-in/sign-up responses carry no plan
   await pull();
   resumeAction(email);
 }
-let checked = false; // true once the first /api/me answer (or failure) has arrived
+let checked = false, offline = false, bootTries = 0; // checked: the first /api/me answer (or failure) has arrived; offline: the server could not be reached
 window.CLOUD = {
-  get user() { return user; }, get ready() { return checked; }, get status() { return status; }, get lastSync() { return lastSync; }, google: false, resetByAdmin: true,
+  get user() { return user; }, get ready() { return checked; }, get offline() { return offline; }, get status() { return status; }, get lastSync() { return lastSync; }, google: false, resetByAdmin: true,
   queue() { if (!user) return; clearTimeout(timer); timer = setTimeout(push, 2500); },
   async pushNow() { if (!user) return; retry = 0; await push(); }, // never throws: callers read CLOUD.status ("error" = not synced)
   async signUp(email, password, name) { const r = await api("POST", "/api/signup", { email, password, name, consent: true }); await afterLogin(r.user); },
@@ -123,9 +139,10 @@ window.CLOUD = {
     try { await api("POST", "/api/logout"); } catch (e) { if (e.code !== "unauthenticated") throw e; }
     flush(true); reset(); setPlan(null); safe(() => A().render());
   },
+  droppedElsewhere() { reset(); setPlan(null); }, // another tab of this browser signed this account out
   async reset() { const x = new Error("reset"); x.code = "reset-admin"; throw x; },
   async changePassword(current, next) { await api("POST", "/api/password", { current, next }); },
-  async deleteAccount() { await api("DELETE", "/api/me"); ls.del(OWNER); evq = []; reset(); setPlan(null); safe(() => A().render()); },
+  async deleteAccount() { await api("DELETE", "/api/me"); ls.del(OWNER); ls.del(PLAN_KEY); evq = []; reset(); setPlan(null); },
   get plan() { return plan; }, get config() { return config; }, get xpKeys() { return xpKeys; },
   isPro() { return !!(user && (user.isAdmin || plan.tier === "pro")); },
   async refresh() { // re-read the session, plan and config (e.g. after a payment); never throws
@@ -140,12 +157,32 @@ window.CLOUD = {
   async checkout(planId, coupon) { const lang = (A() && A().getS && A().getS().lang) || "ar"; return api("POST", "/api/billing/checkout", { plan: planId, coupon: coupon || undefined, lang }); },
   async planInfo() { return api("GET", "/api/plan"); }
 };
-// re-check the session when the tab comes back (e.g. after the password was changed on another device)
-document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible" && user) api("GET", "/api/me").then(r => { if (!r.user) expired(); }).catch(() => {}); });
-window.addEventListener("online", () => { if (user && status === "error") { retry = 0; pulled ? push() : pull(); } });
-api("GET", "/api/me").then(r => { config = r.config || null; checked = true;
-  if (r.user) afterLogin(r.user); else { setPlan(null); A().render(); }
-  if (!config) api("GET", "/api/config").then(c => { config = c.config; safe(() => A().render()); }).catch(() => {});
-}).catch(() => { checked = true; A().render(); api("GET", "/api/config").then(c => { config = c.config; safe(() => A().render()); }).catch(() => {}); });
-api("GET", "/api/xp/keys").then(k => { xpKeys = k; safe(() => A().render()); }).catch(() => {});
+/* the tab comes back (after the phone was locked, another tab or device was used): is the session still valid, did the cloud copy change? */
+let lastWake = 0, lastMe = 0;
+async function wake() {
+  if (!user || Date.now() - lastWake < 15000) return; lastWake = Date.now();
+  try { const e = await head(); if (pulled && etag != null && e && e !== etag) { await pull(false); safe(() => A().render()); } }
+  catch (e) { if (e.code === "unauthenticated") return expired(); }
+  if (Date.now() - lastMe > 600000) { lastMe = Date.now(); api("GET", "/api/me").then(r => { if (!r.user) expired(); else if (r.config) config = r.config; }).catch(() => {}); } // plan changes (e.g. pro ended) at most every 10 minutes
+}
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") wake(); });
+window.addEventListener("focus", wake);
+window.addEventListener("online", () => { if (user) { retry = 0; if (status === "error") pulled ? push() : pull(); else wake(); } else if (offline) boot(); });
+/* first contact with the server; when it cannot be reached the app runs on the local copy (guest mode or the device's known account) and keeps trying */
+function boot() {
+  bootTries++;
+  api("GET", "/api/me").then(r => { config = r.config || null; checked = true; offline = false;
+    if (r.user) afterLogin(r.user); else { setPlan(null); A().render(); }
+    if (!config) api("GET", "/api/config").then(c => { config = c.config; safe(() => A().render()); }).catch(() => {});
+  }).catch(e => { offline = true; checked = true; safe(() => A().render());
+    if (e.code !== "network-request-failed" && e.status && e.status < 500) return; // a clear answer from the server: not an outage
+    setTimeout(boot, Math.min(60000, 3000 * 2 ** Math.min(5, bootTries - 1))); });
+}
+if (!window.__app) { // app.js did not initialize: say so instead of leaving an empty page
+  const ar = (document.documentElement.lang || "ar") !== "en", m = document.getElementById("main");
+  if (m) m.innerHTML = `<section class="card center err-card" style="margin:24px auto;max-width:520px"><h1>${ar ? "تعذّر تشغيل التطبيق" : "The app could not start"}</h1><p class="muted">${ar ? "أعد تحميل الصفحة. إن تكرر الأمر فراسلنا على info@gat.academy." : "Reload the page. If it keeps happening, email info@gat.academy."}</p><p><a class="btn primary" href="/app">${ar ? "أعد التحميل" : "Reload"}</a></p></section>`;
+} else {
+  boot();
+  api("GET", "/api/xp/keys").then(k => { xpKeys = k; safe(() => A().render()); }).catch(() => {});
+}
 })();

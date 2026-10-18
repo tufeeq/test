@@ -69,7 +69,7 @@
       <ul>
         <li>نجمع الحد الأدنى من البيانات اللازم لتشغيل حسابك وحفظ تقدمك.</li>
         <li>لا نبيع بياناتك، ولا نستخدم أدوات تتبّع إعلانية أو خدمات تحليلات من أطراف ثالثة.</li>
-        <li>لا نستلم أرقام بطاقاتك ولا نخزّنها؛ إذ تتولى شركة ميسّر (Moyasar) معالجة الدفع.</li>
+        <li>لا نستلم أرقام بطاقاتك ولا نخزّنها؛ إذ تتولى معالجةَ الدفع بوابةُ الدفع التي تتم عبرها العملية: ميسّر (Moyasar) أو تاب (Tap Payments).</li>
         <li>تستطيع حذف حسابك بنفسك في أي وقت من نافذة الحساب.</li>
       </ul>
     </section>
@@ -110,7 +110,7 @@
       <dl>
         <div><dt>بيانات الحساب</dt><dd>البريد الإلكتروني، والاسم، وكلمة المرور بعد تحويلها إلى قيمة مُجزّأة (Hash) بخوارزمية bcrypt؛ فلا نحتفظ بكلمة المرور نفسها ولا نستطيع الاطلاع عليها.</dd></div>
         <div><dt>بيانات الدراسة والإعدادات</dt><dd>إحصاءات إجاباتك، وخطتك الدراسية، وموعد اختبارك، ودرجتك المستهدفة، والمسار (علمي أو أدبي)، ولغة الواجهة.</dd></div>
-        <div><dt>بيانات الاشتراك والدفع</dt><dd>الخطة المشترَك فيها، والمبلغ، وحالة العملية، والرقم المرجعي للعملية لدى ميسّر.</dd></div>
+        <div><dt>بيانات الاشتراك والدفع</dt><dd>الخطة المشترَك فيها، والمبلغ، وحالة العملية، والرقم المرجعي للعملية لدى بوابة الدفع.</dd></div>
         <div><dt>أحداث الاستخدام</dt><dd>سجلات بالميزات التي تستخدمها داخل المنصة، نستعين بها في تحسين الخدمة وفهم رحلة المستخدم من التسجيل إلى الاشتراك.</dd></div>
         <div><dt>بيانات تسجيل الدخول عبر Google أو Facebook</dt><dd>عند إتاحة هذا الخيار واختيارك له، نتلقى من المزوّد اسمك وبريدك الإلكتروني فقط.</dd></div>
       </dl>
@@ -153,7 +153,7 @@
       <h2><span class="lg-n">٦</span>مشاركة البيانات والاطلاع عليها</h2>
       <p>لا نشارك بياناتك إلا مع مزوّدي الخدمات الذين تعتمد عليهم المنصة في عملها، وبالقدر اللازم لذلك:</p>
       <dl>
-        <div><dt>ميسّر (Moyasar)</dt><dd>لمعالجة المدفوعات عبر مدى، وApple Pay، وSTC Pay، وبطاقات Visa وMastercard. تُعالَج بيانات بطاقتك لدى ميسّر ولا تصل إلينا، وتخضع لسياسة الخصوصية الخاصة بها.</dd></div>
+        <div><dt>ميسّر (Moyasar) أو تاب (Tap Payments)</dt><dd>بوابتا الدفع اللتان قد تُعالَج عبر إحداهما عملية الدفع، باستخدام مدى، وApple Pay، وSTC Pay، وبطاقات Visa وMastercard. تُعالَج بيانات بطاقتك لدى البوابة التي تمت عبرها العملية ولا تصل إلينا، وتخضع لسياسة الخصوصية الخاصة بتلك البوابة.</dd></div>
         <div><dt>Railway</dt><dd>مزوّد الاستضافة السحابية الذي تعمل عليه خوادم المنصة وقاعدة بياناتها (Postgres).</dd></div>
         <div><dt>Google وFacebook</dt><dd>عند اختيارك تسجيل الدخول عبر أيٍّ منهما فقط، وذلك لاستلام اسمك وبريدك الإلكتروني.</dd></div>
         <div><dt>Google Fonts</dt><dd>تُحمَّل خطوط الصفحات من خدمة الخطوط لدى Google، فيصلها عنوان IP لجهازك ونوع متصفحك كما في أي طلب لموقع على الإنترنت، ولا نرسل إليها أيًّا من بيانات حسابك.</dd></div>
@@ -245,7 +245,7 @@
       <ul>
         <li>We collect only the minimum needed to run your account and save your progress.</li>
         <li>We don't sell your data, and we use no advertising trackers or third-party analytics.</li>
-        <li>We never receive or store your card number: payments are handled by Moyasar.</li>
+        <li>We never receive or store your card number: payments are handled by the payment gateway that processes them, Moyasar or Tap Payments.</li>
         <li>You can delete your account yourself at any time from the account window.</li>
       </ul>
     </section>
@@ -286,7 +286,7 @@
       <dl>
         <div><dt>Account data</dt><dd>Your email address, your name, and your password stored as a bcrypt hash. We never keep the password itself and cannot see it.</dd></div>
         <div><dt>Study progress and settings</dt><dd>Statistics on your answers, your study plan, exam date, target score, track (scientific or literary) and interface language.</dd></div>
-        <div><dt>Subscription and payment records</dt><dd>The plan you bought, the amount, the transaction status and the Moyasar reference.</dd></div>
+        <div><dt>Subscription and payment records</dt><dd>The plan you bought, the amount, the transaction status and the payment gateway’s reference.</dd></div>
         <div><dt>Usage events</dt><dd>Records of which features you use, which help us improve the service and understand how students move from signing up to subscribing.</dd></div>
         <div><dt>Google or Facebook sign-in</dt><dd>When this option is available and you choose it, we receive only your name and email address from that provider.</dd></div>
       </dl>
@@ -329,7 +329,7 @@
       <h2><span class="lg-n">6</span>Sharing and access</h2>
       <p>We share data only with the service providers the platform relies on, and only as far as they need it:</p>
       <dl>
-        <div><dt>Moyasar</dt><dd>Processes payments made with mada, Apple Pay, STC Pay, Visa and Mastercard. Your card details are handled by Moyasar and never reach us, and Moyasar's own privacy policy applies to them.</dd></div>
+        <div><dt>Moyasar or Tap Payments</dt><dd>The payment gateways that may process a payment made with mada, Apple Pay, STC Pay, Visa or Mastercard. Your card details are handled by the gateway that processes the payment and never reach us, and that gateway’s own privacy policy applies to them.</dd></div>
         <div><dt>Railway</dt><dd>The cloud hosting provider that runs our servers and our database (Postgres).</dd></div>
         <div><dt>Google and Facebook</dt><dd>Only if you choose to sign in with one of them, so that we receive your name and email address.</dd></div>
         <div><dt>Google Fonts</dt><dd>The fonts on our pages are loaded from Google's font service, which receives your device's IP address and browser type, as with any request to a website. We send it none of your account data.</dd></div>

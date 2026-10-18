@@ -14,21 +14,38 @@ const enabled = () => ({
 
 module.exports = function oauth(app, { pool, wrap, createSession, cleanName, parseCookies, limited }) {
   const base = req => (process.env.PUBLIC_URL || ("https://" + (process.env.CANONICAL_HOST || req.headers.host))).replace(/\/$/, "");
-  const safeNext = n => (typeof n === "string" && /^\/app(?:[?#][^\s]*)?$/.test(n) && n.length < 300) ? n : "/app";
+  // where to land after sign-in: only a same-origin /app URL made of plain URL characters (so it can never point
+  // elsewhere, and never carries a character that is invalid in a Location header)
+  const safeNext = n => (typeof n === "string" && /^\/app(?:[?#][\w\-.~!$&'()*+,;=:@/?#%]*)?$/.test(n) && n.length < 300) ? n : "/app";
   const back = (res, next, err) => res.redirect(302, err ? "/app#signin?err=" + encodeURIComponent(err) : safeNext(next));
+  // The state cookie is signed (HMAC with the provider secrets, or OAUTH_STATE_SECRET), so a forged cookie cannot pair a
+  // browser with an attacker's authorization code (login CSRF). It is still stateless: nothing to store or clean up.
+  const stateKey = () => String(process.env.OAUTH_STATE_SECRET || "") + String(process.env.GOOGLE_CLIENT_SECRET || "") + String(process.env.FACEBOOK_APP_SECRET || "");
+  const sign = v => crypto.createHmac("sha256", stateKey()).update(v).digest("base64url");
   function setState(req, res, provider, next) {
     const state = crypto.randomBytes(24).toString("base64url");
     const val = Buffer.from(JSON.stringify({ s: state, p: provider, n: safeNext(next), t: Date.now() })).toString("base64url");
-    res.append("Set-Cookie", `oas=${val}; Path=/auth; HttpOnly; SameSite=Lax; Max-Age=600${req.secure ? "; Secure" : ""}`);
+    res.append("Set-Cookie", `oas=${val}.${sign(val)}; Path=/auth; HttpOnly; SameSite=Lax; Max-Age=600${req.secure ? "; Secure" : ""}`);
     return state;
+  }
+  // a state is accepted once: replaying a captured callback URL with its cookie does not sign in again
+  const used = new Map();
+  function spend(state) {
+    const now = Date.now(); if (used.size > 5000) for (const [k, t] of used) if (t < now) used.delete(k);
+    if (used.has(state)) return false; used.set(state, now + 600e3); return true;
   }
   function takeState(req, res, provider) {
     res.append("Set-Cookie", `oas=; Path=/auth; HttpOnly; SameSite=Lax; Max-Age=0${req.secure ? "; Secure" : ""}`);
     try {
-      const o = JSON.parse(Buffer.from(parseCookies(req).oas || "", "base64url").toString());
-      if (!o || o.p !== provider || Date.now() - o.t > 600e3) return null;
+      const raw = String(parseCookies(req).oas || ""), dot = raw.lastIndexOf(".");
+      if (dot < 1) return null;
+      const val = raw.slice(0, dot), sig = Buffer.from(raw.slice(dot + 1)), want = Buffer.from(sign(val));
+      if (sig.length !== want.length || !crypto.timingSafeEqual(sig, want)) return null;
+      const o = JSON.parse(Buffer.from(val, "base64url").toString());
+      if (!o || o.p !== provider || typeof o.s !== "string" || typeof o.t !== "number" || Date.now() - o.t > 600e3) return null;
       const a = Buffer.from(String(req.query.state || "")), b = Buffer.from(o.s);
-      return a.length === b.length && crypto.timingSafeEqual(a, b) ? o : null;
+      if (!(a.length === b.length && crypto.timingSafeEqual(a, b)) || !spend(o.s)) return null;
+      return { ...o, n: safeNext(o.n) };
     } catch (e) { return null; }
   }
   async function getJSON(url, opt) { const r = await fetch(url, opt); const j = await r.json().catch(() => ({})); if (!r.ok) throw new Error(r.status + " " + JSON.stringify(j).slice(0, 200)); return j; }

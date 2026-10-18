@@ -185,7 +185,7 @@ XP.add({ key:'en-ge-area', lang:'en', sk:'geometry', ord:30, title:'Perimeter an
     beats:[
       { say:'Perimeter is the distance around a shape, like walking once along its fence.', show:['r','lt','lr','lb','ll'], gap:.25 },
       { say:'Add all four sides: six plus four plus six plus four equals twenty centimeters.', show:['trace','eq1'] },
-      { say:'In short: two times the length plus the width.', show:['n1'] },
+      { say:'In short: two times the sum of the length and the width.', show:['n1'] },
     ]},
   { t:'Area: count the squares', items:{
       g:{type:'grid',x:90,y:100,rows:4,cols:6,cell:38,gap:2,fill:24,c:'n2'},

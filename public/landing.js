@@ -145,7 +145,7 @@
     pl5: 'The full plan up to your test date, with your own test date and target score', pl6: 'Smart spaced repetition for mistakes and cards, and the cause of every mistake',
     pl7: 'Estimated score and time analysis per skill', pl8: 'Review any past attempt question by question',
     priceLoading: 'Current prices show here, and in the app.', seePlans: 'See plans in the app',
-    payLine: 'Secure payment via Moyasar: mada, Apple Pay, STC Pay, Visa and Mastercard.',
+    payLine: '', // from PAY below
     cmpH: 'Full comparison', cmpAria: 'Plan comparison', cmpFeat: 'Feature', cmpFree: 'Free', cmpPro: 'Full access',
     c1: 'Diagnostic test', c2: 'Animated, narrated explainers', c2f: '8 per language', c2p: '33 per language',
     c3: 'Practice questions', c3f: '10 a day', c3p: 'Unlimited', c4: 'Targeted practice on a skill or pattern',
@@ -163,7 +163,7 @@
     q3: 'What do I get when I subscribe?',
     a3: '<p>Everything: all 33 explainers in each language, the 30 model tests, section tests and full timed mocks, unlimited and targeted practice, all flashcards, vocabulary and techniques, the full plan up to your test date, spaced repetition and mistake-cause analysis, the estimated score, and review of any past attempt. A subscription ends when its period ends; it does not renew automatically.</p>',
     q4: 'Which payment methods can I use?',
-    a4: '<p>You pay through Moyasar’s secure checkout, which accepts mada, Apple Pay, STC Pay, Visa and Mastercard. We never store your card details.</p>',
+    a4: '', // from PAY below
     q5: 'Can I get a refund?',
     a5: '<p>Yes. If your subscription isn’t right for you within the period shown in the pricing section, we refund the full amount to the same payment method. To request a refund, email <a href="mailto:info@gat.academy">info@gat.academy</a>.</p>',
     q6: 'Is it in Arabic and English?',
@@ -178,6 +178,20 @@
     footD: 'A complete kit to prepare for the General Aptitude Test, in Arabic and English.', footAria: 'Links',
     footApp: 'Open the app', footGuide: 'Test guide', footPrivacy: 'Privacy Policy', footTerms: 'Terms'
   };
+  /* payment wording follows the gateway that is live (the server marks it on <html data-pay="moyasar|tap|none"> and
+     renders the Arabic and English text from this table; site.js reads it, so keep it a plain literal) */
+  var M = ' مدى، و <bdi>Apple Pay</bdi>، و <bdi>STC Pay</bdi>، و <bdi>Visa</bdi> و <bdi>Mastercard</bdi>.';
+  var MA = ' مدى، و <bdi>Apple Pay</bdi>، و <bdi>STC Pay</bdi>، وبطاقات <bdi>Visa</bdi> و <bdi>Mastercard</bdi>. ولا نحتفظ ببيانات بطاقتك.</p>';
+  var PAY = {
+    moyasar: { ar: { payLine: 'الدفع آمن عبر بوابة ميسّر:' + M, a4: '<p>تدفع عبر بوابة ميسّر الآمنة، وتُقبل فيها:' + MA },
+               en: { payLine: 'Secure payment via Moyasar: mada, Apple Pay, STC Pay, Visa and Mastercard.', a4: '<p>You pay through Moyasar’s secure checkout, which accepts mada, Apple Pay, STC Pay, Visa and Mastercard. We never store your card details.</p>' } },
+    tap:     { ar: { payLine: 'الدفع آمن عبر بوابة تاب (<bdi>Tap</bdi>):' + M, a4: '<p>تدفع عبر بوابة تاب (<bdi>Tap</bdi>) الآمنة، وتُقبل فيها:' + MA },
+               en: { payLine: 'Secure payment via Tap: mada, Apple Pay, STC Pay, Visa and Mastercard.', a4: '<p>You pay through Tap’s secure checkout, which accepts mada, Apple Pay, STC Pay, Visa and Mastercard. We never store your card details.</p>' } },
+    none:    { ar: { payLine: 'الدفع عبر بوابة دفع آمنة:' + M, a4: '<p>تدفع عبر بوابة دفع آمنة، وتُقبل فيها:' + MA },
+               en: { payLine: 'Pay through a secure payment gateway: mada, Apple Pay, STC Pay, Visa and Mastercard.', a4: '<p>You pay through a secure payment gateway, which accepts mada, Apple Pay, STC Pay, Visa and Mastercard. We never store your card details.</p>' } }
+  };
+  var PAYK = PAY[R.getAttribute('data-pay')] ? R.getAttribute('data-pay') : 'none';
+  EN.payLine = PAY[PAYK].en.payLine; EN.a4 = PAY[PAYK].en.a4;
   var META = {
     ar: { title: null, desc: null },
     en: { title: 'GAT Academy | Prepare for the General Aptitude Test with a daily plan and narrated explainers',

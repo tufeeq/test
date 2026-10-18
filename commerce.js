@@ -101,7 +101,10 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
   async function planOf(user) {
     if (!user) return { tier: "free", until: null, source: null };
     if (isAdminEmail(user.email)) return { tier: "pro", until: null, source: "admin" };
-    const r = await pool.query("SELECT ends_at, source FROM subscriptions WHERE user_id=$1 AND revoked_at IS NULL AND starts_at<=now() AND ends_at>now() ORDER BY ends_at DESC LIMIT 1", [user.id]);
+    // pro while a period is running now; `until` is the end of the whole paid stack (a renewal bought early starts when
+    // the current period ends, so the student must see the later date, not the current period's)
+    const r = await pool.query(`SELECT (SELECT max(ends_at) FROM subscriptions WHERE user_id=$1 AND revoked_at IS NULL AND ends_at>now()) ends_at, source
+      FROM subscriptions WHERE user_id=$1 AND revoked_at IS NULL AND starts_at<=now() AND ends_at>now() ORDER BY ends_at DESC LIMIT 1`, [user.id]);
     const s = r.rows[0];
     return s ? { tier: "pro", until: s.ends_at, source: s.source } : { tier: "free", until: null, source: null };
   }
@@ -337,11 +340,11 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
   // Moyasar posts here (invoice callback_url and/or a dashboard webhook). We only act on invoices we created,
   // and always re-fetch them from Moyasar, so a forged post cannot activate anything.
   app.post("/api/billing/moyasar/callback", wrap(async (req, res) => {
-    if (!process.env.MOYASAR_SECRET_KEY) return res.status(503).end();
-    if (limited("mc:" + req.ip, 300, 3600e3)) return res.status(429).end();
+    if (!process.env.MOYASAR_SECRET_KEY) return fail(res, 503, "payments-not-configured");
+    if (limited("mc:" + req.ip, 300, 3600e3)) return fail(res, 429, "too-many-requests");
     const b = req.body || {}, d = b.data || {};
     const want = process.env.MOYASAR_WEBHOOK_SECRET;
-    if (b.secret_token != null && want) { const a = Buffer.from(String(b.secret_token)), w = Buffer.from(want); if (a.length !== w.length || !crypto.timingSafeEqual(a, w)) { console.error("moyasar webhook: bad secret_token"); return res.status(400).end(); } }
+    if (b.secret_token != null && want) { const a = Buffer.from(String(b.secret_token)), w = Buffer.from(want); if (a.length !== w.length || !crypto.timingSafeEqual(a, w)) { console.error("moyasar webhook: bad secret_token"); return fail(res, 400, "bad-signature"); } }
     const ids = [b.invoice_id, d.invoice_id, b.id, d.id].filter(x => typeof x === "string" && /^[0-9a-f-]{20,40}$/i.test(x));
     for (const id of ids) {
       const p = (await pool.query("SELECT ext_id FROM payments WHERE ext_id=$1 AND provider='moyasar'", [id])).rows[0];
@@ -363,12 +366,13 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
   // webhook: Tap posts the charge; we check the hashstring signature, then re-fetch the charge before acting
   app.post("/api/billing/webhook", wrap(async (req, res) => {
     const b = req.body || {}, key = process.env.TAP_SECRET_KEY;
-    if (!key) return res.status(503).end();
+    if (!key) return fail(res, 503, "payments-not-configured");
+    if (limited("tw:" + req.ip, 300, 3600e3)) return fail(res, 429, "too-many-requests");
     const amt = Number(b.amount).toFixed(2);
     const str = `x_id${b.id}x_amount${amt}x_currency${b.currency}x_gateway_reference${(b.reference && b.reference.gateway) || ""}x_payment_reference${(b.reference && b.reference.payment) || ""}x_status${b.status}x_created${(b.transaction && b.transaction.created) || ""}`;
     const sig = crypto.createHmac("sha256", key).update(str).digest("hex");
     const got = String(req.get("hashstring") || "");
-    if (!got || got.length !== sig.length || !crypto.timingSafeEqual(Buffer.from(got), Buffer.from(sig))) { console.error("tap webhook: bad signature"); return res.status(400).end(); }
+    if (!got || got.length !== sig.length || !crypto.timingSafeEqual(Buffer.from(got), Buffer.from(sig))) { console.error("tap webhook: bad signature"); return fail(res, 400, "bad-signature"); }
     if (/^chg_/.test(b.id || "")) { try { await settle(b.id); } catch (e) { console.error("tap webhook settle", e.message); return res.status(500).end(); } }
     res.json({ ok: true });
   }));
@@ -422,13 +426,14 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
 
   A("get", "/users", async (req, res) => {
     const qs = String(req.query.q || "").trim().toLowerCase(), plan = String(req.query.plan || ""), sort = String(req.query.sort || "active");
-    const page = Math.max(0, Math.floor(Number(req.query.page)) || 0), size = Math.min(200, Math.max(10, Math.floor(Number(req.query.size)) || 50));
+    const page = Math.min(1e6, Math.max(0, Math.floor(Number(req.query.page)) || 0)), size = Math.min(200, Math.max(10, Math.floor(Number(req.query.size)) || 50));
     const where = [], params = [];
     if (qs) { params.push("%" + qs.slice(0, 100).replace(/[\\%_]/g, m => "\\" + m) + "%"); where.push(`(lower(u.email) LIKE $${params.length} OR lower(COALESCE(u.name,'')) LIKE $${params.length})`); }
     if (plan === "pro") where.push("s.ends_at IS NOT NULL"); else if (plan === "free") where.push("s.ends_at IS NULL");
-    const order = { active: "p.updated_at DESC NULLS LAST", new: "u.created_at DESC", name: "lower(COALESCE(u.name,u.email))", ends: "s.ends_at ASC NULLS LAST" }[sort] || "p.updated_at DESC NULLS LAST";
+    const ORDERS = { active: "p.updated_at DESC NULLS LAST", new: "u.created_at DESC", name: "lower(COALESCE(u.name,u.email))", ends: "s.ends_at ASC NULLS LAST" };
+    const order = Object.prototype.hasOwnProperty.call(ORDERS, sort) ? ORDERS[sort] : ORDERS.active; // own keys only: ?sort=__proto__ is not an order
     const base = `FROM users u LEFT JOIN progress p ON p.user_id=u.id
-      LEFT JOIN LATERAL (SELECT max(ends_at) ends_at, (array_agg(source ORDER BY ends_at DESC))[1] source FROM subscriptions WHERE user_id=u.id AND revoked_at IS NULL AND starts_at<=now() AND ends_at>now()) s ON true
+      LEFT JOIN LATERAL (SELECT max(ends_at) ends_at, (array_agg(source ORDER BY starts_at))[1] source FROM subscriptions WHERE user_id=u.id AND revoked_at IS NULL AND ends_at>now() HAVING bool_or(starts_at<=now())) s ON true
       ${where.length ? "WHERE " + where.join(" AND ") : ""}`;
     const total = (await pool.query("SELECT count(*)::int n " + base, params)).rows[0].n;
     const r = await pool.query(`SELECT u.id,u.email,u.name,u.created_at,p.track,p.target,p.exam_date,p.summary,p.updated_at,s.ends_at pro_until,s.source pro_source ${base} ORDER BY ${order} LIMIT ${size} OFFSET ${page * size}`, params);
@@ -540,15 +545,18 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
     catch (e) { if (e.code === "23505") return fail(res, 409, "exists"); throw e; }
     audit(req, "coupon_create", code, { pct, maxUses, exp, plans }); res.json({ ok: true });
   });
+  const codeOf = req => String(req.params.code || "").trim().toUpperCase().slice(0, 40); // codes are stored upper-case
   A("patch", "/coupons/:code", async (req, res) => {
-    const r = await pool.query("UPDATE coupons SET active=$1 WHERE code=$2", [!!req.body.active, req.params.code]);
+    const code = codeOf(req);
+    const r = await pool.query("UPDATE coupons SET active=$1 WHERE code=$2", [!!req.body.active, code]);
     if (!r.rowCount) return fail(res, 404, "not-found");
-    audit(req, req.body.active ? "coupon_on" : "coupon_off", req.params.code); res.json({ ok: r.rowCount > 0 });
+    audit(req, req.body.active ? "coupon_on" : "coupon_off", code); res.json({ ok: r.rowCount > 0 });
   });
   A("delete", "/coupons/:code", async (req, res) => {
-    const r = await pool.query("DELETE FROM coupons WHERE code=$1 AND used=0", [req.params.code]);
-    if (!r.rowCount) { const ex = await pool.query("SELECT 1 FROM coupons WHERE code=$1", [req.params.code]); return fail(res, ex.rowCount ? 409 : 404, ex.rowCount ? "in-use" : "not-found"); }
-    audit(req, "coupon_delete", req.params.code); res.json({ ok: true });
+    const code = codeOf(req);
+    const r = await pool.query("DELETE FROM coupons WHERE code=$1 AND used=0", [code]);
+    if (!r.rowCount) { const ex = await pool.query("SELECT 1 FROM coupons WHERE code=$1", [code]); return fail(res, ex.rowCount ? 409 : 404, ex.rowCount ? "in-use" : "not-found"); }
+    audit(req, "coupon_delete", code); res.json({ ok: true });
   });
 
   A("get", "/settings", async (req, res) => { const c = await loadCfg(true); const b = await bundles(); res.json({ config: c, defaults: DEFAULTS, xpKeys: b.keys.all, tap: !!PROVIDER(), provider: PROVIDER() }); });

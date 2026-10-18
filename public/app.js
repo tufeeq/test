@@ -18,6 +18,8 @@ const COMPARE_OPTS = {
   ar:['القيمة الأولى أكبر','القيمة الثانية أكبر','القيمتان متساويتان','المعطيات غير كافية'],
   en:['Quantity A is greater','Quantity B is greater','The two quantities are equal','The relationship cannot be determined']
 };
+/* the standing instruction shown above every comparison item (as in the real test) */
+const COMPARE_INTRO = {ar:'قارن بين القيمتين، ثم اختر:',en:'Compare the two quantities, then choose:'};
 
 /* ---------- Reading passages ---------- */
 const PASSAGES = {
@@ -60,7 +62,7 @@ const VB_AR = [
  {s:'context',q:'يحرص الطالب المجتهد على تأجيل واجباته حتى ينال أعلى الدرجات.',o:['يحرص','المجتهد','تأجيل','أعلى'],a:2,e:'الصحيح «إنجاز»؛ فالتأجيل لا يوصل إلى أعلى الدرجات.'},
  {s:'context',q:'كان الجو باردًا جدًا، فارتدى الناس ملابس خفيفة ليتقوا البرد.',o:['باردًا','خفيفة','ليتقوا','البرد'],a:1,e:'الصحيح «ثقيلة».'},
  {s:'context',q:'القراءة غذاء العقل، فهي تضيّق مدارك الإنسان وتثري لغته.',o:['غذاء','تضيّق','مدارك','تثري'],a:1,e:'الصحيح «توسّع».'},
- {s:'context',q:'انتشر الخبر ببطء شديد، فعلم به الجميع خلال دقائق.',o:['انتشر','ببطء','الجميع','خلال'],a:1,e:'الصحيح «بسرعة».'},
+ {s:'context',q:'انتشر الخبر ببطء شديد، فعلم به الجميع خلال دقائق.',o:['ببطء','فعلم','الجميع','دقائق'],a:0,e:'الصحيح «بسرعة».'},
  {s:'context',q:'يتسم القائد الناجح بالتردد في اتخاذ القرارات الحاسمة وتحمّل المسؤولية.',o:['الناجح','التردد','الحاسمة','تحمّل'],a:1,e:'الصحيح «الحزم».'},
  {s:'context',q:'تساعد الرياضة المنتظمة على إضعاف الجسم وتحسين الحالة المزاجية.',o:['المنتظمة','إضعاف','تحسين','المزاجية'],a:1,e:'الصحيح «تقوية».'},
  {s:'context',q:'لما اشتد العطش بالمسافرين، أسرعوا نحو البئر ليبتعدوا عن الماء.',o:['اشتد','أسرعوا','البئر','ليبتعدوا'],a:3,e:'الصحيح «ليصلوا إلى».'},
@@ -113,11 +115,11 @@ const VB_EN = [
  {s:'completion',q:'The new policy was ______ to reduce traffic congestion in the city center.',o:['designed','forgotten','refused','hidden'],a:0,e:'A policy is designed for a purpose.'},
  {s:'context',q:'The diligent student always postpones his homework so that he can earn top marks.',o:['diligent','postpones','earn','top'],a:1,e:'It should be "completes".'},
  {s:'context',q:'It was freezing outside, so people wore light clothes to protect themselves from the cold.',o:['freezing','light','protect','cold'],a:1,e:'It should be "heavy" or "warm".'},
- {s:'context',q:'Reading nourishes the mind; it narrows a person\'s horizons and enriches their language.',o:['nourishes','narrows','horizons','enriches'],a:1,e:'It should be "broadens".'},
- {s:'context',q:'The news spread very slowly, and everyone had heard it within minutes.',o:['spread','slowly','everyone','within'],a:1,e:'It should be "quickly".'},
+ {s:'context',q:'Reading nourishes the mind; it narrows a person\'s horizons and enriches their language.',o:['narrows','horizons','enriches','language'],a:0,e:'It should be "broadens".'},
+ {s:'context',q:'The news spread very slowly, and everyone had heard it within minutes.',o:['slowly','everyone','heard','minutes'],a:0,e:'It should be "quickly".'},
  {s:'context',q:'A successful leader is known for hesitation when making critical decisions and taking responsibility.',o:['successful','hesitation','critical','responsibility'],a:1,e:'It should be "decisiveness".'},
  {s:'context',q:'As we climb above sea level, the temperature rises and the air becomes thinner.',o:['climb','rises','air','thinner'],a:1,e:'It should be "falls".'},
- {s:'context',q:'Regular exercise helps weaken the body and improve one\'s mood.',o:['Regular','weaken','improve','mood'],a:1,e:'It should be "strengthen".'},
+ {s:'context',q:'Regular exercise helps weaken the body and improve one\'s mood.',o:['weaken','body','improve','mood'],a:0,e:'It should be "strengthen".'},
  {s:'context',q:'The thirsty travelers hurried toward the well to avoid the water.',o:['thirsty','hurried','well','avoid'],a:3,e:'It should be "reach".'},
  {s:'odd',q:'Choose the word that does not belong:',o:['apple','orange','carrot','banana'],a:2,e:'A carrot is a vegetable.'},
  {s:'odd',q:'Choose the word that does not belong:',o:['lion','tiger','leopard','horse'],a:3,e:'The others are big cats.'},
@@ -203,7 +205,7 @@ const GENS = {
   ratio(){ const [a,b]=pick([[1,2],[2,3],[3,4],[3,5],[2,5],[4,5],[5,7],[1,3]]); const k=R(2,9); const tot=(a+b)*k, ans=b*k;
     return {s:'arith',q:bi(`نسبة عدد الأولاد إلى البنات في نادٍ ${a} : ${b}، وعدد الأعضاء ${tot}. كم عدد البنات؟`,`The ratio of boys to girls in a club is ${a} : ${b}, and there are ${tot} members. How many girls are there?`),o:mkOpts(ans,[a*k,tot-a,b*(k+1),Math.round(tot/2)]),e:bi(`الجزء الواحد ⟦${tot} ÷ ${a+b} = ${k}⟧، البنات ⟦${b} × ${k} = ${ans}⟧`,`One part ⟦= ${tot} ÷ ${a+b} = ${k}⟧, girls ⟦= ${b} × ${k} = ${ans}⟧`)}; },
   speed(){ const v=10*R(4,12), t=R(2,5); const ans=v*t;
-    return {s:'arith',q:bi(`تسير سيارة بسرعة ${v} كم/ساعة لمدة ${arC(t,['ساعة واحدة','ساعتين','ساعات','ساعة'])}. ما المسافة التي تقطعها بالكيلومتر؟`,`A car drives at ${v} km/h for ${t} hours. How many kilometers does it travel?`),o:mkOpts(ans,[v+t,ans+v,v*(t-1),ans/2]),e:bi(`⟦المسافة = ${v} × ${t} = ${ans}⟧`,`⟦distance = ${v} × ${t} = ${ans}⟧`)}; },
+    return {s:'arith',q:bi(`تسير سيارة بسرعة ${v} كم/ساعة لمدة ${arC(t,['ساعة واحدة','ساعتين','ساعات','ساعة'])}. ما المسافة التي تقطعها بالكيلومتر؟`,`A car drives at ${v} km/h for ${t} hours. How many kilometers does it travel?`),o:mkOpts(ans,[v*(t+1),ans+v,v*(t-1),ans/2]),e:bi(`⟦المسافة = ${v} × ${t} = ${ans}⟧`,`⟦distance = ${v} × ${t} = ${ans}⟧`)}; },
   fracAdd(){ let a=R(2,9),b=R(2,9); while(b===a) b=R(2,9); const num=a+b, den=a*b, g=gcd(num,den);
     const f=(n,d)=>{const g=gcd(n,d);return `${n/g}/${d/g}`;};
     const ans=f(num,den); const cands=[f(2,a+b),f(1,a+b),f(num,den*2),f(num+1,den),f(a,b)];
@@ -219,7 +221,8 @@ const GENS = {
   seqGeo(){ const r=pick([2,3,4]), s=R(1,r===4?3:6); const t=[0,1,2,3].map(i=>s*r**i); const ans=s*r**4;
     return {s:'algebra',q:bi(`ما العدد التالي في المتتابعة: ⟦${t.join('، ')}، ...⟧؟`,`What comes next: ⟦${t.join(', ')}, ...⟧?`),o:mkOpts(ans,[t[3]+(t[3]-t[2]),ans*r,ans-r,ans+s]),e:bi(`كل حد يُضرب في ⟦${r}⟧: ⟦${t[3]} × ${r} = ${ans}⟧`,`Each term is multiplied by ⟦${r}⟧: ⟦${t[3]} × ${r} = ${ans}⟧`)}; },
   evaluate(){ const x=R(-4,6), b=pick([2,3,4,5]), c=R(1,6); const v=x*x-b*x+c;
-    const w=()=>`⟦(${N(x)})^2 − ${b}(${N(x)}) + ${c} = ${x*x} ${x<0?'+':'−'} ${Math.abs(b*x)} + ${c} = ${N(v)}⟧`;
+    /* three short math runs instead of one long one, so the explanation can wrap on a phone */
+    const w=()=>`⟦(${N(x)})^2 − ${b}(${N(x)}) + ${c}⟧ = ⟦${x*x} ${x<0?'+':'−'} ${Math.abs(b*x)} + ${c}⟧ = ⟦${N(v)}⟧`;
     return {s:'algebra',q:bi(`إذا كان ⟦س = ${N(x)}⟧ فما قيمة ⟦س^2 − ${b}س + ${c}⟧؟`,`If ⟦x = ${N(x)}⟧, what is ⟦x^2 − ${b}x + ${c}⟧?`),o:mkOpts(v,[v+2,x*x+b*x+c,v-1,-v],N,true),e:bi(w(),w())}; },
   rect(){ const l=R(4,15), w=R(2,l-1); const area=l*w, per=2*(l+w);
     if(rnd()<.5) return {s:'geometry',q:bi(`مستطيل طوله ${l} سم وعرضه ${w} سم. ما مساحته بالسنتيمتر المربع؟`,`A rectangle is ${l} cm long and ${w} cm wide. What is its area in cm²?`),o:mkOpts(area,[per,l+w,area+l,area-w]),e:bi(`⟦${l} × ${w} = ${area}⟧`,`⟦${l} × ${w} = ${area}⟧`)};
@@ -250,16 +253,23 @@ const GENS = {
     return {s:'comparison',cmp:1,q:bi(qa,qe),a,e:bi(ex[0],ex[1])}; }
 };
 /* De-duplication: a generator retries (deterministically, same rnd) when it would repeat one of the last
-   150 generated items or copy a fixed bank item word for word. History resets whenever rnd is swapped
+   150 generated items or copy a fixed bank item word for word. History resets whenever the caller's rnd is swapped
    (e.g. each seeded model build), so model tests stay reproducible. */
-let _gh=[],_ghR=null,_BK=null;
+let _gh=[],_gn=[],_ghR=null,_BK=null;
 const genKey=r=>r.s==='odd'?'odd|'+r.o.slice().sort().join('|'):(typeof r.q==='object'?r.q.ar:r.q);
-function _bankKeys(){ if(!_BK){ _BK=new Set(); QB.forEach(r=>{ _BK.add(r.q.ar); _BK.add(r.q.en); }); [VB_AR,VB_EN].forEach(b=>b.forEach(r=>{ if(r.s==='analogy'||r.s==='completion') _BK.add(r.q); if(r.s==='odd') _BK.add(genKey(r)); })); } return _BK; }
-function genUnique(fn){
-  if(_ghR!==rnd){ _ghR=rnd; _gh=[]; }
+/* the odd word itself: two "odd one out" items in a test must not share their answer */
+const oddKey=r=>r.s==='odd'?'oddw|'+r.o[r.a??0]:null;
+function _bankKeys(){ if(!_BK){ _BK=new Set(); QB.forEach(r=>{ _BK.add(r.q.ar); _BK.add(r.q.en); }); [VB_AR,VB_EN].forEach(b=>b.forEach(r=>{ if(r.s==='analogy'||r.s==='completion') _BK.add(r.q); if(r.s==='odd'){ _BK.add(genKey(r)); _BK.add(oddKey(r)); } })); } return _BK; }
+/* Every generated item draws exactly one number from the caller's stream and runs on a private fork of it, so a change
+   inside a generator (an extra retry, a new distractor rule) no longer shifts every later item of a seeded model test. */
+function genFork(fn,name,raw){ const outer=rnd; if(_ghR!==outer){ _ghR=outer; _gh=[]; _gn=[]; } rnd=mulberry(Math.floor(outer()*2147483647)); try{ return genUnique(fn,name,raw); } finally{ rnd=outer; } }
+function genUnique(fn,name,raw){
+  /* variety: a quant generator that produced one of the last 24 generated items (about two sections) hands over to a
+     sibling generator of the same skill, so a test does not show two "workers" problems; still seeded, so model tests stay fixed */
+  if(name&&raw){ const win=_gn.slice(-24); if(win.includes(name)){ const sk=Object.keys(GEN_BY_SKILL).find(s=>GEN_BY_SKILL[s].includes(name)); const alt=sk?[...new Set(GEN_BY_SKILL[sk])].filter(g=>!win.includes(g)&&raw[g]):[]; if(alt.length){ name=alt[Math.floor(rnd()*alt.length)]; fn=raw[name]; } } _gn.push(name); if(_gn.length>50) _gn.shift(); }
   const bk=_bankKeys(); let r;
-  for(let i=0;i<15;i++){ r=fn(); const qs=typeof r.q==='object'?[r.q.ar,r.q.en]:[r.q]; if(!_gh.includes(genKey(r))&&!bk.has(genKey(r))&&!qs.some(x=>bk.has(x))) break; }
-  _gh.push(genKey(r)); if(_gh.length>150) _gh.shift(); return r;
+  for(let i=0;i<15;i++){ r=fn(); const k=genKey(r), ok=oddKey(r); const qs=typeof r.q==='object'?[r.q.ar,r.q.en]:[r.q]; if(!_gh.includes(k)&&!bk.has(k)&&!qs.some(x=>bk.has(x))&&!(ok&&(_gh.includes(ok)||bk.has(ok)))) break; }
+  _gh.push(genKey(r)); const ok2=oddKey(r); if(ok2) _gh.push(ok2); if(_gh.length>150) _gh.splice(0,_gh.length-150); return r;
 }
 const GEN_BY_SKILL = {arith:['percent','discount','ratio','speed','fracAdd'],algebra:['linear','exponent','seqArith','seqGeo','evaluate'],geometry:['rect','triangle','pyth','circle'],stats:['avgMissing','median','pctChange'],comparison:['compare']};
 /* ============ Verbal bank expansion (AR + EN) ============ */
@@ -306,20 +316,20 @@ VB_AR.push(
  {s:'completion',q:'ليس الفتى من يقول كان أبي، إن ...... من يقول ها أنا ذا.',o:['الفتى','الشاعر','العالم','الكريم'],a:0,e:'بيت مشهور يكرر الكلمة نفسها.'},
  {s:'completion',q:'كلما ازداد الضغط على الغاز ...... حجمه عند ثبوت درجة حرارته.',o:['قلّ','زاد','ثبت','تضاعف'],a:0,e:'العلاقة عكسية بين الضغط والحجم.'},
  // context
- {s:'context',q:'الشمس مصدر الظلام والدفء على كوكب الأرض.',o:['مصدر','الظلام','الدفء','كوكب'],a:1,e:'الصحيح «الضوء».'},
+ {s:'context',q:'الشمس مصدر الظلام والدفء على كوكب الأرض.',o:['الظلام','الدفء','كوكب','الأرض'],a:0,e:'الصحيح «الضوء».'},
  {s:'context',q:'يحرص المزارع على سقي أرضه وقت الظهيرة ليقلل تبخر الماء.',o:['يحرص','سقي','الظهيرة','تبخر'],a:2,e:'الصحيح «الصباح الباكر» أو «المساء».'},
- {s:'context',q:'يذوب الثلج عند انخفاض درجة الحرارة فيتحول إلى ماء.',o:['يذوب','انخفاض','يتحول','ماء'],a:1,e:'الصحيح «ارتفاع».'},
+ {s:'context',q:'يذوب الثلج عند انخفاض درجة الحرارة فيتحول إلى ماء.',o:['انخفاض','الحرارة','يتحول','ماء'],a:0,e:'الصحيح «ارتفاع».'},
  {s:'context',q:'كان الجو ممطرًا، فترك الناس المظلات ولبسوا المعاطف الواقية من المطر.',o:['ممطرًا','ترك','المعاطف','الواقية'],a:1,e:'الصحيح «حمل».'},
- {s:'context',q:'لأن المكتبة هادئة يقصدها الطلاب للمذاكرة والحديث بصوت مرتفع والتركيز.',o:['هادئة','للمذاكرة','مرتفع','التركيز'],a:2,e:'الهدوء والتركيز ينفيان الصوت المرتفع؛ الصحيح «منخفض».'},
- {s:'context',q:'يتميز الجمل بقدرته على تحمل العطش، لذا يُعد أضعف الحيوانات ملاءمة للصحراء.',o:['تحمل','العطش','أضعف','للصحراء'],a:2,e:'الصحيح «أكثر».'},
+ {s:'context',q:'لأن المكتبة هادئة يقصدها الطلاب للمذاكرة والحديث بصوت مرتفع والتركيز.',o:['هادئة','يقصدها','للمذاكرة','مرتفع'],a:3,e:'الهدوء والتركيز ينفيان الصوت المرتفع؛ الصحيح «منخفض».'},
+ {s:'context',q:'يتميز الجمل بقدرته على تحمل العطش، لذا يُعد أضعف الحيوانات ملاءمة للصحراء.',o:['يتميز','تحمل','العطش','أضعف'],a:3,e:'الصحيح «أكثر».'},
  {s:'context',q:'كان القائد حكيمًا، يستمع لآراء فريقه ثم يتخذ قراراته بتهوّر.',o:['حكيمًا','يستمع','آراء','بتهوّر'],a:3,e:'الصحيح «بتأنٍّ».'},
  {s:'context',q:'استيقظ مبكرًا فأدرك الحافلة، لكنه وصل إلى المدرسة قبل الجميع.',o:['مبكرًا','فأدرك','لكنه','قبل'],a:2,e:'أداة الربط خاطئة؛ الوصول المبكر نتيجة لا استدراك، والصحيح «فـ».'},
  {s:'context',q:'تنمو النباتات وتزدهر إذا حُرمت من الماء والضوء الكافيين.',o:['تنمو','تزدهر','حُرمت','الكافيين'],a:2,e:'الصحيح «حصلت على».'},
  {s:'context',q:'بذل اللاعب جهدًا كبيرًا في التدريب، فتراجع مستواه وتألق في المباراة.',o:['جهدًا','التدريب','تراجع','تألق'],a:2,e:'الصحيح «تحسّن».'},
  {s:'context',q:'كلما قرأ الإنسان أكثر، ضعفت حصيلته اللغوية واتسعت ثقافته.',o:['قرأ','ضعفت','حصيلته','اتسعت'],a:1,e:'الصحيح «زادت».'},
  {s:'context',q:'أُغلق المتجر بسبب الإقبال الكبير عليه وكثرة أرباحه.',o:['أُغلق','الإقبال','الكبير','أرباحه'],a:0,e:'الإقبال والأرباح يقتضيان «توسّع».'},
- {s:'context',q:'اشتهر حاتم الطائي ببخله حتى صار يُضرب به المثل في الكرم.',o:['اشتهر','ببخله','المثل','الكرم'],a:1,e:'الصحيح «بكرمه».'},
- {s:'context',q:'يزداد الطلب على المراوح في فصل الشتاء بسبب شدة الحرارة.',o:['يزداد','المراوح','الشتاء','الحرارة'],a:2,e:'الصحيح «الصيف».'},
+ {s:'context',q:'اشتهر حاتم الطائي ببخله حتى صار يُضرب به المثل في الكرم.',o:['ببخله','يُضرب','المثل','الكرم'],a:0,e:'الصحيح «بكرمه».'},
+ {s:'context',q:'يزداد الطلب على المراوح في فصل الشتاء بسبب شدة الحرارة.',o:['يزداد','الطلب','المراوح','الشتاء'],a:3,e:'الصحيح «الصيف».'},
  {s:'context',q:'حين اشتد الظلام أطفأنا المصابيح لنرى الطريق بوضوح.',o:['اشتد','الظلام','أطفأنا','بوضوح'],a:2,e:'الصحيح «أشعلنا».'},
  // reading P4-P8
  {s:'reading',p:'P4',q:'المقصود بـ«تسبيل المنفعة» في النص:',o:['صرف غلّة الوقف في وجوه الخير','بيع الأصل الموقوف','توريث الأصل للأبناء','تجميد الأصل دون الانتفاع به'],a:0,e:'«وتُصرف غلّته في وجوه الخير».'},
@@ -374,16 +384,16 @@ VB_EN.push(
  {s:'context',q:'Farmers water their crops at midday to reduce evaporation.',o:['Farmers','water','midday','evaporation'],a:2,e:'It should be "early morning" or "evening".'},
  {s:'context',q:'Ice melts when the temperature drops, turning into water.',o:['melts','drops','turning','water'],a:1,e:'It should be "rises".'},
  {s:'context',q:'It was raining, so people left their umbrellas at home and wore waterproof coats.',o:['raining','left','waterproof','coats'],a:1,e:'It should be "took".'},
- {s:'context',q:'Because the library is quiet, students go there to study, talk loudly and concentrate.',o:['quiet','study','loudly','concentrate'],a:2,e:'Quiet and concentration rule out loud talk.'},
- {s:'context',q:'Camels can endure thirst, which makes them the least suited animals for the desert.',o:['endure','thirst','least','desert'],a:2,e:'It should be "best".'},
+ {s:'context',q:'Because the library is quiet, students go there to study, talk loudly and concentrate.',o:['quiet','students','study','loudly'],a:3,e:'Quiet and concentration rule out loud talk.'},
+ {s:'context',q:'Camels can endure thirst, which makes them the least suited animals for the desert.',o:['endure','thirst','makes','least'],a:3,e:'It should be "best".'},
  {s:'context',q:'The wise leader listens to his team\'s opinions and then makes his decisions recklessly.',o:['wise','listens','opinions','recklessly'],a:3,e:'It should be "carefully".'},
  {s:'context',q:'He woke up early and caught the bus, but he arrived at school before everyone.',o:['early','caught','but','before'],a:2,e:'The linking word is wrong; arriving early is a result, so "and".'},
  {s:'context',q:'Plants grow and flourish when they are deprived of enough water and light.',o:['grow','flourish','deprived','enough'],a:2,e:'It should be "given".'},
  {s:'context',q:'The player trained hard, so his performance declined and he shone in the match.',o:['trained','declined','shone','match'],a:1,e:'It should be "improved".'},
  {s:'context',q:'The more a person reads, the poorer his vocabulary and the broader his knowledge.',o:['reads','poorer','broader','knowledge'],a:1,e:'It should be "richer".'},
  {s:'context',q:'The shop closed down because of its large number of customers and high profits.',o:['closed','large','customers','profits'],a:0,e:'Customers and profits imply it "expanded".'},
- {s:'context',q:'Hatim al-Tai was famous for his stinginess, so much so that he became a proverb for generosity.',o:['famous','stinginess','proverb','generosity'],a:1,e:'It should be "generosity".'},
- {s:'context',q:'Demand for fans rises in winter because of the intense heat.',o:['Demand','fans','winter','heat'],a:2,e:'It should be "summer".'},
+ {s:'context',q:'Hatim al-Tai was famous for his stinginess, so much so that he became a proverb for generosity.',o:['stinginess','became','proverb','generosity'],a:0,e:'It should be "generosity".'},
+ {s:'context',q:'Demand for fans rises in winter because of the intense heat.',o:['Demand','fans','rises','winter'],a:3,e:'It should be "summer".'},
  {s:'context',q:'When it grew dark, we extinguished the lamps to see the road clearly.',o:['dark','extinguished','see','clearly'],a:1,e:'It should be "lit".'},
  {s:'reading',p:'P4',q:'According to the passage, dedicating the benefit of a waqf means:',o:['spending its revenue on good causes','selling the asset','passing the asset to heirs','freezing the asset without using it'],a:0,e:'"its revenue is spent on good causes".'},
  {s:'reading',p:'P4',q:'Which contribution of endowments is mentioned?',o:['building hospitals','funding armies','minting coins','building ports'],a:0,e:'"build schools and hospitals and dig wells".'},
@@ -483,8 +493,8 @@ const CATS = {
   ['curved shapes',['circle','ellipse','oval','crescent'],'shapes with sides']
  ]
 };
-function genAnalogy(lang){ return genUnique(()=>_genAnalogy(lang)); }
-function genOdd(lang){ return genUnique(()=>_genOdd(lang)); }
+function genAnalogy(lang){ return genFork(()=>_genAnalogy(lang)); }
+function genOdd(lang){ return genFork(()=>_genOdd(lang)); }
 function _genAnalogy(lang){
   const rels=REL[lang]; const R0=pick(rels); const pairs=shuffle(R0.p);
   const stem=pairs[0], right=pairs[1];
@@ -494,7 +504,7 @@ function _genAnalogy(lang){
   if(!R0.sym && pairs[2]){ third=[pairs[2][1],pairs[2][0]]; reversed=true; } else third=pick(others[2].p);
   const f=p=>lang==='ar'?`${p[0]} : ${p[1]}`:`${p[0]} : ${p[1]}`;
   const q=lang==='ar'?f(stem):`${stem[0].toUpperCase()} : ${stem[1].toUpperCase()}`;
-  const e= lang==='ar' ? `العلاقة: ${R0.n}.${reversed?` الخيار «${f(third)}» من العلاقة نفسها لكن بترتيب معكوس.`:''}` : `Relationship: ${R0.n}.${reversed?` "${f(third)}" is the same relationship in reverse order.`:''}`;
+  const e= lang==='ar' ? `العلاقة: ${R0.n}، وهي نفسها في «${f(right)}».${reversed?` أما «${f(third)}» فمن العلاقة نفسها لكن بترتيب معكوس.`:''}` : `Relationship: ${R0.n}, the same as in "${f(right)}".${reversed?` "${f(third)}" is the same relationship in reverse order.`:''}`;
   return {s:'analogy',q,o:[f(right),f(d[0]),f(d[1]),f(third)],a:0,e,gen:1};
 }
 function _genOdd(lang){
@@ -645,21 +655,21 @@ VB_AR.push(
  {s:'context',q:'يتميز الصقر بحدة بصره، لذلك يرى فريسته من مسافات قريبة جدًا فقط.',o:['حدة','يرى','فريسته','قريبة'],a:3,e:'حدة البصر تعني الرؤية من مسافات بعيدة.'},
  {s:'context',q:'ازدحمت الشوارع بالسيارات فتأخر الموظفون، ووصلوا إلى أعمالهم مبكرين.',o:['ازدحمت','تأخر','وصلوا','مبكرين'],a:3,e:'المرتكزان: «ازدحمت» و«تأخر».'},
  {s:'context',q:'يغلي الماء عند مئة درجة مئوية، ويتجمد عند خمسين درجة.',o:['يغلي','مئة','يتجمد','خمسين'],a:3,e:'يتجمد الماء عند الصفر.'},
- {s:'context',q:'تغرب الشمس في جهة الشرق، فيحل الليل وتظهر النجوم.',o:['تغرب','الشرق','الليل','النجوم'],a:1,e:'الصحيح «الغرب»؛ فالشمس تغرب في جهة الغرب.'},
+ {s:'context',q:'تغرب الشمس في جهة الشرق، فيحل الليل وتظهر النجوم.',o:['الشرق','يحل','الليل','النجوم'],a:0,e:'الصحيح «الغرب»؛ فالشمس تغرب في جهة الغرب.'},
  {s:'context',q:'كان الطالب متفوقًا في دراسته، فرسب في جميع المواد وحصل على المركز الأول.',o:['متفوقًا','رسب','جميع','الأول'],a:1,e:'الصحيح «نجح».'},
  {s:'context',q:'الكتاب صديق وفيّ، يؤنسك في وحدتك ويخذلك حين تحتاجه.',o:['وفيّ','يؤنسك','وحدتك','يخذلك'],a:3,e:'الصحيح «يعينك».'},
  {s:'context',q:'حرصًا على سلامة الأطفال، تُحفظ الأدوية في أماكن قريبة من متناول أيديهم.',o:['حرصًا','سلامة','تُحفظ','قريبة'],a:3,e:'الصحيح «بعيدة».'},
  {s:'context',q:'بسبب نقص الأكسجين في المرتفعات، يتنفس المتسلقون بسهولة ويسر.',o:['نقص','المرتفعات','يتنفس','بسهولة'],a:3,e:'الصحيح «بصعوبة».'},
- {s:'context',q:'الأمانة من أرذل الصفات التي يتحلى بها المسلم.',o:['الأمانة','أرذل','يتحلى','المسلم'],a:1,e:'الصحيح «أنبل».'},
+ {s:'context',q:'الأمانة من أرذل الصفات التي يتحلى بها المسلم.',o:['أرذل','الصفات','يتحلى','المسلم'],a:0,e:'الصحيح «أنبل».'},
  {s:'context',q:'يسقط المطر حين تتكثف قطرات الماء في السحب وتخفّ فتهبط إلى الأرض.',o:['يسقط','تتكثف','تخفّ','تهبط'],a:2,e:'الصحيح «تثقل».'},
- {s:'context',q:'يُصنع مقبض القدر من البلاستيك لأنه موصل جيد للحرارة فلا تحترق اليد.',o:['يُصنع','البلاستيك','جيد','للحرارة'],a:2,e:'الصحيح «رديء».'},
+ {s:'context',q:'يُصنع مقبض القدر من البلاستيك لأنه موصل جيد للحرارة فلا تحترق اليد.',o:['يُصنع','مقبض','البلاستيك','جيد'],a:3,e:'الصحيح «رديء».'},
  {s:'context',q:'كلما زادت سرعة السيارة قصُرت المسافة اللازمة لإيقافها.',o:['زادت','سرعة','قصُرت','إيقافها'],a:2,e:'الصحيح «طالت».'},
  {s:'context',q:'الشجاع يواجه المخاطر بقلب مرتجف ويُقدم دون تردد.',o:['الشجاع','يواجه','مرتجف','تردد'],a:2,e:'الصحيح «ثابت».'},
  {s:'context',q:'يبعث الربيع في النفس الكآبة بأزهاره الملونة وجوّه المعتدل.',o:['يبعث','الكآبة','الملونة','المعتدل'],a:1,e:'الصحيح «البهجة».'},
  {s:'context',q:'أسرِف في مصروفك حتى يكفيك إلى نهاية الشهر.',o:['أسرِف','مصروفك','يكفيك','نهاية'],a:0,e:'الصحيح «اقتصد»؛ فالإسراف لا يجعل المال يكفي إلى آخر الشهر.'},
  {s:'context',q:'تحتفظ الصحراء بحرارتها ليلًا، لذلك تنخفض درجة الحرارة فيها بشدة بعد الغروب.',o:['تحتفظ','ليلًا','تنخفض','الغروب'],a:0,e:'الصحيح «تفقد».'},
  {s:'context',q:'أنصت الطلاب إلى المعلم باهتمام، فلم يفهموا شيئًا من الدرس.',o:['أنصت','باهتمام','فلم','الدرس'],a:2,e:'الصحيح «ففهموا».'},
- {s:'context',q:'النباتات الصحراوية أوراقها عريضة لتقلل فقد الماء بالتبخر.',o:['الصحراوية','عريضة','تقلل','التبخر'],a:1,e:'الصحيح «صغيرة» أو «إبرية».'},
+ {s:'context',q:'النباتات الصحراوية أوراقها عريضة لتقلل فقد الماء بالتبخر.',o:['عريضة','تقلل','فقد','التبخر'],a:0,e:'الصحيح «صغيرة» أو «إبرية».'},
  {s:'context',q:'حين فاز الفريق بالبطولة عمّ الحزن أرجاء الملعب وتعالت الهتافات.',o:['فاز','الحزن','أرجاء','الهتافات'],a:1,e:'الصحيح «الفرح».'},
  {s:'completion',q:'لا ينبغي أن نحكم على الناس من ......، فالجوهر أهم من المظهر.',o:['مظاهرهم','أفعالهم','أخلاقهم','أعمالهم'],a:0,e:'مقابلة بين المظهر والجوهر.'},
  {s:'completion',q:'كان الامتحان ...... لدرجة أن معظم الطلاب أنهوه قبل الوقت.',o:['سهلًا','صعبًا','طويلًا','معقدًا'],a:0,e:'الإنهاء المبكر نتيجة السهولة.'},
@@ -679,21 +689,21 @@ VB_EN.push(
  {s:'context',q:'The falcon is known for its sharp eyesight, so it can see prey only from very short distances.',o:['sharp','see','prey','short'],a:3,e:'Sharp eyesight means seeing from far away.'},
  {s:'context',q:'The streets were jammed with cars, so the employees were delayed and arrived at work early.',o:['jammed','delayed','arrived','early'],a:3,e:'Anchors: "jammed" and "delayed".'},
  {s:'context',q:'Water boils at 100 degrees Celsius and freezes at 50 degrees.',o:['boils','100','freezes','50'],a:3,e:'Water freezes at 0.'},
- {s:'context',q:'The sun sets in the east, and night falls and the stars appear.',o:['sets','east','night','stars'],a:1,e:'The sun sets in the west.'},
+ {s:'context',q:'The sun sets in the east, and night falls and the stars appear.',o:['east','night','falls','appear'],a:0,e:'The sun sets in the west.'},
  {s:'context',q:'The student excelled in his studies, so he failed every subject and came first.',o:['excelled','failed','every','first'],a:1,e:'It should be "passed".'},
  {s:'context',q:'A book is a loyal friend that keeps you company when you are alone and abandons you when you need it.',o:['loyal','company','alone','abandons'],a:3,e:'It should be "supports".'},
  {s:'context',q:'To keep children safe, medicines are stored within easy reach of their hands.',o:['safe','medicines','stored','within'],a:3,e:'It should be "out of reach".'},
  {s:'context',q:'Because oxygen is scarce at high altitudes, climbers breathe easily and comfortably.',o:['scarce','altitudes','breathe','easily'],a:3,e:'It should be "with difficulty".'},
- {s:'context',q:'Honesty is among the lowest qualities a person can have.',o:['Honesty','lowest','qualities','person'],a:1,e:'It should be "noblest".'},
+ {s:'context',q:'Honesty is among the lowest qualities a person can have.',o:['lowest','qualities','person','have'],a:0,e:'It should be "noblest".'},
  {s:'context',q:'Rain falls when water droplets in clouds condense and become lighter, so they drop to the ground.',o:['falls','condense','lighter','drop'],a:2,e:'It should be "heavier".'},
- {s:'context',q:'Pot handles are made of plastic because it is a good conductor of heat, so hands do not get burned.',o:['handles','plastic','good','burned'],a:2,e:'It should be "poor".'},
+ {s:'context',q:'Pot handles are made of plastic because it is a good conductor of heat, so hands do not get burned.',o:['handles','made','plastic','good'],a:3,e:'It should be "poor".'},
  {s:'context',q:'The faster a car goes, the shorter the distance it needs to stop.',o:['faster','car','shorter','stop'],a:2,e:'It should be "longer".'},
  {s:'context',q:'A brave person faces danger with a trembling heart and moves forward without hesitation.',o:['brave','faces','trembling','hesitation'],a:2,e:'It should be "steady".'},
- {s:'context',q:'Spring fills the soul with gloom through its colorful flowers and mild weather.',o:['fills','gloom','colorful','mild'],a:1,e:'It should be "joy".'},
+ {s:'context',q:'Spring fills the soul with gloom through its colorful flowers and mild weather.',o:['gloom','colorful','flowers','mild'],a:0,e:'It should be "joy".'},
  {s:'context',q:'Be extravagant with your allowance so that it lasts until the end of the month.',o:['extravagant','allowance','lasts','end'],a:0,e:'It should be "thrifty"; spending freely does not make money last.'},
  {s:'context',q:'The desert keeps its heat at night, so temperatures drop sharply after sunset.',o:['keeps','night','drop','sunset'],a:0,e:'It should be "loses".'},
  {s:'context',q:'The students listened to the teacher attentively, so they understood nothing of the lesson.',o:['listened','attentively','nothing','lesson'],a:2,e:'It should be "everything".'},
- {s:'context',q:'Desert plants have broad leaves to reduce water loss through evaporation.',o:['Desert','broad','reduce','evaporation'],a:1,e:'It should be "small" or "needle-like".'},
+ {s:'context',q:'Desert plants have broad leaves to reduce water loss through evaporation.',o:['broad','leaves','reduce','evaporation'],a:0,e:'It should be "small" or "needle-like".'},
  {s:'context',q:'When the team won the championship, sadness filled the stadium and the cheering grew louder.',o:['won','sadness','stadium','cheering'],a:1,e:'It should be "joy".'},
  {s:'completion',q:'We should not judge people by their ______, since the essence matters more than the look.',o:['appearance','actions','manners','work'],a:0,e:'Contrast between appearance and essence.'},
  {s:'completion',q:'The exam was so ______ that most students finished early.',o:['easy','hard','long','complex'],a:0,e:'Finishing early follows ease.'},
@@ -706,6 +716,7 @@ VB_EN.push(
  {s:'completion',q:'Rumors spread quickly when reliable information is ______.',o:['absent','plentiful','available','shared'],a:0,e:'Rumors fill the gap.'},
  {s:'completion',q:'A student needs ______ between study and rest to avoid burnout.',o:['balance','neglect','rivalry','confusion'],a:0,e:'Avoiding burnout needs balance.'},
  {s:'completion',q:'The knight was ______ and did not fear death.',o:['fearless','cowardly','hesitant','timid'],a:0,e:'Not fearing death is courage.'},
+ {s:'completion',q:'Cleanliness is next to ______.',o:['godliness','wealth','laziness','beauty'],a:0,e:'A common saying.'},
  {s:'completion',q:'We cannot ______ the past, but we can learn from it.',o:['change','remember','study','understand'],a:0,e:'"but" contrasts the impossible with the possible.'}
 );
 
@@ -733,10 +744,11 @@ const PROVERBS = {
  ar:[['العلم نور والجهل ......','ظلام'],['خير الأمور ......','أوسطها'],['الوقت كالسيف إن لم تقطعه ......','قطعك'],['من جدّ وجد ومن زرع ......','حصد'],['إذا كان الكلام من فضة فالسكوت من ......','ذهب'],['رُبّ أخٍ لك لم تلده ......','أمك'],['العقل السليم في الجسم ......','السليم'],['اطلبوا العلم من المهد إلى ......','اللحد'],['درهم وقاية خير من قنطار ......','علاج'],['في التأني السلامة وفي العجلة ......','الندامة'],['لكل مقام ......','مقال'],['ما حكّ جلدك مثل ......','ظفرك'],['يد واحدة لا ......','تصفق'],['الجار قبل ......','الدار'],['الرفيق قبل ......','الطريق'],['عند الامتحان يُكرم المرء أو ......','يُهان'],['كل إناء بما فيه ......','ينضح'],['القرش الأبيض ينفع في اليوم ......','الأسود'],['من سار على الدرب ......','وصل'],['الصبر مفتاح ......','الفرج'],['أول الغيث ......','قطرة'],['تجري الرياح بما لا تشتهي ......','السفن'],['خير جليس في الزمان ......','كتاب'],['إن غدًا لناظره ......','قريب'],['على قدر أهل العزم تأتي ......','العزائم'],['ما لا يُدرك كله لا يُترك ......','جُلّه'],['لسانك حصانك إن صنته ......','صانك'],['من طلب العلا سهر ......','الليالي'],['الحاجة أم ......','الاختراع'],['اتق شر من أحسنت ......','إليه'],['بلغ السيل ......','الزبى'],['سبق السيف ......','العذل'],['قيمة كل امرئ ما ......','يحسنه']],
  en:[['Actions speak louder than ______.','words'],['Better late than ______.','never'],['Every cloud has a silver ______.','lining'],['Don\'t judge a book by its ______.','cover'],['The early bird catches the ______.','worm'],['Where there\'s a will, there\'s a ______.','way'],['Knowledge is ______.','power'],['Rome wasn\'t built in a ______.','day'],['Two heads are better than ______.','one'],['Honesty is the best ______.','policy'],['Look before you ______.','leap'],['Time is ______.','money'],['Slow and steady wins the ______.','race'],['Great minds think ______.','alike'],['Birds of a feather flock ______.','together'],['The pen is mightier than the ______.','sword'],['Haste makes ______.','waste'],['Prevention is better than ______.','cure'],['All that glitters is not ______.','gold'],['Absence makes the heart grow ______.','fonder'],['Necessity is the mother of ______.','invention'],['An apple a day keeps the doctor ______.','away'],['Curiosity killed the ______.','cat'],['Don\'t count your chickens before they ______.','hatch'],['Every rose has its ______.','thorn'],['When one door closes, another ______.','opens'],['Strike while the iron is ______.','hot'],['No pain, no ______.','gain']]
 };
-function genProverb(lang){ return genUnique(()=>_genProverb(lang)); }
+function genProverb(lang){ return genFork(()=>_genProverb(lang)); }
 function _genProverb(lang){
   const L0=PROVERBS[lang]; const p=pick(L0); const others=shuffle(L0.filter(x=>x[1]!==p[1])).slice(0,3).map(x=>x[1]);
-  return {s:'completion',q:p[0],o:[p[1],...others],a:0,e:lang==='ar'?'مثل أو قول مأثور بصيغة ثابتة.':'A fixed saying.',gen:1};
+  const full=p[0].replace(/\.{3,}|_{3,}/,p[1]);
+  return {s:'completion',q:p[0],o:[p[1],...others],a:0,e:lang==='ar'?`مثل أو قول مأثور بصيغة ثابتة: «${full}».`:`A fixed saying: "${full}"`,gen:1};
 }
 /* ============ Quant bank expansion ============ */
 const C=(ar,en,a,ear,een)=>({s:'comparison',cmp:1,q:{ar,en},a,e:{ar:ear,en:een}});
@@ -756,7 +768,7 @@ QB.push(
  C('القيمة الأولى: عدد أضلاع السداسي<br>القيمة الثانية: عدد أضلاع الخماسي + 1','Quantity A: sides of a hexagon<br>Quantity B: sides of a pentagon + 1',2,'⟦6 = 5 + 1⟧','⟦6 = 5 + 1⟧'),
  Qx('arith','ما أصغر عدد أولي أكبر من 20؟','What is the smallest prime number greater than 20?',['23','21','25','29'],'21 = 3 × 7 و 22 زوجي، و 23 أولي.','21 = 3 × 7, 22 is even, 23 is prime.'),
  Qx('arith','إذا كان 40% من عدد يساوي 24، فما العدد؟','If 40% of a number is 24, what is the number?',['60','96','64','50'],'⟦24 ÷ 0.4 = 60⟧','⟦24 ÷ 0.4 = 60⟧'),
- Qx('geometry','مستطيل النسبة بين طوله وعرضه 5 : 3 ومحيطه 64 سم. ما طوله؟','A rectangle\'s length to width ratio is 5 : 3 and its perimeter is 64 cm. What is its length?',['20','12','24','16'],'⟦2(5ك + 3ك) = 64 → ك = 4 → 5 × 4 = 20⟧','⟦2(5k + 3k) = 64 → k = 4 → 5 × 4 = 20⟧'),
+ Qx('geometry','مستطيل النسبة بين طوله وعرضه 5 : 3 ومحيطه 64 سم. ما طوله؟','A rectangle\'s length to width ratio is 5 : 3 and its perimeter is 64 cm. What is its length?',['20','12','24','16'],'⟦2(5ك + 3ك) = 64⟧ → ⟦ك = 4⟧ → الطول ⟦5 × 4 = 20⟧','⟦2(5k + 3k) = 64⟧ → ⟦k = 4⟧ → length ⟦5 × 4 = 20⟧'),
  Qx('arith','غادر قطار الساعة 9:45 ووصل الساعة 13:10. كم استغرقت الرحلة؟','A train left at 9:45 and arrived at 13:10. How long was the trip?',['3 س 25 د','3 س 35 د','4 س 25 د','3 س 15 د'].map((x,i)=>({ar:x,en:['3 h 25 min','3 h 35 min','4 h 25 min','3 h 15 min'][i]})),'من 9:45 إلى 12:45 ثلاث ساعات، ثم 25 دقيقة.','9:45 to 12:45 is 3 hours, then 25 minutes.'),
  Qx('geometry','ما قياس الزاوية الصغرى بين عقربي الساعة عند الساعة 3:00؟','What is the smaller angle between the clock hands at 3:00?',['90°','60°','120°','180°'],'كل ساعة ⟦30°⟧، و ⟦3 × 30 = 90⟧','Each hour is ⟦30°⟧, ⟦3 × 30 = 90⟧'),
  Qx('geometry','ما قياس الزاوية الداخلية في السداسي المنتظم؟','What is each interior angle of a regular hexagon?',['120°','108°','135°','60°'],'⟦(6 − 2) × 180 ÷ 6 = 120⟧','⟦(6 − 2) × 180 ÷ 6 = 120⟧'),
@@ -773,7 +785,7 @@ QB.push(
  Qx('geometry','ما مجموع قياسات الزوايا الداخلية للمضلع الخماسي؟','What is the sum of the interior angles of a pentagon?',['540°','360°','720°','450°'],'⟦(5 − 2) × 180 = 540⟧','⟦(5 − 2) × 180 = 540⟧'),
  Qx('algebra','إذا كان ⟦3/س = 12/20⟧ فما قيمة س؟','If ⟦3/x = 12/20⟧, what is x?',['5','4','80','6'],'⟦12س = 60 → س = 5⟧','⟦12x = 60 → x = 5⟧'),
  Qx('stats','في فصل: 12 طالبًا درجاتهم 80، و 8 طلاب درجاتهم 90. ما المتوسط؟','In a class, 12 students scored 80 and 8 scored 90. What is the mean?',['84','85','86','82'],'⟦(960 + 720) ÷ 20 = 84⟧','⟦(960 + 720) ÷ 20 = 84⟧'),
- Qx('arith','أيّ الأعداد الآتية أكبر؟','Which of these is largest?',['⟦0.7⟧','⟦2/3⟧','⟦5/8⟧','⟦13/20⟧'],'⟦2/3 ≈ 0.667 ، 5/8 = 0.625 ، 13/20 = 0.65⟧ وكلها أصغر من ⟦0.7⟧','⟦2/3 ≈ 0.667, 5/8 = 0.625, 13/20 = 0.65⟧, all less than ⟦0.7⟧'),
+ Qx('arith','أيّ الأعداد الآتية أكبر؟','Which of these is largest?',['⟦0.7⟧','⟦2/3⟧','⟦5/8⟧','⟦13/20⟧'],'⟦2/3 ≈ 0.667⟧ ، ⟦5/8 = 0.625⟧ ، ⟦13/20 = 0.65⟧ وكلها أصغر من ⟦0.7⟧','⟦2/3 ≈ 0.667⟧, ⟦5/8 = 0.625⟧, ⟦13/20 = 0.65⟧, all less than ⟦0.7⟧'),
  Qx('algebra','إذا كان ⟦أ = −2⟧ فما قيمة ⟦أ^3 − أ⟧؟','If ⟦a = −2⟧, what is ⟦a^3 − a⟧?',['−6','−10','6','−8'],'⟦−8 − (−2) = −6⟧','⟦−8 − (−2) = −6⟧'),
  Qx('arith','قرأ أحمد 30% من كتاب عدد صفحاته 250. كم صفحة بقيت؟','Ahmed read 30% of a 250-page book. How many pages are left?',['175','75','150','220'],'المتبقي ⟦70% × 250 = 175⟧','Remaining ⟦70% × 250 = 175⟧'),
  Qx('stats','ما المنوال للقيم: ⟦3، 7، 7، 2، 9، 7، 3⟧؟','What is the mode of: ⟦3, 7, 7, 2, 9, 7, 3⟧?',['7','3','5','9'],'العدد 7 تكرر ثلاث مرات، وهو الأكثر تكرارًا.','7 appears three times, more than any other value.'),
@@ -788,7 +800,7 @@ QB.push(
  Qx('geometry','مربع طول قطره 10 سم. ما مساحته بالسنتيمتر المربع؟','A square has a diagonal of 10 cm. What is its area in cm²?',['50','100','25','40'],'مساحة المربع = القطر² ÷ 2: ⟦100 ÷ 2 = 50⟧','Square area = diagonal² ÷ 2: ⟦100 ÷ 2 = 50⟧'),
  Qx('geometry','متوازي مستطيلات أبعاده 2 سم و 3 سم و 5 سم. ما حجمه بالسنتيمتر المكعب؟','A box measures 2 cm by 3 cm by 5 cm. What is its volume in cm³?',['30','10','62','15'],'⟦2 × 3 × 5 = 30⟧ (62 هي المساحة الكلية)','⟦2 × 3 × 5 = 30⟧ (62 is the surface area)'),
  Qx('geometry','مثلث متطابق الضلعين قياس زاوية رأسه 40°. ما قياس كل من زاويتي القاعدة؟','An isosceles triangle has a vertex angle of 40°. What is each base angle?',['70°','40°','140°','50°'],'⟦(180 − 40) ÷ 2 = 70⟧','⟦(180 − 40) ÷ 2 = 70⟧'),
- Qx('geometry','دائرة محيطها ⟦12π⟧ سم. ما مساحتها؟','A circle has a circumference of ⟦12π⟧ cm. What is its area?',['⟦36π⟧','⟦144π⟧','⟦12π⟧','⟦6π⟧'],'⟦2πنق = 12π → نق = 6 → π × 6^2 = 36π⟧','⟦2πr = 12π → r = 6 → π × 6^2 = 36π⟧'),
+ Qx('geometry','دائرة محيطها ⟦12π⟧ سم. ما مساحتها؟','A circle has a circumference of ⟦12π⟧ cm. What is its area?',['⟦36π⟧','⟦144π⟧','⟦12π⟧','⟦6π⟧'],'⟦2πنق = 12π⟧ → ⟦نق = 6⟧ → ⟦π × 6^2 = 36π⟧','⟦2πr = 12π⟧ → ⟦r = 6⟧ → ⟦π × 6^2 = 36π⟧'),
  Qx('geometry','زاويتان متتامتان (مجموعهما 90°) والفرق بينهما 20°. ما قياس الصغرى؟','Two complementary angles (sum 90°) differ by 20°. What is the smaller angle?',['35°','55°','20°','45°'],'⟦(90 − 20) ÷ 2 = 35⟧','⟦(90 − 20) ÷ 2 = 35⟧'),
  Qx('geometry','مثلث قائم الزاوية طول وتره 13 وطول أحد ضلعي القائمة 5. ما طول الضلع الآخر؟','A right triangle has hypotenuse 13 and one leg 5. What is the other leg?',['12','8','18','10'],'⟦√(169 − 25) = √144 = 12⟧','⟦√(169 − 25) = √144 = 12⟧'),
  Qx('algebra','إذا كان ⟦2(س − 3) = 10⟧ فما قيمة س؟','If ⟦2(x − 3) = 10⟧, what is x?',['8','2','6.5','5'],'⟦س − 3 = 5 → س = 8⟧','⟦x − 3 = 5 → x = 8⟧'),
@@ -805,10 +817,11 @@ QB.push(
 /* ---------- extra quant generators ---------- */
 Object.assign(GENS,{
   percentOf(){ const p=pick([10,20,25,40,50,75]); const X=20*R(2,20); const Y=p*X/100;
-    return {s:'arith',q:bi(`إذا كان ${p}% من عدد يساوي ${Y}، فما العدد؟`,`If ${p}% of a number is ${Y}, what is the number?`),o:mkOpts(X,[Y*p/100,Y+p,X/2,X+Y]),e:bi(`⟦${Y} ÷ ${p/100} = ${X}⟧`,`⟦${Y} ÷ ${p/100} = ${X}⟧`)}; },
+    /* integer distractors only: a lone decimal among whole numbers gives itself away */
+    return {s:'arith',q:bi(`إذا كان ${p}% من عدد يساوي ${Y}، فما العدد؟`,`If ${p}% of a number is ${Y}, what is the number?`),o:mkOpts(X,[Y*p/100,Y+p,X/2,X+Y,Y*2].filter(Number.isInteger)),e:bi(`⟦${Y} ÷ ${p/100} = ${X}⟧`,`⟦${Y} ÷ ${p/100} = ${X}⟧`)}; },
   workers(){ let w,d,tot,w2; do{ w=pick([4,5,6,8,10,12]); d=pick([3,4,5,6,8,9,10,12]); tot=w*d; w2=pick([2,3,4,5,6,8,10,12,15,20].filter(x=>x!==w&&tot%x===0)); }while(!w2); const ans=tot/w2;
     const WK=['عامل واحد','عاملان','عمال','عاملًا'], DY=['يوم واحد','يومين','أيام','يومًا'];
-    return {s:'arith',q:bi(`ينجز ${arC(w,WK)} عملًا في ${arC(d,DY)}. في كم يومًا ينجزه ${arC(w2,WK)} بالمعدل نفسه؟`,`${w} workers finish a job in ${d} days. How many days would ${w2} workers take at the same rate?`),o:mkOpts(ans,[d*w2/w,d+w-w2,d,ans*2]),e:bi(`تناسب عكسي: ⟦${w} × ${d} = ${tot} ، ${tot} ÷ ${w2} = ${ans}⟧`,`Inverse proportion: ⟦${w} × ${d} = ${tot}, ${tot} ÷ ${w2} = ${ans}⟧`)}; },
+    return {s:'arith',q:bi(`ينجز ${arC(w,WK)} عملًا في ${arC(d,DY)}. في كم يومًا ينجزه ${arC(w2,WK)} بالمعدل نفسه؟`,`${w} workers finish a job in ${d} days. How many days would ${w2} workers take at the same rate?`),o:mkOpts(ans,[d*w2/w,d+w-w2,d,ans*2,w2].filter(Number.isInteger)),e:bi(`تناسب عكسي: ⟦${w} × ${d} = ${tot} ، ${tot} ÷ ${w2} = ${ans}⟧`,`Inverse proportion: ⟦${w} × ${d} = ${tot}, ${tot} ÷ ${w2} = ${ans}⟧`)}; },
   system(){ const x=R(2,15), y=R(1,x-1); const S=x+y, D=x-y;
     return {s:'algebra',q:bi(`إذا كان ⟦س + ص = ${S}⟧ و ⟦س − ص = ${D}⟧ فما قيمة ص؟`,`If ⟦x + y = ${S}⟧ and ⟦x − y = ${D}⟧, what is y?`),o:mkOpts(y,[x,S-D,y+1,D]),e:bi(`بالطرح: ⟦2ص = ${S} − ${D} = ${2*y} → ص = ${y}⟧`,`Subtract: ⟦2y = ${S} − ${D} = ${2*y} → y = ${y}⟧`)}; },
   consecutive(){ const n=pick([3,5]); const a=R(3,40); const sum=n*a+(n*(n-1))/2; const big=a+n-1;
@@ -816,7 +829,8 @@ Object.assign(GENS,{
   powerEq(){ const b=pick([2,3,4,5]); const x=R(2,b===2?7:4); const v=b**x;
     return {s:'algebra',q:bi(`إذا كان ⟦${b}^س = ${v}⟧ فما قيمة س؟`,`If ⟦${b}^x = ${v}⟧, what is x?`),o:mkOpts(x,[v/b,x+1,x-1,v/2]),e:bi(`⟦${b}^${x} = ${v}⟧`,`⟦${b}^${x} = ${v}⟧`)}; },
   slope(){ const x1=R(-3,4), y1=R(-4,6), m=pick([-3,-2,-1,1,2,3,4]), dx=R(1,4); const x2=x1+dx, y2=y1+m*dx; const P=n=>n<0?`(${N(n)})`:N(n);
-    return {s:'algebra',q:bi(`ما ميل المستقيم المار بالنقطتين ⟦(${N(x1)}، ${N(y1)})⟧ و ⟦(${N(x2)}، ${N(y2)})⟧؟`,`What is the slope of the line through ⟦(${N(x1)}, ${N(y1)})⟧ and ⟦(${N(x2)}, ${N(y2)})⟧?`),o:mkOpts(m,[-m,m+1,dx,m*dx],N,true),e:bi(`⟦(${N(y2)} − ${P(y1)}) ÷ (${N(x2)} − ${P(x1)}) = ${N(m)}⟧`,`⟦(${N(y2)} − ${P(y1)}) ÷ (${N(x2)} − ${P(x1)}) = ${N(m)}⟧`)}; },
+    const w=`⟦(${N(y2)} − ${P(y1)}) ÷ (${N(x2)} − ${P(x1)})⟧ = ⟦${N(m*dx)} ÷ ${dx} = ${N(m)}⟧`;
+    return {s:'algebra',q:bi(`ما ميل المستقيم المار بالنقطتين ⟦(${N(x1)}، ${N(y1)})⟧ و ⟦(${N(x2)}، ${N(y2)})⟧؟`,`What is the slope of the line through ⟦(${N(x1)}, ${N(y1)})⟧ and ⟦(${N(x2)}, ${N(y2)})⟧?`),o:mkOpts(m,[-m,m+1,dx,m*dx],N,true),e:bi(w,w)}; },
   polygon(){ const n=pick([5,6,8,9,10,12]); const sum=(n-2)*180; const names={5:['الخماسي','pentagon'],6:['السداسي','hexagon'],8:['الثماني','octagon'],9:['التساعي','nonagon'],10:['العشاري','decagon'],12:['الاثني عشري','dodecagon']}[n];
     if(rnd()<.5) return {s:'geometry',q:bi(`ما مجموع قياسات الزوايا الداخلية للمضلع ${names[0]}؟`,`What is the sum of the interior angles of a ${names[1]}?`),o:mkOpts(sum,[n*180,sum+180,sum-180,360],x=>N(x)+'°'),e:bi(`⟦(${n} − 2) × 180 = ${sum}⟧`,`⟦(${n} − 2) × 180 = ${sum}⟧`)};
     const each=sum/n; return {s:'geometry',q:bi(`ما قياس الزاوية الداخلية في ${names[0]} المنتظم؟`,`What is each interior angle of a regular ${names[1]}?`),o:mkOpts(each,[360/n,180-each+ (each===90?10:0),each+15,each-12],x=>N(x)+'°'),e:bi(`⟦(${n} − 2) × 180 ÷ ${n} = ${each}⟧`,`⟦(${n} − 2) × 180 ÷ ${n} = ${each}⟧`)}; },
@@ -824,19 +838,21 @@ Object.assign(GENS,{
     if(rnd()<.5) return {s:'geometry',q:bi(`مكعب طول حرفه ${a} سم. ما حجمه بالسنتيمتر المكعب؟`,`A cube has an edge of ${a} cm. What is its volume in cm³?`),o:mkOpts(v,[sa,a*a,3*a,v+a]),e:bi(`⟦${a}^3 = ${v}⟧`,`⟦${a}^3 = ${v}⟧`)};
     return {s:'geometry',q:bi(`مكعب طول حرفه ${a} سم. ما مساحته الكلية بالسنتيمتر المربع؟`,`A cube has an edge of ${a} cm. What is its total surface area in cm²?`),o:mkOpts(sa,[v,4*a*a,a*a,12*a]),e:bi(`⟦6 × ${a}^2 = ${sa}⟧`,`⟦6 × ${a}^2 = ${sa}⟧`)}; },
   clock(){ const h=R(1,11); let ang=30*h; if(ang>180) ang=360-ang;
+    /* distractors stay within 0–180°: a "smaller angle" above 180° is never a plausible choice */
     if(rnd()<.4){ const ha=30*h+15, d=Math.abs(ha-180); /* h:30 → minute hand at 180°, hour hand halfway between h and h+1 */
-      return {s:'geometry',q:bi(`ما قياس الزاوية الصغرى بين عقربي الساعة عند الساعة ${h}:30؟`,`What is the smaller angle between the clock hands at ${h}:30?`),o:mkOpts(d,[Math.abs(30*h-180),d+30,360-d,d+15],x=>N(x)+'°'),e:bi(`عقرب الدقائق عند ⟦180°⟧، وعقرب الساعات في منتصف المسافة بين ${h} و ${h+1}: ⟦${h} × 30 + 15 = ${ha}°⟧، والفرق ⟦${d}°⟧`,`The minute hand is at ⟦180°⟧; the hour hand is halfway between ${h} and ${h+1}: ⟦${h} × 30 + 15 = ${ha}°⟧, so the angle is ⟦${d}°⟧`)}; }
-    return {s:'geometry',q:bi(`ما قياس الزاوية الصغرى بين عقربي الساعة عند الساعة ${h}:00؟`,`What is the smaller angle between the clock hands at ${h}:00?`),o:mkOpts(ang,[360-ang,ang+30,ang-30,6*h],x=>N(x)+'°'),e:bi(`كل ساعة ⟦30°⟧ ، ⟦${h} × 30 = ${30*h}⟧${30*h>180?` ، والصغرى ⟦360 − ${30*h} = ${ang}⟧`:''}`,`Each hour is ⟦30°⟧, ⟦${h} × 30 = ${30*h}⟧${30*h>180?`; smaller angle ⟦= 360 − ${30*h} = ${ang}⟧`:''}`)}; },
+      return {s:'geometry',q:bi(`ما قياس الزاوية الصغرى بين عقربي الساعة عند الساعة ${h}:30؟`,`What is the smaller angle between the clock hands at ${h}:30?`),o:mkOpts(d,[Math.abs(30*h-180),d+30,180-d,d+15,d-15].filter(x=>x>0&&x<=180),x=>N(x)+'°'),e:bi(`عقرب الدقائق عند ⟦180°⟧، وعقرب الساعات في منتصف المسافة بين ${h} و ${h+1}: ⟦${h} × 30 + 15 = ${ha}°⟧، والفرق ⟦${d}°⟧`,`The minute hand is at ⟦180°⟧; the hour hand is halfway between ${h} and ${h+1}: ⟦${h} × 30 + 15 = ${ha}°⟧, so the angle is ⟦${d}°⟧`)}; }
+    return {s:'geometry',q:bi(`ما قياس الزاوية الصغرى بين عقربي الساعة عند الساعة ${h}:00؟`,`What is the smaller angle between the clock hands at ${h}:00?`),o:mkOpts(ang,[180-ang,ang+30,ang-30,6*h,15*h].filter(x=>x>0&&x<=180),x=>N(x)+'°'),e:bi(`كل ساعة ⟦30°⟧ ، ⟦${h} × 30 = ${30*h}⟧${30*h>180?` ، والصغرى ⟦360 − ${30*h} = ${ang}⟧`:''}`,`Each hour is ⟦30°⟧, ⟦${h} × 30 = ${30*h}⟧${30*h>180?`; smaller angle ⟦= 360 − ${30*h} = ${ang}⟧`:''}`)}; },
   prob(){ const r=R(1,7), b=R(1,9); const t=r+b, g=gcd(r,t); const ans=`${r/g}/${t/g}`;
     const f=(n,d)=>{const g=gcd(n,d);return `${n/g}/${d/g}`;}; const o=[ans]; [f(b,t),r<b?f(r,b):null,f(1,t),f(r,t+1),f(r+1,t+1)].filter(Boolean).forEach(c=>{ if(!o.includes(c)&&o.length<4) o.push(c); }); while(o.length<4) o.push(`${o.length}/${t+o.length}`);
-    return {s:'stats',q:bi(`صندوق فيه ${arC(r,['كرة حمراء واحدة','كرتان حمراوان','كرات حمراء','كرة حمراء'])} و ${arC(b,['كرة زرقاء واحدة','كرتان زرقاوان','كرات زرقاء','كرة زرقاء'])}. ما احتمال سحب كرة حمراء عشوائيًا؟`,`A box has ${r} red and ${b} blue ${b===1?'ball':'balls'}. What is the probability of drawing a red ball at random?`),o:o.map(x=>`⟦${x}⟧`),e:bi(`⟦${r} ÷ ${t} = ${ans}⟧`,`⟦${r} ÷ ${t} = ${ans}⟧`)}; },
+    return {s:'stats',q:bi(`صندوق فيه ${arC(r,['كرة حمراء واحدة','كرتان حمراوان','كرات حمراء','كرة حمراء'])} و${arC(b,['كرة زرقاء واحدة','كرتان زرقاوان','كرات زرقاء','كرة زرقاء'])}. ما احتمال سحب كرة حمراء عشوائيًا؟`,`A box has ${r} red and ${b} blue ${b===1?'ball':'balls'}. What is the probability of drawing a red ball at random?`),o:o.map(x=>`⟦${x}⟧`),e:bi(`⟦${r} ÷ ${t} = ${ans}⟧`,`⟦${r} ÷ ${t} = ${ans}⟧`)}; },
   weightedAvg(){ let n1,n2,a1,a2,tot; do{ n1=R(3,8); n2=R(3,8); a1=10*R(5,8); a2=a1+pick([5,10,15]); tot=n1*a1+n2*a2; }while(tot%(n1+n2)); const ans=tot/(n1+n2);
     return {s:'stats',q:bi(`${n1} طلاب متوسط درجاتهم ${a1}، و ${n2} طلاب متوسطهم ${a2}. ما متوسط درجات الجميع؟`,`${n1} students averaged ${a1} and ${n2} students averaged ${a2}. What is the overall average?`),o:mkOpts(ans,[(a1+a2)/2,ans+2,ans-2,a2]),e:bi(`⟦(${n1*a1} + ${n2*a2}) ÷ ${n1+n2} = ${ans}⟧`,`⟦(${n1*a1} + ${n2*a2}) ÷ ${n1+n2} = ${ans}⟧`)}; },
   lcm(){ const pairs=[[4,6],[6,8],[6,9],[8,12],[9,12],[10,15],[12,18],[4,10],[6,10],[15,20],[8,10],[10,12],[12,16],[14,21],[6,15]]; const [a,b]=pick(pairs); const l=a*b/gcd(a,b); const SEC=['ثانية','ثانيتين','ثوانٍ','ثانية'];
     return {s:'arith',q:bi(`تضيء إشارة كل ${arC(a,SEC)} وأخرى كل ${arC(b,SEC)}. إذا أضاءتا معًا الآن، فبعد كم ثانية تضيئان معًا مرة أخرى؟`,`One light flashes every ${a} seconds and another every ${b} seconds. If they flash together now, after how many seconds will they flash together again?`),o:mkOpts(l,[a*b,a+b,gcd(a,b),l*2]),e:bi(`المضاعف المشترك الأصغر لـ ${a} و ${b} هو ⟦${l}⟧`,`The least common multiple of ${a} and ${b} is ⟦${l}⟧`)}; },
   sqrtSimp(){ const a=pick([2,3,4,5,6]); let b=pick([2,3,5,6,7]); while(b===a) b=pick([2,3,5,6,7]); const n=a*a*b;
-    const sq=k=>Number.isInteger(Math.sqrt(k)); const o=[`${a}√${b}`];
-    [[b,a],[a*a,b],[a,b*2],[a+1,b],[a,b+1],[2*a,b]].forEach(([c,k])=>{ const x=`${c}√${k}`; if(o.length<4&&!sq(k)&&!o.includes(x)) o.push(x); });
+    const sq=k=>Number.isInteger(Math.sqrt(k)); const o=[`${a}√${b}`]; const vals=[a*Math.sqrt(b)];
+    /* no two options may be equal in value (3√12 is 6√3): compare numerically, not as text */
+    [[b,a],[a*a,b],[a,b*2],[a+1,b],[a,b+1],[2*a,b]].forEach(([c,k])=>{ const x=`${c}√${k}`, v=c*Math.sqrt(k); if(o.length<4&&!sq(k)&&!vals.some(y=>Math.abs(y-v)<1e-9)){ o.push(x); vals.push(v); } });
     return {s:'algebra',q:bi(`ما أبسط صورة للعدد ⟦√${n}⟧؟`,`What is the simplest form of ⟦√${n}⟧?`),o:o.map(x=>`⟦${x}⟧`),e:bi(`⟦√${n} = √(${a*a} × ${b}) = ${a}√${b}⟧`,`⟦√${n} = √(${a*a} × ${b}) = ${a}√${b}⟧`)}; },
   compareVar(){ const T=[
       ['⟦س > 1⟧<br>القيمة الأولى: ⟦س^2⟧<br>القيمة الثانية: ⟦س⟧','⟦x > 1⟧<br>Quantity A: ⟦x^2⟧<br>Quantity B: ⟦x⟧',0,'أي عدد أكبر من 1 يكبر بتربيعه.','Any number above 1 grows when squared.'],
@@ -856,8 +872,8 @@ GEN_BY_SKILL.algebra.push('system','consecutive','powerEq','slope','sqrtSimp');
 GEN_BY_SKILL.geometry.push('polygon','cube','clock');
 GEN_BY_SKILL.stats.push('prob','weightedAvg');
 GEN_BY_SKILL.comparison.push('compareVar','compare');
-/* wrap every quant generator with the de-duplicating retry (see genUnique in gen.js) */
-Object.keys(GENS).forEach(k=>{ const f=GENS[k]; GENS[k]=()=>genUnique(f); });
+/* wrap every quant generator with the de-duplicating retry and sibling rotation (see genUnique in gen.js) */
+const RAWGENS={}; Object.keys(GENS).forEach(k=>{ RAWGENS[k]=GENS[k]; GENS[k]=()=>genFork(RAWGENS[k],k,RAWGENS); });
 /* ============ Lessons (expanded) ============ */
 const TARGET_T = {analogy:40,completion:45,context:45,odd:35,reading:80,arith:60,algebra:65,geometry:70,stats:60,comparison:50};
 const KA = {arith:'https://www.khanacademy.org/math/arithmetic',algebra:'https://www.khanacademy.org/math/algebra',geometry:'https://www.khanacademy.org/math/geometry',stats:'https://www.khanacademy.org/math/statistics-probability',pre:'https://www.khanacademy.org/math/pre-algebra'};
@@ -1199,7 +1215,7 @@ const PATTERNS=[
 const T = {
  ar:{
   cloudT:'حسابك', cloudOn:'مسجّل بالبريد', cloudOff:'سجّل ببريدك ليُحفظ تقدمك في حسابك، وتكمل من أي جهاز.', acctManage:'إدارة الحساب', acctJoin:'أنشئ حسابًا أو ادخل', cloudSaving:'جارٍ حفظ تقدمك...', cloudErr:'تعذّر حفظ تقدمك الآن، وسنعيد المحاولة تلقائيًا.', cloudSynced:'آخر حفظ في حسابك:',
-  acctTitle:'حسابك', acctJoinT:'احفظ تقدمك في حسابك', acctWhy:'يكفي اسمك وبريدك وكلمة مرور، ليُحفظ تقدمك وتكمل من أي جهاز تدخل منه.', fullName:'اسم الطالب أو الطالبة', namePh:'مثال: سارة أحمد', nameT:'الاسم', nameEdit:'تعديل الاسم', nameSave:'احفظ الاسم', nameSaved:'حُفظ الاسم.', nameMissing:'أضف اسمك ليظهر أعلى الصفحة.', hello:'أهلًا', signUp:'تسجيل جديد', signIn:'دخول', email:'البريد الإلكتروني', password:'كلمة المرور (٨ أحرف على الأقل)', consent:'أوافق على <a href="/terms" target="_blank" rel="noopener">الشروط والأحكام</a> و<a href="/privacy" target="_blank" rel="noopener">سياسة الخصوصية</a>.', withGoogle:'المتابعة بحساب Google', withFacebook:'المتابعة بحساب Facebook', orEmail:'أو بالبريد الإلكتروني', socialNote:'بالمتابعة توافق على <a href="/terms" target="_blank" rel="noopener">الشروط والأحكام</a> و<a href="/privacy" target="_blank" rel="noopener">سياسة الخصوصية</a>.', socialErr:{cancelled:'لم يكتمل الدخول. حاول مرة أخرى.',expired:'انتهت مهلة الدخول. حاول مرة أخرى.','no-email':'لم نتمكن من الحصول على بريدك الإلكتروني من الحساب. سجّل بالبريد مباشرة.',unavailable:'هذه الطريقة غير متاحة حاليًا.',busy:'محاولات كثيرة. انتظر قليلًا ثم حاول.',failed:'تعذّر الدخول بهذه الطريقة الآن. حاول مرة أخرى أو سجّل بالبريد.'}, legalPrivacy:'سياسة الخصوصية', legalTerms:'الشروط والأحكام', needConsent:'يلزم الموافقة على حفظ البيانات لإكمال التسجيل.', withGoogle:'المتابعة بحساب Google', forgot:'نسيت كلمة المرور؟', resetSent:'أرسلنا رابط إعادة التعيين إلى بريدك.', syncNow:'احفظ الآن', chPw:'تغيير كلمة المرور', curPw:'كلمة المرور الحالية', newPw:'كلمة المرور الجديدة (٨ أحرف على الأقل)', chPwBtn:'غيّر كلمة المرور', pwChanged:'تم تغيير كلمة المرور.', signOut:'تسجيل الخروج', verifyHint:'أرسلنا إلى بريدك رابط تأكيد. التأكيد اختياري، لكنه يسهّل عليك استعادة حسابك.', delAcct:'حذف حسابي وبياناتي', delConfirm:'سيُحذف حسابك وكل البيانات المحفوظة فيه نهائيًا، ويبقى تقدمك على هذا الجهاز فقط.', delYes:'نعم، احذف', deleted:'حُذف حسابك وبياناتك.',
+  acctTitle:'حسابك', acctJoinT:'احفظ تقدمك في حسابك', acctWhy:'يكفي اسمك وبريدك وكلمة مرور، ليُحفظ تقدمك وتكمل من أي جهاز تدخل منه.', fullName:'اسم الطالب أو الطالبة', namePh:'مثال: سارة أحمد', nameT:'الاسم', nameEdit:'تعديل الاسم', nameSave:'احفظ الاسم', nameSaved:'حُفظ الاسم.', nameMissing:'أضف اسمك ليظهر أعلى الصفحة.', hello:'أهلًا', signUp:'تسجيل جديد', signIn:'دخول', email:'البريد الإلكتروني', password:'كلمة المرور (٨ أحرف على الأقل)', consent:'أوافق على <a href="/terms" target="_blank" rel="noopener">الشروط والأحكام</a> و<a href="/privacy" target="_blank" rel="noopener">سياسة الخصوصية</a>.', withGoogle:'المتابعة بحساب Google', withFacebook:'المتابعة بحساب Facebook', orEmail:'أو بالبريد الإلكتروني', socialNote:'بالمتابعة توافق على <a href="/terms" target="_blank" rel="noopener">الشروط والأحكام</a> و<a href="/privacy" target="_blank" rel="noopener">سياسة الخصوصية</a>.', socialErr:{cancelled:'لم يكتمل الدخول. حاول مرة أخرى.',expired:'انتهت مهلة الدخول. حاول مرة أخرى.','no-email':'لم نتمكن من الحصول على بريدك الإلكتروني من الحساب. سجّل بالبريد مباشرة.',unavailable:'هذه الطريقة غير متاحة حاليًا.',busy:'محاولات كثيرة. انتظر قليلًا ثم حاول.',failed:'تعذّر الدخول بهذه الطريقة الآن. حاول مرة أخرى أو سجّل بالبريد.'}, legalPrivacy:'سياسة الخصوصية', legalTerms:'الشروط والأحكام', needConsent:'يلزم الموافقة على حفظ البيانات لإكمال التسجيل.', withGoogle:'المتابعة بحساب Google', forgot:'نسيت كلمة المرور؟', resetSent:'أرسلنا رابط إعادة التعيين إلى بريدك.', syncNow:'احفظ الآن', chPw:'تغيير كلمة المرور (تُسجّل خروجك من الأجهزة الأخرى)', curPw:'كلمة المرور الحالية', newPw:'كلمة المرور الجديدة (٨ أحرف على الأقل)', chPwBtn:'غيّر كلمة المرور', pwChanged:'تم تغيير كلمة المرور، وسُجّل خروج حسابك من الأجهزة الأخرى.', signOut:'تسجيل الخروج', verifyHint:'أرسلنا إلى بريدك رابط تأكيد. التأكيد اختياري، لكنه يسهّل عليك استعادة حسابك.', delAcct:'حذف حسابي وبياناتي', delConfirm:'سيُحذف حسابك وكل البيانات المحفوظة فيه نهائيًا من خوادمنا، ويُزال تقدمك من هذا الجهاز أيضًا. إن أردت نسخة فاحفظ ملف تقدمك أولًا من صفحة «تقدّمي».', delYes:'نعم، احذف', deleted:'حُذف حسابك وبياناتك.', deletedD:'شكرًا لك. أُزيل حسابك وكل بياناته من خوادمنا ومن هذا الجهاز، ويمكنك إنشاء حساب جديد متى شئت.',
   privT:'ما البيانات التي نحفظها؟', privD:'لا نحفظ إلا اسمك، وبريدك الإلكتروني، ومسارك (علمي أو نظري)، ودرجتك المستهدفة، وموعد اختبارك إن أدخلته، وتقدمك في التدريب. لا نطلب رقم جوال ولا هوية، ويمكنك حذف حسابك وكل بياناتك في أي وقت من هذه النافذة.',
   authErr:{'email-already-in-use':'هذا البريد مسجّل مسبقًا. اختر «دخول».','invalid-email':'البريد الإلكتروني غير صحيح.','invalid-name':'اكتب اسمك (حرفان على الأقل، و٦٠ حرفًا بحد أقصى).','weak-password':'كلمة المرور قصيرة؛ استخدم ٨ أحرف على الأقل.','invalid-credential':'البريد أو كلمة المرور غير صحيحة.','wrong-password':'البريد أو كلمة المرور غير صحيحة.','user-not-found':'لا يوجد حساب بهذا البريد. اختر «تسجيل جديد».','too-many-requests':'محاولات كثيرة. انتظر قليلًا ثم أعد المحاولة.','network-request-failed':'لا يوجد اتصال بالإنترنت.','requires-recent-login':'لحذف الحساب سجّل الخروج ثم ادخل من جديد وكرر الحذف.','popup-closed-by-user':'أُغلقت نافذة Google قبل الإكمال.','operation-not-allowed':'طريقة الدخول هذه غير متاحة حاليًا.','reset-admin':'لإعادة تعيين كلمة المرور راسلنا على info@gat.academy، وسنرسل إليك كلمة مرور مؤقتة تغيّرها بعد الدخول.',consent:'يلزم الموافقة على الشروط وسياسة الخصوصية لإكمال التسجيل.',unauthenticated:'انتهت الجلسة. ادخل من جديد.',server:'تعذّر الاتصال الآن. حاول بعد قليل.',other:'حدث خطأ غير متوقع. حاول مرة أخرى.'},
   reviewBtn:'مراجعة', reviewOf:'مراجعة اختبار', retake:'أعد الحل', reviewHint:'اضغط أي اختبار مكتمل لتراجع إجاباتك وأخطاءك. يحتفظ هذا الجهاز بتفاصيل آخر ٢٠ اختبارًا، وآخر محاولة لكل نموذج.', noDetail:'تفاصيل هذا الاختبار غير متاحة، فربما أجريته على جهاز آخر أو منذ مدة.',
@@ -1266,7 +1282,7 @@ const T = {
  },
  en:{
   cloudT:'Your account', cloudOn:'Signed in as', cloudOff:'Sign up with your email to save your progress to your account and pick up where you left off on any device.', acctManage:'Manage account', acctJoin:'Sign up or sign in', cloudSaving:'Saving your progress...', cloudErr:'Couldn’t save your progress just now. We’ll try again automatically.', cloudSynced:'Last saved to your account:',
-  acctTitle:'Your account', acctJoinT:'Save your progress to your account', acctWhy:'All it takes is your name, email and a password. Your progress is saved and goes with you to any device.', fullName:'Student name', namePh:'e.g. Sara Ahmed', nameT:'Name', nameEdit:'Edit name', nameSave:'Save name', nameSaved:'Name saved.', nameMissing:'Add your name so it shows at the top of the page.', hello:'Hi', signUp:'Sign up', signIn:'Sign in', email:'Email', password:'Password (at least 8 characters)', consent:'I agree to the <a href="/terms?lang=en" target="_blank" rel="noopener">Terms</a> and the <a href="/privacy?lang=en" target="_blank" rel="noopener">Privacy Policy</a>.', withGoogle:'Continue with Google', withFacebook:'Continue with Facebook', orEmail:'or use your email', socialNote:'By continuing you agree to the <a href="/terms?lang=en" target="_blank" rel="noopener">Terms</a> and the <a href="/privacy?lang=en" target="_blank" rel="noopener">Privacy Policy</a>.', socialErr:{cancelled:'Sign-in was not completed. Please try again.',expired:'The sign-in took too long. Please try again.','no-email':'We could not get your email from that account. Sign up with your email instead.',unavailable:'This option is not available right now.',busy:'Too many attempts. Wait a moment and try again.',failed:'That sign-in did not work just now. Try again or use your email.'}, legalPrivacy:'Privacy Policy', legalTerms:'Terms', needConsent:'Please agree to data storage to finish signing up.', withGoogle:'Continue with Google', forgot:'Forgot password?', resetSent:'We sent a reset link to your email.', syncNow:'Save now', chPw:'Change password', curPw:'Current password', newPw:'New password (at least 8 characters)', chPwBtn:'Change password', pwChanged:'Password changed.', signOut:'Sign out', verifyHint:'We sent a confirmation link to your email. Confirming is optional, but it makes recovering your account easier.', delAcct:'Delete my account and data', delConfirm:'Your account and everything saved in it will be permanently deleted. Your progress will stay on this device only.', delYes:'Yes, delete', deleted:'Account and data deleted.',
+  acctTitle:'Your account', acctJoinT:'Save your progress to your account', acctWhy:'All it takes is your name, email and a password. Your progress is saved and goes with you to any device.', fullName:'Student name', namePh:'e.g. Sara Ahmed', nameT:'Name', nameEdit:'Edit name', nameSave:'Save name', nameSaved:'Name saved.', nameMissing:'Add your name so it shows at the top of the page.', hello:'Hi', signUp:'Sign up', signIn:'Sign in', email:'Email', password:'Password (at least 8 characters)', consent:'I agree to the <a href="/terms?lang=en" target="_blank" rel="noopener">Terms</a> and the <a href="/privacy?lang=en" target="_blank" rel="noopener">Privacy Policy</a>.', withGoogle:'Continue with Google', withFacebook:'Continue with Facebook', orEmail:'or use your email', socialNote:'By continuing you agree to the <a href="/terms?lang=en" target="_blank" rel="noopener">Terms</a> and the <a href="/privacy?lang=en" target="_blank" rel="noopener">Privacy Policy</a>.', socialErr:{cancelled:'Sign-in was not completed. Please try again.',expired:'The sign-in took too long. Please try again.','no-email':'We could not get your email from that account. Sign up with your email instead.',unavailable:'This option is not available right now.',busy:'Too many attempts. Wait a moment and try again.',failed:'That sign-in did not work just now. Try again or use your email.'}, legalPrivacy:'Privacy Policy', legalTerms:'Terms', needConsent:'Please agree to data storage to finish signing up.', withGoogle:'Continue with Google', forgot:'Forgot password?', resetSent:'We sent a reset link to your email.', syncNow:'Save now', chPw:'Change password (signs out your other devices)', curPw:'Current password', newPw:'New password (at least 8 characters)', chPwBtn:'Change password', pwChanged:'Password changed, and your account was signed out on other devices.', signOut:'Sign out', verifyHint:'We sent a confirmation link to your email. Confirming is optional, but it makes recovering your account easier.', delAcct:'Delete my account and data', delConfirm:'Your account and everything saved in it will be permanently deleted from our servers, and your progress is removed from this device too. If you want a copy, save a progress file first from the Progress page.', delYes:'Yes, delete', deleted:'Account and data deleted.', deletedD:'Thank you. Your account and all its data were removed from our servers and from this device. You can create a new account any time.',
   privT:'What data do we keep?', privD:'We keep only your name, email, track, target score, test date (if you add it) and practice progress. We never ask for a phone number or ID, and you can delete your account and all your data at any time from this window.',
   authErr:{'email-already-in-use':'This email is already registered. Choose "Sign in".','invalid-email':'That email address is not valid.','invalid-name':'Enter your name (2 to 60 characters).','weak-password':'Password too short; use at least 8 characters.','invalid-credential':'Wrong email or password.','wrong-password':'Wrong email or password.','user-not-found':'No account with this email. Choose "Sign up".','too-many-requests':'Too many attempts. Wait a moment and try again.','network-request-failed':'No internet connection.','requires-recent-login':'To delete your account, sign out, sign in again and repeat.','popup-closed-by-user':'The Google window closed before finishing.','operation-not-allowed':'This sign-in method isn’t available right now.','reset-admin':'To reset your password, email info@gat.academy. We’ll send you a temporary password to change after you sign in.',consent:'Please agree to the Terms and Privacy Policy to finish signing up.',unauthenticated:'Your session ended. Please sign in again.',server:'We couldn’t connect just now. Please try again shortly.',other:'Something went wrong. Please try again.'},
   reviewBtn:'Review', reviewOf:'Review of test', retake:'Retake', reviewHint:'Tap any completed test to review your answers and mistakes. This device keeps the details of your last 20 tests and your latest attempt at each model test.', noDetail:'Details for this test aren’t available. You may have taken it on another device or a while ago.',
@@ -1398,14 +1414,14 @@ Object.assign(T.ar,{
   cmpRows:v=>[['الاختبار التشخيصي (٢٠ سؤالًا)','مرة واحدة','متى شئت'],['الشروحات المتحركة المسموعة',`${v.xp} من ${v.xpAll}`,`كلها (${v.xpAll})`],['أسئلة التدريب',`${v.daily} يوميًا`,'بلا حد'],['البطاقات والمفردات','مختارات من كل مهارة','كلها'],['الخطة الدراسية',v.weeksN===2?'أول أسبوعين':v.weeksN===1?'الأسبوع الأول':`أول ${v.weeks} أسابيع`,'حتى يوم الاختبار'],['صندوق الأخطاء',`آخر ${v.mist} من أخطائك`,'بلا حد'],['التقنيات والأنماط','مختارات','كلها'],['التحليلات','خريطة الإتقان وتحليل مهارتين','كل المهارات'],['٣٠ نموذجًا والأقسام والمحاكاة الكاملة',false,true],['مراجعة أي محاولة سابقة',false,true],['الدرجة التقديرية وتحليل الزمن',false,true],['التكرار المتباعد الذكي',false,true],['تحليل أسباب الأخطاء',false,true],['تدريب موجّه على مهارة أو نمط',false,true],['تخصيص الخطة بموعد الاختبار والهدف',false,true]],
   couponL:'لديك رمز خصم؟', couponPh:'رمز الخصم', applyBtn:'تطبيق', couponOk:p=>`خصم ${p}٪`, couponBad:'رمز الخصم غير صالح لهذه الباقة.', couponSignup:'سجّل حسابك أولًا لتطبيق الرمز.',
   total:'الإجمالي', free100:'مجانًا بالرمز', payBtn:'ادفع وابدأ الآن', payBusy:'جارٍ التحويل...', activateBtn:'فعّل اشتراكي الآن', signupToBuy:'سجّل حسابك المجاني للمتابعة',
-  payNote:'مدى، Apple Pay، STC Pay والبطاقات. دفع آمن عبر ميسّر.', payOff:'الدفع الإلكتروني غير متاح مؤقتًا', payOffD:'الدفع الإلكتروني غير متاح الآن. إن كان لديك رمز اشتراك فأدخله في خانة رمز الخصم ليُفعَّل اشتراكك فورًا.',
+  payNote:p=>p?`مدى، Apple Pay، STC Pay والبطاقات. دفع آمن عبر ${p}.`:'مدى، Apple Pay، STC Pay والبطاقات. دفع آمن.', payOff:'الدفع الإلكتروني غير متاح مؤقتًا', payOffD:'الدفع الإلكتروني غير متاح الآن. إن كان لديك رمز اشتراك فأدخله في خانة رمز الخصم ليُفعَّل اشتراكك فورًا.',
   refund:d=>`لم يناسبك الاشتراك؟ نعيد إليك المبلغ كاملًا إن طلبت ذلك خلال ${d} أيام. راسلنا على info@gat.academy`,
   paidT:'تم تفعيل اشتراكك', paidD:'فُتح كل شيء. بالتوفيق في اختبارك!', paidWait:'نتحقق من الدفع الآن، وتُفتح لك المزايا خلال لحظات.', failedT:'لم تكتمل عملية الدفع', failedD:'يمكنك المحاولة مجددًا أو اختيار وسيلة دفع أخرى. إن خُصم المبلغ ولم يُفعَّل اشتراكك فراسلنا وسنحل الأمر.',
   youArePro:'أنت مشترك', activeUntil:d=>`اشتراكك فعّال حتى ${d}`, proForever:'اشتراكك فعّال.', goToday:'إلى يومي', allOpen:'كل المزايا متاحة لك.',
   signupFirstT:'سجّل أولًا', signupFirst:'أنشئ حسابك المجاني أولًا ثم اختر باقتك، ليرتبط اشتراكك بحسابك وتستخدمه من أي جهاز.',
   errGeneric:'تعذّر إكمال الطلب. حاول مجددًا.', errNet:'تعذّر الاتصال. تحقق من الإنترنت ثم حاول مجددًا.', errAuth:'انتهت جلستك. سجّل الدخول من جديد.',
   ctxStart:'ابدأ بالمجاني، واشترك حين تحتاج المزيد.', ctxDaily:n=>`أنهيت أسئلتك المجانية الـ ${n} لهذا اليوم.`, ctxXp:n=>`أنهيت ${n} من الشروحات.`, ctxAcc:(s,a,b)=>`ارتفعت دقتك في ${s} من ${a}٪ إلى ${b}٪.`, ctxDays:n=>`تدرّبت حتى الآن في ${n} من الأيام.`, ctxMore:n=>`وما زال أمامك ${n} من الشروحات.`,
-  nudgeT:'أحسنت!',
+  nudgeT:'أحسنت!', studyNow:'بطاقة الآن', practiceKinds:'أنواع التدريب', included:'متاح', notIncluded:'غير متاح',
   subT:'اشتراكي', planFree:'مجاني', planFreeD:'الخطة المجانية، بلا مدة.', payHist:'سجل المدفوعات', noPays:'لا مدفوعات بعد.', payStatus:{paid:'مدفوع',failed:'لم يكتمل',refunded:'مسترد',initiated:'قيد الدفع'},
   reportT:'تقرير بدايتك', reportIntro:n=>`هذا يومك الـ ${n} منذ بدأت. إليك رحلتك بالأرقام: من أين بدأت، وأين أنت الآن، وكم بقي لتبلغ هدفك.`, repNotYet:n=>`هذه نظرة مبكرة، والأيام المتبقية حتى يكتمل تقريرك: ${n}.`,
   reportReadyE:'تقريرك جاهز', reportReadyT:'أين كنت، وأين أنت الآن', reportReadyD:'قارن نقطة بدايتك في التشخيصي بمستواك اليوم، وكم بقي إلى هدفك.', reportOpen:'اعرض التقرير',
@@ -1429,14 +1445,14 @@ Object.assign(T.en,{
   cmpRows:v=>[['Diagnostic test (20 questions)','Once','Any time'],['Animated, narrated explainers',`${v.xp} of ${v.xpAll}`,`All ${v.xpAll}`],['Daily practice',`${v.daily} questions a day`,'Unlimited'],['Flashcards and vocabulary','A selection from every skill','All'],['Study plan',v.weeksN===1?'First week':`First ${v.weeks} weeks`,'Up to test day'],['Mistake box',`Last ${v.mist}`,'Unlimited'],['Techniques and patterns','A selection','All'],['Analytics','Mastery map and 2 skills in detail','All skills'],['30 model tests, sections and full mocks',false,true],['Review any past attempt',false,true],['Estimated score and time analysis',false,true],['Smart spaced repetition',false,true],['Mistake-cause analysis',false,true],['Targeted skill and pattern practice',false,true],['Plan with your test date and target',false,true]],
   couponL:'Have a coupon?', couponPh:'Coupon code', applyBtn:'Apply', couponOk:p=>`${p}% off`, couponBad:'This coupon is not valid for this plan.', couponSignup:'Sign up first to apply a coupon.',
   total:'Total', free100:'Free with this code', payBtn:'Pay and start now', payBusy:'Redirecting...', activateBtn:'Activate my plan now', signupToBuy:'Create your free account to continue',
-  payNote:'mada, Apple Pay, STC Pay and cards. Secure checkout by Moyasar.', payOff:'Online payment is temporarily unavailable', payOffD:'Online payment isn’t available right now. If you have a subscription code, enter it in the coupon field to activate your plan right away.',
+  payNote:p=>p?`mada, Apple Pay, STC Pay and cards. Secure checkout by ${p}.`:'mada, Apple Pay, STC Pay and cards. Secure checkout.', payOff:'Online payment is temporarily unavailable', payOffD:'Online payment isn’t available right now. If you have a subscription code, enter it in the coupon field to activate your plan right away.',
   refund:d=>`Not the right fit? Ask within ${d} days for a full refund. Email info@gat.academy`,
   paidT:'Your Pro plan is active', paidD:'Everything is open. Good luck on your test!', paidWait:'We’re confirming your payment. Pro will unlock in a moment.', failedT:'The payment didn’t go through', failedD:'You can try again or use another payment method. If you were charged but your plan isn’t active, email us and we’ll sort it out.',
   youArePro:'You are on Pro', activeUntil:d=>`Pro until ${d}`, proForever:'Your plan is active.', goToday:'Go to Today', allOpen:'Everything is unlocked for you.',
   signupFirstT:'Sign up first', signupFirst:'Create your free account first, then choose a plan, so it’s linked to your account and works on any device.',
   errGeneric:'Something went wrong. Please try again.', errNet:'Could not connect. Check your internet and try again.', errAuth:'Your session ended. Please sign in again.',
   ctxStart:'Start free, and go Pro when you’re ready for more.', ctxDaily:n=>`You finished today's ${n} free questions.`, ctxXp:n=>`You finished ${n} explainer${n==='1'?'':'s'}.`, ctxAcc:(s,a,b)=>`Your ${s} accuracy rose from ${a}% to ${b}%.`, ctxDays:n=>`You have practiced on ${n} day${n==='1'?'':'s'}.`, ctxMore:n=>n==='1'?'One more explainer is waiting.':`${n} more explainers are waiting.`,
-  nudgeT:'Nice work!',
+  nudgeT:'Nice work!', studyNow:'Study now', practiceKinds:'Practice options', included:'Included', notIncluded:'Not included',
   subT:'My subscription', planFree:'Free', planFreeD:'Free plan, no time limit.', payHist:'Payment history', noPays:'No payments yet.', payStatus:{paid:'Paid',failed:'Not completed',refunded:'Refunded',initiated:'Pending'},
   reportT:'Your progress report', reportIntro:n=>`This is day ${n} of your journey. Here’s your journey in numbers: where you began, where you are now, and how far you are from your target.`, repNotYet:n=>`This is an early look. Days until your full report: ${n}.`,
   reportReadyE:'Your report is ready', reportReadyT:'Where you started, where you are now', reportReadyD:'Compare your diagnostic baseline with your level today, and see how far you are from your target.', reportOpen:'Open the report',
@@ -1528,16 +1544,47 @@ const GUIDE_SOURCES = [
 
 /* ============ STATE ============ */
 const KEY='masar100_v1';
-const todayStr=()=>new Date().toISOString().slice(0,10);
-const addDays=(d,n)=>{ const x=new Date(d+'T12:00:00'); x.setDate(x.getDate()+n); return x.toISOString().slice(0,10); };
+/* calendar days are the student's local days (midnight in Riyadh, not UTC): the daily limit, streaks, plan weeks and review dates all use them */
+const pad2=n=>String(n).padStart(2,'0');
+const ymd=x=>x.getFullYear()+'-'+pad2(x.getMonth()+1)+'-'+pad2(x.getDate());
+const todayStr=()=>ymd(new Date());
+const addDays=(d,n)=>{ const x=new Date(String(d).slice(0,10)+'T12:00:00'); x.setDate(x.getDate()+n); return ymd(x); };
+const isDay=v=>typeof v==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(v)&&!isNaN(new Date(v+'T12:00:00'));
 const DEF=()=>({lang:'ar',track:'sci',target:100,examDate:'',weeks:8,planStart:todayStr(),done:{},stats:{},recent:[],attempts:[],mistakes:[],days:[],sessionDays:[],vocab:{ar:{},en:{}},cards:{},models:{},xp:{},causes:{concept:0,careless:0,time:0,trap:0}});
-let S=(()=>{ try{ let r=localStorage.getItem(KEY); if(!r){ const old=localStorage.getItem('masar95_v1'); if(old){ const o=JSON.parse(old); o.target=100; (o.mistakes||[]).forEach(m=>{m.box=0;m.due=todayStr();}); return Object.assign(DEF(),o);} }
-  if(r) return Object.assign(DEF(),JSON.parse(r)); }catch(e){} return DEF(); })();
+/* any stored or imported state (old shapes, missing fields, wrong types) becomes a valid state with defaults; never throws */
+function normalize(o){
+  if(!o||typeof o!=='object'||Array.isArray(o)) o={};
+  const s=Object.assign(DEF(),o);
+  const isObj=v=>!!v&&typeof v==='object'&&!Array.isArray(v);
+  ['recent','attempts','mistakes','days','sessionDays'].forEach(k=>{ if(!Array.isArray(s[k])) s[k]=[]; });
+  ['done','stats','cards','models','xp','causes','vocab','dq','diag','rst'].forEach(k=>{ if(s[k]!=null&&!isObj(s[k])) delete s[k]; });
+  ['done','stats','cards','models','xp','causes','vocab'].forEach(k=>{ if(!isObj(s[k])) s[k]={}; });
+  if(!isObj(s.vocab.ar)) s.vocab.ar={}; if(!isObj(s.vocab.en)) s.vocab.en={};
+  for(const c of ['concept','careless','time','trap']) s.causes[c]=Math.max(0,+s.causes[c]||0);
+  s.lang=s.lang==='en'?'en':'ar'; s.track=s.track==='lit'?'lit':'sci'; s.target=Math.max(60,Math.min(100,Math.round(+s.target)||100)); s.weeks=[4,6,8,10,12].includes(+s.weeks)?+s.weeks:8;
+  if(!isDay(s.planStart)) s.planStart=todayStr(); if(!isDay(s.examDate)) s.examDate=''; if(s.since!=null&&!isDay(s.since)) delete s.since;
+  s.recent=s.recent.filter(x=>isObj(x)&&typeof x.s==='string'); s.attempts=s.attempts.filter(x=>isObj(x)&&typeof x.kind==='string');
+  s.mistakes=s.mistakes.filter(x=>isObj(x)&&x.key&&Array.isArray(x.opts)).map(m=>{ if(typeof m.box!=='number') m.box=0; if(!isDay(m.due)) m.due=todayStr(); if(m.lang!=='en') m.lang='ar'; return m; });
+  const days=a=>[...new Set(a.filter(isDay))].sort(); s.days=days(s.days); s.sessionDays=days(s.sessionDays);
+  if(s.diag&&(!isObj(s.diag.skills)||!isDay(s.diag.date))) delete s.diag;
+  if(s.dq&&!isDay(s.dq.d)) delete s.dq;
+  for(const k of ['cards','xp','models','stats']) for(const [id,v] of Object.entries(s[k])) if(!isObj(v)) delete s[k][id];
+  for(const l of ['ar','en']) for(const [w,v] of Object.entries(s.vocab[l])) if(!isObj(v)) delete s.vocab[l][w];
+  return s;
+}
+let LOAD_ERR=false; /* the saved copy on this device could not be read (corrupt or truncated JSON) */
+let S=(()=>{ let r=null; try{ r=localStorage.getItem(KEY); if(r==null){ const old=localStorage.getItem('masar95_v1'); if(old){ const o=JSON.parse(old); o.target=100; (o.mistakes||[]).forEach(m=>{m.box=0;m.due=todayStr();}); return normalize(o); } } }catch(e){}
+  if(r!=null){ try{ const o=JSON.parse(r); if(!o||typeof o!=='object'||Array.isArray(o)) throw 0; return normalize(o); }catch(e){ LOAD_ERR=true; try{ localStorage.setItem(KEY+'_bad',String(r).slice(0,2e6)); }catch(e2){} } }
+  return normalize({}); })();
 { /* ?lang=en|ar from the marketing page: apply once, then drop it from the address */ try{ const u=new URL(location.href), q=u.searchParams.get('lang'); if(q==='en'||q==='ar'){ S.lang=q; u.searchParams.delete('lang'); history.replaceState(null,'',u.pathname+(u.search||'')+u.hash); } }catch(e){} }
 if(!S.since) S.since=todayStr(); /* first use on this device (merged with the cloud copy: the earliest wins) */
-let STORE_OK=(()=>{ try{ localStorage.setItem('__t','1'); localStorage.removeItem('__t'); return true; }catch(e){ return false; } })(), PERSIST=false;
+let STORE_OK=(()=>{ try{ localStorage.setItem('__t','1'); localStorage.removeItem('__t'); return true; }catch(e){ return false; } })(), PERSIST=false, SAVE_WARNED=false;
 try{ navigator.storage?.persisted?.().then(v=>{ PERSIST=v; if(!v&&navigator.storage.persist) navigator.storage.persist().then(x=>PERSIST=x).catch(()=>{}); }).catch(()=>{}); }catch(e){}
-const save=()=>{ S.savedAt=Date.now(); try{ localStorage.setItem(KEY,JSON.stringify(S)); STORE_OK=true; }catch(e){ STORE_OK=false; } try{ window.CLOUD?.queue?.(); }catch(e){} const el=document.getElementById('save-dot'); if(el){ el.classList.toggle('bad',!STORE_OK); el.title=STORE_OK?t('savedOk'):t('saveFail'); } };
+/* save to this device; when storage is full, old attempt details are dropped to make room, and the student is warned once instead of losing work silently */
+const save=()=>{ S.savedAt=Date.now(); const body=JSON.stringify(S); let ok=false;
+  try{ localStorage.setItem(KEY,body); ok=true; }catch(e){ try{ if(typeof shrinkDetails==='function'&&shrinkDetails(8)){ localStorage.setItem(KEY,body); ok=true; } }catch(e2){} }
+  STORE_OK=ok; if(!ok&&!SAVE_WARNED){ SAVE_WARNED=true; toast(window.CLOUD?.user?t('saveFailCloud'):t('saveFail')); }
+  try{ window.CLOUD?.queue?.(); }catch(e){} const el=document.getElementById('save-dot'); if(el){ el.classList.toggle('bad',!STORE_OK); el.title=STORE_OK?t('savedOk'):t('saveFail'); el.setAttribute('aria-label',el.title); } };
 const t=k=>{ const p=k.split('.'); let o=T[S.lang]; for(const x of p) o=o?.[x]; return o??k; };
 const L=o=>o&&typeof o==='object'&&('ar' in o)?o[S.lang]:o;
 /* local strings owned by app.js (added only where ui.js does not define them yet) */
@@ -1554,7 +1601,16 @@ const T2={
     welcomeIn:n=>n?`أهلًا ${n}! تقدمك يُحفظ الآن في حسابك.`:'أهلًا بك! تقدمك يُحفظ الآن في حسابك.',
     nextRev:d=>`أقرب مراجعة: ${d}`,tomorrow:'غدًا',noMist:'ستظهر هنا الأسئلة التي تخطئ فيها في الاختبارات والتدريب.',
     secDone:n=>`انتهى القسم ${n}`,secNext:(q,m)=>`${q} سؤالًا في ${m} دقيقة. يبدأ الوقت حين تضغط «ابدأ القسم».`,secNoBack:'لا يمكنك العودة إلى القسم السابق بعد الآن.',secStart:'ابدأ القسم',
-    authErr:{'sync-first':'تعذّر حفظ آخر تقدمك في حسابك، فأبقيناك مسجّلًا حتى لا يضيع. تحقق من اتصالك ثم حاول مجددًا.'}},
+    authErr:{'sync-first':'تعذّر حفظ آخر تقدمك في حسابك، فأبقيناك مسجّلًا حتى لا يضيع. تحقق من اتصالك ثم حاول مجددًا.'},
+    saveFailCloud:'المتصفح لا يسمح بالحفظ على هذا الجهاز الآن، لكن تقدمك يُحفظ في حسابك.',
+    loadErr:'تعذّر قراءة تقدمك المحفوظ على هذا الجهاز، فبدأنا بنسخة جديدة. إن كان لديك حساب فسيعود تقدمك منه عند الدخول، ويمكنك أيضًا استرجاعه من ملف نسخة احتياطية في صفحة «تقدّمي».',
+    sessionLost:'انتهت جلستك. ادخل من جديد ليستمر حفظ تقدمك في حسابك.',
+    offlineNote:'لا يمكن الوصول إلى الخادم الآن. تعمل بالنسخة المحفوظة على هذا الجهاز، وسيُحفظ تقدمك في حسابك حين يعود الاتصال.',
+    signedOutElsewhere:'سجّلت الخروج من حسابك في نافذة أخرى، فأُزيل تقدمه من هذا الجهاز.',
+    mergedGuest:'ضممنا ما تدرّبت عليه على هذا الجهاز قبل الدخول إلى حسابك.',
+    errPageT:'تعذّر عرض هذه الصفحة',errPageD:'حدث خطأ غير متوقع. جرّب إعادة التحميل، وإن تكرر فراسلنا على info@gat.academy.',reload:'أعد التحميل',errUnexpected:'حدث خطأ غير متوقع. إن تكرر فأعد تحميل الصفحة.',
+    goHome:'إلى الصفحة الرئيسية',tooMany:n=>`محاولات كثيرة. يمكنك المحاولة مجددًا بعد ${n} دقيقة.`,pwLong:'كلمة المرور طويلة جدًا؛ الحد ٢٠٠ حرف.',resetMail:'إعادة تعيين كلمة المرور',resetMailBody:e=>`أرغب في إعادة تعيين كلمة المرور لحسابي في أكاديمية القدرات. بريد الحساب: ${e}`,sendMail:'أرسل الطلب بالبريد',
+    reportLink:'تقرير بدايتك جاهز: أين كنت، وأين أنت الآن.'},
   en:{emptyT:'No data yet',emptyD:'This page shows your actual numbers: estimated score, accuracy, time and the level of each skill. Start with the diagnostic (20 questions in 15 minutes) to find your starting point.',
     recoStartH:'Start with the diagnostic',recoStartP:'It measures your level in all ten skills, and your plan and daily sessions are built on it.',greetN:n=>'Your target: '+n,
     finishQ:'Finish the test and see your result?',endSecQ:'End this section and move to the next one?',curPwWrong:'Your current password is incorrect.',gateT:'Sign up to start',gateMsg:'Create your free account before your first test, so your results, mistakes and progress are saved to your account and you can pick them up on any device. Your test starts right after.',gateLater:'Not now',
@@ -1567,7 +1623,16 @@ const T2={
     welcomeIn:n=>n?`Welcome, ${n}! Your progress is now saved to your account.`:'Welcome! Your progress is now saved to your account.',
     nextRev:d=>`Next review: ${d}`,tomorrow:'tomorrow',noMist:'Questions you get wrong in tests and practice will show up here.',
     secDone:n=>`Section ${n} done`,secNext:(q,m)=>`${q} questions in ${m} minutes. The clock starts when you press “Start the section”.`,secNoBack:'You can no longer go back to the previous section.',secStart:'Start the section',
-    authErr:{'sync-first':'We couldn’t save your latest progress to your account, so we kept you signed in to avoid losing it. Check your connection and try again.'}}
+    authErr:{'sync-first':'We couldn’t save your latest progress to your account, so we kept you signed in to avoid losing it. Check your connection and try again.'},
+    saveFailCloud:'Your browser can’t save on this device right now, but your progress is being saved to your account.',
+    loadErr:'We couldn’t read the progress saved on this device, so we started a fresh copy. If you have an account, your progress comes back when you sign in; you can also restore it from a backup file on the Progress page.',
+    sessionLost:'Your session ended. Sign in again so your progress keeps saving to your account.',
+    offlineNote:'The server can’t be reached right now. You’re working with the copy saved on this device; your progress will be saved to your account when the connection is back.',
+    signedOutElsewhere:'You signed out of your account in another tab, so its progress was removed from this device.',
+    mergedGuest:'What you practiced on this device before signing in was added to your account.',
+    errPageT:'This page couldn’t be shown',errPageD:'Something unexpected went wrong. Try reloading; if it keeps happening, email info@gat.academy.',reload:'Reload',errUnexpected:'Something unexpected went wrong. If it keeps happening, reload the page.',
+    goHome:'Go to the home page',tooMany:n=>`Too many attempts. You can try again in ${n} minutes.`,pwLong:'Password is too long; the limit is 200 characters.',resetMail:'Password reset',resetMailBody:e=>`I would like to reset the password of my GAT Academy account. Account email: ${e}`,sendMail:'Send the request by email',
+    reportLink:'Your progress report is ready: where you started, where you are now.'}
 };
 (()=>{ for(const l of ['ar','en']){ const d=T[l]; for(const [k,v] of Object.entries(T2[l])){ if(v&&typeof v==='object'&&!Array.isArray(v)&&typeof v!=='function'){ d[k]=d[k]||{}; for(const [k2,v2] of Object.entries(v)) if(!(k2 in d[k])) d[k][k2]=v2; } else if(!(k in d)) d[k]=v; } } })();
 const $=s=>document.querySelector(s);
@@ -1592,7 +1657,11 @@ function skillInfo(s,recent=S.recent){
 }
 const ALL_SKILLS=[...V_SKILLS,...Q_SKILLS];
 const isMock=a=>a.kind==='mock'||a.kind==='model';
-function dueList(lang=S.lang){ const d=todayStr(); if(!PRO()) return S.mistakes.filter(m=>m.lang===lang).slice(-(+FREE.mistakesMax||0)); /* free: last N, no spacing */ return S.mistakes.filter(m=>m.lang===lang&&(m.due||d)<=d); }
+/* at most 300 mistakes are kept; closed tombstones go first */
+function capMistakes(){ if(S.mistakes.length<=300) return; const open=S.mistakes.filter(m=>(m.box||0)<4), closed=S.mistakes.filter(m=>(m.box||0)>=4); S.mistakes=closed.slice(-Math.max(0,300-open.length)).concat(open.slice(-300)); }
+/* open mistakes (box<4); closed ones stay as tombstones so another device cannot bring them back */
+const openMistakes=(lang=S.lang)=>S.mistakes.filter(m=>m.lang===lang&&(m.box||0)<4);
+function dueList(lang=S.lang){ const d=todayStr(), open=openMistakes(lang); if(!PRO()) return open.slice(-(+FREE.mistakesMax||0)); /* free: last N, no spacing */ return open.filter(m=>(m.due||d)<=d); }
 function readiness(recent=S.recent,attempts=S.attempts){
   const lv=ALL_SKILLS.map(s=>skillInfo(s,recent).level); const lvl=lv.reduce((a,b)=>a+b,0)/(4*lv.length);
   const mocks=attempts.filter(a=>isMock(a)&&a.est!=null).slice(-3); const mk=mocks.length?mocks.reduce((a,x)=>a+x.est,0)/(3*100):0;
@@ -1611,9 +1680,12 @@ const CLOUD_BUILD=!!document.querySelector('script[src*="cloud.js"]');
 /* free-plan limits (overwritten by config.free from the server) */
 const FREE={xp:[],dailyQuestions:10,cardsFrac:.25,planWeeks:2,mistakesMax:15,techFrac:.25,diagnostic:true};
 function syncFree(){ const c=window.CLOUD?.config?.free; if(c&&typeof c==='object') Object.assign(FREE,c); }
+const cachedPro=()=>{ try{ const p=JSON.parse(localStorage.getItem('masar100_plan')); return !!(p&&p.tier==='pro'&&p.email&&p.email===localStorage.getItem('masar100_owner')); }catch(e){ return false; } };
 function PRO(){ const C=window.CLOUD;
-  if(!C){ if(!CLOUD_BUILD) return true; try{ const p=JSON.parse(localStorage.getItem('masar100_plan')); return !!(p&&p.tier==='pro'&&p.email&&p.email===localStorage.getItem('masar100_owner')); }catch(e){ return false; } }
-  return !!C.isPro?.(); }
+  if(!C){ if(!CLOUD_BUILD) return true; return cachedPro(); }
+  if(C.user) return !!C.isPro?.(); if(C.offline&&getOwner()) return cachedPro(); return false; }
+/* an account is in play: signed in, or a known account while the server is unreachable (its limits still apply) */
+const acct=()=>!!(window.CLOUD?.user||(window.CLOUD?.offline&&getOwner()));
 const CFG=()=>window.CLOUD?.config||null;
 const EVQ=[]; /* events fired before cloud.js has loaded */
 const track=(type,k,v)=>{ try{ const C=window.CLOUD; if(C&&C.track) C.track(type,k,v); else if(CLOUD_BUILD&&EVQ.length<50) EVQ.push([type,k,v]); }catch(e){} };
@@ -1632,7 +1704,7 @@ function addDaily(n){ if(!n) return; const d=todayStr(); if(!S.dq||S.dq.d!==d) S
 function gateTest(kind){ if(PRO()) return false;
   if(PRO_KINDS[kind]){ hitLimit(PRO_KINDS[kind]); return true; }
   if(kind==='diag'&&diagTaken()){ hitLimit('test'); return true; }
-  if((kind==='session'||kind==='review')&&window.CLOUD?.user&&dailyLeft()<=0){ hitLimit('daily'); return true; }
+  if((kind==='session'||kind==='review')&&acct()&&dailyLeft()<=0){ hitLimit('daily'); return true; }
   return false; }
 /* flashcards & vocabulary: the first cardsFrac of each skill's deck (interleaved across skills) */
 const FLASH0=FLASH.slice(), VOC0={ar:VOCAB.ar.slice(),en:VOCAB.en.slice()};
@@ -1670,9 +1742,10 @@ function ctxMsg(k){ const f=progressFacts(), out=[];
   else if(f.days>=2) out.push(t('ctxDays')(numL(f.days)));
   if(f.more&&(f.xpDone||k==='xp')) out.push(t('ctxMore')(numL(f.more)));
   return out.join(' ')||t('ctxStart'); }
-/* at most one unsolicited prompt per session */
+/* at most one unsolicited prompt per tab session, and one per day per account (S.nudgeD syncs across devices) */
 let NUDGE=null;
-function maybeNudge(reason){ if(PRO()||!CLOUD_BUILD||!window.CLOUD?.user) return; try{ if(sessionStorage.getItem('masar100_nudged')) return; sessionStorage.setItem('masar100_nudged','1'); }catch(e){ if(NUDGE) return; }
+function maybeNudge(reason){ if(PRO()||!CLOUD_BUILD||!window.CLOUD?.user) return; if(S.nudgeD===todayStr()) return; try{ if(sessionStorage.getItem('masar100_nudged')) return; sessionStorage.setItem('masar100_nudged','1'); }catch(e){ if(NUDGE) return; }
+  S.nudgeD=todayStr(); save();
   NUDGE={reason,msg:ctxMsg(reason)}; { const tq=$('#toast'); if(tq){ clearTimeout(toastT); tq.hidden=true; } } /* the toast would cover the nudge's buttons */ renderNudge(); }
 function renderNudge(){ let el=$('#nudge'); if(!NUDGE){ if(el) el.remove(); return; }
   if(!el){ el=document.createElement('div'); el.id='nudge'; el.setAttribute('role','status'); document.body.appendChild(el); }
@@ -1741,6 +1814,9 @@ function diagSet(lang){ const u=new Set(); let q=[]; Q_SKILLS.forEach(sk=>q=q.co
 function sessionPlan(lang=S.lang){ const due=dueList(lang).slice(0,8); const weak=rankSkills().slice(0,2).map(x=>x.s); return {due,weak,nWeak:10,nMix:25-due.length-10}; }
 function sessionSet(lang){
   const p=sessionPlan(lang), used=new Set(); let qs=p.due.map(m=>({...m}));
+  /* a due review and a fresh copy of the same bank question must not both appear: mark the sources of the due items as used */
+  { const dk=new Set(qs.map(m=>m.key)); const rawKey=r=>{ const q=typeof r.q==='object'?r.q[lang]:r.q, o=r.cmp?COMPARE_OPTS[lang][r.a]:(r.o||[])[r.a??0]; return q+'|'+(o&&typeof o==='object'?o[lang]:o)+'|'+(r.p||''); };
+    if(dk.size) [...bank(lang),...QB].forEach(r=>{ if(dk.has(rawKey(r))){ used.add(r); if(r.p) used.add('P:'+r.p); } }); }
   p.weak.forEach(s=>qs=qs.concat(buildSkill(s,5,lang,used)));
   const pool=rankSkills(); const w=pool.map(x=>x.level<4?3:1); const tot=w.reduce((a,b)=>a+b,0);
   for(let i=0;i<p.nMix;i++){ let r=Math.random()*tot,k=0; while(k<w.length-1&&r>w[k]){ r-=w[k]; k++; } qs=qs.concat(buildSkill(pool[k].s,1,lang,used)); }
@@ -1754,6 +1830,7 @@ let PEND=null;
 /* accounts build: a student must sign up (or sign in) before starting any test or practice */
 function authGate(kind,o){ const C=window.CLOUD; if(!C||C.user) return false;
   if(C.ready===false){ setTimeout(()=>startTest(kind,o),300); return true; }
+  if(C.offline&&getOwner()) return false; /* known account, server unreachable: work locally, sync later */
   PEND={kind,o}; AC.tab='signup'; AC.gate=true; openAcct(); return true; }
 function startTest(kind,o={}){
   if(gateTest(kind)) return;
@@ -1769,40 +1846,44 @@ function startTest(kind,o={}){
   else if(kind==='skill'){ mode='learn'; title=SKILLS[o.skill][lang]; sections=[sec(title,buildSkill(o.skill,10,lang,used),15)]; }
   else if(kind==='session'){ mode='learn'; title=t('sessionTitle'); let qs=sessionSet(lang); const left=dailyLeft(); if(qs.length>left) qs=qs.slice(0,left); sections=[sec(title,qs,Math.max(5,Math.round(qs.length*1.3)))]; }
   else if(kind==='review'){ const d=dueList(lang).slice(0,Math.min(20,dailyLeft())); if(!d.length){ toast(t('noDue')); return; } mode='learn'; title=t('pReview'); sections=[sec(title,d.map(m=>({...m})),Math.max(5,d.length*1.5))]; }
-  X={kind,title,mode,sections,si:0,qi:0,lang,task:o.task||null,skill:o.skill||null,mk:o.k,qStart:Date.now(),confirm:null,showMap:false};
+  X={kind,title,mode,sections,si:0,qi:0,lang,task:o.task||null,skill:o.skill||null,mk:o.k,qStart:Date.now(),tickAt:Date.now(),confirm:null,showMap:false};
   try{ document.activeElement?.blur?.(); }catch(e){}
   examShow(true);
   clearInterval(timer); timer=setInterval(tick,1000); renderExam();
   track('test_start',kind); if(kind==='diag') track('diag_start');
 }
 /* the test screen is a full-page dialog: the page behind it is made inert so Tab stays inside */
-function examShow(on){ const el=$('#exam'); document.body.classList.toggle('exam-open',on); el.hidden=!on;
-  ['header.top','#main','footer','#tabbar','#banner'].forEach(q=>{ const e=$(q); if(e) e.inert=on; });
+function examShow(on){ const el=$('#exam'); document.body.classList.toggle('exam-open',on); el.hidden=!on; overlayInert();
   if(on){ el.tabIndex=-1; setTimeout(()=>{ if(!el.contains(document.activeElement)) el.focus({preventScroll:true}); },0); } }
 const cur=()=>X.sections[X.si];
 const clock=s=>{ s=Math.max(0,Math.round(s)); return `${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`; };
-function tick(){ if(!X||X.result||X.reviewOnly||X.between) return; const s=cur(); s.left--; if(s.left%10===0) saveLive(); const el=$('#ex-timer'); if(el){ el.textContent=clock(s.left); el.classList.toggle('low',s.left<=180); } if(s.left<=0){ toast(t('timeUp')); closeSection(); } }
+/* the clock follows wall time, not the number of interval ticks: a backgrounded tab (browsers run timers about once a minute there) or a locked phone
+   still spends its seconds, as in the real test. Only a reload pauses it (see checkLive). X.tickAt keeps the fraction of a second, so nothing drifts. */
+function tick(){ if(!X||X.result||X.reviewOnly||X.between) return; const s=cur(), now=Date.now(); if(!X.tickAt) X.tickAt=now;
+  if(X.mode==='learn'&&document.hidden){ X.tickAt=now; X.qStart=now; return; } /* practice with instant feedback is not an exam: time away from the tab is not charged */
+  const dt=Math.floor((now-X.tickAt)/1000); if(dt<1) return; X.tickAt+=dt*1000; s.left=Math.max(0,s.left-dt);
+  if(now-(X.liveAt||0)>=10000){ X.liveAt=now; saveLive(); } const el=$('#ex-timer'); if(el){ el.textContent=clock(s.left); el.classList.toggle('low',s.left<=180); } if(s.left<=0){ toast(t('timeUp')); closeSection(); } }
 function logTime(){ const s=cur(); const n=Date.now(); if(!s.locked[X.qi]) s.tsp[X.qi]+=(n-X.qStart)/1000; X.qStart=n; }
 function go(i){ logTime(); X.qi=Math.max(0,Math.min(cur().qs.length-1,i)); X.confirm=null; X.showMap=false; renderExam(); $('#exam').scrollTop=0; }
 function choose(k){ const s=cur(); if(s.locked[X.qi]) return; s.ans[X.qi]=k; if(X.mode==='learn'){ logTime(); s.locked[X.qi]=true; } renderExam(); }
 function closeSection(){ logTime(); X.confirm=null; if(X.si<X.sections.length-1){ X.si++; X.qi=0; X.between=true; /* a pause screen before the next section; its clock starts on "start" */ renderExam(); } else finishTest(); }
 function answeredN(){ return X.sections.reduce((a,s)=>a+s.ans.filter(x=>x!=null).length,0); }
-function quitTest(){ if(X&&!X.result&&!X.reviewOnly&&(X.kind==='session'||X.kind==='review')){ addDaily(answeredN()); save(); }
+function quitTest(){ takePending(); if(X&&!X.result&&!X.reviewOnly&&(X.kind==='session'||X.kind==='review')){ addDaily(answeredN()); save(); }
   const nudge=X&&X.result&&!X.reviewOnly&&(X.kind==='session'||X.kind==='review')&&!PRO()&&dailyLeft()<=0;
   clearInterval(timer); clearLive(); X=null; examShow(false); if(nudge) maybeNudge('daily'); }
 function finishTest(){
   if(!X||X.result||X.reviewOnly) return;
-  clearInterval(timer); clearLive(); const d=todayStr(); const INT=[1,3,7,14];
-  const all=[]; X.sections.forEach(s=>s.qs.forEach((q,i)=>all.push({q,your:s.ans[i],time:s.tsp[i]})));
+  clearInterval(timer); clearLive(); takePending(); const d=todayStr(); const INT=[1,3,7,14];
+  const all=[]; X.sections.forEach(s=>s.qs.forEach((q,i)=>all.push({q,your:s.ans[i],time:s.tsp[i],flag:!!s.flag[i]})));
   const bySkill={};
   all.forEach(({q,your,time})=>{
     const ok=your===q.ans, st=S.stats[q.s]||(S.stats[q.s]={c:0,t:0,time:0}); st.t++; st.time+=time; if(ok) st.c++;
     S.recent.push({s:q.s,ok,t:Math.round(time),d}); const b=bySkill[q.s]||(bySkill[q.s]={c:0,t:0}); b.t++; if(ok) b.c++;
-    const key=q.key||qKey(q); q.key=key; const m=S.mistakes.find(x=>x.key===key);
-    if(ok&&m){ if((m.due||d)<=d){ m.box=(m.box||0)+1; if(m.box>=4) S.mistakes=S.mistakes.filter(x=>x!==m); else m.due=addDays(d,INT[m.box]); } }
-    else if(!ok){ if(m){ m.box=0; m.due=addDays(d,1); } else S.mistakes.push({key,s:q.s,area:q.area,q:q.q,passage:q.passage,pkey:q.pkey,opts:q.opts,ans:q.ans,exp:q.exp,cmp:q.cmp,lang:X.lang,box:0,due:addDays(d,1)}); }
+    const key=q.key||qKey(q); q.key=key; const m=S.mistakes.find(x=>x.key===key), now=Date.now();
+    if(ok&&m&&(m.box||0)<4){ if((m.due||d)<=d){ m.box=(m.box||0)+1; m.at=now; if(m.box>=4) delete m.due; /* closed: kept as a tombstone */ else m.due=addDays(d,INT[m.box]); } }
+    else if(!ok){ if(m){ m.box=0; m.due=addDays(d,1); m.at=now; } else S.mistakes.push({key,s:q.s,area:q.area,q:q.q,passage:q.passage,pkey:q.pkey,opts:q.opts,ans:q.ans,exp:q.exp,cmp:q.cmp,lang:X.lang,box:0,due:addDays(d,1),at:now}); }
   });
-  if(S.recent.length>1500) S.recent=S.recent.slice(-1500); if(S.mistakes.length>300) S.mistakes=S.mistakes.slice(-300);
+  if(S.recent.length>1500) S.recent=S.recent.slice(-1500); capMistakes();
   const correct=all.filter(x=>x.your===x.q.ans).length, skipped=all.filter(x=>x.your==null).length;
   const est=['diag','mock','model','verbal','quant'].includes(X.kind)?estimate(all.map(x=>({s:x.q.s,ok:x.your===x.q.ans}))):null;
   const att={id:Date.now().toString(36),date:d,kind:X.kind,skill:X.skill,mk:X.kind==='model'?X.mk+1:undefined,correct,total:all.length,pct:Math.round(100*correct/Math.max(1,all.length)),est,time:Math.round(all.reduce((a,x)=>a+x.time,0))};
@@ -1843,7 +1924,7 @@ function renderExam(){
     ${q.passage?`<aside class="ex-passage"><div class="eyebrow">${tt.passage}</div><p>${esc(q.passage)}</p></aside>`:''}
     <section class="ex-q">
       <div class="ex-qhead"><span class="chip">${SKILLS[q.s][X.lang]}</span>${q.box!=null?`<span class="chip sand">${tt.kinds.review}</span>`:''}</div>
-      <div class="ex-stem ${q.s==='analogy'?'analogy':''}">${stem(q.q)}</div>
+      <div class="ex-stem ${q.s==='analogy'?'analogy':''}">${q.cmp?`<div class="eyebrow">${COMPARE_INTRO[X.lang]}</div>`:''}${stem(q.q)}</div>
       <div class="ex-opts">${q.opts.map((o,k)=>`<button class="opt ${optClass(k)}" data-k="${k}" aria-pressed="${a===k}" ${locked?'disabled':''}><span class="bub">${L4[k]}</span><span class="otx">${optH(o)}</span></button>`).join('')}</div>
       ${X.mode==='learn'&&locked?`<div class="fb ${a===q.ans?'ok':'bad'}"><strong>${a===q.ans?tt.correctFb:tt.wrongFb+': '+L4[q.ans]}</strong><p>${M(esc(q.exp))}</p></div>`:''}
     </section>
@@ -1868,7 +1949,7 @@ function renderBetween(el){ const s=cur(), tt=T[X.lang];
   <div class="rs ex-between">${X.confirm==='quit'?`<div class="ex-confirm"><p>${tt.quitConfirm}</p><div class="row"><button class="btn danger" id="cf-yes">${tt.yesQuit}</button><button class="btn ghost" id="cf-no">${tt.cancel}</button></div></div>`:''}
     <section class="card center"><div class="eyebrow">${tt.secDone(numL(X.si))}</div><h2>${esc(s.name)}</h2><p>${tt.secNext(numL(s.qs.length),numL(Math.round(s.left/60)))}</p><p class="small muted">${tt.secNoBack}</p><button class="btn primary xl" id="ex-go">${tt.secStart}</button></section></div>`;
   const on=(id,f)=>{ const b=el.querySelector(id); if(b) b.onclick=f; };
-  on('#ex-go',()=>{ X.between=false; X.confirm=null; X.qStart=Date.now(); renderExam(); el.scrollTop=0; });
+  on('#ex-go',()=>{ X.between=false; X.confirm=null; X.qStart=Date.now(); X.tickAt=Date.now(); renderExam(); el.scrollTop=0; });
   on('#ex-quit',()=>{ X.confirm='quit'; renderExam(); }); on('#cf-no',()=>{ X.confirm=null; renderExam(); }); on('#cf-yes',quitTest);
   setTimeout(()=>el.querySelector('#ex-go')?.focus(),0); }
 document.addEventListener('keydown',e=>{
@@ -1895,9 +1976,9 @@ function renderResult(el){
     <div class="rs-rev-head"><h3>${tt.review}</h3><div class="seg"><button class="${r.filter==='wrong'?'on':''}" data-f="wrong">${tt.onlyWrong}</button><button class="${r.filter==='all'?'on':''}" data-f="all">${tt.all}</button></div></div>
     <div class="rev-list">${list.map(x=>{ const ok=x.your===x.q.ans; const m=S.mistakes.find(z=>z.key===x.q.key); return `
       <article class="rev ${ok?'ok':'bad'}">
-        <div class="rev-h"><span class="muted small">${tt.q} ${numL(x.i+1)}</span><span class="chip">${SKILLS[x.q.s][X.lang]}</span></div>
+        <div class="rev-h"><span class="muted small">${tt.q} ${numL(x.i+1)}</span><span class="chip">${SKILLS[x.q.s][X.lang]}</span>${x.flag?`<span class="chip sand">${tt.flagged}</span>`:''}</div>
         ${x.q.passage?`<details class="rev-p"><summary>${tt.passage}</summary><p>${esc(x.q.passage)}</p></details>`:''}
-        <div class="rev-stem">${stem(x.q.q)}</div>
+        <div class="rev-stem">${x.q.cmp?`<div class="eyebrow">${COMPARE_INTRO[X.lang]}</div>`:''}${stem(x.q.q)}</div>
         <ul class="rev-opts">${x.q.opts.map((o,k)=>`<li class="${k===x.q.ans?'right':''} ${k===x.your&&!ok?'yours':''}"><span class="bub">${L4[k]}</span><span>${optH(o)}</span>${k===x.q.ans?`<em>${tt.rightAns}</em>`:''}${k===x.your&&!ok?`<em>${tt.yourAns}</em>`:''}</li>`).join('')}</ul>
         <p class="rev-exp"><strong>${tt.explain}:</strong> ${M(esc(x.q.exp))}</p>
         ${!ok&&m&&PRO()?`<div class="cause"><span class="small muted">${tt.causeQ}</span><div class="chips">${Object.entries(tt.causes).map(([k,v])=>`<button class="cchip ${m.cause===k?'on':''}" data-i="${x.i}" data-c="${k}">${v}</button>`).join('')}</div></div>`:''}
@@ -1953,6 +2034,9 @@ const ICON={
   check:'<svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
   gear:'<svg viewBox="0 0 24 24" class="i16"><circle cx="12" cy="12" r="3"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/></svg>'
 };
+for(const k in ICON) ICON[k]=ICON[k].replace('<svg ','<svg aria-hidden="true" focusable="false" ');
+/* Latin-only text inside the Arabic UI (brand names, English titles) is marked for screen readers and bidi */
+const lt=s=>S.lang==='ar'&&!/[\u0600-\u06FF]/.test(String(s||''))?' lang="en" dir="ltr"':'';
 function ring(v,suf='',size=140,label=''){
   const r=42, c=2*Math.PI*r, val=v==null?0:Math.max(0,Math.min(100,v));
   return `<svg class="ring" viewBox="0 0 100 100" style="inline-size:${size}px" role="img" aria-label="${label} ${v??'—'}"><circle cx="50" cy="50" r="${r}" class="r-track"/>${v!=null&&val>0?`<circle cx="50" cy="50" r="${r}" class="r-val" stroke-dasharray="${(c*val/100).toFixed(1)} ${c.toFixed(1)}" transform="rotate(-90 50 50)"/>`:''}<text x="50" y="${label?52:57}" text-anchor="middle" class="r-txt">${v==null?'—':numL(v)+suf}</text>${label?`<text x="50" y="68" text-anchor="middle" class="r-lab">${label}</text>`:''}</svg>`;
@@ -1963,6 +2047,7 @@ function barRow(label,acc,meta){
   return `<div class="bar-row ${label?'':'nolabel'}">${label?`<span class="bl">${esc(label)}</span>`:''}<span class="bt"><span class="bf ${lv}" style="inline-size:${p}%"></span><span class="b95"></span></span><span class="bv num">${acc==null?'—':numL(p)+'%'}</span>${meta?`<span class="bm num">${meta}</span>`:''}</div>`;
 }
 const pips=l=>`<span class="pips" role="img" aria-label="${l}/4">${[1,2,3,4].map(i=>`<i class="${i<=l?'on l'+l:''}"></i>`).join('')}</span>`;
+const SMOOTH=()=>{ try{ return matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'; }catch(e){ return 'smooth'; } };
 let toastT; function toast(m){ const el=$('#toast'); el.textContent=m; el.hidden=false; clearTimeout(toastT); toastT=setTimeout(()=>el.hidden=true,2600); }
 function settingsForm(id){
   return `<form class="settings-form" id="${id}">
@@ -1979,9 +2064,10 @@ function bindSettings(id){ const f=document.getElementById(id); if(!f) return; f
   save(); renderRoute(); toast(t('saved')); }; }
 
 /* ============ PLAN ============ */
-function planWeeks(){ if(S.examDate){ const d=Math.ceil((new Date(S.examDate)-new Date(S.planStart))/864e5); if(d>0) return Math.max(2,Math.min(16,Math.ceil(d/7))); } return S.weeks; }
+function planWeeks(){ if(S.examDate){ const d=daysBetween(S.planStart,S.examDate); if(d>0) return Math.max(2,Math.min(16,Math.ceil(d/7))); } return S.weeks; }
 function daysLeft(){ return S.examDate? Math.ceil((new Date(S.examDate+'T08:00')-new Date())/864e5):null; }
-function currentWeek(){ const d=Math.floor((new Date()-new Date(S.planStart))/864e5); return Math.max(0,Math.min(planWeeks()-1,Math.floor(d/7))); }
+/* week boundaries fall on the student's local midnight (planStart is a local calendar day) */
+function currentWeek(){ const d=daysBetween(S.planStart,todayStr()); return Math.max(0,Math.min(planWeeks()-1,Math.floor(Math.max(0,d)/7))); }
 function buildPlan(){
   const n=planWeeks(), weeks=[]; const phaseOf=i=>{ if(i===n-1) return 3; const f=(i+.5)/n; return f<Math.max(.3,2/n)?0:f<.55?1:f<.8?2:3; };
   const vO=['analogy','completion','reading','context','odd'], qO=S.track==='sci'?['arith','algebra','geometry','comparison','stats']:['arith','geometry','comparison','stats','algebra'];
@@ -2014,8 +2100,8 @@ function taskItem(tk){ const d=taskDone(tk);
 function pageToday(){
   const dl=daysLeft(), est=estimate(), rd=readiness(), plan=buildPlan(), cw=currentWeek(), wk=plan[cw];
   const hasData=S.attempts.length>0, sp=sessionPlan(), doneToday=S.sessionDays.includes(todayStr()), checks=readyChecks();
-  const invite=!diagTaken()&&!hasData, dl2=window.CLOUD?.user?dailyLeft():Infinity;
-  const repCard=CLOUD_BUILD&&!PRO()&&!S.repHide&&reportReady()?`<section class="card rep-card"><div><div class="eyebrow">${t('reportReadyE')}</div><h2>${t('reportReadyT')}</h2><p class="muted">${t('reportReadyD')}</p></div><div class="row"><a class="btn primary" href="#report">${t('reportOpen')}</a><button class="btn ghost sm" id="rp-hide">${t('dismiss')}</button></div></section>`:'';
+  const invite=!diagTaken()&&!hasData, dl2=acct()?dailyLeft():Infinity;
+  const repCard=CLOUD_BUILD&&!PRO()&&!S.repHide&&!S.repSeen&&reportReady()?`<section class="card rep-card"><div><div class="eyebrow">${t('reportReadyE')}</div><h2>${t('reportReadyT')}</h2><p class="muted">${t('reportReadyD')}</p></div><div class="row"><a class="btn primary" href="#report">${t('reportOpen')}</a><button class="btn ghost sm" id="rp-hide">${t('dismiss')}</button></div></section>`:'';
   return `
   <section class="hero">
     <div class="hero-main">
@@ -2039,7 +2125,7 @@ function pageToday(){
       <div class="eyebrow">${t('sessionTitle')}</div>
       <h2>${doneToday?t('sessionDone'):t('sessionSub')}</h2>
       <p class="muted">${t('sessionParts')(numL(sp.due.length),numL(sp.nWeak),numL(sp.nMix))}</p><div class="chips">${sp.weak.map(s=>`<span class="chip">${SKILLS[s][S.lang]}</span>`).join('')}</div>
-      ${dl2!==Infinity&&window.CLOUD?.user?`<p class="daily-left small">${dl2>0?t('dailyLeft')(numL(dl2),numL(FREE.dailyQuestions)):t('dailyOut')}</p>`:''}
+      ${dl2!==Infinity?`<p class="daily-left small">${dl2>0?t('dailyLeft')(numL(dl2),numL(FREE.dailyQuestions)):t('dailyOut')}</p>`:''}
     </div>
     ${dl2<=0?`<button class="btn primary xl" data-lock="daily">${LOCKSVG} ${t('unlock')}</button>`:`<button class="btn primary xl" data-start="session">${t('startSession')}</button>`}
   </section>`}
@@ -2054,7 +2140,7 @@ function pageToday(){
   </section>
   <section class="block">
     <div class="block-head"><h2 class="hl">${t('methodTitle')}</h2><a href="#guide">${t('nav.guide')}</a></div>
-    <div class="method-strip">${METHOD[S.lang].slice(0,4).map(m=>`<div class="mcard"><h4>${m[0]}</h4><p>${m[1]}</p><span class="mtag">${m[2]}</span></div>`).join('')}</div>
+    <div class="method-strip">${METHOD[S.lang].slice(0,4).map(m=>`<div class="mcard"><h3>${m[0]}</h3><p>${m[1]}</p><span class="mtag">${m[2]}</span></div>`).join('')}</div>
   </section>`;
 }
 function masteryMap(recent){ const tile=s=>{ const i=skillInfo(s,recent); return `<a class="mtile l${i.level}" href="#lesson-${s}"><span class="mt-n">${SKILLS[s][S.lang]}</span>${pips(i.level)}<span class="mt-f"><span class="mt-l">${t('levels')[i.level]}</span><span class="mt-a num">${i.acc==null?'—':numL(Math.round(i.acc*100))+'%'}</span></span></a>`; };
@@ -2063,7 +2149,7 @@ function pagePlan(){
   const plan=buildPlan(), cw=currentWeek();
   return `<header class="page-h"><a class="back" href="#today">${t('nav.today')}</a><h1>${t('planTitle')}</h1><p>${t('planIntro')}</p></header>
   <div class="card">${settingsForm('pf')}</div>
-  <div class="card restart"><div><h3>${t('restartT')}</h3><p class="small muted">${t('restartD')}</p></div><button class="btn ghost" id="pl-restart">${t('restartBtn')}</button><div id="pl-confirm"></div></div>
+  <div class="card restart"><div><h2>${t('restartT')}</h2><p class="small muted">${t('restartD')}</p></div><button class="btn ghost" id="pl-restart">${t('restartBtn')}</button><div id="pl-confirm"></div></div>
   <ol class="phase-row">${t('phaseNames').map((p,i)=>`<li class="${plan[cw].ph===i?'cur':''}"><b>${p}</b><span>${t('phaseDesc')[i]}</span></li>`).join('')}</ol>
   <div class="weeks">${plan.map(w=>!PRO()&&w.i>=FREE.planWeeks?`<section class="week card locked"><div class="wk-h"><h3>${t('week')} ${numL(w.i+1)}</h3><span class="chip ph${w.ph}">${t('phaseNames')[w.ph]}</span>${w.i===cw?`<span class="now">${t('thisWeek')}</span>`:''}</div>${lockLine('plan')}</section>`:`<section class="week card ${w.i===cw?'cur':''}"><div class="wk-h"><h3>${t('week')} ${numL(w.i+1)}</h3><span class="chip ph${w.ph}">${t('phaseNames')[w.ph]}</span>${w.i===cw?`<span class="now">${t('thisWeek')}</span>`:''}<span class="wk-c num">${numL(w.tasks.filter(taskDone).length)}/${numL(w.tasks.length)}</span></div><div class="task-list">${w.tasks.map(taskItem).join('')}</div></section>`).join('')}</div>`;
 }
@@ -2073,9 +2159,9 @@ function pageLearn(tab='cards'){
   if(tab==='lessons'){ const card=s=>{ const i=skillInfo(s), l=LESSONS[s][S.lang], c=FLASH.find(f=>f.sk===s); return `<a class="lcard" href="#lesson-${s}"><div class="lc-ill">${ILL[c.ill]()}</div><div class="lc-top"><h3>${SKILLS[s][S.lang]}</h3>${pips(i.level)}</div><p>${M(esc(l.concept[0]))}</p><div class="lc-f"><span class="muted small">${t('levels')[i.level]}${xpList(s).length+lockedXp(s).length?` · <span class="lc-xp">▶ ${numL(xpList(s).length+lockedXp(s).length)} ${t('xpShort')}</span>`:''}</span><span class="lc-go">${t('lessonsOpen')}</span></div></a>`; };
     body=`<h2 class="sec-h hl">${t('verbal')}</h2><div class="lgrid">${V_SKILLS.map(card).join('')}</div><h2 class="sec-h hl">${t('quant')}</h2><div class="lgrid">${Q_SKILLS.map(card).join('')}</div>`; }
   else if(tab==='cards') body=cardsView();
-  else if(tab==='tech'){ const n=techN(TECH.length); body=`<p class="lead">${t('techIntro')}</p><div class="notes">${TECH.slice(0,n).map((x,i)=>`<article class="note-card c${i%4}"><div class="nc-ill">${ILL[x.ill]()}</div><h3>${esc(L(x.t))}</h3><p>${M(esc(L(x.d)))}</p></article>`).join('')}</div>`
+  else if(tab==='tech'){ const n=techN(TECH.length); body=`<p class="lead">${t('techIntro')}</p><h2 class="sr-only">${t('tabs').tech}</h2><div class="notes">${TECH.slice(0,n).map((x,i)=>`<article class="note-card c${i%4}"><div class="nc-ill">${ILL[x.ill]()}</div><h3>${esc(L(x.t))}</h3><p>${M(esc(L(x.d)))}</p></article>`).join('')}</div>`
     +(n<TECH.length?`${lockLine('tech',t('moreTech')(numL(TECH.length-n)))}<div class="notes locked-notes">${TECH.slice(n).map((x,i)=>`<button type="button" class="note-card c${(i+n)%4} locked" data-lock="tech"><h3>${esc(L(x.t))}</h3>${lockBadge()}</button>`).join('')}</div>`:''); }
-  else if(tab==='patterns'){ const n=techN(PATTERNS.length); body=`<p class="lead">${t('patIntro')}</p><div class="pats">${PATTERNS.slice(0,n).map((p,i)=>`<article class="pat card"><div class="pat-h"><span class="pnum">${numL(i+1)}</span><h3>${esc(L(p.t))}</h3><span class="chip">${SKILLS[p.sk][S.lang]}</span></div><p><b>${t('how')}:</b> ${esc(L(p.how))}</p><p class="key"><b>${t('trick')}:</b> ${M(esc(L(p.trick)))}</p><p class="exl">${esc(L(p.ex))}</p><button class="btn sm soft" data-start="skill" data-skill="${p.sk}">${PRO()?'':LOCKSVG}${t('practicePattern')}</button></article>`).join('')}</div>`
+  else if(tab==='patterns'){ const n=techN(PATTERNS.length); body=`<p class="lead">${t('patIntro')}</p><h2 class="sr-only">${t('tabs').patterns}</h2><div class="pats">${PATTERNS.slice(0,n).map((p,i)=>`<article class="pat card"><div class="pat-h"><span class="pnum">${numL(i+1)}</span><h3>${esc(L(p.t))}</h3><span class="chip">${SKILLS[p.sk][S.lang]}</span></div><p><b>${t('how')}:</b> ${esc(L(p.how))}</p><p class="key"><b>${t('trick')}:</b> ${M(esc(L(p.trick)))}</p><p class="exl">${esc(L(p.ex))}</p><button class="btn sm soft" data-start="skill" data-skill="${p.sk}">${PRO()?'':LOCKSVG}${t('practicePattern')}</button></article>`).join('')}</div>`
     +(n<PATTERNS.length?`${lockLine('tech',t('morePat')(numL(PATTERNS.length-n)))}<div class="pats">${PATTERNS.slice(n).map((p,i)=>`<button type="button" class="pat card locked" data-lock="tech"><div class="pat-h"><span class="pnum">${numL(i+n+1)}</span><h3>${esc(L(p.t))}</h3><span class="chip">${SKILLS[p.sk][S.lang]}</span></div>${lockBadge()}</button>`).join('')}</div>`:''); }
   else if(tab==='vocab') body=vocabView();
   else body=`<p class="lead">${t('resIntro')}</p>${RESOURCES.map(c=>`<h2 class="sec-h hl">${L(c.cat)}</h2><div class="rgrid">${c.items.map(resCard).join('')}</div>`).join('')}`;
@@ -2096,15 +2182,15 @@ function cardsView(){
   const due=cardDue(), cards=deckCards(), known=cards.filter(c=>S.cards[c.id]?.box>=4&&cardOpen(c)).length, nOpen=cards.filter(cardOpen).length;
   const chips=`<div class="deck-chips">${decks.map(([k,v])=>`<button class="dchip ${FCV.deck===k?'on':''}" data-deck="${k}">${v}</button>`).join('')}</div>`;
   const head=`<p class="lead">${t('cardsIntro')}</p>${chips}<div class="vstats"><span><b class="num">${numL(known)}</b> ${t('known')}</span><span><b class="num">${numL(due.length)}</b> ${t('left')}</span><span class="muted">/ ${numL(nOpen)}</span></div>${nOpen<cards.length?lockLine('cards',t('moreCards')(numL(cards.length-nOpen))):''}`;
-  const study=due.length?`<div class="study"><button class="flash-btn" id="fc-card" aria-label="${t('tapFlip')}">${stickyCard(due[0],FCV.flip,true)}</button><div class="vbtns">${FCV.flip?`<button class="btn ghost" id="fc-again">${t('again')}</button><button class="btn primary" id="fc-know">${t('know')}</button>`:''}</div></div>`:`<div class="card center"><p>${t('deckDone')}</p></div>`;
+  const study=`<h2 class="sr-only">${t('studyNow')}</h2>`+(due.length?`<div class="study"><button class="flash-btn" id="fc-card" aria-label="${t('tapFlip')}">${stickyCard(due[0],FCV.flip,true)}</button><div class="vbtns">${FCV.flip?`<button class="btn ghost" id="fc-again">${t('again')}</button><button class="btn primary" id="fc-know">${t('know')}</button>`:''}</div></div>`:`<div class="card center"><p>${t('deckDone')}</p></div>`);
   return head+study+`<h2 class="sec-h hl">${t('allInDeck')}</h2><div class="notes">${cards.map(c=>cardOpen(c)?`<details class="mini-flash"><summary>${stickyCard(c,false,false)}</summary>${stickyCard(c,true,false)}</details>`:`<button type="button" class="mini-lock ${['c0','c1','c2','c3'][ALL_SKILLS.indexOf(c.sk)%4]}" data-lock="cards"><span class="chip">${SKILLS[c.sk][S.lang]}</span><b>${esc(L(c.f))}</b>${lockBadge()}</button>`).join('')}</div>`;
 }
-function cardAct(ok){ const due=cardDue(); if(!due.length) return; const c=due[0]; const st=S.cards[c.id]||{box:0}; const INT=[1,3,7,14];
+function cardAct(ok){ const due=cardDue(); if(!due.length) return; const c=due[0]; const st=S.cards[c.id]||{box:0}; const INT=[1,3,7,14]; st.t=Date.now();
   if(!PRO()){ if(ok){ st.box=4; st.due=todayStr(); } else { st.box=0; st.ag=Date.now(); } S.cards[c.id]=st; FCV.flip=false; save(); return renderRoute(); } /* free: no spaced schedule */
   if(ok){ st.box=(st.box||0)+1; st.due=addDays(todayStr(),INT[Math.min(3,st.box-1)]); } else { st.box=0; st.due=todayStr(); const i=FLASH.indexOf(c); FLASH.push(FLASH.splice(i,1)[0]); }
   S.cards[c.id]=st; FCV.flip=false; save(); renderRoute(); }
 function resCard(it){ const url=it.u||(it.yt?yt(L(it.yt)):''); const tag={video:S.lang==='ar'?'فيديو':'Video',link:S.lang==='ar'?'رابط':'Link',official:S.lang==='ar'?'رسمي':'Official',book:S.lang==='ar'?'كتاب':'Book'}[it.k];
-  const inner=`<span class="ricon ${it.k}">${ICON[it.k]}</span><div class="rc-body"><div class="rc-top"><h3>${esc(L(it.t))}</h3><span class="chip">${tag}</span></div><p>${esc(L(it.d))}</p></div>`;
+  const inner=`<span class="ricon ${it.k}" aria-hidden="true">${ICON[it.k]}</span><div class="rc-body"><div class="rc-top"><h3${lt(L(it.t))}>${esc(L(it.t))}</h3><span class="chip">${tag}</span></div><p>${esc(L(it.d))}</p></div>`;
   return url?`<a class="rcard" href="${url}" target="_blank" rel="noopener">${inner}</a>`:`<div class="rcard">${inner}</div>`; }
 /* foundation explainers (animated, narrated; Arabic) */
 const XPOK=()=>!!(window.XP&&XP.ready);
@@ -2155,22 +2241,22 @@ function vocabView(){
   return head+`<button class="vcard ${VC.flip?'flipped':''}" id="vcard"><span class="v-word">${esc(w)}</span>${VC.flip?`<span class="v-mean">${esc(m)}</span>`:`<span class="v-hint">${t('flip')}</span>`}</button>
   <div class="vbtns">${VC.flip?`<button class="btn ghost" id="v-again">${t('again')}</button><button class="btn primary" id="v-know">${t('know')}</button>`:''}</div>`;
 }
-function vocabAct(ok){ const st=S.vocab[S.lang]||(S.vocab[S.lang]={}); const due=vocabDue(); if(!due.length) return; const w=due[0][0]; const c=st[w]||{box:0}; const INT=[1,2,4,8];
+function vocabAct(ok){ const st=S.vocab[S.lang]||(S.vocab[S.lang]={}); const due=vocabDue(); if(!due.length) return; const w=due[0][0]; const c=st[w]||{box:0}; const INT=[1,2,4,8]; c.t=Date.now();
   if(!PRO()){ if(ok){ c.box=4; c.due=todayStr(); } else { c.box=0; c.ag=Date.now(); } st[w]=c; VC.flip=false; save(); return renderRoute(); }
   if(ok){ c.box=(c.box||0)+1; c.due=addDays(todayStr(),INT[Math.min(3,c.box-1)]); } else { c.box=0; c.due=todayStr(); const arr=VOCAB[S.lang]; const idx=arr.findIndex(x=>x[0]===w); arr.push(arr.splice(idx,1)[0]); }
   st[w]=c; VC.flip=false; save(); renderRoute(); }
 function pagePractice(){
-  const due=dueList().length, pro=PRO(), dl=window.CLOUD?.user?dailyLeft():Infinity, dt=diagTaken();
+  const due=dueList().length, pro=PRO(), dl=acct()?dailyLeft():Infinity, dt=diagTaken();
   const card=(k,title,desc,cls='',meta='')=>{ const lk=!pro&&(PRO_KINDS[k]||(k==='diag'&&dt));
     if(lk) return `<article class="pcard locked ${cls}"><div><h3>${title} ${lockBadge()}</h3><p>${desc}</p>${meta}<p class="ben small">${k==='diag'?t('ben').diag:t('ben').test}</p></div><button class="btn soft" data-start="${k}">${LOCKSVG} ${t('unlock')}</button></article>`;
     const out=!pro&&(k==='session'||k==='review')&&dl<=0;
     return `<article class="pcard ${cls}"><div><h3>${title}</h3><p>${desc}</p>${meta}</div>${out?`<button class="btn ${cls==='feature'?'primary':'soft'}" data-lock="daily">${LOCKSVG} ${t('unlock')}</button>`:`<button class="btn ${cls==='feature'?'primary':cls==='dark'?'sand':'soft'}" data-start="${k}" ${k==='review'&&!due?'disabled':''}>${t('start')}</button>`}</article>`; };
-  const nMist=S.mistakes.filter(m=>m.lang===S.lang).length;
-  const nd=!due&&nMist?S.mistakes.filter(m=>m.lang===S.lang).map(m=>m.due||'').sort()[0]:null;
+  const nMist=openMistakes().length;
+  const nd=!due&&nMist?openMistakes().map(m=>m.due||'').sort()[0]:null;
   const revHint=!nMist?`<p class="small muted">${t('noMist')}</p>`:nd?`<p class="small muted">${t('nextRev')(nd===addDays(todayStr(),1)?t('tomorrow'):dateH(nd))}</p>`:'';
   const dmeta=dl!==Infinity?`<p class="small daily-left">${dl>0?t('dailyLeft')(numL(dl),numL(FREE.dailyQuestions)):t('dailyOut')}</p>`:'';
   return `<header class="page-h"><h1>${t('practiceTitle')}</h1><p>${t('practiceIntro')}</p></header>
-  <div class="pgrid">
+  <h2 class="sr-only">${t('practiceKinds')}</h2><div class="pgrid">
     ${card('session',t('pSession'),t('pSessionD'),'feature',dmeta)}
     ${card('diag',t('pDiag'),t('pDiagD'),'',dt&&!pro?`<p class="small">✓ ${t('diagDone')}</p>`:'')}
     ${card('review',t('pReview'),t('pReviewD'),'',`<p class="due-n"><b class="num">${numL(due)}</b> ${t('due')}</p>${revHint}${!pro&&nMist>(+FREE.mistakesMax||0)?`<p class="small muted">${t('mistCap')(numL(FREE.mistakesMax))}</p>`:''}`)}
@@ -2195,6 +2281,7 @@ function pageProgress(){
   const srow=i=>`<a class="srow" href="#lesson-${i.s}"><span class="sn">${SKILLS[i.s][S.lang]}</span><span class="sl">${pips(i.level)}<small>${t('levels')[i.level]}</small></span><span class="sb">${barRow('',i.acc,'')}</span><span class="stime num ${i.time!=null&&i.time>TARGET_T[i.s]?'slow':''}">${i.time!=null?numL(Math.round(i.time)):'—'} / ${numL(TARGET_T[i.s])}${t('sec')}</span></a>`;
   return `<header class="page-h"><h1>${t('progressTitle')}</h1></header>
   ${real?'':`<div class="demo empty-state"><span><b>${t('emptyT')}.</b> ${t('emptyD')}</span><button class="btn primary sm" data-start="diag">${t('diagFirst')}</button></div>`}
+  ${CLOUD_BUILD&&!pro&&reportReady()?`<div class="demo rep-line"><span>${t('reportLink')}</span><a class="btn primary sm" href="#report">${t('reportOpen')}</a></div>`:''}
   <div class="kpis">
     <div class="kpi big">${ring(rd,'%',104)}<div><span class="kl">${t('kReady')}</span><span class="ks">${numL(checks.filter(Boolean).length)}/${numL(4)} ${S.lang==='ar'?'معايير متحققة':'criteria met'}</span></div></div>
     ${pro?kpi(t('kEst'),est==null?'—':numL(est),est!=null?`${t('gap')}: ${numL(Math.max(0,S.target-est))}`:''):lkpi(t('kEst'))}
@@ -2250,9 +2337,9 @@ function pageGuide(){
   return `<header class="page-h"><h1>${t('guideTitle')}</h1><p class="note">${t('verifyNote')}</p></header>
   <nav class="toc">${secs.map(s=>`<a href="#guide" data-scroll="g-${s.id}">${s.h}</a>`).join('')}</nav>
   <div class="guide-body">
-    <section id="g-method" class="gsec"><h2>${t('methodTitle')}</h2><p>${t('methodIntro')}</p><div class="method-grid">${METHOD[S.lang].map((m,i)=>`<div class="mcard"><span class="mnum num">${numL(i+1)}</span><h4>${m[0]}</h4><p>${m[1]}</p><span class="mtag">${m[2]}</span></div>`).join('')}</div></section>
+    <section id="g-method" class="gsec"><h2>${t('methodTitle')}</h2><p>${t('methodIntro')}</p><div class="method-grid">${METHOD[S.lang].map((m,i)=>`<div class="mcard"><span class="mnum num">${numL(i+1)}</span><h3>${m[0]}</h3><p>${m[1]}</p><span class="mtag">${m[2]}</span></div>`).join('')}</div></section>
     ${g.map(s=>`<section id="g-${s.id}" class="gsec card"><h2>${s.h}</h2>${s.body}</section>`).join('')}
-    <section class="gsec card"><h2>${t('sourcesLine')}</h2><ul class="bul">${GUIDE_SOURCES.map(x=>`<li><a href="${x[2]}" target="_blank" rel="noopener">${S.lang==='ar'?x[0]:x[1]}</a></li>`).join('')}</ul></section>
+    <section class="gsec card"><h2>${t('sourcesLine')}</h2><ul class="bul">${GUIDE_SOURCES.map(x=>`<li><a href="${x[2]}" target="_blank" rel="noopener"${lt(S.lang==='ar'?x[0]:x[1])}>${S.lang==='ar'?x[0]:x[1]}</a></li>`).join('')}</ul></section>
   </div>`;
 }
 
@@ -2261,6 +2348,8 @@ function pageGuide(){
 let UP={plan:null,coupon:'',quote:null,qerr:'',note:'',err:'',busy:false,k:null,qt:null,qseq:0};
 const money=n=>{ const v=Math.round(n*100)/100; return numL(Number.isInteger(v)?v:v.toFixed(2)); };
 const CURR=()=>S.lang==='ar'?'ريال':(CFG()?.currency||'SAR');
+/* the payment gateway named in the copy follows config.provider ('moyasar' | 'tap' | null → no name) */
+const provName=()=>{ const p=CFG()?.provider; return p==='moyasar'?(S.lang==='ar'?'ميسّر':'Moyasar'):p==='tap'?(S.lang==='ar'?'تاب':'Tap'):''; };
 function plansOf(){ return (CFG()?.plans||[]).filter(p=>p&&p.id); }
 function curPlan(){ const ps=plansOf(); if(!ps.length) return null; return ps.find(p=>p.id===UP.plan)||ps.find(p=>p.best)||ps[0]; }
 function planCards(sel){ const ps=plansOf(); if(!ps.length) return `<p class="muted small">${t('plansLoading')}</p>`;
@@ -2268,8 +2357,8 @@ function planCards(sel){ const ps=plansOf(); if(!ps.length) return `<p class="mu
     return `<button type="button" class="up-plan ${on?'on':''} ${p.best?'best':''}" role="radio" aria-checked="${on}" data-plan="${esc(p.id)}">${p.best?`<span class="up-best">${t('bestValue')}</span>`:''}<b class="up-pn">${esc(p[S.lang]||p.en||p.id)}</b><span class="up-price"><b class="num">${money(p.price)}</b> ${CURR()}</span><span class="up-days">${t('perDays')(numL(p.days))}${per?` · ${t('perMonth')(money(per),CURR())}`:''}</span></button>`; }).join('')}</div>`; }
 function compareTable(){ const F=FREE, fx=(F.xp||[]).filter(k=>xpLang(k)===S.lang).length, all=xpAllKeys().filter(k=>xpLang(k)===S.lang).length, pct=x=>numL(Math.round((+x||0)*100))+'%';
   const rows=t('cmpRows')({xp:numL(fx),xpAll:numL(all),daily:numL(F.dailyQuestions),cards:pct(F.cardsFrac),weeks:numL(F.planWeeks),weeksN:+F.planWeeks,mist:numL(F.mistakesMax),tech:pct(F.techFrac)});
-  const cell=v=>v===true?`<span class="cmp-y" aria-label="✓">${ICON.check}</span>`:v===false?`<span class="cmp-n" aria-label="—">${LOCKSVG}</span>`:esc(v);
-  return `<div class="tbl cmp"><table><thead><tr><th></th><th>${t('colFree')}</th><th class="pro-col">${t('colPro')}</th></tr></thead><tbody>${rows.map(r=>`<tr><th scope="row">${esc(r[0])}</th><td>${cell(r[1])}</td><td class="pro-col">${cell(r[2])}</td></tr>`).join('')}</tbody></table></div>`; }
+  const cell=v=>v===true?`<span class="cmp-y" role="img" aria-label="${t('included')}">${ICON.check}</span>`:v===false?`<span class="cmp-n" role="img" aria-label="${t('notIncluded')}">${LOCKSVG}</span>`:esc(v);
+  return `<div class="tbl cmp"><table><thead><tr><th></th><th>${t('colFree')}</th><th class="pro-col" lang="en">${t('colPro')}</th></tr></thead><tbody>${rows.map(r=>`<tr><th scope="row">${esc(r[0])}</th><td>${cell(r[1])}</td><td class="pro-col">${cell(r[2])}</td></tr>`).join('')}</tbody></table></div>`; }
 function priceLine(){ const p=curPlan(); if(!p) return ''; const q=UP.quote&&UP.quote.plan===p.id?UP.quote:null;
   if(q&&q.pct) return `<span class="up-total">${t('total')}: <s class="num">${money(p.price)}</s> <b class="num">${q.amount===0?t('free100'):money(q.amount)+' '+CURR()}</b> <span class="chip">${t('couponOk')(numL(q.pct))}</span></span>`;
   return `<span class="up-total">${t('total')}: <b class="num">${money(p.price)} ${CURR()}</b></span>`; }
@@ -2280,12 +2369,12 @@ function payState(){ const C=window.CLOUD, p=curPlan(), q=UP.quote&&p&&UP.quote.
   if(!pays) return {label:t('payOff'),dis:true};
   return {label:UP.busy?t('payBusy'):t('payBtn'),dis:UP.busy}; }
 function upgradeBody(sheet){ const C=window.CLOUD, cfg=CFG(), p=curPlan(), pro=PRO(), pays=!!cfg?.payments, ps=payState();
-  if(pro&&C?.user){ const u=C.plan?.until; return `<div class="up-pro card"><span class="pro-chip big">${t('proChip')}</span><h2>${t('youArePro')}</h2><p class="muted">${u?t('activeUntil')(dateLong(u)):t('proForever')}</p><div class="row"><a class="btn primary" href="#today">${t('goToday')}</a>${sheet?'':`<button class="btn ghost" data-acct="1">${t('acctManage')}</button>`}</div></div>${sheet?'':`<section class="up-inc"><h2 class="sec-h hl">${t('incT')}</h2>${compareTable()}</section>`}`; }
+  if(pro&&C?.user){ const u=C.plan?.until; return `<div class="up-pro card"><span class="pro-chip big" lang="en">${t('proChip')}</span><h2>${t('youArePro')}</h2><p class="muted">${u?t('activeUntil')(dateLong(u)):t('proForever')}</p><div class="row"><a class="btn primary" href="#today">${t('goToday')}</a>${sheet?'':`<button class="btn ghost" data-acct="1">${t('acctManage')}</button>`}</div></div>${sheet?'':`<section class="up-inc"><h2 class="sec-h hl">${t('incT')}</h2>${compareTable()}</section>`}`; }
   return `${UP.k||sheet?`<p class="up-ctx">${esc(ctxMsg(UP.k))}</p>`:''}
     ${planCards(p)}
     <form class="up-coupon" id="up-cf" novalidate><label for="up-cp">${t('couponL')}</label><div class="up-cp-row"><input id="up-cp" type="text" dir="ltr" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="40" placeholder="${t('couponPh')}" value="${esc(UP.coupon)}"><button class="btn ghost sm" type="submit">${t('applyBtn')}</button></div><p class="up-qerr small" id="up-qerr" role="alert">${UP.qerr?esc(UP.qerr):''}</p></form>
     <div class="up-pay"><div id="up-price">${priceLine()}</div><button class="btn primary xl block" id="up-pay" ${ps.dis?'disabled':''}>${ps.label}</button>
-      ${!pays&&C?.user?`<p class="up-off small">${t('payOffD')}</p>`:''}${pays?`<p class="small muted">${t('payNote')}</p>`:''}
+      ${!pays&&C?.user?`<p class="up-off small">${t('payOffD')}</p>`:''}${pays?`<p class="small muted">${t('payNote')(provName())}</p>`:''}
       ${cfg?.refund?.on?`<p class="up-refund small">${ICON.official}<span>${t('refund')(numL(cfg.refund.days))}</span></p>`:''}
       ${UP.err?`<p class="acct-err" role="alert">${esc(UP.err)}</p>`:''}${UP.note?`<p class="acct-info" role="status">${esc(UP.note)}</p>`:''}</div>
     ${sheet?`<details class="up-more"><summary>${t('incT')}</summary>${compareTable()}</details><a class="up-all" href="#upgrade" id="up-all">${t('seeAll')}</a>`:`<section class="up-inc"><h2 class="sec-h hl">${t('incT')}</h2>${compareTable()}</section>`}`; }
@@ -2317,10 +2406,10 @@ async function doCheckout(){ const C=window.CLOUD; if(!C) return; const p=curPla
   UP.busy=false; rerenderUp(); }
 function rerenderUp(){ const sh=$('#upsheet'); if(sh&&!sh.hidden) renderUpsheet(); if(route().p==='upgrade') renderRoute(); }
 function openUpgrade(k){ if(!window.CLOUD) return; UP.k=k||null; UP.err=''; UP.note='';
-  let el=$('#upsheet'); if(!el){ el=document.createElement('div'); el.id='upsheet'; document.body.appendChild(el); el.addEventListener('pointerdown',e=>{ if(e.target===el) closeUpgrade(); }); }
-  el.hidden=false; document.body.classList.add('sheet-open'); renderUpsheet(); track('upgrade_view',k||'sheet');
+  let el=$('#upsheet'); const was=!!(el&&!el.hidden); if(!el){ el=document.createElement('div'); el.id='upsheet'; document.body.appendChild(el); el.addEventListener('pointerdown',e=>{ if(e.target===el) closeUpgrade(); }); }
+  if(!was){ const a=document.activeElement; UP_RET={el:a,sel:a&&a.dataset&&a.dataset.lock?`[data-lock="${a.dataset.lock}"]`:a&&a.id?'#'+a.id:null}; } el.hidden=false; document.body.classList.add('sheet-open'); overlayInert(); renderUpsheet(); track('upgrade_view',k||'sheet');
   setTimeout(()=>el.querySelector('.up-plan.on,#up-x')?.focus(),0); }
-function closeUpgrade(){ const el=$('#upsheet'); if(el&&!el.hidden){ el.hidden=true; el.innerHTML=''; document.body.classList.remove('sheet-open'); } }
+function closeUpgrade(){ const el=$('#upsheet'); if(el&&!el.hidden){ el.hidden=true; el.innerHTML=''; document.body.classList.remove('sheet-open'); overlayInert(); const r=UP_RET; UP_RET=null; if(r&&$('#acct').hidden){ const el=r.el&&r.el.isConnected&&r.el!==document.body?r.el:r.sel&&$('#main')?.querySelector(r.sel); el?.focus?.(); } } }
 function renderUpsheet(){ const el=$('#upsheet'); if(!el) return; el.dir=S.lang==='ar'?'rtl':'ltr'; el.lang=S.lang;
   const k=UP.k, ben=k&&t('ben')[k];
   el.innerHTML=`<div class="up-sheet" role="dialog" aria-modal="true" aria-labelledby="up-h"><button class="icon-btn acct-x" id="up-x" aria-label="${t('close')}">${ICON.x}</button>
@@ -2358,12 +2447,12 @@ function renderBanner(){ const el=$('#banner'); if(!el) return; const b=CFG()?.b
   el.querySelector('#bn-x').onclick=()=>{ gone.push(key); try{ localStorage.setItem('masar100_banner_x',JSON.stringify(gone.slice(-20))); }catch(e){} renderBanner(); }; }
 function renderProChip(){ const ab=$('#acct-btn'); if(!ab) return; let c=$('#pro-chip'); const on=!!window.CLOUD?.user&&PRO();
   if(on&&!c){ c=document.createElement('a'); c.id='pro-chip'; c.className='pro-chip'; c.href='#upgrade'; ab.parentNode.insertBefore(c,ab); }
-  if(c){ c.hidden=!on; c.textContent=t('proChip'); c.title=t('youArePro'); } }
+  if(c){ c.hidden=!on; c.textContent=t('proChip'); c.title=t('youArePro'); c.setAttribute('lang','en'); } }
 /* my subscription (account modal) */
 function subSection(){ const C=window.CLOUD, pi=AC.planInfo, p=C.plan||{tier:'free'}, pro=C.isPro();
   const st=t('payStatus'), pays=(pi&&pi.payments)||[];
   return `<details class="acct-priv acct-sub" open><summary>${t('subT')}</summary>
-    <div class="sub-row"><span class="${pro?'pro-chip':'chip'}">${pro?t('proChip'):t('planFree')}</span><span class="small">${pro?(p.until?t('activeUntil')(dateLong(p.until)):t('proForever')):t('planFreeD')}</span></div>
+    <div class="sub-row"><span class="${pro?'pro-chip':'chip'}" ${pro?'lang="en"':''}>${pro?t('proChip'):t('planFree')}</span><span class="small">${pro?(p.until?t('activeUntil')(dateLong(p.until)):t('proForever')):t('planFreeD')}</span></div>
     <a class="btn ${pro?'ghost':'primary'} sm" href="#upgrade" id="ac-up">${pro?t('seePlans'):t('upgradeBtn')}</a>
     <div class="sub-pays"><b class="small">${t('payHist')}</b>${!pi?`<p class="small muted">${t('loading')}</p>`:pays.length?`<ul>${pays.map(x=>`<li><span class="num">${dateH(String(x.paid_at||x.created_at).slice(0,10))}</span><span>${esc((plansOf().find(q=>q.id===x.plan_id)||{})[S.lang]||x.plan_id||'')}</span><b class="num">${money(+x.amount)} ${S.lang==='ar'?'ريال':esc(x.currency||'')}</b><span class="chip ${x.status==='paid'?'':'sand'}">${st[x.status]||esc(x.status)}</span></li>`).join('')}</ul>`:`<p class="small muted">${t('noPays')}</p>`}</div></details>`; }
 
@@ -2383,7 +2472,7 @@ let LAST_H=null;
 function onEnter(h){
   if(h.startsWith('upgrade')){ track('upgrade_view','page');
     if(/(^|[?&])paid=1/.test(h)){ const go=(n=0)=>{ const C=window.CLOUD; if(C&&C.ready&&C.refresh) C.refresh(); else if(n<40) setTimeout(()=>go(n+1),250); }; go(); } }
-  if(h==='report') track('report_view'); }
+  if(h==='report'){ track('report_view'); if(reportReady()&&!S.repSeen){ S.repSeen=1; save(); } } } /* seen once: the Today card steps aside; the Progress page keeps a link */
 function renderRoute(){
   syncFree(); const r=route(), h=(location.hash||'#today').slice(1); if(h!==LAST_H){ LAST_H=h; onEnter(h); } document.documentElement.lang=S.lang; document.documentElement.dir=S.lang==='ar'?'rtl':'ltr';
   $('#brand-n').textContent=t('brand'); document.title=S.lang==='ar'?'أكاديمية القدرات | GAT Academy':'GAT Academy | أكاديمية القدرات'; { const L=S.lang==='ar'; $('#theme-btn').setAttribute('aria-label',L?'المظهر':'Theme'); $('#acct-btn')?.setAttribute('aria-label',L?'الحساب':'Account'); $('#nav').setAttribute('aria-label',L?'التنقل الرئيسي':'Main navigation'); $('#tabbar').setAttribute('aria-label',L?'التنقل السفلي':'Bottom navigation'); $('#lang-btn').setAttribute('lang',L?'en':'ar'); } $('#brand-t').textContent=t('tagline'); $('#lang-btn').textContent=t('switchLang');
@@ -2391,14 +2480,26 @@ function renderRoute(){
   $('#nav').innerHTML=links; $('#tabbar').innerHTML=links;
   const ab=$('#acct-btn'); if(ab){ const u=window.CLOUD?.user, nm=(u&&u.name)||''; ab.hidden=!window.CLOUD; ab.classList.toggle('on',!!u); ab.classList.toggle('has-name',!!nm); ab.title=u?(nm?nm+' · ':'')+(u.email||''):t('acctJoin');
     let sp=ab.querySelector('.acct-name'); if(nm){ if(!sp){ sp=document.createElement('span'); sp.className='acct-name'; ab.appendChild(sp); } sp.textContent=nm.split(' ')[0]; ab.setAttribute('aria-label',(S.lang==='ar'?'الحساب: ':'Account: ')+nm); } else if(sp) sp.remove(); }
-  $('#main').innerHTML=r.v(); $('#foot').innerHTML=esc(t('footer'))+(window.CLOUD?` · <a class="foot-home" href="/?home=1${S.lang==='en'?'&lang=en':''}">${t('aboutSite')}</a> · <a class="foot-home" href="/privacy${S.lang==='en'?'?lang=en':''}">${t('legalPrivacy')}</a> · <a class="foot-home" href="/terms${S.lang==='en'?'?lang=en':''}">${t('legalTerms')}</a>`:''); bindMain();
+  let html; try{ html=r.v(); }catch(e){ console.error(e); html=errorCard(); } $('#main').innerHTML=notices()+html; $('#foot').innerHTML=esc(t('footer')).replace('info@gat.academy','<a class="mail-link" dir="ltr" href="mailto:info@gat.academy">info@gat.academy</a>')+(window.CLOUD?` · <a class="foot-home" href="/?home=1${S.lang==='en'?'&lang=en':''}">${t('aboutSite')}</a> · <a class="foot-home" href="/privacy${S.lang==='en'?'?lang=en':''}">${t('legalPrivacy')}</a> · <a class="foot-home" href="/terms${S.lang==='en'?'?lang=en':''}">${t('legalTerms')}</a>`:''); bindMain();
   renderBanner(); renderProChip(); loadPremium(); if(NUDGE) renderNudge();
 }
+/* device/session notices shown above the page: a corrupt saved copy, a lost session, an unreachable server */
+const NX=k=>{ try{ return sessionStorage.getItem('masar100_nx_'+k)==='1'; }catch(e){ return false; } };
+function notices(){ const C=window.CLOUD, out=[]; const bar=(k,txt,act='')=>out.push(`<div class="demo notice" role="status" data-nx="${k}"><span>${txt}</span><span class="row">${act}<button class="icon-btn sm" data-nxclose="${k}" aria-label="${t('close')}">${ICON.x}</button></span></div>`);
+  if(LOAD_ERR&&!NX('load')) bar('load',esc(t('loadErr')));
+  if(C&&C.ready){ if(C.offline&&!C.user&&getOwner()&&!NX('off')) bar('off',esc(t('offlineNote')));
+    else if(!C.offline&&!C.user&&getOwner()&&!NX('sess')) bar('sess',esc(t('sessionLost')),`<button class="btn primary sm" data-acct="1" data-tab="signin">${t('signIn')}</button>`); }
+  return out.join(''); }
+function errorCard(){ return `<section class="card center err-card"><h1>${t('errPageT')}</h1><p class="muted">${t('errPageD')}</p><div class="row"><a class="btn primary" href="#today">${t('nav.today')}</a><button type="button" class="btn ghost" id="err-reload">${t('reload')}</button></div></section>`; }
+let ERR_TOAST=0;
+window.addEventListener('error',e=>{ if(!e||!e.error||/ResizeObserver/.test(String(e.message))) return; if(Date.now()-ERR_TOAST<30000) return; ERR_TOAST=Date.now(); try{ toast(t('errUnexpected')); }catch(x){} });
 function bindMain(){
   const m=$('#main');
+  m.querySelectorAll('[data-nxclose]').forEach(b=>b.onclick=()=>{ try{ sessionStorage.setItem('masar100_nx_'+b.dataset.nxclose,'1'); }catch(e){} b.closest('.notice')?.remove(); });
+  { const rl=$('#err-reload'); if(rl) rl.onclick=()=>location.reload(); }
   m.querySelectorAll('[data-review]').forEach(b=>{ b.onclick=e=>{ e.stopPropagation(); openReview(b.dataset.review); }; if(b.tagName==='TR') b.onkeydown=e=>{ if(e.key==='Enter') openReview(b.dataset.review); }; });
-  m.querySelectorAll('[data-acct]').forEach(b=>b.onclick=openAcct);
-  m.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>document.getElementById(b.dataset.go)?.scrollIntoView({behavior:'smooth'}));
+  m.querySelectorAll('[data-acct]').forEach(b=>b.onclick=()=>{ if(b.dataset.tab) AC.tab=b.dataset.tab; openAcct(); });
+  m.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>document.getElementById(b.dataset.go)?.scrollIntoView({behavior:SMOOTH()}));
   m.querySelectorAll('[data-start]').forEach(b=>b.onclick=()=>startTest(b.dataset.start,{skill:b.dataset.skill}));
   m.querySelectorAll('[data-xp]').forEach(b=>b.onclick=()=>{ XP_BACK=b.dataset.xp; track('xp_start',b.dataset.xp); XP.open(b.dataset.xp); });
   m.querySelectorAll('[data-lock]').forEach(b=>b.onclick=e=>{ e.preventDefault(); e.stopPropagation(); if(b.dataset.lock==='report') openUpgrade('report'); else hitLimit(b.dataset.lock); });
@@ -2407,7 +2508,7 @@ function bindMain(){
   if(route().p==='report') m.querySelectorAll('[data-plan]').forEach(b=>b.onclick=()=>{ UP.plan=b.dataset.plan; openUpgrade('report'); });
   { const rh=$('#rp-hide'); if(rh) rh.onclick=()=>{ S.repHide=1; save(); renderRoute(); }; }
   m.querySelectorAll('[data-task]').forEach(b=>b.onclick=()=>{ const tk=buildPlan().flatMap(w=>w.tasks).find(x=>x.id===b.dataset.task); if(tk) runTask(tk); });
-  m.querySelectorAll('[data-scroll]').forEach(a=>a.onclick=e=>{ e.preventDefault(); document.getElementById(a.dataset.scroll)?.scrollIntoView({behavior:'smooth',block:'start'}); });
+  m.querySelectorAll('[data-scroll]').forEach(a=>a.onclick=e=>{ e.preventDefault(); document.getElementById(a.dataset.scroll)?.scrollIntoView({behavior:SMOOTH(),block:'start'}); });
   bindSettings('pf');
   const on=(id,f)=>{ const b=$(id); if(b) b.onclick=f; };
   on('#vcard',()=>{ if(!VC.flip){ VC.flip=true; renderRoute(); } });
@@ -2447,36 +2548,46 @@ applyTheme();
 function cloudLine(){ const C=window.CLOUD; if(!C||!C.user) return ''; if(C.status==='saving') return t('cloudSaving'); if(C.status==='error') return t('cloudErr'); return C.lastSync?t('cloudSynced')+' '+new Date(C.lastSync).toLocaleTimeString(S.lang==='ar'?'ar-SA':'en-GB',{timeStyle:'short'}):''; }
 let AC={tab:'signup',err:'',busy:false,confirmDel:false,info:''};
 function authIntent(){ const C=window.CLOUD; if(!AUTHQ||!C||!C.ready) return; const q=AUTHQ; AUTHQ=null; if(!C.user){ AC.tab=q; openAcct(); if(AUTHERR){ AC.err=(t('socialErr')||{})[AUTHERR]||(t('socialErr')||{}).failed; AUTHERR=null; renderAcct(); } } }
-function openAcct(){ AC.err=''; AC.info=''; AC.confirmDel=false; closeUpgrade(); $('#acct').hidden=false; AC.planInfo=null;
+function openAcct(){ AC.err=''; AC.info=''; AC.infoHtml=''; AC.confirmDel=false; AC.deleted=false; closeUpgrade(); AC_RET=document.activeElement; $('#acct').hidden=false; overlayInert(); AC.planInfo=null;
   const C=window.CLOUD; if(C?.user&&C.planInfo) C.planInfo().then(r=>{ AC.planInfo=r; if(!$('#acct').hidden) renderAcct(); }).catch(()=>{ AC.planInfo={payments:[]}; if(!$('#acct').hidden) renderAcct(); });
   renderAcct(); setTimeout(()=>($('#ac-email')||$('#ac-x')||$('#acct button'))?.focus(),0); }
-function closeAcct(){ AC.fPass=''; { const pw=$('#ac-pass'); if(pw) pw.value=''; } PEND=null; AC.gate=false; AC.gateUp=false; $('#acct').hidden=true; $('#acct-btn')?.focus(); }
+let AC_RET=null, UP_RET=null;
+function closeAcct(){ AC.fPass=''; { const pw=$('#ac-pass'); if(pw) pw.value=''; } PEND=null; AC.gate=false; AC.gateUp=false; AC.deleted=false; $('#acct').hidden=true; overlayInert(); const r=AC_RET; AC_RET=null; (r&&r.isConnected&&r!==document.body?r:$('#acct-btn'))?.focus?.(); }
+/* while a dialog (account, upgrade sheet, test) is open, everything behind it is inert: Tab and screen readers stay inside */
+function overlayInert(){ const ex=document.body.classList.contains('exam-open'), acct=!$('#acct').hidden, up=!!($('#upsheet')&&!$('#upsheet').hidden), modal=acct||up;
+  ['header.top','#main','footer','#tabbar','#banner','#nudge'].forEach(q=>{ const e=$(q); if(e) e.inert=ex||modal; }); const x=$('#exam'); if(x) x.inert=modal&&ex; const xp=$('#xp'); if(xp) xp.inert=modal; const a=$('#acct'); if(a) a.inert=up&&acct; }
+document.addEventListener('keydown',e=>{ if(e.key!=='Tab'||document.body.classList.contains('xp-open')) return; const box=[$('#acct'),$('#upsheet'),$('#exam')].find(x=>x&&!x.hidden&&!x.inert); if(!box) return;
+  const f=[...box.querySelectorAll('a[href],button:not([disabled]),input:not([disabled]):not([type=hidden]),select:not([disabled]),textarea:not([disabled]),summary,[tabindex]:not([tabindex="-1"])')].filter(x=>x.offsetParent!==null&&!x.closest('[hidden]')); if(!f.length) return;
+  const a=document.activeElement, first=f[0], last=f[f.length-1];
+  if(!e.shiftKey&&(a===last||!box.contains(a))){ e.preventDefault(); first.focus(); } else if(e.shiftKey&&(a===first||!box.contains(a))){ e.preventDefault(); last.focus(); } });
 document.addEventListener('keydown',e=>{ if(e.key!=='Escape') return; const a=$('#acct'), p=$('#theme-pop'), us=$('#upsheet'); if(us&&!us.hidden&&(!a||a.hidden)){ closeUpgrade(); return; } if(a&&!a.hidden){ closeAcct(); return; } if(p&&!p.hidden){ p.hidden=true; $('#theme-btn').setAttribute('aria-expanded','false'); $('#theme-btn').focus(); } });
-const authMsg=c=>c==='cur-pw'?t('curPwWrong'):(t('authErr')[String(c||'').replace('auth/','')]||t('authErr').other);
+const authMsg=(c,e)=>{ c=String(c||'').replace('auth/',''); if(c==='cur-pw') return t('curPwWrong'); if(c==='pw-long') return t('pwLong');
+  if(c==='too-many-requests'){ const ra=+(e&&e.retryAfter)||0; return t('tooMany')(numL(ra?Math.max(1,Math.ceil(ra/60)):(AC.tab==='signup'&&!window.CLOUD?.user?60:15))); } /* the server's windows: 15 min (sign-in, password), 1 h (sign-up) */
+  return t('authErr')[c]||t('authErr').other; };
 function renderAcct(){
   const el=$('#acct'), C=window.CLOUD; if(!el||!C) return; const u=C.user;
   if(!u){ const v=q=>el.querySelector(q); if(v('#ac-email')) AC.fEmail=v('#ac-email').value; if(v('#ac-pass')) AC.fPass=v('#ac-pass').value; if(v('#ac-name')) AC.fName=v('#ac-name').value; if(v('#ac-ok')) AC.fOk=v('#ac-ok').checked; } /* a re-render keeps what was typed */
   el.innerHTML=`<div class="acct-box" role="dialog" aria-modal="true" aria-labelledby="acct-h">
     <button class="icon-btn acct-x" id="ac-x" aria-label="${t('close')}">${ICON.x}</button>
     ${u?`<h2 id="acct-h">${u.name?`${t('hello')}${S.lang==='ar'?'، ':', '}${esc(u.name)}`:t('acctTitle')}</h2>
-      <p class="acct-mail">${esc(u.email||'')}</p>
+      <p class="acct-mail" dir="ltr">${esc(u.email||'')}</p>
       ${C.plan?subSection():''}
       ${C.setName?`<details class="acct-priv" ${(!u.name||AC.nameOpen)?'open':''}><summary>${u.name?t('nameEdit'):t('nameMissing')}</summary><form id="ac-namef" class="acct-form" novalidate><label>${t('fullName')}<input type="text" id="ac-nm" autocomplete="name" maxlength="60" value="${esc(u.name||'')}" placeholder="${t('namePh')}"></label><button class="btn ghost" type="submit">${t('nameSave')}</button></form></details>`:''}
       ${u.emailVerified?'':`<p class="small note">${t('verifyHint')}</p>`}
       <p class="small muted" id="cloud-line2">${cloudLine()}</p>
       <div class="row"><button class="btn primary" id="ac-sync">${t('syncNow')}</button><button class="btn ghost" id="ac-out">${t('signOut')}</button></div>
-      ${C.changePassword?`<details class="acct-priv" ${AC.pwOpen?'open':''}><summary>${t('chPw')}</summary><form id="ac-pwf" class="acct-form" novalidate><label>${t('curPw')}<input type="password" id="ac-cur" autocomplete="current-password" dir="ltr"></label><label>${t('newPw')}<input type="password" id="ac-new" autocomplete="new-password" minlength="8" dir="ltr"></label><button class="btn ghost" type="submit">${t('chPwBtn')}</button></form></details>`:''}
+      ${C.changePassword?`<details class="acct-priv" ${AC.pwOpen?'open':''}><summary>${t('chPw')}</summary><form id="ac-pwf" class="acct-form" novalidate><label>${t('curPw')}<input type="password" id="ac-cur" autocomplete="current-password" dir="ltr"></label><label>${t('newPw')}<input type="password" id="ac-new" autocomplete="new-password" minlength="8" maxlength="200" dir="ltr"></label><button class="btn ghost" type="submit">${t('chPwBtn')}</button></form></details>`:''}
       <details class="acct-priv"><summary>${t('privT')}</summary><p class="small">${t('privD')}</p></details>
       ${AC.confirmDel?`<div class="ex-confirm inline"><p>${t('delConfirm')}</p><div class="row"><button class="btn danger" id="ac-del2">${t('delYes')}</button><button class="btn ghost" id="ac-nodel">${t('cancel')}</button></div></div>`:`<button class="btn danger-ghost sm" id="ac-del">${t('delAcct')}</button>`}
-      `:`<h2 id="acct-h">${AC.gateUp?t('signupFirstT'):AC.gate?t('gateT'):AC.tab==='signin'?t('signinT'):t('acctJoinT')}</h2><p class="small ${AC.gate?'gate-msg':'muted'}">${AC.gateUp?t('signupFirst'):AC.gate?t('gateMsg'):AC.tab==='signin'?t('signinWhy'):t('acctWhy')}</p>
+      `:AC.deleted?`<h2 id="acct-h">${t('deleted')}</h2><p class="small">${t('deletedD')}</p><div class="row"><a class="btn primary" href="/?home=1${S.lang==='en'?'&lang=en':''}">${t('goHome')}</a><button class="btn ghost" id="ac-x2">${t('close')}</button></div>`:`<h2 id="acct-h">${AC.gateUp?t('signupFirstT'):AC.gate?t('gateT'):AC.tab==='signin'?t('signinT'):t('acctJoinT')}</h2><p class="small ${AC.gate?'gate-msg':'muted'}">${AC.gateUp?t('signupFirst'):AC.gate?t('gateMsg'):AC.tab==='signin'?t('signinWhy'):t('acctWhy')}</p>
       <div class="seg acct-seg"><button class="${AC.tab==='signup'?'on':''}" data-tab="signup">${t('signUp')}</button><button class="${AC.tab==='signin'?'on':''}" data-tab="signin">${t('signIn')}</button></div>
       ${(()=>{ const so=(C.config&&C.config.social)||{}; if(!so.google&&!so.facebook) return ''; const nx=encodeURIComponent('/app'+(location.hash&&!/^#sign/.test(location.hash)?location.hash:''));
         return `<div class="acct-social">${so.google?`<a class="btn social" href="/auth/google?next=${nx}"><svg class="sic" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.3 0-9.7-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg><span>${t('withGoogle')}</span></a>`:''}${so.facebook?`<a class="btn social" href="/auth/facebook?next=${nx}"><svg class="sic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="12" fill="#1877F2"/><path fill="#fff" d="M15.1 12.9l.4-2.9h-2.8V8.1c0-.8.4-1.6 1.7-1.6h1.3V4c0 0-1.2-.2-2.3-.2-2.3 0-3.8 1.4-3.8 3.9V10H7v2.9h2.6V20h3.1v-7.1h2.4z"/></svg><span>${t('withFacebook')}</span></a>`:''}
           ${AC.tab==='signup'?`<p class="acct-snote">${t('socialNote')}</p>`:''}<p class="acct-or"><span>${t('orEmail')}</span></p></div>`; })()}
       <form id="ac-form" class="acct-form" novalidate>
         ${AC.tab==='signup'&&C.setName?`<label>${t('fullName')}<input type="text" id="ac-name" autocomplete="name" maxlength="60" required placeholder="${t('namePh')}" value="${esc(AC.fName||'')}"></label>`:''}
-        <label>${t('email')}<input type="email" id="ac-email" autocomplete="email" required dir="ltr" value="${esc(AC.fEmail||'')}"></label>
-        <label>${t('password')}<input type="password" id="ac-pass" autocomplete="${AC.tab==='signup'?'new-password':'current-password'}" minlength="8" required dir="ltr" value="${esc(AC.fPass||'')}"></label>
+        <label>${t('email')}<input type="email" id="ac-email" autocomplete="email" required dir="ltr" value="${esc(AC.fEmail||(AC.tab==='signin'?getOwner():''))}"></label>
+        <label>${t('password')}<input type="password" id="ac-pass" autocomplete="${AC.tab==='signup'?'new-password':'current-password'}" minlength="8" maxlength="200" required dir="ltr" value="${esc(AC.fPass||'')}"></label>
         ${AC.tab==='signup'?`<label class="chkl"><input type="checkbox" id="ac-ok" ${AC.fOk?'checked':''}> <span>${t('consent')}</span></label>`:''}
         ${AC.err?`<p class="acct-err" role="alert">${esc(AC.err)}</p>`:''}
         <button class="btn primary block" type="submit" ${AC.busy?'disabled':''}>${AC.tab==='signup'?t('signUp'):t('signIn')}</button>
@@ -2484,78 +2595,116 @@ function renderAcct(){
       ${C.google?`<button class="btn ghost block" id="ac-google">${t('withGoogle')}</button>`:''}
       ${AC.tab==='signin'?`<button class="linkbtn" id="ac-reset">${t('forgot')}</button>`:''}
       <details class="acct-priv"><summary>${t('privT')}</summary><p class="small">${t('privD')}</p></details>`}
-    ${AC.err&&u?`<p class="acct-err" role="alert">${esc(AC.err)}</p>`:''}${AC.info?`<p class="acct-info" role="status">${esc(AC.info)}</p>`:''}
+    ${AC.err&&u?`<p class="acct-err" role="alert">${esc(AC.err)}</p>`:''}${AC.info?`<p class="acct-info" role="status">${esc(AC.info)}</p>`:AC.infoHtml?`<p class="acct-info" role="status">${AC.infoHtml}</p>`:''}
   </div>`;
   const on=(id,f)=>{ const b=el.querySelector(id); if(b) b.onclick=f; };
-  on('#ac-x',closeAcct); on('#ac-up',()=>closeAcct());
+  on('#ac-x',closeAcct); on('#ac-x2',closeAcct); on('#ac-up',()=>closeAcct());
   el.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{ AC.tab=b.dataset.tab; AC.err=''; renderAcct(); });
-  const run=async fn=>{ AC.busy=true; AC.err=''; AC.info=''; renderAcct(); let ok=false; try{ await fn(); ok=true; AC.fPass=''; }catch(e){ AC.err=authMsg(e&&e.code); } AC.busy=false; renderAcct(); renderRoute();
+  const run=async fn=>{ AC.busy=true; AC.err=''; AC.info=''; AC.infoHtml=''; renderAcct(); let ok=false; try{ await fn(); ok=true; AC.fPass=''; }catch(e){ AC.err=authMsg(e&&e.code,e); } AC.busy=false; renderAcct(); renderRoute();
     if(ok&&PEND&&C.user){ const p=PEND; closeAcct(); if(p.fn) p.fn(); else startTest(p.kind,p.o); }
     else if(ok&&AC.justIn&&C.user){ closeAcct(); toast(t('welcomeIn')(String(C.user.name||'').split(' ')[0])); }
     AC.justIn=false; };
   const f=el.querySelector('#ac-form'); if(f) f.onsubmit=e=>{ e.preventDefault(); const em=el.querySelector('#ac-email').value.trim(), pw=el.querySelector('#ac-pass').value; AC.fEmail=em; AC.fPass=pw; { const ok0=el.querySelector('#ac-ok'); if(ok0) AC.fOk=ok0.checked; } { const n0=el.querySelector('#ac-name'); if(n0) AC.fName=n0.value; }
     if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)){ AC.err=t('authErr')['invalid-email']; return renderAcct(); }
-    if(pw.length<8){ AC.err=t('authErr')['weak-password']; return renderAcct(); }
+    if(pw.length<8){ AC.err=t('authErr')['weak-password']; return renderAcct(); } if(pw.length>200){ AC.err=t('pwLong'); return renderAcct(); }
     const nmEl=el.querySelector('#ac-name'), nm=nmEl?nmEl.value.replace(/\s+/g,' ').trim():''; AC.fEmail=em; if(nmEl) AC.fName=nm;
     if(nmEl&&(nm.length<2||nm.length>60)){ AC.err=t('authErr')['invalid-name']; return renderAcct(); }
     if(AC.tab==='signup'&&!el.querySelector('#ac-ok').checked){ AC.err=t('authErr').consent||t('needConsent'); return renderAcct(); }
     run(async()=>{ await (AC.tab==='signup'?C.signUp(em,pw,nm):C.signIn(em,pw)); AC.justIn=true; }); };
   const nf=el.querySelector('#ac-namef'); if(nf) nf.onsubmit=e=>{ e.preventDefault(); const v=el.querySelector('#ac-nm').value.replace(/\s+/g,' ').trim(); if(v.length<2||v.length>60){ AC.err=t('authErr')['invalid-name']; AC.nameOpen=true; return renderAcct(); } run(async()=>{ await C.setName(v); AC.nameOpen=false; AC.info=t('nameSaved'); }); };
   on('#ac-google',()=>run(()=>C.signInGoogle()));
-  on('#ac-reset',()=>{ const em=el.querySelector('#ac-email').value.trim(); if(C.resetByAdmin){ AC.err=''; AC.info=t('authErr')['reset-admin']; return renderAcct(); } /* reset by email to the team: a how-to, not an error */
+  on('#ac-reset',()=>{ const em=el.querySelector('#ac-email').value.trim(); AC.fEmail=em; if(C.resetByAdmin){ AC.err=''; AC.infoHtml=`${esc(t('authErr')['reset-admin'])} <a class="mail-link" dir="ltr" href="mailto:info@gat.academy?subject=${encodeURIComponent(t('resetMail'))}&body=${encodeURIComponent(t('resetMailBody')(em||'…'))}">${esc(t('sendMail'))}</a>`; return renderAcct(); } /* reset by email to the team: a how-to with a ready-made message, not an error */
     if(!em){ AC.err=t('authErr')['invalid-email']; return renderAcct(); } run(async()=>{ await C.reset(em); AC.info=t('resetSent'); }); });
   on('#ac-sync',()=>run(()=>C.pushNow()));
-  const pwf=el.querySelector('#ac-pwf'); if(pwf) pwf.onsubmit=e=>{ e.preventDefault(); AC.pwOpen=true; const cu=el.querySelector('#ac-cur').value, nw=el.querySelector('#ac-new').value; if(nw.length<8){ AC.err=t('authErr')['weak-password']; return renderAcct(); }
+  const pwf=el.querySelector('#ac-pwf'); if(pwf) pwf.onsubmit=e=>{ e.preventDefault(); AC.pwOpen=true; const cu=el.querySelector('#ac-cur').value, nw=el.querySelector('#ac-new').value; if(nw.length<8){ AC.err=t('authErr')['weak-password']; return renderAcct(); } if(nw.length>200){ AC.err=t('pwLong'); return renderAcct(); }
     run(async()=>{ try{ await C.changePassword(cu,nw); }catch(x){ if(x&&x.code==='invalid-credential'){ const y=new Error('cur'); y.code='cur-pw'; throw y; } throw x; } AC.info=t('pwChanged'); AC.pwOpen=false; }); };
   // sign out: sync first, then remove this account's progress from the device (it is safe in the cloud)
-  on('#ac-out',()=>run(async()=>{ if(C.pushNow){ await C.pushNow(); if(C.status==='error'){ const x=new Error('sync'); x.code='sync-first'; throw x; } } await C.signOut(); clearLocal(); AC.info=t('signedOut'); if(PREM) setTimeout(()=>location.reload(),900); /* drop premium lessons from memory */ }));
+  on('#ac-out',()=>run(async()=>{ if(C.pushNow){ await C.pushNow(); if(C.status==='error'){ const x=new Error('sync'); x.code='sync-first'; throw x; } } await C.signOut(); clearLocal(); AC.info=t('signedOut'); if(PREM){ try{ sessionStorage.setItem('masar100_msg','signedOut'); }catch(e){} setTimeout(()=>location.reload(),600); } /* drop premium lessons from memory; the confirmation is shown again after the reload */ }));
   on('#ac-del',()=>{ AC.confirmDel=true; renderAcct(); }); on('#ac-nodel',()=>{ AC.confirmDel=false; renderAcct(); });
-  on('#ac-del2',()=>run(async()=>{ await C.deleteAccount(); setOwner(''); AC.confirmDel=false; AC.info=t('deleted'); }));
+  on('#ac-del2',()=>run(async()=>{ await C.deleteAccount(); if(X) { clearInterval(timer); X=null; examShow(false); } clearLocal(); AC.confirmDel=false; AC.deleted=true; }));
 }
 window.__app={
   getS:()=>S, render:()=>{ if(window.CLOUD?.user?.email) setOwner(window.CLOUD.user.email); flushEVQ(); renderRoute(); authIntent(); if(!$('#acct').hidden) renderAcct(); const us=$('#upsheet'); if(us&&!us.hidden&&!us.contains(document.activeElement)) renderUpsheet(); },
   cloudStatus:()=>{ ['#cloud-line','#cloud-line2'].forEach(id=>{ const e=$(id); if(e) e.textContent=cloudLine(); }); },
-  mergeCloud:c=>{ if(!c||!c.stats) return; const em=window.CLOUD?.user?.email||'', owner=getOwner();
-    if(owner&&em&&owner!==em){ DET={}; try{ localStorage.removeItem(DKEY); }catch(e){} S=Object.assign(DEF(),c); }  // local data belongs to another account: never mix it in
-    else S=mergeStates(S,c);
+  /* the cloud copy arrives: merge it with this device's copy (guest=true: the device had no account before this sign-in) */
+  mergeCloud:(c,guest)=>{ if(!c||typeof c!=='object') return; const em=window.CLOUD?.user?.email||'', owner=getOwner();
+    if(owner&&em&&owner!==em){ DET={}; try{ localStorage.removeItem(DKEY); }catch(e){} S=normalize(c); }  // local data belongs to another account: never mix it in
+    else { const had=hasProgress(S); S=mergeStates(S,c); if(guest&&had) setTimeout(()=>toast(t('mergedGuest')),1200); }
     if(em) setOwner(em); try{ localStorage.setItem(KEY,JSON.stringify(S)); }catch(e){} },
+  /* the server no longer accepts our session (expired, password changed or account deleted elsewhere): keep working locally, ask to sign in again */
+  sessionLost:()=>{ SESSION_LOST=true; renderRoute(); },
+  /* this account was signed out in another tab of this browser: its progress must not stay readable here */
+  signedOutElsewhere:()=>{ if(X&&!X.result&&!X.reviewOnly) quitTest(); closeAcct(); S=normalize({lang:S.lang}); DET={}; try{ localStorage.removeItem(DKEY); }catch(e){} clearLive(); renderRoute(); toast(t('signedOutElsewhere')); },
+  /* the cloud copy is too large for the server: drop the oldest history and try again */
+  shrink:()=>{ let n=0; if(S.recent.length>600){ S.recent=S.recent.slice(-600); n++; } const open=S.mistakes.filter(m=>(m.box||0)<4); if(S.mistakes.length>open.length){ S.mistakes=open; n++; } if(S.mistakes.length>150){ S.mistakes=S.mistakes.slice(-150); n++; } if(S.attempts.length>150){ S.attempts=S.attempts.slice(-150); n++; } if(n) save(); return n>0; },
   summary:()=>{ const n=S.recent.length, c=S.recent.filter(x=>x.ok).length; return {est:estimate(),readiness:S.attempts.length?readiness():0,solved:n,acc:n?Math.round(100*c/n):0,models:Object.keys(S.models||{}).length,streak:calcStreak(),lastActive:S.days[S.days.length-1]||''}; }
 };
+let SESSION_LOST=false;
+const hasProgress=s=>!!(s.attempts.length||s.mistakes.length||Object.keys(s.cards).length||Object.keys(s.xp).length||Object.keys(s.vocab.ar).length||Object.keys(s.vocab.en).length);
 $('#acct-btn')&&($('#acct-btn').onclick=openAcct);
 $('#acct')&&$('#acct').addEventListener('pointerdown',e=>{ if(e.target.id==='acct') closeAcct(); });
 /* which account the progress on this device belongs to (device-only, never synced) */
 const OKEY='masar100_owner';
 function getOwner(){ try{ return localStorage.getItem(OKEY)||''; }catch(e){ return ''; } }
 function setOwner(v){ try{ v?localStorage.setItem(OKEY,v):localStorage.removeItem(OKEY); }catch(e){} }
-function clearLocal(){ const lang=S.lang; S=DEF(); S.lang=lang; DET={}; try{ localStorage.removeItem(DKEY); }catch(e){} clearLive(); setOwner(''); save(); }
-/* merge local (a) with cloud (b) progress without losing attempts made on either side */
+function clearLocal(){ S=normalize({lang:S.lang}); DET={}; try{ localStorage.removeItem(DKEY); }catch(e){} clearLive(); setOwner(''); save(); }
+/* another tab of this browser changed the saved copy: take it in (merged) so this tab's next save cannot overwrite it; deferred while a test is running */
+let PENDING_MERGE=null;
+function takePending(){ if(PENDING_MERGE){ const o=PENDING_MERGE; PENDING_MERGE=null; S=mergeStates(S,o); } }
+window.addEventListener('storage',e=>{ try{ if(e.storageArea&&e.storageArea!==localStorage) return;
+  if(e.key===OKEY&&!e.newValue&&e.oldValue&&window.CLOUD?.user&&String(window.CLOUD.user.email).toLowerCase()===String(e.oldValue).toLowerCase()){ window.CLOUD.droppedElsewhere?.(); window.__app.signedOutElsewhere(); return; }
+  if(e.key===DKEY){ DET=loadDetails(); return; }
+  if(e.key===KEY&&e.newValue){ const o=JSON.parse(e.newValue); if(!o||typeof o!=='object'||o.savedAt===S.savedAt) return; if(X&&!X.result&&!X.reviewOnly){ PENDING_MERGE=o; return; } S=mergeStates(S,o); if($('#acct').hidden) renderRoute(); } }catch(err){} });
+/* merge local (a) with cloud (b) progress without losing attempts made on either side; a reset made on one side is honoured (S.rst markers) */
+const ms36=id=>parseInt(String(id||''),36)||0;
+const uniDays=(x,y)=>[...new Set([...(x||[]),...(y||[])])].sort();
 function mergeStates(a,b){
-  a=Object.assign(DEF(),a); b=Object.assign(DEF(),b);
+  a=normalize(a); b=normalize(b);
   const newer=(b.savedAt||0)>(a.savedAt||0)?b:a, older=newer===a?b:a;
   const o=Object.assign(DEF(),older,newer); o.lang=a.savedAt?newer.lang:b.lang;
   const ida=new Set(a.attempts.map(x=>x.id)), idb=new Set(b.attempts.map(x=>x.id)), sup=(x,y)=>[...y].every(i=>x.has(i));
   const base=sup(ida,idb)&&(ida.size||!idb.size)?a:sup(idb,ida)?b:null;
-  if(base){ ['attempts','recent','stats','causes','mistakes','models'].forEach(k=>o[k]=base[k]); }
+  if(base){ ['attempts','recent','stats','causes','models'].forEach(k=>o[k]=base[k]); }
   else {
     const am=new Map(); [...older.attempts,...newer.attempts].forEach(x=>am.set(x.id,x)); o.attempts=[...am.values()].sort((x,y)=>(x.date+x.id)<(y.date+y.id)?-1:1).slice(-300);
     const ra=a.recent, rb=b.recent; let k=0; while(k<ra.length&&k<rb.length&&JSON.stringify(ra[k])===JSON.stringify(rb[k])) k++;
     o.recent=ra.slice(0,k).concat(rb.slice(k),ra.slice(k)).map((x,i)=>[x,i]).sort((x,y)=>(x[0].d<y[0].d?-1:x[0].d>y[0].d?1:x[1]-y[1])).map(x=>x[0]).slice(-1500);
     o.causes={}; ['concept','careless','time','trap'].forEach(c=>o.causes[c]=Math.max(a.causes[c]||0,b.causes[c]||0));
-    const mm=new Map(); [...older.mistakes,...newer.mistakes].forEach(x=>mm.set(x.key,x)); o.mistakes=[...mm.values()].slice(-300);
     o.models={}; new Set([...Object.keys(a.models),...Object.keys(b.models)]).forEach(k=>{ const x=a.models[k], y=b.models[k]; if(!x||!y){ o.models[k]=x||y; return; } const l=(x.date||'')>=(y.date||'')?x:y; o.models[k]={...l,best:Math.max(x.best||0,y.best||0)}; });
   }
-  const uni=(x,y)=>[...new Set([...(x||[]),...(y||[])])].sort(); o.days=uni(a.days,b.days); o.sessionDays=uni(a.sessionDays,b.sessionDays);
+  /* mistakes: per question, the copy touched last wins (a closed one stays closed) */
+  { const mm=new Map(); [...a.mistakes,...b.mistakes].forEach(x=>{ const w=mm.get(x.key); if(!w||(x.at||0)>(w.at||0)||((x.at||0)===(w.at||0)&&(x.box||0)>(w.box||0))) mm.set(x.key,x); }); o.mistakes=[...mm.values()].map((x,i)=>[x,i]).sort((x,y)=>((x[0].at||0)-(y[0].at||0))||(x[1]-y[1])).map(x=>x[0]); }
+  o.days=uniDays(a.days,b.days); o.sessionDays=uniDays(a.sessionDays,b.sessionDays);
   o.done=a.planStart===b.planStart?{...older.done,...newer.done}:{...newer.done};
-  const pickBox=(x,y)=>{ const r={...x}; for(const [k,v] of Object.entries(y||{})){ const w=r[k]; if(!w||(v.box||0)>(w.box||0)||((v.box||0)===(w.box||0)&&(v.due||'')>(w.due||''))) r[k]=v; } return r; };
-  o.cards=pickBox(a.cards,b.cards); o.vocab={ar:pickBox(a.vocab?.ar,b.vocab?.ar),en:pickBox(a.vocab?.en,b.vocab?.en)};
-  o.xp={...(a.xp||{})}; for(const [k,v] of Object.entries(b.xp||{})){ const w=o.xp[k]; if(!w||(v.score||0)>(w.score||0)||((v.score||0)===(w.score||0)&&(v.date||'')>(w.date||''))) o.xp[k]=v; }
+  const pickBox=(x,y)=>{ const r={...x}; for(const [k,v] of Object.entries(y||{})){ const w=r[k]; if(!w||(v.t&&w.t?v.t>w.t:((v.box||0)>(w.box||0)||((v.box||0)===(w.box||0)&&(v.due||'')>(w.due||''))))) r[k]=v; } return r; };
+  o.cards=pickBox(a.cards,b.cards); o.vocab={ar:pickBox(a.vocab.ar,b.vocab.ar),en:pickBox(a.vocab.en,b.vocab.en)};
+  o.xp={...a.xp}; for(const [k,v] of Object.entries(b.xp)){ const w=o.xp[k]; if(!w||(v.score||0)>(w.score||0)||((v.score||0)===(w.score||0)&&(v.date||'')>(w.date||''))) o.xp[k]=v; }
   o.lastExport=[a.lastExport,b.lastExport].filter(Boolean).sort().pop()||undefined;
   o.diag=[a.diag,b.diag].filter(x=>x&&x.date).sort((x,y)=>x.date<y.date?-1:x.date>y.date?1:0)[0]; if(!o.diag) delete o.diag; /* baseline: the first diagnostic */
   o.since=[a.since,b.since].filter(Boolean).sort()[0]; if(!o.since) delete o.since;
   { const q=[a.dq,b.dq].filter(x=>x&&x.d); o.dq=q.length===2&&q[0].d===q[1].d?{d:q[0].d,n:Math.max(q[0].n||0,q[1].n||0)}:q.sort((x,y)=>x.d<y.d?-1:1).pop(); if(!o.dq) delete o.dq; }
-  if(a.repHide||b.repHide) o.repHide=1;
+  if(a.repHide||b.repHide) o.repHide=1; if(a.repSeen||b.repSeen) o.repSeen=1; o.nudgeD=[a.nudgeD,b.nudgeD].filter(Boolean).sort().pop(); if(!o.nudgeD) delete o.nudgeD;
+  applyResets(o,a,b); capMistakesOf(o);
   o.savedAt=Math.max(a.savedAt||0,b.savedAt||0);
   return o;
+}
+function capMistakesOf(o){ if(o.mistakes.length<=300) return; const open=o.mistakes.filter(m=>(m.box||0)<4), closed=o.mistakes.filter(m=>(m.box||0)>=4); o.mistakes=closed.slice(-Math.max(0,300-open.length)).concat(open.slice(-300)); }
+/* S.rst[part] = when that part was last erased on purpose (reset, restart, import). The side that erased later is the authority for that part;
+   the other side only contributes what it did after that moment, so a stale device or tab can never bring erased progress back. */
+function applyResets(o,a,b){
+  const ra=a.rst||{}, rb=b.rst||{}, rst={}; for(const k of new Set([...Object.keys(ra),...Object.keys(rb)])){ const v=Math.max(+ra[k]||0,+rb[k]||0); if(v) rst[k]=v; } if(Object.keys(rst).length) o.rst=rst; else delete o.rst;
+  for(const P of ['skills','models','mistakes','cards','plan']){
+    const ma=+ra[P]||0, mb=+rb[P]||0; if(ma===mb) continue;
+    const au=ma>mb?a:b, ot=au===a?b:a, m=Math.max(ma,mb), day=ymd(new Date(m)), fresh=(ot.savedAt||0)>m;
+    const later=(arr,f)=>fresh?arr.filter(f):[];
+    const models=()=>{ const r={...au.models}; if(fresh) for(const [k,v] of Object.entries(ot.models)) if(!r[k]&&ms36(v.aid)>m) r[k]=v; return r; };
+    if(P==='skills'){ const ids=new Set(au.attempts.map(x=>x.id)); o.attempts=au.attempts.concat(later(ot.attempts,x=>!ids.has(x.id)&&ms36(x.id)>m)).sort((x,y)=>(x.date+x.id)<(y.date+y.id)?-1:1).slice(-300);
+      o.recent=au.recent.concat(later(ot.recent,x=>(x.d||'')>=day)).slice(-1500); o.stats=au.stats; o.days=uniDays(au.days,later(ot.days,d=>d>=day)); o.sessionDays=uniDays(au.sessionDays,later(ot.sessionDays,d=>d>=day)); o.models=models(); }
+    if(P==='models'){ o.models=models(); const keep=new Set(au.attempts.map(x=>x.id)); o.attempts=o.attempts.filter(x=>x.kind!=='model'||keep.has(x.id)||ms36(x.id)>m); }
+    if(P==='mistakes'){ const keys=new Set(au.mistakes.map(x=>x.key)); o.mistakes=au.mistakes.concat(later(ot.mistakes,x=>!keys.has(x.key)&&(x.at||0)>m)); o.causes={...au.causes}; }
+    if(P==='cards'){ const pick=(x,y)=>{ const r={...(x||{})}; if(fresh) for(const [k,v] of Object.entries(y||{})) if(!r[k]&&(v.t||0)>m) r[k]=v; return r; }; o.cards=pick(au.cards,ot.cards); o.vocab={ar:pick(au.vocab.ar,ot.vocab.ar),en:pick(au.vocab.en,ot.vocab.en)}; o.xp=pick(au.xp,ot.xp); }
+    if(P==='plan'){ o.planStart=au.planStart; o.weeks=au.weeks; o.done={...au.done}; }
+  }
 }
 /* ============ attempt details (local) ============ */
 const DKEY='masar100_details';
@@ -2563,7 +2712,7 @@ function loadDetails(){ try{ return JSON.parse(localStorage.getItem(DKEY))||{}; 
 let DET=loadDetails();
 function getDetail(id){ return DET[id]||null; }
 function saveDetail(att,all){
-  const qs=all.map(({q,your,time})=>({s:q.s,q:q.q,pkey:q.pkey||null,passage:q.pkey?null:(q.passage||null),opts:q.opts,ans:q.ans,exp:q.exp,cmp:!!q.cmp,key:q.key||null,your,t:Math.round(time)}));
+  const qs=all.map(({q,your,time,flag})=>({s:q.s,q:q.q,pkey:q.pkey||null,passage:q.pkey?null:(q.passage||null),opts:q.opts,ans:q.ans,exp:q.exp,cmp:!!q.cmp,key:q.key||null,your,t:Math.round(time),f:flag?1:undefined}));
   DET[att.id]={id:att.id,kind:X.kind,title:X.title,lang:X.lang,mk:X.kind==='model'?X.mk:null,skill:X.skill||null,att,qs};
   // keep: the latest attempt of each model + the 20 most recent other attempts
   const modelIds=new Set(Object.values(S.models||{}).map(m=>m.aid).filter(Boolean));
@@ -2572,6 +2721,9 @@ function saveDetail(att,all){
   Object.values(DET).forEach(x=>{ if(x.kind==='model'&&!modelIds.has(x.id)&&!others.slice(0,20).includes(x)) delete DET[x.id]; });
   for(let i=0;i<5;i++){ try{ localStorage.setItem(DKEY,JSON.stringify(DET)); break; }catch(e){ const old=Object.values(DET).sort((a,b)=>a.id<b.id?-1:1)[0]; if(!old) break; delete DET[old.id]; } }
 }
+/* storage is full: drop the n oldest attempt details (a local convenience) to make room for the progress itself */
+function shrinkDetails(n){ const ids=Object.values(DET).sort((a,b)=>a.id<b.id?-1:1).slice(0,n).map(x=>x.id); if(!ids.length) return false; ids.forEach(id=>delete DET[id]);
+  try{ localStorage.setItem(DKEY,JSON.stringify(DET)); }catch(e){ DET={}; try{ localStorage.removeItem(DKEY); }catch(e2){} } return true; }
 function openReview(id){
   if(X&&!X.result&&!X.reviewOnly) return;
   if(!PRO()){ hitLimit('review'); return; }
@@ -2580,7 +2732,7 @@ function openReview(id){
     clearInterval(timer);
     X={kind:a.kind,title,lang:S.lang,mk:a.mk?a.mk-1:null,skill:a.skill||null,reviewOnly:true,sections:[],result:{all:[],bySkill:{},correct:a.correct,skipped:null,att:{...a,total:a.total||0,time:a.time||0},filter:'wrong',noDetail:true}};
     examShow(true); renderExam(); return; }
-  const all=d.qs.map(x=>({q:{...x,area:SKILLS[x.s].area,passage:x.pkey?(PASSAGES[d.lang]||{})[x.pkey]:x.passage},your:x.your,time:x.t}));
+  const all=d.qs.map(x=>({q:{...x,area:SKILLS[x.s].area,passage:x.pkey?(PASSAGES[d.lang]||{})[x.pkey]:x.passage},your:x.your,time:x.t,flag:!!x.f}));
   const bySkill={}; all.forEach(({q,your})=>{ const b=bySkill[q.s]||(bySkill[q.s]={c:0,t:0}); b.t++; if(your===q.ans) b.c++; });
   const correct=all.filter(x=>x.your===x.q.ans).length, skipped=all.filter(x=>x.your==null).length;
   clearInterval(timer);
@@ -2591,24 +2743,28 @@ function openReview(id){
 const LKEY='masar100_live';
 function saveLive(){ if(!X||X.result||X.reviewOnly) return; try{ const {confirm,showMap,...rest}=X; localStorage.setItem(LKEY,JSON.stringify({at:Date.now(),X:rest})); }catch(e){} }
 function clearLive(){ try{ localStorage.removeItem(LKEY); }catch(e){} }
+/* refresh the live copy when the tab is hidden or closed, so a resume starts exactly where the student stopped (the timed save above can be up to 10 s old).
+   Practice with instant feedback (daily session, skill drill, review) is not an exam: time spent away from the tab is not charged there; timed tests keep running. */
+document.addEventListener('visibilitychange',()=>{ if(document.hidden) saveLive(); else if(X&&!X.result&&!X.reviewOnly&&X.mode==='learn'){ X.tickAt=Date.now(); X.qStart=Date.now(); } }); window.addEventListener('pagehide',()=>saveLive());
 function checkLive(){
   let L=null; try{ L=JSON.parse(localStorage.getItem(LKEY)); }catch(e){}
   if(!L||!L.X||!L.X.sections||Date.now()-(L.at||0)>864e5){ clearLive(); return; }
   const tt=T[S.lang], lx=L.X, sec=lx.sections[lx.si]||lx.sections[0];
   const el=$('#exam'); el.dir=S.lang==='ar'?'rtl':'ltr'; el.lang=S.lang; examShow(true);
   el.innerHTML=`<div class="ex-top"><div class="ex-title"><strong>${esc(tt.resumeT)}</strong></div></div><div class="rs"><div class="ex-confirm"><p>${esc(tt.resumeD(lx.title,numL(lx.qi+1),numL(sec.qs.length)))}</p><div class="row"><button class="btn primary" id="lv-yes">${tt.resumeBtn}</button><button class="btn ghost" id="lv-no">${tt.discardBtn}</button></div></div></div>`;
-  el.querySelector('#lv-yes').onclick=()=>{ X={...lx,confirm:null,showMap:false,qStart:Date.now()}; clearInterval(timer); timer=setInterval(tick,1000); renderExam(); toast(tt.resumed); };
+  el.querySelector('#lv-yes').onclick=()=>{ X={...lx,confirm:null,showMap:false,qStart:Date.now(),tickAt:Date.now()}; clearInterval(timer); timer=setInterval(tick,1000); renderExam(); toast(tt.resumed); };
   el.querySelector('#lv-no').onclick=()=>{ clearLive(); el.innerHTML=''; examShow(false); };
 }
-/* selective reset */
+/* selective reset; each erased part is stamped in S.rst so other devices honour it (see applyResets) */
 function resetParts(parts){
+  const now=Date.now(), mark=(...ks)=>{ S.rst=S.rst||{}; ks.forEach(k=>S.rst[k]=now); };
   const has=k=>parts.includes(k)||parts.includes('all');
-  if(parts.includes('all')){ DET={}; try{ localStorage.removeItem(DKEY); }catch(e){} const lang=S.lang, track=S.track, target=S.target, keep={diag:S.diag,dq:S.dq,since:S.since,repHide:S.repHide}; S=DEF(); Object.assign(S,{lang,track,target}); for(const k in keep) if(keep[k]!=null) S[k]=keep[k]; save(); renderRoute(); return; }
-  if(has('plan')){ S.done={}; S.planStart=todayStr(); }
-  if(has('mistakes')){ S.mistakes=[]; S.causes={concept:0,careless:0,time:0,trap:0}; }
-  if(has('models')){ Object.values(S.models||{}).forEach(m=>{ if(m.aid) delete DET[m.aid]; }); S.models={}; S.attempts=S.attempts.filter(a=>a.kind!=='model'); }
-  if(has('cards')){ S.cards={}; S.vocab={ar:{},en:{}}; S.xp={}; }
-  if(has('skills')){ DET={}; S.recent=[]; S.stats={}; S.attempts=[]; S.days=[]; S.sessionDays=[]; S.models={}; }
+  if(parts.includes('all')){ DET={}; try{ localStorage.removeItem(DKEY); }catch(e){} const keep={lang:S.lang,track:S.track,target:S.target,diag:S.diag,dq:S.dq,since:S.since,repHide:S.repHide,repSeen:S.repSeen,nudgeD:S.nudgeD}; S=normalize({}); for(const k in keep) if(keep[k]!=null) S[k]=keep[k]; mark('plan','mistakes','models','cards','skills'); save(); renderRoute(); return; }
+  if(has('plan')){ S.done={}; S.planStart=todayStr(); mark('plan'); }
+  if(has('mistakes')){ S.mistakes=[]; S.causes={concept:0,careless:0,time:0,trap:0}; mark('mistakes'); }
+  if(has('models')){ Object.values(S.models||{}).forEach(m=>{ if(m.aid) delete DET[m.aid]; }); S.models={}; S.attempts=S.attempts.filter(a=>a.kind!=='model'); mark('models'); }
+  if(has('cards')){ S.cards={}; S.vocab={ar:{},en:{}}; S.xp={}; mark('cards'); }
+  if(has('skills')){ DET={}; S.recent=[]; S.stats={}; S.attempts=[]; S.days=[]; S.sessionDays=[]; S.models={}; mark('skills','models'); }
   try{ localStorage.setItem(DKEY,JSON.stringify(DET)); }catch(e){}
   save(); renderRoute();
 }
@@ -2626,7 +2782,7 @@ function importText(txt){
     try{ o=JSON.parse(txt); }catch(e){ o=JSON.parse(decodeURIComponent(escape(atob(txt)))); }
     if(o&&o.app==='masar100') o=o.data; if(!o||typeof o!=='object'||!o.stats||!Array.isArray(o.attempts||[])) throw 0;
   }catch(e){ toast(t('badCode')); return; }
-  const doIt=()=>{ S=Object.assign(DEF(),o); save(); renderRoute(); toast(t('imported')); };
+  const doIt=()=>{ const now=Date.now(); S=normalize(o); S.rst={plan:now,mistakes:now,models:now,cards:now,skills:now}; save(); renderRoute(); toast(t('imported')); };
   const box=$('#bk-confirm'); if(!box||!(S.attempts.length||Object.keys(S.cards).length)) return doIt();
   box.innerHTML=`<div class="ex-confirm inline"><p>${t('importQ')}</p><div class="row"><button class="btn primary" id="im-yes">${t('importYes')}</button><button class="btn ghost" id="im-no">${t('cancel')}</button></div></div>`;
   $('#im-yes').onclick=doIt; $('#im-no').onclick=()=>box.innerHTML=''; box.scrollIntoView({block:'nearest'});
@@ -2634,10 +2790,12 @@ function importText(txt){
 $('#lang-btn').onclick=()=>{ S.lang=S.lang==='ar'?'en':'ar'; VC.flip=false; save(); renderRoute(); const us=$('#upsheet'); if(us&&!us.hidden) renderUpsheet(); };
 let XP_BACK=null;
 let XP_NUDGE=false;
-if(XPOK()){ XP.setHooks({onDone:(k,sc,n)=>{ S.xp=S.xp||{}; const w=S.xp[k]; if(!w||sc>=(w.score||0)) S.xp[k]={score:sc,n,date:todayStr()}; save(); track('xp_done',k,sc);
+if(XPOK()){ XP.setHooks({onDone:(k,sc,n)=>{ S.xp=S.xp||{}; const w=S.xp[k]; if(!w||sc>=(w.score||0)) S.xp[k]={score:sc,n,date:todayStr(),t:Date.now()}; save(); track('xp_done',k,sc);
     /* the student finished every free explainer of this skill and more are waiting: one warm invitation after the player closes */
     if(!PRO()){ const L0=XP.get?.(k), sk=L0&&L0.sk; if(sk&&lockedXp(sk).length&&xpList(sk).every(x=>S.xp[x.key])) XP_NUDGE=true; } },
   onClose:()=>{ const y=window.scrollY; renderRoute(); window.scrollTo(0,y); if(XP_NUDGE){ XP_NUDGE=false; maybeNudge('xp'); } const b=XP_BACK&&document.querySelector(`[data-xp="${XP_BACK}"]`); if(b) b.focus({preventScroll:true}); }}); XP.loadTracks(); }
-window.addEventListener('hashchange',()=>{ if(document.body.classList.contains('xp-open')&&XPOK()) XP.close(); renderRoute(); authIntent(); window.scrollTo(0,0); });
+window.addEventListener('hashchange',()=>{ if(document.body.classList.contains('xp-open')&&XPOK()) XP.close(); closeUpgrade(); renderRoute(); authIntent(); window.scrollTo(0,0); });
 renderRoute(); initAI(); checkLive();
+if(!STORE_OK){ SAVE_WARNED=true; setTimeout(()=>toast(t('saveFail')),900); }
+try{ const msg=sessionStorage.getItem('masar100_msg'); if(msg){ sessionStorage.removeItem('masar100_msg'); if(T[S.lang][msg]) setTimeout(()=>toast(t(msg)),700); } }catch(e){} /* a message carried over a reload (e.g. sign-out) */
 { const el=$('#save-dot'); if(el){ el.classList.toggle('bad',!STORE_OK); el.title=STORE_OK?t('savedOk'):t('saveFail'); el.setAttribute('aria-label',el.title); } }

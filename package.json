@@ -4,7 +4,9 @@
   "description": "Masar 100 — GAT prep site with accounts (Railway)",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "test": "node test/run.js",
+    "test:load": "node test/load.js"
   },
   "dependencies": {
     "acorn": "^8.18.0",
@@ -14,6 +16,6 @@
   },
   "private": true,
   "engines": {
-    "node": ">=20"
+    "node": "22.x"
   }
 }

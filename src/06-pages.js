@@ -168,7 +168,7 @@ async function pageLesson(id) {
 async function pageProgress() {
   const b = bands(), tg = targetBand();
   const hist = S.attempts.slice().reverse();
-  const qtRows = []; for (const sk of ['L', 'R']) for (const [t, v] of Object.entries(S.qt[sk] || {})) qtRows.push({ sk, t, ...v, p: v.c / v.t });
+  const qtRows = []; for (const sk of ['L', 'R']) for (const [t, v] of Object.entries(S.qt[sk] || {})) qtRows.push({ sk, t, c: v.c, n: v.t, p: v.c / v.t });
   qtRows.sort((a, c) => a.p - c.p);
   const series = ['L', 'R'].map(k => S.attempts.filter(a => a.skill === k).slice(-10));
   const spark = (arr, k) => { if (arr.length < 2) return ''; const W = 260, H = 70, x = i => 10 + (W - 20) * i / (arr.length - 1), y = v => H - 10 - (H - 20) * (v - 3) / 6; return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;max-width:300px;direction:ltr"><line x1="10" x2="${W - 10}" y1="${y(tg)}" y2="${y(tg)}" stroke="var(--ink)" stroke-dasharray="3 3" stroke-width="1"/><polyline fill="none" stroke="var(--c${k})" stroke-width="2.5" points="${arr.map((a, i) => x(i) + ',' + y(a.band)).join(' ')}"/>${arr.map((a, i) => `<circle cx="${x(i)}" cy="${y(a.band)}" r="3.5" fill="var(--c${k})"/>`).join('')}</svg>`; };
@@ -234,7 +234,7 @@ function bindUpgrade() {
   let sel = ($('.plan-c.on') || {}).dataset; sel = sel ? sel.plan : null;
   $$('.plan-c').forEach(b => b.onclick = () => { $$('.plan-c').forEach(x => x.classList.remove('on')); b.classList.add('on'); sel = UPG.plan = b.dataset.plan; quote(); });
   const cp = $('#up-cp'); let qt; if (cp) cp.oninput = () => { clearTimeout(qt); qt = setTimeout(quote, 500); };
-  async function quote() { const code = cp.value.trim(); UPG.code = code; if (!code) { $('#up-q').textContent = ''; return; } if (!signedIn()) { $('#up-q').textContent = _('سيُطبَّق الرمز بعد إنشاء حسابك.', 'The code is applied after you create your account.'); return; } try { const r = await CLOUD.quote(sel, code); $('#up-q').innerHTML = `<span style="color:var(--ok-t)">${_('خصم', 'Discount')} ${numL(r.pct)}% → <b>${numL(r.amount)} ${_('ريال', 'SAR')}</b></span>`; } catch (e) { $('#up-q').innerHTML = `<span class="err">${_('الرمز غير صالح', 'Invalid code')}</span>`; } }
+  async function quote() { const code = cp.value.trim(); UPG.code = code; if (!code) { $('#up-q').textContent = ''; return; } if (!signedIn()) { $('#up-q').textContent = _('سيُطبَّق الرمز بعد إنشاء حسابك.', 'The code is applied after you create your account.'); return; } try { const r = await CLOUD.quote(sel, code); const el = $('#up-q'); if (el) el.innerHTML = `<span style="color:var(--ok-t)">${_('خصم', 'Discount')} ${numL(r.pct)}% → <b>${numL(r.amount)} ${_('ريال', 'SAR')}</b></span>`; } catch (e) { const el = $('#up-q'); if (el) el.innerHTML = `<span class="err">${_('الرمز غير صالح', 'Invalid code')}</span>`; } }
   const go = $('#up-go'); if (go) go.onclick = async () => {
     if (!signedIn()) return openAuth('signup', () => renderRoute());
     go.disabled = true;
@@ -242,7 +242,7 @@ function bindUpgrade() {
     catch (e) { toast(e.code === 'payments-not-configured' ? _('الدفع الإلكتروني غير مفعّل بعد. تواصل معنا.', 'Online payment is not enabled yet. Contact us.') : e.code === 'bad-coupon' ? _('رمز الخصم غير صالح', 'Invalid discount code') : _('تعذّر بدء الدفع', 'Could not start the payment'), 4000); }
     go.disabled = false;
   };
-  if (location.hash.includes('paid=1') && window.CLOUD) CLOUD.refresh();
+  if (location.hash.includes('paid=1') && window.CLOUD && !UPG.refreshed) { UPG.refreshed = true; CLOUD.refresh(); } // once: refresh() re-renders this page
   if (cp && cp.value) quote();
 }
 

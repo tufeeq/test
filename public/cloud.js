@@ -25,8 +25,9 @@ function flush(keepalive) {
   clearTimeout(evTimer); evTimer = null;
   if (!user || !evq.length) return;
   const events = evq.splice(0, 50);
-  fetch("/api/events", { method: "POST", headers: H, credentials: "same-origin", keepalive: !!keepalive, body: JSON.stringify({ events }) }).catch(() => {});
+  const req = fetch("/api/events", { method: "POST", headers: H, credentials: "same-origin", keepalive: !!keepalive, body: JSON.stringify({ events }) }).catch(() => {});
   if (evq.length) evTimer = setTimeout(flush, 1000);
+  return req;
 }
 function track(type, k, v) {
   if (!type) return;
@@ -124,7 +125,7 @@ window.CLOUD = {
   async signIn(email, password) { const r = await api("POST", "/api/login", { email, password }); await afterLogin(r.user); },
   async signOut() {
     if (user && pulled && status !== "ok") { try { await push(); } catch (e) {} } // flush unsynced changes first
-    flush(true); // pending usage events must go out while the session cookie is still valid
+    try { await Promise.race([flush(true), new Promise(r => setTimeout(r, 1500))]); } catch (e) {} // pending usage events must land before the session is deleted
     try { await api("POST", "/api/logout"); } catch (e) { if (e.code !== "unauthenticated") throw e; }
     reset(); setPlan(null); safe(() => A().render());
   },

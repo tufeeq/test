@@ -61,6 +61,7 @@ function mapSVG(m, opts = {}) {
     return `<text x="${it.x + it.w / 2}" y="${y0}" text-anchor="middle" style="font-size:${fs}px"${italic ? ' font-style="italic"' : ''}>${ls.map((l, i) => `<tspan x="${it.x + it.w / 2}" dy="${i ? fs * 1.15 : 0}">${esc(l)}</tspan>`).join('')}</text>`; };
   // labelled points (You are here, lettered slots): a road label moves along the road rather than sit on top of one
   const busy = (m.items || []).filter(x => x.t === 'you' || x.t === 'slot').map(x => [x.x, x.y]);
+  for (const r of (m.items || []).filter(x => x.t === 'road' && x.pts && x.pts.length > 1)) busy.push(r.pts[0], r.pts[r.pts.length - 1]); // junctions: a label must not sit where another road meets this one
   const clear = (x, y) => busy.every(([bx, by]) => Math.hypot(bx - x, by - y) > 9);
   for (const it of m.items || []) {
     if (it.t === 'road') { s += `<polyline points="${pts(it.pts)}" stroke="#bbb" stroke-width="4.5" fill="none" stroke-linecap="butt"/><polyline points="${pts(it.pts)}" stroke="#fff" stroke-width=".4" stroke-dasharray="2 2" fill="none"/>`; if (it.label) { const [a, b] = [it.pts[0], it.pts[it.pts.length - 1]]; const vert = Math.abs(a[0] - b[0]) < Math.abs(a[1] - b[1]); const at = f => [a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f]; const [lx, ly] = [.5, .25, .75, .15, .85].map(at).find(([x, y]) => clear(x, y)) || at(.5); s += `<text x="${lx + (vert ? 3.5 : 0)}" y="${ly + (vert ? 0 : 1.1)}" text-anchor="${vert ? 'start' : 'middle'}" font-size="2.6" font-style="italic">${esc(it.label)}</text>`; } }

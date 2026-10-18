@@ -267,6 +267,7 @@ app.post("/api/password/reset", wrap(async (req, res) => {
   await pool.query("DELETE FROM sessions WHERE user_id=$1", [uid]); // sign out every other device
   await createSession(req, res, uid);
   const u = (await pool.query("SELECT id,email,name FROM users WHERE id=$1", [uid])).rows[0];
+  for (const k of [...hits.keys()]) if (k.startsWith("le:" + u.email + "|") || k === "lg:" + u.email) hits.delete(k); // a successful reset clears the failed-login lockout
   res.json({ user: { ...pub(u), plan: await C.planOf(u) } });
 }));
 setInterval(() => pool.query("DELETE FROM password_resets WHERE created_at<now()-interval '2 days'").catch(() => {}), 3600e3).unref();

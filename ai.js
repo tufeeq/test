@@ -41,11 +41,13 @@ function extractJSON(t) {
   if (a < 0 || b <= a) throw new Error("no json");
   return JSON.parse(s.slice(a, b + 1));
 }
+const TIMEOUT_MS = Number(process.env.AI_TIMEOUT_MS) || 60000; // a hung upstream must not pin the learner's quota slot (or the request) forever
 async function claude(system, user, maxTokens) {
   const r = await fetch(API + "/messages", {
     method: "POST",
     headers: { "x-api-key": process.env.ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01", "content-type": "application/json" },
-    body: JSON.stringify({ model: MODEL, max_tokens: maxTokens, system, messages: [{ role: "user", content: user }] })
+    body: JSON.stringify({ model: MODEL, max_tokens: maxTokens, system, messages: [{ role: "user", content: user }] }),
+    signal: AbortSignal.timeout(TIMEOUT_MS)
   });
   const j = await r.json().catch(() => ({}));
   if (!r.ok) { const e = new Error("anthropic " + r.status + " " + JSON.stringify(j).slice(0, 300)); throw e; }
@@ -130,8 +132,8 @@ CANDIDATE'S ANSWER (${words(essay)} words):
 ${essay}`;
     const q = await reserve(req, "ai_writing"); if (!q.ok) return fail(res, 402, limitErr(q));
     let out;
-    try { out = clean(extractJSON(await claude(WRITING_SYS, user, 2500)), ["TA", "CC", "LR", "GRA"]); }
-    catch (e) { console.error("ai writing", e.message); await release(q.id); return fail(res, 502, "ai-failed"); }
+    try { out = clean(extractJSON(await claude(WRITING_SYS, user, 2500)), ["TA", "CC", "LR", "GRA"]); if (out.overall == null) throw new Error("no bands"); }
+    catch (e) { console.error("ai writing", e.message); await release(q.id); return fail(res, 502, "ai-failed"); } // a reply without bands is useless: don't charge the quota
     out.words = words(essay);
     await commit(q.id, task, out.overall);
     res.json({ result: out, left: q.left });
@@ -146,7 +148,7 @@ ${essay}`;
     const user = `IELTS Speaking Part ${part}\nQUESTION / CUE CARD:\n${question}\nDURATION: ${Math.round(dur)} seconds\nTRANSCRIPT (${words(transcript)} words):\n${transcript}`;
     const q = await reserve(req, "ai_speaking"); if (!q.ok) return fail(res, 402, limitErr(q));
     let out;
-    try { out = clean(extractJSON(await claude(SPEAKING_SYS, user, 1800)), ["FC", "LR", "GRA", "P"]); }
+    try { out = clean(extractJSON(await claude(SPEAKING_SYS, user, 1800)), ["FC", "LR", "GRA", "P"]); if (out.overall == null) throw new Error("no bands"); }
     catch (e) { console.error("ai speaking", e.message); await release(q.id); return fail(res, 502, "ai-failed"); }
     await commit(q.id, "p" + part, out.overall);
     res.json({ result: out, left: q.left });
@@ -164,8 +166,9 @@ ${essay}`;
     let o;
     try { o = extractJSON(await claude(PLACE_SYS, user, 1500)); }
     catch (e) { console.error("ai placement", e.message); await release(q.id); return fail(res, 502, "ai-failed"); }
-    const part = (x, keys) => { if (!x || !x.bands) return null; const c = clean(x, keys); return { bands: c.bands, overall: c.overall, summary: c.summary, next: c.next }; };
+    const part = (x, keys) => { if (!x || !x.bands) return null; const c = clean(x, keys); return c.overall == null ? null : { bands: c.bands, overall: c.overall, summary: c.summary, next: c.next }; };
     const out = { W: w ? part(o.W, ["TA", "CC", "LR", "GRA"]) : null, S: sp.length ? part(o.S, ["FC", "LR", "GRA", "P"]) : null };
+    if ((w && !out.W) && (!sp.length || !out.S)) { console.error("ai placement", "no bands"); await release(q.id); return fail(res, 502, "ai-failed"); } // nothing usable came back
     await commit(q.id, (out.W ? "W" : "") + (out.S ? "S" : ""), out.W ? out.W.overall : out.S && out.S.overall);
     res.json({ result: out });
   }));

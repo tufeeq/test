@@ -1,5 +1,6 @@
 /* ============ Speaking: examiner simulator, recording, live transcript, fluency meter, AI feedback ============ */
 const SR_API = window.SpeechRecognition || window.webkitSpeechRecognition;
+const SR_FATAL = new Set(['not-allowed', 'service-not-allowed', 'audio-capture', 'network', 'language-not-supported']); // recognition errors that will not go away by restarting
 async function pageSpeaking() {
   const [p1, p2] = await Promise.all([content('part1'), content('part23')]);
   const o1 = freeCount(p1.items.length), o2 = freeCount(p2.items.length);
@@ -7,11 +8,11 @@ async function pageSpeaking() {
   return `<div class="page-h"><span class="eyebrow">${skName('S')}</span><h1>${_('غرفة المحادثة', 'Speaking room')}</h1><p>${_('ممتحن يسألك بصوته، وتجيب أنت بصوتك. نسجّل إجابتك ونكتبها نصًّا، ونقيس طلاقتك (سرعة الكلام، والتوقفات، وكلمات الحشو، وتنوع المفردات)، ثم تقارنها بإجابة نموذجية أو تحصل على تقييم ذكي.', 'An examiner asks you questions out loud and you answer out loud. We record and transcribe your answer, measure your fluency (speed, fillers, vocabulary range), then you compare with a model answer or get AI feedback.')}</p></div>
   ${!SR_API ? `<div class="notice gold">${_('متصفحك لا يدعم تحويل الكلام إلى نص؛ ستعمل التسجيلات والمقارنة بالنموذج، لكن للتفريغ النصي والتقييم الذكي استخدم Chrome أو Edge أو Safari الحديث.', 'Your browser does not support speech-to-text; recording and model answers still work, but for transcripts and AI marking use a recent Chrome, Edge or Safari.')}</div>` : ''}
   <div class="g3">
-    <a class="card tile" href="#speak/mock"><span class="t-ic bg-S" style="color:#fff">${ic('S', 'i20')}</span><h3>${_('اختبار محادثة كامل', 'Full speaking mock')}</h3><p class="small muted">${_('الأجزاء الثلاثة متتالية كما في يوم الاختبار (١١–١٤ دقيقة).', 'All three parts back to back, like test day (11–14 minutes).')}</p>${PRO() ? '' : `<span class="lock-b">${ic('lock')}${_('برو', 'Pro')}</span>`}</a>
-    <div class="card tile"><span class="t-ic" style="background:var(--gold-soft)">${ic('target', 'i20')}</span><h3>${_('آخر نتيجة', 'Last result')}</h3><p class="small muted">${last ? `${_('الجزء', 'Part')} ${numL(last.part)} · ${last.band != null ? 'Band ' + bandL(last.band) : _('بدون تقييم', 'not marked')} · ${numL(last.wpm || 0)} ${_('كلمة/دقيقة', 'wpm')}` : _('لم تسجّل بعد.', 'Nothing recorded yet.')}</p></div>
+    <a class="card tile" href="${PRO() ? '#speak/mock' : '#upgrade'}" data-lock="${PRO() ? '' : 'speaking'}"><span class="t-ic bg-S" style="color:#fff">${ic('S', 'i20')}</span><h3>${_('اختبار محادثة كامل', 'Full speaking mock')}</h3><p class="small muted">${_('الأجزاء الثلاثة متتالية كما في يوم الاختبار (١١–١٤ دقيقة).', 'All three parts back to back, like test day (11–14 minutes).')}</p>${PRO() ? '' : `<span class="lock-b">${ic('lock')}${_('برو', 'Pro')}</span>`}</a>
+    <div class="card tile"><span class="t-ic" style="background:var(--gold-soft)">${ic('target', 'i20')}</span><h3>${_('آخر نتيجة', 'Last result')}</h3><p class="small muted">${last ? `${last.part ? _('الجزء', 'Part') + ' ' + numL(last.part) : last.diag ? _('تحديد المستوى', 'placement') : _('اختبار كامل', 'full mock')} · ${last.band != null ? 'Band ' + bandL(last.band) : _('بدون تقييم', 'not marked')} · ${numL(last.wpm || 0)} ${_('كلمة/دقيقة', 'wpm')}` : _('لم تسجّل بعد.', 'Nothing recorded yet.')}</p></div>
   </div>
-  <div class="card"><h2>${_('الجزء الأول: أسئلة عن نفسك', 'Part 1: questions about you')}</h2><div class="list">${p1.items.map((t, i) => { const lk = i >= o1; return `<a class="li" href="${lk ? '#upgrade' : '#speak/p1/' + t.id}"><span class="li-t"><b>${esc(L(t.topic))}</b><small class="muted">${numL(t.qs.length)} ${_('أسئلة', 'questions')}</small></span>${lk ? `<span class="lock-b">${ic('lock')}${_('برو', 'Pro')}</span>` : ic('arrow')}</a>`; }).join('')}</div></div>
-  <div class="card"><h2>${_('الجزءان الثاني والثالث: البطاقة والنقاش', 'Parts 2 & 3: cue card and discussion')}</h2><div class="list">${p2.items.map((t, i) => { const lk = i >= o2; return `<a class="li" href="${lk ? '#upgrade' : '#speak/p2/' + t.id}"><span class="li-t"><b class="ltr-text" style="text-align:start">${esc(t.card.title)}</b><small class="muted">${esc(t.cat)}</small></span>${lk ? `<span class="lock-b">${ic('lock')}${_('برو', 'Pro')}</span>` : ic('arrow')}</a>`; }).join('')}</div></div>
+  <div class="card"><h2>${_('الجزء الأول: أسئلة عن نفسك', 'Part 1: questions about you')}</h2><div class="list">${p1.items.map((t, i) => { const lk = i >= o1; return `<a class="li ${lk ? 'locked' : ''}" href="${lk ? '#upgrade' : '#speak/p1/' + t.id}" data-lock="${lk ? 'speaking' : ''}"><span class="li-t"><b>${esc(L(t.topic))}</b><small class="muted">${numL(t.qs.length)} ${_('أسئلة', 'questions')}</small></span>${lk ? `<span class="lock-b">${ic('lock')}${_('برو', 'Pro')}</span>` : ic('arrow')}</a>`; }).join('')}</div></div>
+  <div class="card"><h2>${_('الجزءان الثاني والثالث: البطاقة والنقاش', 'Parts 2 & 3: cue card and discussion')}</h2><div class="list">${p2.items.map((t, i) => { const lk = i >= o2; return `<a class="li ${lk ? 'locked' : ''}" href="${lk ? '#upgrade' : '#speak/p2/' + t.id}" data-lock="${lk ? 'speaking' : ''}"><span class="li-t"><b class="ltr-text" style="text-align:start">${esc(t.card.title)}</b><small class="muted">${esc(t.cat)}</small></span>${lk ? `<span class="lock-b">${ic('lock')}${_('برو', 'Pro')}</span>` : ic('arrow')}</a>`; }).join('')}</div></div>
   <div class="card"><h2>${_('نصائح سريعة', 'Quick tips')}</h2><div class="row"><a class="btn ghost sm" href="#lesson/S-p2">${_('درس البطاقة', 'Cue card lesson')}</a><a class="btn ghost sm" href="#lesson/S-flu">${_('درس الطلاقة', 'Fluency lesson')}</a></div></div>`;
 }
 
@@ -32,7 +33,7 @@ async function pageSpeak(mode, id) {
   }
   SP = { mode, id, title, steps, i: 0, answers: [], rec: null, stream: null };
   setTimeout(() => spRender(), 0);
-  return `<div class="spread"><a href="#speaking" class="btn ghost sm">${BK()}${_('غرفة المحادثة', 'Speaking room')}</a><span class="chip pri">${esc(title)}</span></div><div id="sp-stage" class="grid"></div>`;
+  return `<div class="spread"><a href="#speaking" class="btn ghost sm">${BK()}${_('غرفة المحادثة', 'Speaking room')}</a><span class="chip pri" dir="auto">${esc(title)}</span></div><div id="sp-stage" class="grid"></div>`;
 }
 function spAudio(clip) { return new Promise(res => { const a = new Audio('/audio/sp/' + clip + '.mp3'); a.volume = S.vol ?? .9; a.onended = res; a.onerror = res; a.play().catch(res); SP.player = a; }); }
 async function spRender() {
@@ -75,8 +76,10 @@ async function spStart(s) {
     const r = new SR_API(); r.lang = 'en-GB'; r.continuous = true; r.interimResults = true; rec.sr = r;
     rec.base = '';
     r.onresult = e => { let fin = '', int = ''; for (let i = 0; i < e.results.length; i++) { const x = e.results[i]; if (x.isFinal) fin += x[0].transcript + ' '; else int += x[0].transcript; } rec.text = rec.base + fin; rec.cur = fin; rec.interim = int; const el = $('#sp-live'); if (el) el.textContent = (rec.text + int).trim(); };
-    r.onend = () => { rec.base = rec.text; if (SP && SP.rec === rec) try { r.start(); } catch (e) {} };
-    try { r.start(); } catch (e) {}
+    // a permanent failure (no speech service, mic blocked for recognition…) must not restart in a loop: the audio recording goes on, only the transcript is lost
+    r.onerror = e => { if (SR_FATAL.has(e.error)) { rec.srErr = e.error; const el = $('#sp-live'); if (el) el.hidden = true; } };
+    r.onend = () => { rec.base = rec.text; if (SP && SP.rec === rec && !rec.srErr) try { r.start(); } catch (e) {} };
+    try { r.start(); } catch (e) { rec.srErr = 'start'; }
   }
   rec.tm = setInterval(() => { const sec = (Date.now() - rec.t0) / 1000, el = $('#sp-t'); if (el) el.textContent = fmtT(sec); if (s.max && sec >= s.max) { if (s.part === 2) spAudio('p2stop'); spStop(); } }, 300);
 }
@@ -86,7 +89,7 @@ function spStop(discard) {
   rec.mr.onstop = () => {
     if (discard) return;
     const blob = new Blob(rec.chunks, { type: rec.mr.mimeType || 'audio/webm' }), secs = (Date.now() - rec.t0) / 1000, text = (rec.text + ' ' + rec.interim).trim();
-    const ans = { step: rec.s, url: URL.createObjectURL(blob), secs, text, m: metrics(text, secs) }; SP.answers.push(ans);
+    const ans = { step: rec.s, url: URL.createObjectURL(blob), secs, text, srErr: rec.srErr, m: metrics(text, secs) }; SP.answers.push(ans);
     spReview(ans);
   };
   try { rec.mr.stop(); } catch (e) {}
@@ -105,7 +108,10 @@ function spReview(ans) {
   const s = ans.step, act = $('#sp-act'); if (!act) return;
   const cfg = window.CLOUD && CLOUD.config;
   act.style.justifyItems = 'stretch'; act.style.textAlign = 'start';
-  act.innerHTML = `<audio controls src="${ans.url}" style="width:100%"></audio>${ans.text ? `<div class="transcript">${esc(ans.text)}</div>` : `<p class="small muted">${SR_API ? _('لم يُلتقط نص؛ تحدث بصوت أوضح أو اقترب من الميكروفون.', 'No speech was captured; speak more clearly or closer to the mic.') : ''}</p>`}
+  const noText = !SR_API ? _('متصفحك لا يحوّل الكلام إلى نص؛ استمع إلى تسجيلك وقارنه بالإجابة النموذجية.', 'Your browser cannot transcribe speech; listen to your recording and compare it with the model answer.')
+    : ans.srErr ? _('تعذّر تحويل الكلام إلى نص (الخدمة غير متاحة أو لا يوجد اتصال)؛ تسجيلك محفوظ، وقارنه بالإجابة النموذجية.', 'Speech could not be transcribed (service unavailable or offline); your recording is kept, so compare it with the model answer.')
+    : _('لم يُلتقط نص؛ تحدث بصوت أوضح أو اقترب من الميكروفون.', 'No speech was captured; speak more clearly or closer to the mic.');
+  act.innerHTML = `<audio controls src="${ans.url}" style="width:100%"></audio>${ans.text ? `<div class="transcript">${esc(ans.text)}</div>` : `<p class="small muted">${noText}</p>`}
     ${metricsHTML(ans.m, s.part)}
     <details><summary style="cursor:pointer;font-weight:600">${_('إجابة نموذجية (Band 8)', 'Model answer (band 8)')}</summary><div class="model" style="margin-top:6px">${esc(s.model || '')}</div>${s.tip ? `<p class="small">${esc(L(s.tip))}</p>` : ''}</details>
     <div id="sp-ai"></div>
@@ -136,7 +142,8 @@ function spSummary() {
   const tot = A.reduce((a, x) => ({ w: a.w + x.m.words, s: a.s + x.m.secs, f: a.f + x.m.fill }), { w: 0, s: 0, f: 0 });
   const wpm = tot.s ? Math.round(tot.w / (tot.s / 60)) : 0;
   // fluency-based estimate (only an indicator; AI or a teacher gives a real band)
-  const est = A.length ? half(clampBand(4 + Math.min(2, wpm / 70) + Math.min(1.5, (tot.w / Math.max(1, A.length)) / 40) - Math.min(1, tot.f / Math.max(1, tot.w) * 20))) : null;
+  // without any transcript (no speech recognition) there is nothing to estimate from: no indicator, and nothing saved as a band
+  const est = A.length && tot.w ? half(clampBand(4 + Math.min(2, wpm / 70) + Math.min(1.5, (tot.w / Math.max(1, A.length)) / 40) - Math.min(1, tot.f / Math.max(1, tot.w) * 20))) : null;
   if (est != null && SP.mode === 'mock') { S.speaking.push({ id: uid(), part: 0, date: todayStr(), secs: tot.s, wpm, words: tot.w, band: est, est: true }); save(); }
   st.innerHTML = `<div class="card"><h2>${_('انتهت الجلسة', 'Session complete')}</h2>${metricsHTML({ words: tot.w, wpm, fill: tot.f, range: 0, secs: Math.round(tot.s) }, 3)}
   ${est != null ? `<div class="spread"><p>${_('مؤشر الطلاقة التقديري (يعتمد على السرعة والطول والحشو فقط):', 'Estimated fluency indicator (speed, length and fillers only):')}</p><div class="stamp sm c-S"><b>${fmtBand(est)}</b><small>est.</small></div></div>` : ''}

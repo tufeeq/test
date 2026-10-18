@@ -123,10 +123,11 @@ function setCookie(req, res, token, maxAgeSec) {
   res.set("Set-Cookie", parts.join("; "));
 }
 const fail = (res, status, code) => res.status(status).json({ error: code });
+const str = v => typeof v === "string" ? v : ""; // body fields must be strings (an array/object would stringify into a "valid" value)
 const validEmail = e => typeof e === "string" && e.length <= 254 && /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e);
 const DUMMY_HASH = bcrypt.hashSync("not-a-real-password", 11);
 // student's display name: 2–60 visible characters, control/format characters removed, spaces collapsed
-const cleanName = v => String(v == null ? "" : v).normalize("NFC").replace(/[\u0000-\u001f\u007f-\u009f\u200b-\u200f\u202a-\u202e\u2066-\u2069<>]/g, "").replace(/\s+/g, " ").trim();
+const cleanName = v => (typeof v === "string" ? v : "").normalize("NFC").replace(/[\u0000-\u001f\u007f-\u009f\u200b-\u200f\u202a-\u202e\u2066-\u2069<>]/g, "").replace(/\s+/g, " ").trim();
 const validName = n => n.length >= 2 && n.length <= 60;
 const pub = u => ({ email: u.email, name: u.name || "", isAdmin: isAdminEmail(u.email) });
 const isAdminEmail = e => ADMIN_EMAILS.includes(String(e || "").toLowerCase());
@@ -179,7 +180,7 @@ app.post("/api/name", needUser, wrap(async (req, res) => {
 }));
 
 app.post("/api/signup", wrap(async (req, res) => {
-  const email = String(req.body.email || "").trim().toLowerCase(), pw = String(req.body.password || "");
+  const email = str(req.body.email).trim().toLowerCase(), pw = str(req.body.password);
   if (limited("su:" + req.ip, 60, 3600e3)) return fail(res, 429, "too-many-requests"); // generous: a whole class may sign up from one school IP
   if (!validEmail(email)) return fail(res, 400, "invalid-email");
   if (pw.length < 8 || pw.length > 200) return fail(res, 400, "weak-password");
@@ -194,7 +195,7 @@ app.post("/api/signup", wrap(async (req, res) => {
 }));
 
 app.post("/api/login", wrap(async (req, res) => {
-  const email = String(req.body.email || "").trim().toLowerCase(), pw = String(req.body.password || "");
+  const email = str(req.body.email).trim().toLowerCase(), pw = str(req.body.password);
   // Limits: 150 attempts / 15 min per IP (classrooms share one IP).
   // Failed attempts are counted per email+IP (10 / 15 min), so someone guessing from their own device
   // cannot lock the real student out on another device. A high per-email ceiling (100 / 15 min)
@@ -216,7 +217,7 @@ app.post("/api/logout", wrap(async (req, res) => {
 }));
 
 app.post("/api/password", needUser, wrap(async (req, res) => {
-  const cur = String(req.body.current || ""), next = String(req.body.next || "");
+  const cur = str(req.body.current), next = str(req.body.next);
   if (next.length < 8 || next.length > 200) return fail(res, 400, "weak-password");
   if (over("pw:" + req.user.id, 10, 900e3)) return fail(res, 429, "too-many-requests");
   const r = await pool.query("SELECT pass_hash FROM users WHERE id=$1", [req.user.id]);
@@ -233,7 +234,7 @@ app.post("/api/password", needUser, wrap(async (req, res) => {
 const mail = require("./mail");
 const RESET_MIN = 60;
 app.post("/api/password/forgot", wrap(async (req, res) => {
-  const email = String(req.body.email || "").trim().toLowerCase();
+  const email = str(req.body.email).trim().toLowerCase();
   if (!validEmail(email)) return fail(res, 400, "invalid-email");
   if (limited("fp:" + req.ip, 20, 3600e3) || limited("fpe:" + email, 3, 3600e3)) return fail(res, 429, "too-many-requests");
   if (!mail.configured()) { console.warn("password reset requested but no mail service is configured"); return res.json({ ok: true, mail: false }); }
@@ -248,7 +249,7 @@ app.post("/api/password/forgot", wrap(async (req, res) => {
   res.json({ ok: true, mail: true });
 }));
 app.post("/api/password/check", wrap(async (req, res) => {
-  const token = String(req.body.token || "");
+  const token = str(req.body.token);
   if (limited("rc:" + req.ip, 60, 3600e3)) return fail(res, 429, "too-many-requests");
   const r = await pool.query("SELECT u.email FROM password_resets p JOIN users u ON u.id=p.user_id WHERE p.token_hash=$1 AND p.used_at IS NULL AND p.expires_at>now()", [sha(token)]);
   if (!r.rows[0]) return fail(res, 400, "reset-invalid");
@@ -256,7 +257,7 @@ app.post("/api/password/check", wrap(async (req, res) => {
   res.json({ email: e.slice(0, Math.min(2, i)) + "•••" + e.slice(i) });
 }));
 app.post("/api/password/reset", wrap(async (req, res) => {
-  const token = String(req.body.token || ""), pw = String(req.body.password || "");
+  const token = str(req.body.token), pw = str(req.body.password);
   if (limited("rs:" + req.ip, 30, 3600e3)) return fail(res, 429, "too-many-requests");
   if (pw.length < 8 || pw.length > 200) return fail(res, 400, "weak-password");
   const r = await pool.query("UPDATE password_resets SET used_at=now() WHERE token_hash=$1 AND used_at IS NULL AND expires_at>now() RETURNING user_id", [sha(token)]);
@@ -365,6 +366,7 @@ app.get("/audio/index.json", wrap(async (req, res) => {
   res.set("Cache-Control", "no-cache").json(r.rows.map(x => x.id));
 }));
 app.get("/audio/:id.mp3", wrap(async (req, res, next) => {
+  if (!/^[\w-]{1,64}$/.test(req.params.id)) return next(); // clip ids are [\w-] (importNarration); anything else (e.g. %00) is not a clip
   const r = await pool.query("SELECT mime, data, updated_at FROM narration WHERE id=$1", [req.params.id]);
   const row = r.rows[0]; if (!row) return next();   // not a narration clip: let static files (test audio) answer
   const buf = row.data, total = buf.length;
@@ -391,7 +393,7 @@ async function importNarration() {
     if (!c || !/^[\w-]{1,64}$/.test(c.id || "") || !/^https:\/\//.test(c.url || "")) { bad++; continue; }
     if (have.has(c.id) && !c.replace) { skip++; continue; }
     try {
-      const r = await fetch(c.url); if (!r.ok) throw new Error("HTTP " + r.status);
+      const r = await fetch(c.url, { signal: AbortSignal.timeout(60000) }); if (!r.ok) throw new Error("HTTP " + r.status);
       const buf = Buffer.from(await r.arrayBuffer()); if (buf.length < 500 || buf.length > 5e6) throw new Error("size " + buf.length);
       await pool.query("INSERT INTO narration(id,mime,data,updated_at) VALUES($1,'audio/mpeg',$2,now()) ON CONFLICT (id) DO UPDATE SET data=EXCLUDED.data, updated_at=now()", [c.id, buf]);
       ok++;
@@ -463,15 +465,32 @@ const versionAssets = html => html.replace(ASSET_RE, (m, a, slash, p, z) => {
 const escHtml = t => String(t).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
 const unescHtml = t => String(t).replace(/<[^>]+>/g, "").replace(/&(amp|lt|gt|quot|#39);/g, (m, k) => ({ amp: "&", lt: "<", gt: ">", quot: '"', "#39": "'" })[k]);
 const arNum = n => String(n).replace(/\d/g, d => "٠١٢٣٤٥٦٧٨٩"[d]);
-function landingExtras(html, cfg) {
+// Landing page in English: every [data-en] element gets its English text, lang/dir/title/canonical/links follow.
+// landing.js does the same swap client-side; this server copy is what crawlers (hreflang="en" → /?lang=en) and no-JS visitors get.
+const EN_DESC = "Prepare for IELTS in Arabic and English: computer-delivered tests with every answer explained in Arabic, an AI examiner for Writing and Speaking, an Arabic-speaker error radar and a daily plan to your test date.";
+function landingEnglish(html) {
+  return html.replace('<html lang="ar" dir="rtl">', '<html lang="en" dir="ltr">')
+    .replace(/(<(\w+)\b[^>]*\bdata-en="([^"]*)"[^>]*>)([^<]*)(<\/\2>)/g, (m, open, tag, en, ar, close) => open.replace(/ data-en="/, ` data-ar="${ar.replace(/"/g, "&quot;")}" data-en="`) + en + close)
+    .replace(/<title>[^<]*<\/title>/, "<title>IELTS Academy | أكاديمية الآيلتس</title>")
+    .replace(/(<meta name="description" content=")[^"]*(">)/, `$1${EN_DESC}$2`)
+    .replace(/(<meta (?:property="og:description"|name="twitter:description") content=")[^"]*(">)/g, `$1${EN_DESC}$2`)
+    .replace(/(<meta (?:property="og:title"|name="twitter:title") content=")[^"]*(">)/g, "$1IELTS Academy · the first IELTS prep built for Arabic speakers$2")
+    .replace('<meta property="og:locale" content="ar_SA">\n<meta property="og:locale:alternate" content="en_US">', '<meta property="og:locale" content="en_US">\n<meta property="og:locale:alternate" content="ar_SA">')
+    .replace(/(<link rel="canonical" href="https:\/\/[^"\/]+\/)(">)/, "$1?lang=en$2").replace(/(<meta property="og:url" content="https:\/\/[^"\/]+\/)(">)/, "$1?lang=en$2")
+    .replace(/href="\/app(#[^"]*)?"/g, (m, h) => `href="/app?lang=en${h || ""}"`)
+    .replace('id="lp-lang">English<', 'id="lp-lang">العربية<');
+}
+function landingExtras(html, cfg, en) {
   const plans = cfg.plans.filter(p => p.active);
-  // same markup landing.js builds (Arabic): it removes .paid cards and rebuilds them once /api/config arrives
-  const ben = ["كل الشروحات المرئية التفاعلية للمهارات الـ١٦", "كل الاختبارات الكاملة مع الشرح بالعربية", "المصحح الذكي للكتابة والمحادثة يوميًا", "كل الدروس والبطاقات والإجابات النموذجية", "الخطة الكاملة وصندوق أخطاء غير محدود", "اختبار محادثة كامل بممتحن صوتي"];
-  const cards = plans.map(p => `<div class="card paid${p.best ? " best" : ""}"><h3>${escHtml(p.ar)}${p.best ? ` <span class="chip pri">الأوفر</span>` : ""}</h3><div class="price">${arNum(p.price)} <small style="font-size:1rem">ريال</small></div>${p.days > 31 ? `<p class="small" style="margin:0;color:var(--teal-t,#14686C);font-weight:700">≈ ${arNum(Math.round(p.price / (p.days / 30)))} ريال شهريًا</p>` : ""}<p class="small muted">دفعة واحدة لمدة ${arNum(p.days)} يومًا · بدون تجديد تلقائي</p><ul class="benefits">${ben.map(b => `<li>✓ ${b}</li>`).join("")}</ul><a class="btn ${p.best ? "primary" : ""} block" href="/app?lang=ar#upgrade">اشترك</a></div>`).join("");
+  // same markup landing.js builds; it also receives the plans through #lp-cfg so it never has to wait for /api/config
+  const ben = en ? ["All 16 interactive video explainers", "Every full test with Arabic explanations", "Daily AI marking for Writing & Speaking", "All lessons, cards and model answers", "The full plan and unlimited mistake box", "A full speaking mock with a voiced examiner"]
+    : ["كل الشروحات المرئية التفاعلية للمهارات الـ١٦", "كل الاختبارات الكاملة مع الشرح بالعربية", "المصحح الذكي للكتابة والمحادثة يوميًا", "كل الدروس والبطاقات والإجابات النموذجية", "الخطة الكاملة وصندوق أخطاء غير محدود", "اختبار محادثة كامل بممتحن صوتي"];
+  const num = n => en ? String(n) : arNum(n);
+  const cards = plans.map(p => `<div class="card paid${p.best ? " best" : ""}"><h3>${escHtml(en ? p.en : p.ar)}${p.best ? ` <span class="chip pri">${en ? "Best value" : "الأوفر"}</span>` : ""}</h3><div class="price">${num(p.price)} <small style="font-size:1rem">${en ? "SAR" : "ريال"}</small></div>${p.days > 31 ? `<p class="small" style="margin:0;color:var(--teal-t,#14686C);font-weight:700">${en ? `≈ SAR ${Math.round(p.price / (p.days / 30))}/month` : `≈ ${arNum(Math.round(p.price / (p.days / 30)))} ريال شهريًا`}</p>` : ""}<p class="small muted">${en ? `One payment for ${p.days} days · no auto-renewal` : `دفعة واحدة لمدة ${arNum(p.days)} يومًا · بدون تجديد تلقائي`}</p><ul class="benefits">${ben.map(b => `<li>✓ ${b}</li>`).join("")}</ul><a class="btn ${p.best ? "primary" : ""} block" href="/app?lang=${en ? "en" : "ar"}#upgrade">${en ? "Subscribe" : "اشترك"}</a></div>`).join("");
   html = html.replace("<!--PLANS-->", cards);
   if (plans.length) {
     const m = Math.min(...plans.map(p => Math.round(p.price / Math.max(1, p.days / 30))));
-    html = html.replace(/(<td class="us" id="lp-cmp-price" data-en=")[^"]*(">)[^<]*(<\/td>)/, `$1from SAR ${m}/month$2من ${arNum(m)} ريالًا شهريًا$3`);
+    html = html.replace(/(<td class="us" id="lp-cmp-price" data-en=")[^"]*(">)[^<]*(<\/td>)/, `$1from SAR ${m}/month$2${en ? `from SAR ${m}/month` : `من ${arNum(m)} ريالًا شهريًا`}$3`);
   }
   const base = "https://" + SITE_HOST;
   const faq = [...html.matchAll(/<details><summary[^>]*>([\s\S]*?)<\/summary><p[^>]*>([\s\S]*?)<\/p><\/details>/g)]
@@ -480,33 +499,38 @@ function landingExtras(html, cfg) {
     { "@context": "https://schema.org", "@type": "EducationalOrganization", name: "أكاديمية الآيلتس", alternateName: "IELTS Academy", url: base + "/",
       logo: base + "/favicon.svg", image: base + "/og.png", email: "info@myielts.academy", inLanguage: ["ar", "en"] },
     { "@context": "https://schema.org", "@type": "Course", name: "التحضير لاختبار الآيلتس | IELTS preparation", inLanguage: ["ar", "en"],
-      description: "تحضير لاختبار الآيلتس الأكاديمي والعام بصيغة الاختبار المحوسب مع شرح بالعربية ومصحح ذكي للكتابة والمحادثة.",
+      description: en ? EN_DESC : "تحضير لاختبار الآيلتس الأكاديمي والعام بصيغة الاختبار المحوسب مع شرح بالعربية ومصحح ذكي للكتابة والمحادثة.",
       provider: { "@type": "EducationalOrganization", name: "أكاديمية الآيلتس", url: base + "/" },
-      offers: plans.map(p => ({ "@type": "Offer", name: p.ar, price: String(p.price), priceCurrency: cfg.currency, category: "Paid", url: base + "/#pricing" })),
+      offers: plans.map(p => ({ "@type": "Offer", name: en ? p.en : p.ar, price: String(p.price), priceCurrency: cfg.currency, category: "Paid", url: base + "/#pricing" })),
       hasCourseInstance: { "@type": "CourseInstance", courseMode: "online", courseWorkload: "PT30M" } },
-    faq.length ? { "@context": "https://schema.org", "@type": "FAQPage", inLanguage: "ar", mainEntity: faq } : null
+    faq.length ? { "@context": "https://schema.org", "@type": "FAQPage", inLanguage: en ? "en" : "ar", mainEntity: faq } : null
   ].filter(Boolean);
   const json = JSON.stringify(ld).replace(/</g, "\\u003c");
-  return html.replace("<!--JSONLD-->", `<script type="application/ld+json">${json}</script>`);
+  const lpCfg = JSON.stringify({ plans: plans.map(({ id, ar, en: e, days, price, best }) => ({ id, ar, en: e, days, price, best: !!best })), currency: cfg.currency }).replace(/</g, "\\u003c");
+  return html.replace("<!--JSONLD-->", `<script type="application/ld+json">${json}</script>\n<script id="lp-cfg" type="application/json">${lpCfg}</script>`);
 }
-const htmlCache = new Map(); // file -> { key, body }
+const htmlCache = new Map(); // file[+lang] -> { key, body }
 async function sendPage(req, res, name, status) {
   const f = path.join(PUB, name), st = await fs.promises.stat(f);
   let extraKey = "";
   let cfg = null;
-  if (name === "index.html") { cfg = await C.loadCfg(); extraKey = JSON.stringify([cfg.plans, cfg.currency]); }
-  const vers = [...(htmlCache.get(f) || { assets: [] }).assets].map(p => fileVersion(path.join(PUB, p))).join(",");
+  const en = name === "index.html" && req.query.lang === "en";
+  if (name === "index.html") { cfg = await C.loadCfg(); extraKey = JSON.stringify([cfg.plans, cfg.currency, en]); }
+  const ck = f + (en ? "?en" : "");
+  const vers = [...(htmlCache.get(ck) || { assets: [] }).assets].map(p => fileVersion(path.join(PUB, p))).join(",");
   const key = f + ":" + st.mtimeMs + ":" + st.size + ":" + vers + ":" + extraKey;
-  let c = htmlCache.get(f);
+  let c = htmlCache.get(ck);
   if (!c || c.key !== key) {
     let html = await fs.promises.readFile(f, "utf8");
     const assets = [...html.matchAll(ASSET_RE)].map(m => m[3]);
     html = versionAssets(html);
-    if (cfg) html = landingExtras(html, cfg);
+    if (en) html = landingEnglish(html);
+    if (cfg) html = landingExtras(html, cfg, en);
     const v2 = assets.map(p => fileVersion(path.join(PUB, p))).join(",");
     c = { key: f + ":" + st.mtimeMs + ":" + st.size + ":" + v2 + ":" + extraKey, body: Buffer.from(html), assets };
-    htmlCache.set(f, c);
+    htmlCache.set(ck, c);
   }
+  if (name === "index.html") res.set("Vary", "Accept-Encoding"); // ?lang= is part of the URL, so no Vary on language is needed
   return sendText(req, res, { body: c.body, key: c.key, type: "html" }, "no-cache", status);
 }
 // "/" is the marketing page for visitors; signed-in students go straight to the app at /app
@@ -539,10 +563,9 @@ app.use(express.static(PUB, { extensions: ["html"], setHeaders: (res, f) => {
 app.use("/api", (req, res) => fail(res, 404, "not-found"));
 app.use((req, res) => sendPage(req, res, "404.html", 404).catch(() => res.status(404).end("Not found")));
 app.use((err, req, res, next) => {
-  if (err && (err.type === "entity.parse.failed" || err.type === "entity.too.large" || err.type === "encoding.unsupported" || err.type === "charset.unsupported")) {
-    const tooBig = err.type === "entity.too.large";
-    return fail(res, tooBig ? 413 : 400, tooBig ? "too-large" : "bad-json");
-  }
+  // body-parser errors carry a 4xx status (bad JSON, unsupported charset/encoding, corrupt gzip, too large): never a 500
+  if (err && (err.type === "entity.too.large" || err.status === 413)) return fail(res, 413, "too-large");
+  if (err && ((err.status >= 400 && err.status < 500) || /^(entity|encoding|charset|request)\./.test(err.type || ""))) return fail(res, err.status >= 400 && err.status < 500 ? err.status : 400, "bad-json");
   console.error(err);
   if (req.path.startsWith("/api")) return fail(res, 500, "server");
   res.status(500).send("Server error");

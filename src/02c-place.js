@@ -22,7 +22,7 @@ function plSteps(cur) {
   return `<div class="pl-steps" dir="ltr">${st.map(([k, n], i) => `<span class="pl-st ${i < cur ? 'done' : i === cur ? 'on' : ''}"><i>${i < cur ? '✓' : i + 1}</i>${n}</span>`).join('')}</div>`;
 }
 function plExit() {
-  $('#ex-x').onclick = () => { if (!confirm(_('إن خرجت الآن تُحفظ نتيجتا الاستماع والقراءة فقط. هل تريد الخروج؟', 'If you leave now only your listening and reading results are kept. Leave?'))) return; plCleanup(); closeExam(); };
+  $('#ex-x').onclick = () => { if (!confirm(EX.secs.length ? _('إن خرجت الآن تُحفظ نتيجتا الاستماع والقراءة فقط. هل تريد الخروج؟', 'If you leave now only your listening and reading results are kept. Leave?') : _('إن خرجت الآن لن تُحفظ الكتابة والمحادثة، وتستطيع العودة إليهما من صفحة «اليوم». هل تريد الخروج؟', 'If you leave now, writing and speaking are not saved; you can come back to them from Today. Leave?'))) return; plCleanup(); closeExam(); };
 }
 function plCleanup() { if (!PL) return; clearInterval(PL.wt); clearInterval(PL.st); if (PL.sr) { PL.sr.onend = null; try { PL.sr.stop(); } catch (e) {} } if (PL.player) { PL.player.pause(); } }
 
@@ -30,6 +30,21 @@ function plCleanup() { if (!PL) return; clearInterval(PL.wt); clearInterval(PL.s
 function placeStart() {
   PL = { text: (S.notes || {})['w:placement'] || '', wleft: PL_W.secs, i: 0, ans: [], can: null };
   track('diag_w_start'); errorsData().catch(() => {}); plWriting();
+}
+/* which placement skills are still missing (quick placement = listening + reading only; writing may also have been skipped) */
+function diagMissing() { const has = k => S.attempts.some(a => a.kind === 'diag' && a.skill === k && a.band != null); return ['W', 'S'].filter(k => !has(k)); }
+const diagNeedsWS = () => diagTaken() && diagMissing().length > 0;
+/* ---------- entry for the writing + speaking stages on their own (after a quick placement) ----------
+   Opens the exam room straight into the writing stage with a minimal EX (no listening/reading sections);
+   placeFinish → renderResult then works on made[] holding only W/S, and closeExam cleans up as usual. */
+function startPlaceWS() {
+  if (!signedIn()) return openAuth('signup', () => startPlaceWS());
+  if (!diagNeedsWS()) return toast(_('أكملت تحديد مستواك في المهارات الأربع.', 'Your placement already covers all four skills.'));
+  if (EX) return;
+  EX = { spec: { kind: 'diag', full4: true, wsOnly: true, title: _('تحديد المستوى: الكتابة والمحادثة', 'Placement: writing & speaking'), mode: 'exam', sections: [] }, secs: [], cur: 0, ans: {}, flags: new Set(), review: false, res: {}, started: true, mode: 'exam', lpart: 0, audioEl: null, t0: Date.now(), left: 0, result: { bySkill: {}, qt: {}, made: [] } };
+  document.body.classList.add('exam-open');
+  const ex = $('#exam'); ex.hidden = false; ex.className = (S.exContrast ? 'contrast ' : '') + (S.exBig ? 'big' : '');
+  track('diag_start', 'ws'); placeStart();
 }
 
 /* ---------- writing ---------- */
@@ -88,8 +103,9 @@ function plRec(s) {
   const r = new SR_API(); r.lang = 'en-GB'; r.continuous = true; r.interimResults = true;
   const rec = { s, t0: Date.now(), base: '', text: '', interim: '' }; PL.rec = rec; PL.sr = r;
   r.onresult = e => { let fin = '', int = ''; for (let i = 0; i < e.results.length; i++) { const x = e.results[i]; if (x.isFinal) fin += x[0].transcript + ' '; else int += x[0].transcript; } rec.text = rec.base + fin; rec.interim = int; const el = $('#pl-live'); if (el) { el.hidden = false; el.textContent = (rec.text + int).trim(); } };
-  r.onerror = e => { if (e.error === 'not-allowed' || e.error === 'service-not-allowed') { PL.rec = null; clearInterval(PL.st); toast(_('لم نتمكن من استخدام الميكروفون. اختر وصفًا لمستواك بدلًا من ذلك.', 'The microphone is not available. Choose a description of your level instead.'), 4500); plCanDo(true); } };
-  r.onend = () => { rec.base = rec.text; if (PL && PL.rec === rec) try { r.start(); } catch (e) {} };
+  // recognition is the only thing we capture here: a permanent failure (mic blocked, no speech service, offline) goes to the self-rating instead of restarting forever
+  r.onerror = e => { if (SR_FATAL.has(e.error)) { rec.dead = true; PL.rec = null; PL.sr = null; clearInterval(PL.st); r.onend = null; try { r.stop(); } catch (x) {} toast(e.error === 'network' || e.error === 'audio-capture' ? _('تعذّر تحويل كلامك إلى نص (لا اتصال بخدمة التعرف على الكلام). اختر وصفًا لمستواك بدلًا من ذلك.', 'Your speech could not be transcribed (no connection to the speech service). Choose a description of your level instead.') : _('لم نتمكن من استخدام الميكروفون. اختر وصفًا لمستواك بدلًا من ذلك.', 'The microphone is not available. Choose a description of your level instead.'), 4500); plCanDo(true); } };
+  r.onend = () => { rec.base = rec.text; if (PL && PL.rec === rec && !rec.dead) try { r.start(); } catch (e) {} };
   try { r.start(); } catch (e) { return plCanDo(true); }
   const mic = $('#pl-mic'); mic.classList.add('rec');
   PL.st = setInterval(() => { const sec = (Date.now() - rec.t0) / 1000, el = $('#pl-t'); if (el) el.textContent = fmtT(sec); if (sec >= s.max) plStop(); }, 300);
@@ -174,10 +190,15 @@ async function placeFinish() {
   made.filter(a => a.skill === 'W' || a.skill === 'S').forEach(a => track('diag_done', a.skill + ':placement', a.band));
   PL = null;
   renderResult();
+  if (!EX.secs.length) { // writing + speaking on their own: there are no answers to review, so the main button goes back to Today
+    const g = $('#rv-go'); if (g) { g.textContent = _('العودة إلى خطة اليوم', 'Back to today'); g.onclick = () => closeExam(); }
+    if (!made.length) ex.querySelector('.result-top').insertAdjacentHTML('afterbegin', `<p class="notice gold" dir="${AR() ? 'rtl' : 'ltr'}">${_('لم نتمكن من تقدير الكتابة أو المحادثة هذه المرة (نص قصير أو بلا إجابات). يمكنك إعادتهما من صفحة «اليوم».', 'We could not estimate writing or speaking this time (too short or no answers). You can retake them from Today.')}</p>`);
+  }
 }
 
 function placeOverallHTML(made) {
-  const last = {}; made.forEach(a => last[a.skill] = a.band);
+  // overall band from the four placement skills: earlier placement attempts (e.g. a quick listening + reading run) fill in what this run did not cover
+  const last = {}; if (EX && EX.spec.kind === 'diag') S.attempts.filter(a => a.kind === 'diag' && a.band != null).forEach(a => last[a.skill] = a.band); made.forEach(a => last[a.skill] = a.band);
   const notes = made.filter(a => a.note && a.note.summary && L(a.note.summary));
   const k4 = ['L', 'R', 'W', 'S'], all = k4.every(k => last[k] != null);
   const ov = all ? roundOverall(k4.reduce((x, k) => x + last[k], 0) / 4) : null;

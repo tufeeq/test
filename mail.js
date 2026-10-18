@@ -2,13 +2,15 @@
 // Needs RESEND_API_KEY; the sender defaults to no-reply@<CANONICAL_HOST> (that domain must be verified in Resend).
 const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const configured = () => !!process.env.RESEND_API_KEY || process.env.MAIL_LOG === "1";
+const TIMEOUT_MS = Number(process.env.MAIL_TIMEOUT_MS) || 15000;
 const from = () => process.env.MAIL_FROM || `أكاديمية الآيلتس <no-reply@${process.env.CANONICAL_HOST || "myielts.academy"}>`;
 async function send({ to, subject, html, text }) {
   if (!process.env.RESEND_API_KEY) { console.log("[mail:dev]", to, subject, (text.match(/https?:\/\/\S+/) || [""])[0]); return { id: "dev" }; } // local testing only
   const r = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: { Authorization: "Bearer " + process.env.RESEND_API_KEY, "Content-Type": "application/json" },
-    body: JSON.stringify({ from: from(), to: [to], subject, html, text, reply_to: process.env.MAIL_REPLY_TO || `info@${process.env.CANONICAL_HOST || "myielts.academy"}` })
+    body: JSON.stringify({ from: from(), to: [to], subject, html, text, reply_to: process.env.MAIL_REPLY_TO || `info@${process.env.CANONICAL_HOST || "myielts.academy"}` }),
+    signal: AbortSignal.timeout(TIMEOUT_MS) // a stalled mail API must not hold the request (or the pool) open
   });
   if (!r.ok) { const t = (await r.text()).slice(0, 300); if (r.status === 403) diagnose("send rejected"); throw new Error("resend " + r.status + " " + t); }
   return r.json();
@@ -19,15 +21,15 @@ async function diagnose(reason) {
   if (!process.env.RESEND_API_KEY || Date.now() - lastDiag < 10 * 60e3) return; lastDiag = Date.now();
   const H = { Authorization: "Bearer " + process.env.RESEND_API_KEY };
   try {
-    const list = await (await fetch("https://api.resend.com/domains", { headers: H })).json();
+    const list = await (await fetch("https://api.resend.com/domains", { headers: H, signal: AbortSignal.timeout(TIMEOUT_MS) })).json();
     const ds = list.data || [];
     if (!ds.length) { console.error("[mail] Resend account behind RESEND_API_KEY has NO domains. Add myielts.academy in the same Resend account (" + reason + ")"); return; }
     for (const d of ds) {
-      const full = await (await fetch("https://api.resend.com/domains/" + d.id, { headers: H })).json();
+      const full = await (await fetch("https://api.resend.com/domains/" + d.id, { headers: H, signal: AbortSignal.timeout(TIMEOUT_MS) })).json();
       console.log(`[mail] Resend domain ${d.name} status=${d.status} region=${d.region || full.region || "?"} (${reason})`);
       (full.records || []).forEach(r => console.log(`[mail]   ${r.record} ${r.type} ${r.name} -> ${String(r.value).slice(0, 70)} : ${r.status}`));
       if (d.status === "verified") verified = true;
-      if (d.status !== "verified") { const v = await fetch("https://api.resend.com/domains/" + d.id + "/verify", { method: "POST", headers: H }); console.log("[mail] verification requested:", v.status); }
+      if (d.status !== "verified") { const v = await fetch("https://api.resend.com/domains/" + d.id + "/verify", { method: "POST", headers: H, signal: AbortSignal.timeout(TIMEOUT_MS) }); console.log("[mail] verification requested:", v.status); }
     }
   } catch (e) { console.error("[mail] diagnose failed", e.message); }
 }

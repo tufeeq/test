@@ -145,7 +145,7 @@ async function startDrill({ skills, n = 10, title, session }) {
   if (!items.length) return toast(_('لا توجد تمارين لهذه المهارة بعد.', 'No drills for this skill yet.'));
   if (session && !PRO() && items.length < session.length) toast(_(`الجلسة اختُصرت إلى ${numL(items.length)} أسئلة حسب حدّك اليومي المجاني.`, `Session shortened to ${items.length} questions (your free daily limit).`));
   DS = { sess: !!session, title: title || _('جلسة تدريب', 'Practice session'), items, i: 0, res: [], t0: Date.now(), plays: 0, hint: false, done: false };
-  location.hash = '#drill';
+  if (location.hash === '#drill') renderRoute(); else location.hash = '#drill'; // "another round" starts from the summary, which is already on #drill
 }
 function pageDrillRun() {
   if (!DS) { setTimeout(() => location.hash = '#practice', 0); return ''; }
@@ -214,14 +214,17 @@ function drSummary() {
 /* daily session: mistakes due + weakest skills + mixed */
 async function startSession() {
   await skillsData();
-  const now = todayStr(), items = [];
+  const now = todayStr(), items = [], N = 15, has = d => items.some(x => x.id === d.id);
+  const pools = {}; for (const s of SKL) pools[s.id] = await poolFor(s.id); // drills + generated extras (paraphrase, Arabic-speaker errors)
   const dueIds = Object.entries(S.dr).filter(([, v]) => !v.ok && v.due <= now).map(([k]) => k);
-  items.push(...DRL.filter(d => dueIds.includes(d.id)).slice(0, 4));
-  const weak = rankSkills().slice(0, 2).map(x => x.id);
-  for (const s of weak) { const pool = (await poolFor(s)).filter(d => !items.includes(d)); items.push(...pickItems(pool, 4)); if (GEN[s]) items.push(GEN[s]()); }
+  items.push(...Object.values(pools).flat().filter(d => dueIds.includes(d.id)).slice(0, 4));
+  const ranked = rankSkills().map(x => x.id), weak = ranked.slice(0, 2);
+  for (const s of weak) { items.push(...pickItems(pools[s].filter(d => !has(d)), 4)); if (GEN[s]) items.push(GEN[s]()); }
   const others = shuffle(SKL.map(s => s.id).filter(s => !weak.includes(s))).slice(0, 4);
-  for (const s of others) { const pool = (await poolFor(s)).filter(d => !items.includes(d)); items.push(...pickItems(pool, 1)); }
-  startDrill({ session: items.slice(0, 15), title: _('جلسة اليوم', 'Today’s session') });
+  for (const s of others) items.push(...pickItems(pools[s].filter(d => !has(d)), 1));
+  // top up to the promised 15 from the weakest skills onwards (due and unseen items first, as in pickItems)
+  for (const s of ranked) { if (items.length >= N) break; items.push(...pickItems(pools[s].filter(d => !has(d)), N - items.length)); }
+  startDrill({ session: items.slice(0, N), title: _('جلسة اليوم', 'Today’s session') });
 }
 
 /* ---------- practice hub ---------- */

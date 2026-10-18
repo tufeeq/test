@@ -31,7 +31,7 @@ module.exports = function oauth(app, { pool, wrap, createSession, cleanName, par
       return a.length === b.length && crypto.timingSafeEqual(a, b) ? o : null;
     } catch (e) { return null; }
   }
-  async function getJSON(url, opt) { const r = await fetch(url, opt); const j = await r.json().catch(() => ({})); if (!r.ok) throw new Error(r.status + " " + JSON.stringify(j).slice(0, 200)); return j; }
+  async function getJSON(url, opt) { const r = await fetch(url, { ...opt, signal: AbortSignal.timeout(15000) }); const j = await r.json().catch(() => ({})); if (!r.ok) throw new Error(r.status + " " + JSON.stringify(j).slice(0, 200)); return j; }
 
   // find the account by provider id, else by (verified) email — linking it — else create one
   async function signInWith(provider, pid, email, name) {

@@ -204,14 +204,16 @@ function open(key,opt={}){
   setTimeout(()=>$x('#xp-start')?.focus(),0);
 }
 function renderChapters(){ const L=P.L; $x('#xp-chap').innerHTML=P.scenes.map((si,i)=>{ const sc=L.scenes[si]; const st=i<P.idx?'done':i===P.idx?'cur':''; return `<li class="${st}"><button data-go="${i}"><span class="n">${AD(i+1)}</span><span>${escx(sc.t)}</span>${sc.interactive?`<span class="k">${u('inter')}</span>`:''}</button></li>`; }).join('')+(P.only==null&&L.quiz?`<li class="${P.idx>=P.scenes.length?'cur':''}"><button data-go="quiz"><span class="n">${IC.check}</span><span>${u('final')}</span></button></li>`:'');
-  document.querySelectorAll('#xp-chap [data-go]').forEach(b=>b.onclick=()=>{ if(!P.started){ $x('#xp-cover').hidden=true; P.started=true; } b.dataset.go==='quiz'?showQuiz():go(+b.dataset.go); }); }
+  document.querySelectorAll('#xp-chap [data-go]').forEach(b=>b.onclick=()=>{ if(!P.started){ $x('#xp-cover').hidden=true; P.started=true; } b.dataset.go==='quiz'?showQuiz():go(+b.dataset.go); seeStage(); }); }
+/* on narrow screens the chapter list sits below the player: bring the board back into view after a jump */
+function seeStage(){ try{ if(matchMedia('(max-width:900px)').matches){ const sw=$x('#xp-sw'); if(sw) sw.scrollIntoView({block:'start',behavior:'smooth'}); } }catch(e){} }
 function setSceneTitle(){ const sc=P.L.scenes[P.scenes[P.idx]]; $x('#xp-scene-t').textContent=sc?sc.t:''; }
 function setPlaying(v){ P.playing=v; const b=$x('#xp-pp'); if(b){ b.innerHTML=v?IC.pause:IC.play; b.setAttribute('aria-label',v?u('pause'):u('play')); } }
 function pause(){ if(!P) return; setPlaying(false); if(P.trk&&P.trk.audio){ P.trk.audio.pause(); gsap.globalTimeline.pause(); return; } TTS.pause(); if(P.tl) P.tl.pause(); }
 function resume(){ if(!P) return; setPlaying(true); if(P.trk&&P.trk.audio){ gsap.globalTimeline.resume(); if(!P.waiting) P.trk.audio.play().catch(()=>{}); return; } if(P.tl) P.tl.resume(); TTS.resume(); }
 function go(i){ if(!P) return; if(i<0) i=0; if(i>=P.scenes.length){ P.only!=null?finishQuick():showQuiz(); return; } playScene(i); }
 function segProgress(i,frac){ document.querySelectorAll('#xp-segs i').forEach((s,j)=>{ s.classList.toggle('done',j<i); const b=s.querySelector('b'); if(j===i) b.style.inlineSize=Math.round(frac*100)+'%'; else if(j>i) b.style.inlineSize='0'; else b.style.inlineSize=''; }); }
-function setupSceneAt(pi){ if(P.tl) P.tl.kill(); gsap.killTweensOf('*'); gsap.globalTimeline.resume(); const q=$x('#xp-quiz'); if(q) q.remove();
+function setupSceneAt(pi){ if(P.tl) P.tl.kill(); gsap.killTweensOf('*'); gsap.globalTimeline.resume(); const q=$x('#xp-quiz'); if(q) q.remove(); $x('#xp-sw')?.classList.remove('quiz-on');
   P.idx=pi; renderChapters(); setSceneTitle();
   const sc=P.L.scenes[P.scenes[pi]], stage=$x('#xp-stage'); stage.innerHTML=''; P.ctx=sc.setup(stage); P.ctx._stage=stage; P.ctxScene=P.scenes[pi]; gsap.fromTo(stage,{opacity:0},{opacity:1,duration:.25}); return P.ctx; }
 async function playScene(i){
@@ -281,6 +283,7 @@ function finishQuick(){ RUN++; TTS.stop(); stopTrack(); setPlaying(false); segPr
 function showQuiz(){
   RUN++; TTS.stop(); stopTrack(); if(P.tl) P.tl.kill(); setPlaying(false); P.idx=P.scenes.length; renderChapters(); segProgress(P.scenes.length,0); $x('#xp-scene-t').textContent='';
   const Q=P.L.quiz||[]; if(!Q.length){ close(); return; } let k=0, score=0; let d=$x('#xp-quiz'); if(!d){ d=document.createElement('div'); d.className='xp-quiz'; d.id='xp-quiz'; $x('#xp-sw').appendChild(d); }
+  $x('#xp-sw').classList.add('quiz-on'); seeStage();
   captionText(u('quizIntro'));
   const show=()=>{ const it=Q[k]; d.innerHTML=`<p class="xp-qn">${u('qn')(AD(k+1),AD(Q.length))}</p><h3 ${it.ltr||LG==='en'?'dir="ltr"':'dir="auto"'}>${escx(it.q)}</h3><div class="xp-opts">${it.o.map((o,i)=>`<button class="xp-opt" dir="auto" data-i="${i}">${escx(o)}</button>`).join('')}</div><div id="xp-fb"></div>`;
     d.querySelectorAll('.xp-opt').forEach(b=>b.onclick=()=>{ const i=+b.dataset.i, ok=i===it.a; if(ok) score++; d.querySelectorAll('.xp-opt').forEach((x,j)=>{ x.disabled=true; if(j===it.a) x.classList.add('right'); else if(j===i) x.classList.add('wrong'); });

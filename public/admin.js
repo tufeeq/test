@@ -48,33 +48,34 @@ function rel(v) {
 const fmtDur = sec => { sec = Math.round(num(sec)); if (!sec) return "—"; const m = Math.floor(sec / 60), s = sec % 60; return m ? fmtN(m) + _(" د ", "m ") + (s ? fmtN(s) + _(" ث", "s") : "") : fmtN(s) + _(" ث", "s"); };
 const today = () => new Date().toISOString().slice(0, 10);
 
-/* ================= domain labels ================= */
-const SKILLS = {
-  analogy: ["التناظر اللفظي", "Verbal analogy"], completion: ["إكمال الجمل", "Sentence completion"], context: ["الخطأ السياقي", "Contextual error"],
-  odd: ["المفردة الشاذة", "Odd word out"], reading: ["استيعاب المقروء", "Reading comprehension"], arith: ["الحساب", "Arithmetic"],
-  algebra: ["الجبر", "Algebra"], geometry: ["الهندسة", "Geometry"], stats: ["التحليل والإحصاء", "Analysis & statistics"], comparison: ["المقارنات", "Quantitative comparison"]
-};
+/* ================= domain labels (IELTS) ================= */
+const SKILLS = { L: ["الاستماع", "Listening"], R: ["القراءة", "Reading"], W: ["الكتابة", "Writing"], S: ["المحادثة", "Speaking"] };
 const SKILL_ORDER = Object.keys(SKILLS);
 const sk = s => (SKILLS[s] ? _(SKILLS[s][0], SKILLS[s][1]) : _("أخرى", "Other") + (s && s !== "other" ? " · " + s : ""));
-const XP_PREFIX = { al: "algebra", an: "analogy", ar: "arith", cm: "comparison", co: "completion", cx: "context", ge: "geometry", od: "odd", re: "reading", st: "stats", percent: "arith", balance: "algebra", analogy: "analogy" };
-function xpInfo(k) { const en = k.startsWith("en-"); const b = en ? k.slice(3) : k; const p = b.split("-")[0]; return { lang: en ? "en" : "ar", skill: XP_PREFIX[b] || XP_PREFIX[p] || "other" }; }
+// question types (progress.qt keys, see src/01-core.js QT_NAMES)
+const QT = { tfng: ["صح / خطأ / غير مذكور", "True/False/Not Given"], ynng: ["نعم / لا / غير مذكور", "Yes/No/Not Given"], mcq: ["اختيار من متعدد", "Multiple choice"], mcq2: ["اختيار إجابتين", "Choose two"],
+  headings: ["مطابقة العناوين", "Matching headings"], info: ["مطابقة المعلومات", "Matching information"], features: ["مطابقة الخصائص", "Matching features"], endings: ["مطابقة نهايات الجمل", "Sentence endings"],
+  matching: ["المطابقة", "Matching"], sentence: ["إكمال الجمل", "Sentence completion"], short: ["الإجابات القصيرة", "Short answers"], notes: ["إكمال الملاحظات", "Note completion"], form: ["إكمال النموذج", "Form completion"],
+  table: ["إكمال الجدول", "Table completion"], flow: ["المخطط الانسيابي", "Flow chart"], summary: ["إكمال الملخص", "Summary completion"], summary_bank: ["ملخص ببنك كلمات", "Summary (word bank)"], map: ["الخرائط", "Maps & plans"] };
+const qtL = t => (QT[t] ? _(QT[t][0], QT[t][1]) : t || "—");
+// explainer keys look like xp-L-detail / xp-W-t2: the skill is the second segment
+function xpInfo(k) { const m = /^xp-([LRWS])-/.exec(k || ""); return { skill: m ? m[1] : "other" }; }
 const LIMITS = {
-  daily: ["الأسئلة اليومية", "Daily questions"], xp: ["الشروحات المقفلة", "Locked explainers"], test: ["الاختبارات", "Tests"],
+  daily: ["الأسئلة اليومية", "Daily questions"], xp: ["الشروحات المقفلة", "Locked explainers"], test: ["الاختبارات الكاملة", "Full tests"],
   cards: ["البطاقات والمفردات", "Flashcards & vocabulary"], mistakes: ["صندوق الأخطاء", "Mistake box"], plan: ["الخطة الدراسية", "Study plan"],
-  review: ["مراجعة المحاولات", "Attempt review"], analytics: ["التحليلات", "Analytics"], tech: ["الأساليب والأنماط", "Techniques & patterns"],
-  custom: ["تخصيص الخطة", "Plan customization"], skill: ["التدريب الموجّه", "Targeted practice"]
+  writing: ["مهام الكتابة", "Writing tasks"], speaking: ["مواضيع المحادثة", "Speaking topics"], lesson: ["الدروس", "Lessons"], tech: ["الأساليب", "Techniques"]
 };
 const limitL = k => (LIMITS[k] ? _(LIMITS[k][0], LIMITS[k][1]) : k || "—");
-const KINDS = {
-  diag: ["الاختبار التشخيصي", "Diagnostic"], session: ["جلسة يومية", "Daily session"], skill: ["تدريب مهارة", "Skill practice"], model: ["نموذج محاكٍ", "Model test"],
-  verbal: ["قسم لفظي", "Verbal section"], quant: ["قسم كمي", "Quant section"], mock: ["محاكاة كاملة", "Full mock"], mistakes: ["مراجعة الأخطاء", "Mistake review"], custom: ["تدريب مخصص", "Custom practice"], section: ["اختبار قسم", "Section test"]
-};
-const kindL = k => (KINDS[k] ? _(KINDS[k][0], KINDS[k][1]) : k || "—");
+// attempt kinds (progress.attempts[].kind) and event keys like "L:L02", "drill:L-detail,R-tfng", "W:placement"
+const KINDS = { L: ["اختبار استماع", "Listening test"], R: ["اختبار قراءة", "Reading test"], diag: ["تحديد المستوى", "Placement"], drill: ["تدريب", "Drill"] };
+const kindL = k => { if (!k) return "—"; if (KINDS[k]) return _(KINDS[k][0], KINDS[k][1]); const [a, b] = String(k).split(":"); if (KINDS[a] || SKILLS[a]) return (KINDS[a] ? _(KINDS[a][0], KINDS[a][1]) : sk(a)) + (b ? " · " + b : ""); return k; };
+const isPctKey = k => /^drill:/.test(k || "");
+const bandL = v => (v == null || !isFinite(Number(v)) ? "—" : new Intl.NumberFormat(LOC(), { minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(Number(v)));
 const EVENTS = {
-  open: ["فتح التطبيق", "Opened the app", "sky"], diag_start: ["بدأ التشخيصي", "Started diagnostic", ""], diag_done: ["أنهى التشخيصي", "Finished diagnostic", ""],
-  xp_start: ["بدأ شرحًا", "Started an explainer", "pink"], xp_done: ["أنهى شرحًا", "Finished an explainer", "pink"], ai_writing: ["تقييم كتابة ذكي", "AI writing marked", "pink"], ai_speaking: ["تقييم محادثة ذكي", "AI speaking marked", "pink"], lesson_done: ["أنهى درسًا", "Finished a lesson", ""], limit_hit: ["بلغ حدًا مجانيًا", "Hit a free limit", "coral"],
+  open: ["فتح التطبيق", "Opened the app", "sky"], diag_start: ["بدأ تحديد المستوى", "Started placement", ""], diag_w_start: ["بدأ كتابة تحديد المستوى", "Started placement writing", ""], diag_s_start: ["بدأ محادثة تحديد المستوى", "Started placement speaking", ""], diag_done: ["أنهى تحديد المستوى", "Finished placement", ""],
+  xp_start: ["بدأ شرحًا", "Started an explainer", "pink"], xp_done: ["أنهى شرحًا", "Finished an explainer", "pink"], ai_writing: ["تقييم كتابة ذكي", "AI writing marked", "pink"], ai_speaking: ["تقييم محادثة ذكي", "AI speaking marked", "pink"], ai_placement: ["تقييم تحديد المستوى الذكي", "AI placement marked", "pink"], lesson_done: ["أنهى درسًا", "Finished a lesson", ""], limit_hit: ["بلغ حدًا مجانيًا", "Hit a free limit", "coral"],
   upgrade_view: ["شاهد الباقات", "Viewed plans", "butter"], checkout_start: ["بدأ الدفع", "Started checkout", "butter"], test_start: ["بدأ اختبارًا", "Started a test", ""],
-  test_done: ["أنهى اختبارًا", "Finished a test", ""], report_view: ["شاهد تقرير التجربة", "Viewed trial report", "sky"]
+  test_done: ["أنهى اختبارًا", "Finished a test", ""], report_view: ["شاهد تقرير التجربة", "Viewed trial report", "sky"], xlang: ["غيّر أسلوب الشرح", "Changed explanation style", ""], pw_forgot: ["طلب استعادة كلمة المرور", "Requested a password reset", ""], pw_reset: ["أعاد تعيين كلمة المرور", "Reset the password", ""], js_error: ["خطأ في المتصفح", "Browser error", "coral"]
 };
 const SOURCES = { tap: ["دفع إلكتروني", "Paid"], coupon: ["قسيمة", "Coupon"], manual: ["منحة يدوية", "Manual grant"], admin: ["مشرف", "Admin"] };
 const srcL = s => (SOURCES[s] ? _(SOURCES[s][0], SOURCES[s][1]) : s || "—");
@@ -582,16 +583,15 @@ function renderDrawer() {
   const scrollY = $(".dr-b", dr) ? $(".dr-b", dr).scrollTop : 0;
   const pctS = LANG === "ar" ? "٪" : "%";
   const facts = [[_("التسجيل", "Joined"), fmtDate(u.created_at)], [_("آخر مزامنة", "Last sync"), u.updated_at ? rel(u.updated_at) : "—"], [_("النوع", "Module"), u.track ? (u.track === "gt" ? "General" : "Academic") : "—"], [_("الهدف", "Target"), u.target != null ? fmtN(u.target / 10, 1) : "—"], [_("موعد الاختبار", "Exam date"), u.exam_date ? fmtDate(u.exam_date) : "—"], [_("الدرجة التقديرية", "Est. band"), s.est != null ? fmtN(s.est / 10, 1) : "—"], ["L / R / W / S", [s.L, s.R, s.W, s.S].map(x => x == null ? "—" : fmtN(x, 1)).join(" · ")], [_("الجاهزية", "Readiness"), s.readiness != null ? fmtN(s.readiness) + pctS : "—"], [_("الأسئلة المحلولة", "Solved"), s.solved != null ? fmtN(s.solved) : "—"], [_("الدقة", "Accuracy"), s.acc != null ? fmtN(s.acc) + pctS : "—"], [_("النماذج", "Model tests"), s.models != null ? fmtN(s.models) : "—"], [_("السلسلة", "Streak"), s.streak != null ? fmtN(s.streak) : "—"]];
-  // skills + diagnostic baseline
-  const diagAtt = (d.attempts || []).slice().reverse().find(a => a.kind === "diag");
-  const diag = d.diag && typeof d.diag === "object" ? d.diag : null;
-  const dSk = diag && (diag.skills || diag.bySkill) || null;
-  const skillRows = SKILL_ORDER.filter(k => d.skills && d.skills[k]).concat(Object.keys(d.skills || {}).filter(k => !SKILLS[k])).map(k => {
-    const x = d.skills[k], t = num(x.t), c = num(x.c), acc = t ? c / t : 0, base = dSk && dSk[k] && num(dSk[k].t) ? num(dSk[k].c) / num(dSk[k].t) : null;
-    return { label: sk(k), v: acc, mark: base, vlabel: fmtPct(acc, 0), vsub: `${fmtN(c)}/${fmtN(t)}`, tipH: sk(k), tip: `${_("الدقة", "Accuracy")} ${fmtPct(acc, 0)} · ${fmtN(t)} ${_("سؤال", "questions")} · ${_("متوسط الوقت", "avg time")} ${fmtDur(t ? num(x.time) / t : 0)}${base != null ? ` · ${_("التشخيصي", "diagnostic")} ${fmtPct(base, 0)}` : ""}` };
-  });
-  const diagPct = diag ? (diag.pct != null ? num(diag.pct) / 100 : diag.score != null ? num(diag.score) / 100 : null) : diagAtt ? num(diagAtt.pct) / 100 : null;
-  const diagEst = diag && diag.est != null ? diag.est : diagAtt ? diagAtt.est : null, diagDate = diag && (diag.date || diag.at) || (diagAtt && diagAtt.date);
+  // question-type accuracy (progress.qt = {L:{tfng:{c,t}},…}) and the placement baseline (attempts with kind "diag")
+  const qt = d.skills && typeof d.skills === "object" ? d.skills : {};
+  const skillRows = [];
+  SKILL_ORDER.concat(Object.keys(qt).filter(k => !SKILLS[k])).forEach(sec => { const g = qt[sec]; if (!g || typeof g !== "object") return;
+    Object.keys(g).sort((a, b) => num(g[b].t) - num(g[a].t)).forEach(type => { const x = g[type] || {}, t = num(x.t), c = num(x.c); if (!t) return; const acc = c / t;
+      skillRows.push({ label: qtL(type), sub: sk(sec), v: acc, vlabel: fmtPct(acc, 0), vsub: `${fmtN(c)}/${fmtN(t)}`, tipH: sk(sec) + " · " + qtL(type), tip: `${_("الدقة", "Accuracy")} ${fmtPct(acc, 0)} · ${fmtN(t)} ${_("سؤال", "questions")}` }); }); });
+  const diag = d.diag && typeof d.diag === "object" ? d.diag : null, dB = diag && diag.bands || {};
+  const diagDate = diag && diag.date;
+  const cnt = d.counts || {};
   const xp = Object.entries(d.xp || {}).sort((a, b) => String(b[1].date || "").localeCompare(String(a[1].date || "")));
   const subs = d.subscriptions || [], pays = d.payments || [], evs = d.events || [];
   const isPro = p.tier === "pro";
@@ -622,15 +622,16 @@ function renderDrawer() {
       ${skillRows.length ? hbars(skillRows, { max: 1 }) : `<p class="empty">${_("لم يحل أسئلة بعد.", "No questions solved yet.")}</p>`}</section>
 
     <div class="g2">
-      <section class="card"><div class="card-h"><h2>${_("خط الأساس التشخيصي", "Diagnostic baseline")}</h2></div>
-        ${diagPct != null || diagEst != null ? `<div class="facts"><div><span>${_("النتيجة", "Score")}</span><b>${diagPct != null ? fmtPct(diagPct, 0) : "—"}</b></div><div><span>${_("التقديرية", "Est.")}</span><b>${diagEst != null ? fmtN(diagEst) : "—"}</b></div><div><span>${_("التاريخ", "Date")}</span><b>${esc(diagDate ? fmtDate(diagDate) : "—")}</b></div></div>` : `<p class="empty">${_("لم يُجرِ الاختبار التشخيصي بعد.", "Hasn't taken the diagnostic yet.")}</p>`}</section>
+      <section class="card"><div class="card-h"><h2>${_("تحديد المستوى", "Placement baseline")}</h2></div>
+        ${diag ? `<div class="facts">${SKILL_ORDER.map(k => `<div><span>${esc(sk(k))}</span><b>${esc(bandL(dB[k]))}</b></div>`).join("")}<div><span>${_("التاريخ", "Date")}</span><b>${esc(diagDate ? fmtDate(diagDate) : "—")}</b></div></div>` : `<p class="empty">${_("لم يُجرِ اختبار تحديد المستوى بعد.", "Hasn't taken the placement test yet.")}</p>`}
+        <p class="small muted" style="margin-top:8px">${_(`مقالات: ${fmtN(cnt.writing)} · محادثة: ${fmtN(cnt.speaking)} · دروس: ${fmtN(cnt.lessons)} · أخطاء محفوظة: ${fmtN(cnt.mistakes)} · أيام نشاط: ${fmtN(cnt.days)}`, `Essays: ${fmtN(cnt.writing)} · Speaking: ${fmtN(cnt.speaking)} · Lessons: ${fmtN(cnt.lessons)} · Saved mistakes: ${fmtN(cnt.mistakes)} · Active days: ${fmtN(cnt.days)}`)}</p></section>
       <section class="card"><div class="card-h"><h2>${_("الشروحات المنجزة", "Explainers done")}</h2><span class="chip">${fmtN(xp.length)}</span></div>
-        ${xp.length ? `<div class="chips">${xp.map(([k, v]) => `<span class="chip ${xpInfo(k).lang === "en" ? "sky" : ""}" tabindex="0" data-tip-h="${esc(k)}" data-tip="${esc(sk(xpInfo(k).skill) + " · " + _("النتيجة", "score") + " " + fmtN(v.score) + "/" + fmtN(v.n) + (v.date ? " · " + fmtDate(v.date) : ""))}"><span class="mono">${esc(k)}</span>&nbsp;${fmtN(v.score)}/${fmtN(v.n)}</span>`).join("")}</div>` : `<p class="empty">${_("لم ينهِ أي شرح بعد.", "No explainers finished yet.")}</p>`}</section>
+        ${xp.length ? `<div class="chips">${xp.map(([k, v]) => `<span class="chip" tabindex="0" data-tip-h="${esc(k)}" data-tip="${esc(sk(xpInfo(k).skill) + " · " + _("النتيجة", "score") + " " + fmtN(v.score) + "/" + fmtN(v.n) + (v.date ? " · " + fmtDate(v.date) : ""))}"><span class="mono">${esc(k)}</span>&nbsp;${fmtN(v.score)}/${fmtN(v.n)}</span>`).join("")}</div>` : `<p class="empty">${_("لم ينهِ أي شرح بعد.", "No explainers finished yet.")}</p>`}</section>
     </div>
 
     <section class="card"><div class="card-h"><h2>${_("آخر المحاولات", "Recent attempts")}</h2></div>
-      ${(d.attempts || []).length ? `<div class="tbl"><table><thead><tr><th scope="col">${_("التاريخ", "Date")}</th><th scope="col">${_("النوع", "Type")}</th><th scope="col" class="num">${_("النتيجة", "Score")}</th><th scope="col" class="num hide-sm">${_("التقديرية", "Est.")}</th><th scope="col" class="num hide-sm">${_("المدة", "Time")}</th></tr></thead><tbody>
-      ${d.attempts.slice(0, 12).map(a => `<tr><td>${esc(fmtDate(a.date))}</td><td>${esc(kindL(a.kind))}${a.mk ? " " + fmtN(a.mk) : ""}${a.skill ? ` <span class="muted small">· ${esc(sk(a.skill))}</span>` : ""}</td><td class="num">${fmtN(a.correct)}/${fmtN(a.total)} <span class="muted">(${fmtN(a.pct)}${pctS})</span></td><td class="num hide-sm">${a.est != null ? fmtN(a.est) : "—"}</td><td class="num hide-sm">${fmtDur(a.time)}</td></tr>`).join("")}</tbody></table></div>` : `<p class="empty">${_("لا محاولات بعد.", "No attempts yet.")}</p>`}</section>
+      ${(d.attempts || []).length ? `<div class="tbl"><table><thead><tr><th scope="col">${_("التاريخ", "Date")}</th><th scope="col">${_("النوع", "Type")}</th><th scope="col" class="num">${_("الإجابات", "Raw")}</th><th scope="col" class="num">${_("الدرجة", "Band")}</th><th scope="col" class="num hide-sm">${_("المدة", "Time")}</th></tr></thead><tbody>
+      ${d.attempts.slice(0, 12).map(a => `<tr><td>${esc(fmtDate(a.date))}</td><td>${esc(kindL(a.kind))}${a.skill ? ` <span class="muted small">· ${esc(sk(a.skill))}</span>` : ""}${a.test ? ` <span class="mono muted small">${esc(a.test)}</span>` : ""}${a.mode === "practice" ? ` <span class="chip">${_("تدريب", "practice")}</span>` : ""}${a.full ? ` <span class="chip pro">${_("كامل", "full")}</span>` : ""}${a.ai ? ` <span class="chip pink">AI</span>` : ""}</td><td class="num">${a.of != null ? `${fmtN(a.raw)}/${fmtN(a.of)}` : "—"}</td><td class="num"><b>${esc(bandL(a.band))}</b>${a.est ? `<span class="muted small"> ≈</span>` : ""}</td><td class="num hide-sm">${fmtDur(a.dur)}</td></tr>`).join("")}</tbody></table></div>` : `<p class="empty">${_("لا محاولات بعد.", "No attempts yet.")}</p>`}</section>
 
     <section class="card"><div class="card-h"><h2>${_("الاشتراكات", "Subscriptions")}</h2></div>
       ${subs.length ? `<div class="tbl"><table><thead><tr><th scope="col">${_("المصدر", "Source")}</th><th scope="col">${_("الباقة", "Plan")}</th><th scope="col">${_("من", "From")}</th><th scope="col">${_("إلى", "To")}</th><th scope="col">${_("الحالة", "Status")}</th><th scope="col">${_("ملاحظة", "Note")}</th></tr></thead><tbody>
@@ -641,7 +642,7 @@ function renderDrawer() {
       ${pays.map(x => `<tr><td>${esc(fmtDate(x.created_at))}</td><td>${esc(planName(x.plan_id))}</td><td class="num">${fmtMoney(x.amount)}${num(x.refunded_amount) ? `<br><small class="muted">−${fmtMoney(x.refunded_amount)}</small>` : ""}</td><td class="mono">${esc(x.coupon || "—")}</td><td><span class="chip ${esc(x.status)}">${esc(pstatL(x.status))}</span></td></tr>`).join("")}</tbody></table></div>` : `<p class="empty">${_("لا مدفوعات.", "No payments.")}</p>`}</section>
 
     <section class="card"><div class="card-h"><h2>${_("آخر الأحداث", "Recent events")}</h2><span class="sub">${fmtN(evs.length)}</span></div>
-      ${evs.length ? `<ul class="plain evl">${evs.slice(0, 40).map(e => { const L = EVENTS[e.type] || [e.type, e.type, ""]; const extra = e.type === "limit_hit" ? limitL(e.k) : (e.type === "test_done" || e.type === "test_start") ? kindL(e.k) : e.k || ""; const v = e.v != null ? (e.type === "xp_done" ? fmtN(e.v, 1) : fmtN(e.v, 1) + (["diag_done", "test_done"].includes(e.type) ? (LANG === "ar" ? "٪" : "%") : "")) : ""; return `<li><span class="ic ${L[2]}" aria-hidden="true"></span><span>${esc(_(L[0], L[1]))}${extra ? ` · <span class="${e.type.startsWith("xp") ? "mono" : ""}">${esc(extra)}</span>` : ""}${v ? ` · <b>${esc(v)}</b>` : ""}</span><time datetime="${esc(e.at)}" title="${esc(fmtDT(e.at))}">${esc(rel(e.at))}</time></li>`; }).join("")}</ul>` : `<p class="empty">${_("لا أحداث مسجلة.", "No events recorded.")}</p>`}</section>
+      ${evs.length ? `<ul class="plain evl">${evs.slice(0, 40).map(e => { const L = EVENTS[e.type] || [e.type, e.type, ""]; const extra = e.type === "limit_hit" ? limitL(e.k) : (e.type === "test_done" || e.type === "test_start" || e.type === "diag_done") ? kindL(e.k) : e.k || ""; const v = e.v != null ? (["diag_done", "test_done"].includes(e.type) ? (isPctKey(e.k) ? fmtN(e.v, 0) + (LANG === "ar" ? "٪" : "%") : _("درجة ", "band ") + fmtN(e.v, 1)) : fmtN(e.v, 1)) : ""; return `<li><span class="ic ${L[2]}" aria-hidden="true"></span><span>${esc(_(L[0], L[1]))}${extra ? ` · <span class="${e.type.startsWith("xp") ? "mono" : ""}">${esc(extra)}</span>` : ""}${v ? ` · <b>${esc(v)}</b>` : ""}</span><time datetime="${esc(e.at)}" title="${esc(fmtDT(e.at))}">${esc(rel(e.at))}</time></li>`; }).join("")}</ul>` : `<p class="empty">${_("لا أحداث مسجلة.", "No events recorded.")}</p>`}</section>
 
     <section class="card dz"><div class="card-h"><h3>${_("حذف الحساب", "Delete account")}</h3></div>
       ${self ? `<p class="small">${_("لا يمكنك حذف حسابك من هنا.", "You can't delete your own account here.")}</p>` : `<p class="small">${_("يُحذف الحساب وكل تقدمه واشتراكاته نهائيًا ولا يمكن التراجع. للتأكيد اكتب البريد:", "The account, its progress and subscriptions are deleted permanently. To confirm, type the email:")} <b class="ltr">${esc(u.email)}</b></p>
@@ -823,21 +824,21 @@ async function vContent(tok) {
   const [r] = await Promise.all([api("GET", `/api/admin/content?days=${d}`), getSettings().catch(() => null)]); if (!live(tok)) return;
   const free = new Set(SETTINGS ? SETTINGS.config.free.xp : []);
   const xs = r.explainers.map(x => ({ ...x, starts: num(x.starts), users: num(x.users), done: num(x.done), score: x.score == null ? null : num(x.score), comp: num(x.starts) ? Math.min(1, num(x.done) / num(x.starts)) : 0, info: xpInfo(x.k) }));
-  const skills = Object.entries(r.skills || {}).map(([k, v]) => ({ k, c: num(v.c), t: num(v.t), time: num(v.time), users: num(v.users) })).sort((a, b) => (SKILL_ORDER.indexOf(a.k) + 99 * !SKILLS[a.k]) - (SKILL_ORDER.indexOf(b.k) + 99 * !SKILLS[b.k]));
+  const skills = Object.entries(r.skills || {}).map(([k, v]) => { const [sec, type] = k.split(":"); return { k, sec, type, c: num(v.c), t: num(v.t), users: num(v.users) }; }).sort((a, b) => (SKILL_ORDER.indexOf(a.sec) + 99 * !SKILLS[a.sec]) - (SKILL_ORDER.indexOf(b.sec) + 99 * !SKILLS[b.sec]) || b.t - a.t);
   MAIN.innerHTML = ph("المحتوى", "Content", "تحليلات المحتوى", "Content analytics", "ما الذي يدرسه الطلاب، وأين يتعثرون.", "What students study and where they struggle.", periodSeg("ct-p", d) + refreshBtn()) + `
   <section class="card"><div class="card-h"><h2>${_("الشروحات التفاعلية", "Interactive explainers")}</h2><span class="sub">${_("اضغط على عنوان العمود للترتيب", "Click a column header to sort")}</span></div><div id="xp-tbl"></div></section>
   <div class="g3">
-    <section class="card"><div class="card-h"><h2>${_("الدقة حسب المهارة", "Accuracy by skill")}</h2><span class="sub">${_("من تقدم الطلاب المحفوظ", "from students' saved progress")}</span></div>
-      ${skills.length ? hbars(skills.map(s => ({ label: sk(s.k), sub: _(`${fmtN(s.users)} طالب · ${fmtN(s.t)} سؤال`, `${fmtN(s.users)} students · ${fmtN(s.t)} questions`), v: s.t ? s.c / s.t : 0, vlabel: fmtPct(s.t ? s.c / s.t : 0, 0), vsub: fmtDur(s.t ? s.time / s.t : 0), tipH: sk(s.k), tip: `${_("الدقة", "Accuracy")} ${fmtPct(s.t ? s.c / s.t : 0, 1)} · ${fmtN(s.c)}/${fmtN(s.t)} · ${_("متوسط الوقت للسؤال", "avg time per question")} ${fmtDur(s.t ? s.time / s.t : 0)}` })), { max: 1, cls: "sky" }) : `<p class="empty">${_("لا بيانات تقدم في هذه الفترة.", "No progress data in this period.")}</p>`}</section>
+    <section class="card"><div class="card-h"><h2>${_("الدقة حسب نوع السؤال", "Accuracy by question type")}</h2><span class="sub">${_("من تقدم الطلاب المحفوظ", "from students' saved progress")}</span></div>
+      ${skills.length ? hbars(skills.map(s => ({ label: qtL(s.type), sub: sk(s.sec) + " · " + _(`${fmtN(s.users)} طالب · ${fmtN(s.t)} سؤال`, `${fmtN(s.users)} students · ${fmtN(s.t)} questions`), v: s.t ? s.c / s.t : 0, vlabel: fmtPct(s.t ? s.c / s.t : 0, 0), vsub: `${fmtN(s.c)}/${fmtN(s.t)}`, tipH: sk(s.sec) + " · " + qtL(s.type), tip: `${_("الدقة", "Accuracy")} ${fmtPct(s.t ? s.c / s.t : 0, 1)} · ${fmtN(s.c)}/${fmtN(s.t)}` })), { max: 1, cls: "sky" }) : `<p class="empty">${_("لا بيانات تقدم في هذه الفترة.", "No progress data in this period.")}</p>`}</section>
     <section class="card"><div class="card-h"><h2>${_("ملخص الاختبارات", "Tests summary")}</h2></div>
-      ${r.tests.length ? `<div class="tbl"><table><thead><tr><th scope="col">${_("النوع", "Type")}</th><th scope="col" class="num">${_("المرات", "Taken")}</th><th scope="col" class="num">${_("المتوسط", "Average")}</th></tr></thead><tbody>${r.tests.map(t => `<tr><td>${esc(kindL(t.k))}</td><td class="num">${fmtN(t.n)}</td><td class="num">${t.avg != null ? fmtN(t.avg, 0) + (LANG === "ar" ? "٪" : "%") : "—"}<span class="mini"><span style="inline-size:${Math.min(100, num(t.avg)).toFixed(0)}%"></span></span></td></tr>`).join("")}</tbody></table></div>` : `<p class="empty">${_("لم تُسجَّل اختبارات في هذه الفترة.", "No tests recorded in this period.")}</p>`}</section>
+      ${r.tests.length ? `<div class="tbl"><table><thead><tr><th scope="col">${_("النوع", "Type")}</th><th scope="col" class="num">${_("المرات", "Taken")}</th><th scope="col" class="num">${_("المتوسط", "Average")}</th></tr></thead><tbody>${r.tests.map(t => { const pct = isPctKey(t.k); return `<tr><td>${esc(kindL(t.k))}</td><td class="num">${fmtN(t.n)}</td><td class="num">${t.avg != null ? (pct ? fmtN(t.avg, 0) + (LANG === "ar" ? "٪" : "%") : _("درجة ", "band ") + fmtN(t.avg, 1)) : "—"}<span class="mini"><span style="inline-size:${Math.min(100, pct ? num(t.avg) : 100 * num(t.avg) / 9).toFixed(0)}%"></span></span></td></tr>`; }).join("")}</tbody></table></div>` : `<p class="empty">${_("لم تُسجَّل اختبارات في هذه الفترة.", "No tests recorded in this period.")}</p>`}</section>
   </div>`;
   const draw = () => {
     const { k, asc } = S.xpSort, dir = asc ? 1 : -1;
     const rows = xs.slice().sort((a, b) => { const A = k === "k" ? a.k : a[k] ?? -1, B = k === "k" ? b.k : b[k] ?? -1; return (A > B ? 1 : A < B ? -1 : 0) * dir; });
     const th = (key, a, e, cls = "num") => `<th scope="col" class="sortable ${cls}" tabindex="0" data-xs="${key}" aria-sort="${k === key ? (asc ? "ascending" : "descending") : "none"}">${_(a, e)}<span class="ar-i" aria-hidden="true">${k === key ? (asc ? "▴" : "▾") : "↕"}</span></th>`;
     $("#xp-tbl").innerHTML = rows.length ? `<div class="tbl"><table><thead><tr>${th("k", "الشرح", "Explainer", "")}${th("starts", "البدايات", "Starts")}${th("users", "طلاب فريدون", "Unique users", "num hide-sm")}${th("done", "الإكمال", "Completions")}${th("comp", "نسبة الإكمال", "Completion")}${th("score", "متوسط الاختبار", "Avg quiz", "num hide-sm")}</tr></thead><tbody>
-      ${rows.map(x => `<tr><td><span class="mono"><b>${esc(x.k)}</b></span> <span class="chip ${x.info.lang === "en" ? "sky" : ""}">${x.info.lang === "en" ? "EN" : "ع"}</span> ${free.has(x.k) ? `<span class="chip pink">${_("مجاني", "Free")}</span>` : ""}<br><small class="muted">${esc(sk(x.info.skill))}</small></td><td class="num">${fmtN(x.starts)}</td><td class="num hide-sm">${fmtN(x.users)}</td><td class="num">${fmtN(x.done)}</td><td class="num"><span class="nowrap">${fmtPct(x.comp, 0)}<span class="mini"><span style="inline-size:${(100 * x.comp).toFixed(0)}%"></span></span></span></td><td class="num hide-sm">${x.score != null ? fmtN(x.score, 1) : "—"}</td></tr>`).join("")}
+      ${rows.map(x => `<tr><td><span class="mono"><b>${esc(x.k)}</b></span> ${free.has(x.k) ? `<span class="chip pink">${_("مجاني", "Free")}</span>` : ""}<br><small class="muted">${esc(sk(x.info.skill))}</small></td><td class="num">${fmtN(x.starts)}</td><td class="num hide-sm">${fmtN(x.users)}</td><td class="num">${fmtN(x.done)}</td><td class="num"><span class="nowrap">${fmtPct(x.comp, 0)}<span class="mini"><span style="inline-size:${(100 * x.comp).toFixed(0)}%"></span></span></span></td><td class="num hide-sm">${x.score != null ? fmtN(x.score, 1) : "—"}</td></tr>`).join("")}
       </tbody></table></div>` : `<p class="tbl-empty">${_("لم يبدأ أحد شرحًا في هذه الفترة.", "Nobody started an explainer in this period.")}</p>`;
     $$("[data-xs]").forEach(h => { const go = () => { const key = h.dataset.xs; S.xpSort = { k: key, asc: S.xpSort.k === key ? !S.xpSort.asc : key === "k" }; draw(); const n = $(`[data-xs="${key}"]`); if (n) n.focus(); }; h.addEventListener("click", go); h.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go(); } }); });
   };
@@ -864,6 +865,9 @@ function validate(c) {
   const f = c.free, rng = (k, lo, hi, msg) => { const v = f[k]; if (v === "" || !(num(v) >= lo && num(v) <= hi)) E["free." + k] = msg; };
   rng("dailyQuestions", 0, 500, _("بين ٠ و٥٠٠", "0 to 500")); rng("planWeeks", 0, 52, _("بين ٠ و٥٢", "0 to 52")); rng("mistakesMax", 0, 1000, _("بين ٠ و١٠٠٠", "0 to 1000"));
   rng("cardsFrac", 0, 1, _("بين ٠ و١٠٠٪", "0 to 100%")); rng("techFrac", 0, 1, _("بين ٠ و١٠٠٪", "0 to 100%"));
+  rng("aiWriting", 0, 50, _("بين ٠ و٥٠", "0 to 50")); rng("aiSpeaking", 0, 50, _("بين ٠ و٥٠", "0 to 50"));
+  const pr = c.pro || {}; if (pr.aiWritingDaily === "" || !(num(pr.aiWritingDaily) >= 0 && num(pr.aiWritingDaily) <= 100)) E["pro.aiWritingDaily"] = _("بين ٠ و١٠٠", "0 to 100");
+  if (pr.aiSpeakingDaily === "" || !(num(pr.aiSpeakingDaily) >= 0 && num(pr.aiSpeakingDaily) <= 200)) E["pro.aiSpeakingDaily"] = _("بين ٠ و٢٠٠", "0 to 200");
   if (c.refund.days === "" || !(num(c.refund.days) >= 0 && num(c.refund.days) <= 60)) E["refund.days"] = _("بين ٠ و٦٠ يومًا", "0 to 60 days");
   else if (c.refund.on && !(num(c.refund.days) >= 1)) E["refund.days"] = _("يوم واحد على الأقل عند التفعيل", "At least 1 day when on");
   if (c.trialReportDays === "" || !(num(c.trialReportDays) >= 1 && num(c.trialReportDays) <= 60)) E.trialReportDays = _("بين ١ و٦٠ يومًا", "1 to 60 days");
@@ -874,7 +878,8 @@ function validate(c) {
 function normalize(c) {
   const o = clone(c);
   o.plans = o.plans.map(p => ({ id: String(p.id).trim(), ar: String(p.ar || "").trim(), en: String(p.en || "").trim(), days: Math.round(num(p.days)), price: num(p.price), active: p.active !== false, best: !!p.best }));
-  ["dailyQuestions", "planWeeks", "mistakesMax"].forEach(k => { o.free[k] = Math.round(num(o.free[k])); });
+  ["dailyQuestions", "planWeeks", "mistakesMax", "aiWriting", "aiSpeaking"].forEach(k => { o.free[k] = Math.round(num(o.free[k])); });
+  o.pro = { aiWritingDaily: Math.round(num((o.pro || {}).aiWritingDaily)), aiSpeakingDaily: Math.round(num((o.pro || {}).aiSpeakingDaily)) };
   ["cardsFrac", "techFrac"].forEach(k => { o.free[k] = Math.round(num(o.free[k]) * 1000) / 1000; });
   o.refund = { on: !!o.refund.on, days: Math.round(num(o.refund.days)) }; o.trialReportDays = Math.round(num(o.trialReportDays));
   o.banner = { on: !!o.banner.on, ar: String(o.banner.ar || "").trim(), en: String(o.banner.en || "").trim(), tone: o.banner.tone };
@@ -882,7 +887,7 @@ function normalize(c) {
 }
 async function vSettings(tok) {
   const r = await getSettings(true); if (!live(tok)) return;
-  if (!S.draft) { S.draft = clone(r.config); S.dirty = false; S.errs = {}; }
+  if (!S.draft) { S.draft = clone(r.config); S.draft.pro = S.draft.pro || clone(r.defaults.pro); S.dirty = false; S.errs = {}; }
   renderSettings();
 }
 function renderSettings() {
@@ -894,10 +899,11 @@ function renderSettings() {
   const pctV = v => (v === "" ? "" : Math.round(num(v) * 1000) / 10);
   // explainer groups
   const freeSet = new Set(c.free.xp || []);
-  const groups = { ar: {}, en: {} }; keys.forEach(k => { const i = xpInfo(k); (groups[i.lang][i.skill] = groups[i.lang][i.skill] || []).push(k); });
-  const grp = lang => { const g = groups[lang], ks = Object.values(g).flat(), on = ks.filter(k => freeSet.has(k)).length;
-    return `<div class="xp-group"><h3>${lang === "ar" ? _("الشروحات العربية", "Arabic explainers") : _("الشروحات الإنجليزية", "English explainers")}<span class="chip ${on ? "pink" : "free"}" id="xpc-${lang}">${_(`${fmtN(on)} مجانية من ${fmtN(ks.length)}`, `${on} free of ${ks.length}`)}</span></h3>
-    ${Object.keys(g).sort((a, b) => (SKILL_ORDER.indexOf(a) + 99 * !SKILLS[a]) - (SKILL_ORDER.indexOf(b) + 99 * !SKILLS[b])).map(s => `<div class="xp-skill"><span>${esc(sk(s))}</span><div class="checks">${g[s].sort().map(k => `<label class="xk"><input type="checkbox" data-xp="${esc(k)}" ${freeSet.has(k) ? "checked" : ""}>${esc(k)}</label>`).join("")}</div></div>`).join("")}</div>`; };
+  const groups = {}; keys.forEach(k => { const i = xpInfo(k); (groups[i.skill] = groups[i.skill] || []).push(k); });
+  const grp = sec => { const ks = groups[sec] || [], on = ks.filter(k => freeSet.has(k)).length; if (!ks.length) return "";
+    return `<div class="xp-group"><h3>${esc(sk(sec))}<span class="chip ${on ? "pink" : "free"}" id="xpc-${esc(sec)}">${_(`${fmtN(on)} مجانية من ${fmtN(ks.length)}`, `${on} free of ${ks.length}`)}</span></h3>
+    <div class="xp-skill"><div class="checks">${ks.slice().sort().map(k => `<label class="xk"><input type="checkbox" data-xp="${esc(k)}" ${freeSet.has(k) ? "checked" : ""}>${esc(k)}</label>`).join("")}</div></div></div>`; };
+  const xpSecs = SKILL_ORDER.concat(Object.keys(groups).filter(k => !SKILLS[k]));
   const nErr = Object.keys(E).length;
   MAIN.innerHTML = ph("الإعدادات", "Settings", "الإعدادات", "Settings", "الباقات وحدود الخطة المجانية والإعلانات. تُطبَّق على التطبيق خلال ٣٠ ثانية من الحفظ.", "Plans, free-plan limits and announcements. Applied to the app within 30 seconds of saving.",
     `<button class="btn primary sm" type="button" id="s-save2" ${S.dirty ? "" : "disabled"}>${ic("check")}${_("حفظ", "Save")}</button>`) + `
@@ -926,9 +932,17 @@ function renderSettings() {
       <label class="fld">${_("حصة الأساليب والأنماط", "Techniques & patterns share")}<span class="unit"><input type="number" data-p="free.techFrac" data-pct min="0" max="100" step="1" value="${pctV(c.free.techFrac)}" ${inv("free.techFrac")}><span>%</span></span>${err("free.techFrac")}<span class="hint">${_("الافتراضي ", "Default ")}${fmtPct(D.free.techFrac, 0)}</span></label>
     </div></section>
 
+  <section class="card"><div class="card-h"><h2>${_("حصص المصحح الذكي", "AI examiner quotas")}</h2><div class="sec-acts">${rst("ai")}</div></div>
+    <div class="fgrid">
+      <label class="fld">${_("مقالات مجانية (مدى الحياة)", "Free essays (lifetime)")}<input type="number" data-p="free.aiWriting" data-num min="0" max="50" step="1" value="${esc(c.free.aiWriting)}" ${inv("free.aiWriting")}>${err("free.aiWriting")}<span class="hint">${_("الافتراضي ", "Default ")}${fmtN(D.free.aiWriting)}</span></label>
+      <label class="fld">${_("إجابات محادثة مجانية (مدى الحياة)", "Free speaking answers (lifetime)")}<input type="number" data-p="free.aiSpeaking" data-num min="0" max="50" step="1" value="${esc(c.free.aiSpeaking)}" ${inv("free.aiSpeaking")}>${err("free.aiSpeaking")}<span class="hint">${_("الافتراضي ", "Default ")}${fmtN(D.free.aiSpeaking)}</span></label>
+      <label class="fld">${_("مقالات برو يوميًا", "Pro essays per day")}<input type="number" data-p="pro.aiWritingDaily" data-num min="0" max="100" step="1" value="${esc(c.pro.aiWritingDaily)}" ${inv("pro.aiWritingDaily")}>${err("pro.aiWritingDaily")}<span class="hint">${_("الافتراضي ", "Default ")}${fmtN(D.pro.aiWritingDaily)}</span></label>
+      <label class="fld">${_("إجابات محادثة برو يوميًا", "Pro speaking answers per day")}<input type="number" data-p="pro.aiSpeakingDaily" data-num min="0" max="200" step="1" value="${esc(c.pro.aiSpeakingDaily)}" ${inv("pro.aiSpeakingDaily")}>${err("pro.aiSpeakingDaily")}<span class="hint">${_("الافتراضي ", "Default ")}${fmtN(D.pro.aiSpeakingDaily)}</span></label>
+    </div><p class="small muted">${_("تحديد المستوى الذكي ثابت: مرة واحدة مجانًا، و٣ يوميًا لبرو. المشرفون بلا حد.", "AI placement is fixed: once free, 3 a day for pro. Admins are unlimited.")}</p></section>
+
   <section class="card"><div class="card-h"><h2>${_("الشروحات المجانية", "Free explainers")}</h2><div class="sec-acts"><span class="chip pink" id="xpc-all">${_(`${fmtN(keys.filter(k => freeSet.has(k)).length)} من ${fmtN(keys.length)}`, `${keys.filter(k => freeSet.has(k)).length} of ${keys.length}`)}</span>${rst("xp")}</div></div>
     <p class="small muted">${_("المحدَّد يظهر لكل الطلاب؛ الباقي يظهر بقفل لمشتركي برو فقط. يُعاد بناء حزمة الشروحات المجانية تلقائيًا بعد الحفظ.", "Checked explainers are open to everyone; the rest show a lock for pro only. The free bundle rebuilds automatically after saving.")}</p>
-    ${keys.length ? `<div class="g2">${grp("ar")}${grp("en")}</div>` : `<p class="empty">${_("لم يُعثر على شروحات.", "No explainers found.")}</p>`}</section>
+    ${keys.length ? `<div class="g2">${xpSecs.map(grp).join("")}</div>` : `<p class="empty">${_("لم يُعثر على شروحات.", "No explainers found.")}</p>`}</section>
 
   <div class="g2">
     <section class="card"><div class="card-h"><h2>${_("الاسترداد وتقرير التجربة", "Refunds & trial report")}</h2><div class="sec-acts">${rst("refund")}</div></div>
@@ -968,6 +982,7 @@ function renderSettings() {
       if (part === "plans") S.draft.plans = clone(D.plans);
       if (part === "limits") ["dailyQuestions", "cardsFrac", "planWeeks", "mistakesMax", "techFrac"].forEach(k => { S.draft.free[k] = D.free[k]; });
       if (part === "xp") S.draft.free.xp = clone(D.free.xp);
+      if (part === "ai") { S.draft.free.aiWriting = D.free.aiWriting; S.draft.free.aiSpeaking = D.free.aiSpeaking; S.draft.pro = clone(D.pro); }
       if (part === "refund") { S.draft.refund = clone(D.refund); S.draft.trialReportDays = D.trialReportDays; }
       if (part === "banner") S.draft.banner = clone(D.banner);
       S.errs = {}; dirty(); renderSettings(); toast(_("استُعيدت القيم الافتراضية", "Defaults restored"), "info", _("احفظ لتطبيقها.", "Save to apply them.")); return; }
@@ -978,7 +993,7 @@ function renderSettings() {
 }
 function updateXpCounts() {
   const set = new Set(S.draft.free.xp), keys = SETTINGS.xpKeys || [];
-  ["ar", "en"].forEach(l => { const ks = keys.filter(k => xpInfo(k).lang === l), on = ks.filter(k => set.has(k)).length, el = $("#xpc-" + l); if (el) { el.textContent = _(`${fmtN(on)} مجانية من ${fmtN(ks.length)}`, `${on} free of ${ks.length}`); el.className = "chip " + (on ? "pink" : "free"); } });
+  SKILL_ORDER.concat(["other"]).forEach(l => { const ks = keys.filter(k => xpInfo(k).skill === l), on = ks.filter(k => set.has(k)).length, el = $("#xpc-" + l); if (el) { el.textContent = _(`${fmtN(on)} مجانية من ${fmtN(ks.length)}`, `${on} free of ${ks.length}`); el.className = "chip " + (on ? "pink" : "free"); } });
   const a = $("#xpc-all"); if (a) a.textContent = _(`${fmtN(keys.filter(k => set.has(k)).length)} من ${fmtN(keys.length)}`, `${keys.filter(k => set.has(k)).length} of ${keys.length}`);
 }
 function updatePreviews() {

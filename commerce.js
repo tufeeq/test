@@ -7,7 +7,7 @@ const xpbundle = require("./xpbundle");
 const FREE_XP_DEFAULT = ["xp-L-detail", "xp-R-tfng", "xp-W-t1", "xp-S-p1"];
 // event types the browser may post. Server-recorded types (ai_writing, ai_speaking, ai_placement — which also count
 // against AI quotas — and checkout_start) are deliberately absent: the client can't fake funnel steps or burn quota.
-const EVENT_TYPES = new Set(["open", "diag_start", "diag_done", "xp_start", "xp_done", "limit_hit", "upgrade_view", "test_start", "test_done", "report_view", "lesson_done"]);
+const EVENT_TYPES = new Set(["open", "diag_start", "diag_w_start", "diag_s_start", "diag_done", "xp_start", "xp_done", "limit_hit", "upgrade_view", "test_start", "test_done", "report_view", "lesson_done", "xlang", "pw_forgot", "pw_reset"]);
 
 // Defaults: every value here can be changed from the admin dashboard (settings table).
 const DEFAULTS = {
@@ -117,7 +117,7 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
   app.get("/api/plan", needUser, wrap(async (req, res) => {
     const plan = await planOf(req.user);
     const subs = await pool.query("SELECT plan_id,source,starts_at,ends_at,revoked_at FROM subscriptions WHERE user_id=$1 ORDER BY starts_at DESC LIMIT 20", [req.user.id]);
-    const pays = await pool.query("SELECT id,plan_id,amount,currency,status,created_at,paid_at,refunded_amount FROM payments WHERE user_id=$1 AND status<>'initiated' ORDER BY created_at DESC LIMIT 20", [req.user.id]);
+    const pays = await pool.query("SELECT id,plan_id,amount,currency,status,created_at,paid_at,refunded_amount FROM payments WHERE user_id=$1 AND status NOT IN ('initiated','expired') ORDER BY created_at DESC LIMIT 20", [req.user.id]); // abandoned checkouts are not payments
     res.json({ plan, subscriptions: subs.rows, payments: pays.rows });
   }));
 
@@ -143,8 +143,12 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
     if (code) {
       const r = await pool.query("SELECT * FROM coupons WHERE code=$1", [String(code).trim().toUpperCase()]);
       const cp = r.rows[0];
-      if (!cp || !cp.active || (cp.expires_at && new Date(cp.expires_at) < new Date()) || (cp.max_uses != null && cp.used >= cp.max_uses) || (cp.plan_ids && cp.plan_ids.length && !cp.plan_ids.includes(plan.id))) return { error: "bad-coupon" };
+      if (!cp || !cp.active || (cp.expires_at && new Date(cp.expires_at) < new Date()) || (cp.plan_ids && cp.plan_ids.length && !cp.plan_ids.includes(plan.id))) return { error: "bad-coupon" };
       if (userId && (await pool.query("SELECT 1 FROM payments WHERE user_id=$1 AND coupon=$2 AND status IN ('paid','refunded') LIMIT 1", [userId, cp.code])).rows[0]) return { error: "bad-coupon" }; // one use per learner
+      if (cp.max_uses != null) { // uses held by this learner's own unfinished checkouts are released when they retry (claimCoupon), so they don't count
+        const mine = userId ? (await pool.query("SELECT count(*)::int n FROM payments WHERE user_id=$1 AND coupon=$2 AND status='initiated' AND coupon_held", [userId, cp.code])).rows[0].n : 0;
+        if (cp.used - mine >= cp.max_uses) return { error: "bad-coupon" };
+      }
       pct = Math.max(0, Math.min(100, cp.pct)); coupon = cp.code;
     }
     const amount = pct >= 100 ? 0 : Math.max(1, money(plan.price * (100 - pct) / 100));
@@ -155,8 +159,9 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
     if (q.error) return fail(res, 400, q.error);
     res.json({ plan: q.plan.id, amount: q.amount, currency: q.currency, pct: q.pct, coupon: q.coupon });
   }));
+  const TAP_TIMEOUT_MS = Number(process.env.TAP_TIMEOUT_MS) || 30000;
   async function tap(method, url, body) {
-    const r = await fetch(TAP_API + url, { method, headers: { Authorization: "Bearer " + process.env.TAP_SECRET_KEY, "Content-Type": "application/json", accept: "application/json" }, body: body ? JSON.stringify(body) : undefined });
+    const r = await fetch(TAP_API + url, { method, headers: { Authorization: "Bearer " + process.env.TAP_SECRET_KEY, "Content-Type": "application/json", accept: "application/json" }, body: body ? JSON.stringify(body) : undefined, signal: AbortSignal.timeout(TAP_TIMEOUT_MS) });
     const j = await r.json().catch(() => ({}));
     if (!r.ok) { const e = new Error("tap " + r.status + " " + JSON.stringify(j).slice(0, 300)); e.tap = j; throw e; }
     return j;
@@ -272,7 +277,7 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
   }));
 
   // unfinished Tap checkouts that hold a coupon: re-check after an hour (frees the use when abandoned); expire after 2 days
-  setInterval(async () => {
+  async function sweepCheckouts() {
     try {
       await pool.query("UPDATE payments SET status='expired' WHERE status='initiated' AND created_at<now()-interval '2 days'");
       const st = await pool.query("SELECT id,tap_id FROM payments WHERE coupon_held AND status IN ('initiated','expired') AND created_at<now()-interval '1 hour' ORDER BY created_at LIMIT 20");
@@ -282,7 +287,8 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
         if ((p && p.status === "expired") || !r.tap_id) await releaseCoupon(r.id);
       }
     } catch (e) { console.error("coupon sweep", e.message); }
-  }, 1800e3).unref();
+  }
+  setInterval(sweepCheckouts, Number(process.env.COUPON_SWEEP_MS) || 1800e3).unref(); // COUPON_SWEEP_MS: tests only
 
   // ======================= ADMIN =======================
   const A = (method, route, fn) => app[method]("/api/admin" + route, needAdmin, wrap(fn));
@@ -350,13 +356,21 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
     const id = req.params.id;
     const u = (await pool.query("SELECT u.id,u.email,u.name,u.created_at,p.track,p.target,p.lang,p.exam_date,p.summary,p.updated_at,p.p FROM users u LEFT JOIN progress p ON p.user_id=u.id WHERE u.id=$1", [id])).rows[0];
     if (!u) return fail(res, 404, "not-found");
-    let skills = {}, attempts = [], xp = {}, diag = null;
-    try { const S = JSON.parse(u.p || "null") || {}; skills = S.stats || {}; attempts = (S.attempts || []).slice(-30).reverse(); xp = S.xp || {}; diag = S.diag || null; } catch (e) {}
+    // progress shape (src/01-core.js DEF): qt = {L:{tfng:{c,t}},R:{…}} per question type; attempts = {kind:'L'|'R'|'diag', skill, test, raw, of, band, full, mode, date, dur}
+    let skills = {}, attempts = [], xp = {}, diag = null, counts = {};
+    try {
+      const S = JSON.parse(u.p || "null") || {};
+      skills = S.qt && typeof S.qt === "object" ? S.qt : {};
+      attempts = (Array.isArray(S.attempts) ? S.attempts : []).slice(-40).reverse();
+      xp = S.xp && typeof S.xp === "object" ? S.xp : {};
+      const d = attempts.filter(a => a && a.kind === "diag"); if (d.length) diag = { date: d.map(a => a.date).sort()[0] || null, bands: Object.fromEntries(d.map(a => [a.skill, a.band])) };
+      counts = { writing: (S.writing || []).length, speaking: (S.speaking || []).length, mistakes: (S.mistakes || []).length, lessons: Object.keys(S.lessons || {}).length, days: (S.days || []).length };
+    } catch (e) {}
     delete u.p;
     const subs = (await pool.query("SELECT id,plan_id,source,starts_at,ends_at,revoked_at,note,created_by,payment_id FROM subscriptions WHERE user_id=$1 ORDER BY starts_at DESC", [id])).rows;
     const pays = (await pool.query("SELECT id,plan_id,amount,currency,coupon,status,tap_id,tap_status,refunded_amount,created_at,paid_at FROM payments WHERE user_id=$1 ORDER BY created_at DESC", [id])).rows;
     const events = (await pool.query("SELECT type,k,v,at FROM events WHERE user_id=$1 ORDER BY at DESC LIMIT 60", [id])).rows;
-    res.json({ user: { ...u, isAdmin: isAdminEmail(u.email) }, plan: await planOf(u), skills, attempts, xp, diag, subscriptions: subs, payments: pays, events });
+    res.json({ user: { ...u, isAdmin: isAdminEmail(u.email) }, plan: await planOf(u), skills, attempts, xp, diag, counts, subscriptions: subs, payments: pays, events });
   });
   A("post", "/users/:id/grant", async (req, res) => {
     const days = Math.round(Number(req.body.days)); if (!(days >= 1 && days <= 1000)) return fail(res, 400, "bad-days");
@@ -393,7 +407,11 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
       refundId = rf.id || null;
     }
     await pool.query("UPDATE payments SET status='refunded', refunded_amount=$1, refund_id=$2 WHERE id=$3", [amount, refundId, p.id]);
-    if (req.body.revoke !== false) await pool.query("UPDATE subscriptions SET revoked_at=now() WHERE payment_id=$1 AND revoked_at IS NULL", [p.id]);
+    // revoke the period bought with this payment; periods stacked after it (grant() starts a new period when the current
+    // one ends) are pulled forward by the unused part of the revoked period, so the learner keeps the days they paid for
+    if (req.body.revoke !== false) await pool.query(`WITH x AS (UPDATE subscriptions SET revoked_at=now() WHERE payment_id=$1 AND revoked_at IS NULL RETURNING user_id, starts_at, ends_at)
+      UPDATE subscriptions s SET starts_at=s.starts_at-x.d, ends_at=s.ends_at-x.d FROM (SELECT user_id, ends_at e, ends_at-GREATEST(starts_at, now()) d FROM x) x
+      WHERE s.user_id=x.user_id AND s.revoked_at IS NULL AND s.payment_id IS DISTINCT FROM $1 AND s.starts_at>=x.e AND x.d>interval '0'`, [p.id]);
     audit(req, "refund", p.id, { amount, refundId }); res.json({ ok: true, refundId });
   });
   app.post("/api/billing/refund-webhook", (req, res) => res.json({ ok: true }));
@@ -417,14 +435,16 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
     audit(req, "coupon_create", code, { pct, maxUses, exp, plans }); res.json({ ok: true });
   });
   A("patch", "/coupons/:code", async (req, res) => {
-    const r = await pool.query("UPDATE coupons SET active=$1 WHERE code=$2", [!!req.body.active, req.params.code]);
+    const code = String(req.params.code).trim().toUpperCase(); // codes are stored upper-case (see POST)
+    const r = await pool.query("UPDATE coupons SET active=$1 WHERE code=$2", [!!req.body.active, code]);
     if (!r.rowCount) return fail(res, 404, "not-found");
-    audit(req, req.body.active ? "coupon_on" : "coupon_off", req.params.code); res.json({ ok: r.rowCount > 0 });
+    audit(req, req.body.active ? "coupon_on" : "coupon_off", code); res.json({ ok: r.rowCount > 0 });
   });
   A("delete", "/coupons/:code", async (req, res) => {
-    const r = await pool.query("DELETE FROM coupons WHERE code=$1 AND used=0", [req.params.code]);
-    if (!r.rowCount) { const ex = await pool.query("SELECT 1 FROM coupons WHERE code=$1", [req.params.code]); return fail(res, ex.rowCount ? 409 : 404, ex.rowCount ? "in-use" : "not-found"); }
-    audit(req, "coupon_delete", req.params.code); res.json({ ok: true });
+    const code = String(req.params.code).trim().toUpperCase();
+    const r = await pool.query("DELETE FROM coupons WHERE code=$1 AND used=0", [code]);
+    if (!r.rowCount) { const ex = await pool.query("SELECT 1 FROM coupons WHERE code=$1", [code]); return fail(res, ex.rowCount ? 409 : 404, ex.rowCount ? "in-use" : "not-found"); }
+    audit(req, "coupon_delete", code); res.json({ ok: true });
   });
 
   A("get", "/settings", async (req, res) => { const c = await loadCfg(true); res.json({ config: c, defaults: DEFAULTS, xpKeys: xpbundle.allKeys(), tap: !!process.env.TAP_SECRET_KEY }); });
@@ -453,10 +473,10 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
     const xp = (await pool.query(`SELECT k, count(*) FILTER (WHERE type='xp_start')::int starts, count(DISTINCT user_id) FILTER (WHERE type='xp_start')::int users,
       count(*) FILTER (WHERE type='xp_done')::int done, avg(v) FILTER (WHERE type='xp_done')::float score
       FROM events WHERE type IN ('xp_start','xp_done') AND at>now()-($1||' days')::interval AND k IS NOT NULL GROUP BY k ORDER BY starts DESC`, [String(days)])).rows;
-    // skill accuracy aggregated from the students' saved progress (stats per skill: c correct, t total, time)
+    // question-type accuracy aggregated from the students' saved progress (qt = {L:{tfng:{c,t}},R:{…}}): key "L:tfng"
     const prog = await pool.query("SELECT p FROM progress WHERE updated_at>now()-($1||' days')::interval", [String(days)]);
     const skills = {};
-    for (const row of prog.rows) { try { const st = (JSON.parse(row.p) || {}).stats || {}; for (const s in st) { const x = skills[s] || (skills[s] = { c: 0, t: 0, time: 0, users: 0 }); x.c += st[s].c || 0; x.t += st[s].t || 0; x.time += st[s].time || 0; x.users++; } } catch (e) {} }
+    for (const row of prog.rows) { try { const qt = (JSON.parse(row.p) || {}).qt || {}; for (const sk in qt) for (const t in qt[sk]) { const q = qt[sk][t] || {}; if (!(q.t > 0)) continue; const k = sk + ":" + t, x = skills[k] || (skills[k] = { c: 0, t: 0, users: 0 }); x.c += q.c || 0; x.t += q.t || 0; x.users++; } } catch (e) {} }
     const tests = (await pool.query(`SELECT k, count(*)::int n, avg(v)::float avg FROM events WHERE type='test_done' AND at>now()-($1||' days')::interval GROUP BY k ORDER BY n DESC`, [String(days)])).rows;
     res.json({ days, explainers: xp, skills, tests });
   });

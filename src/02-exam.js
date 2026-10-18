@@ -51,10 +51,14 @@ function scoreGroup(g, ans, sk) {
 
 /* ---------- maps (listening labels) ---------- */
 function mapSVG(m, opts = {}) {
-  const W = m.w || 100, H = m.h || 70; let s = `<svg class="mapsvg" viewBox="-2 -2 ${W + 4} ${H + 4}" role="img" aria-label="${esc(m.title || 'map')}"><rect x="0" y="0" width="${W}" height="${H}" fill="#fbfaf6" stroke="#999" stroke-width=".4"/>`;
+  // stroke:none on the root: the site-wide icon rule (svg{stroke:currentColor;stroke-width:1.8}) would otherwise outline the compass and the "you are here" marker in the text colour
+  const W = m.w || 100, H = m.h || 70; let s = `<svg class="mapsvg" style="stroke:none" viewBox="-2 -2 ${W + 4} ${H + 4}" role="img" aria-label="${esc(m.title || 'map')}"><rect x="0" y="0" width="${W}" height="${H}" fill="#fbfaf6" stroke="#999" stroke-width=".4"/>`;
   const pts = p => p.map(x => x.join(',')).join(' ');
+  // labelled points (You are here, lettered slots): a road label moves along the road rather than sit on top of one
+  const busy = (m.items || []).filter(x => x.t === 'you' || x.t === 'slot').map(x => [x.x, x.y]);
+  const clear = (x, y) => busy.every(([bx, by]) => Math.hypot(bx - x, by - y) > 9);
   for (const it of m.items || []) {
-    if (it.t === 'road') { s += `<polyline points="${pts(it.pts)}" stroke="#bbb" stroke-width="4.5" fill="none" stroke-linecap="butt"/><polyline points="${pts(it.pts)}" stroke="#fff" stroke-width=".4" stroke-dasharray="2 2" fill="none"/>`; if (it.label) { const [a, b] = [it.pts[0], it.pts[it.pts.length - 1]]; const vert = Math.abs(a[0] - b[0]) < Math.abs(a[1] - b[1]); s += `<text x="${(a[0] + b[0]) / 2 + (vert ? 3.5 : 0)}" y="${(a[1] + b[1]) / 2 + (vert ? 0 : 1.1)}" text-anchor="${vert ? 'start' : 'middle'}" font-size="2.6" font-style="italic">${esc(it.label)}</text>`; } }
+    if (it.t === 'road') { s += `<polyline points="${pts(it.pts)}" stroke="#bbb" stroke-width="4.5" fill="none" stroke-linecap="butt"/><polyline points="${pts(it.pts)}" stroke="#fff" stroke-width=".4" stroke-dasharray="2 2" fill="none"/>`; if (it.label) { const [a, b] = [it.pts[0], it.pts[it.pts.length - 1]]; const vert = Math.abs(a[0] - b[0]) < Math.abs(a[1] - b[1]); const at = f => [a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f]; const [lx, ly] = [.5, .25, .75, .15, .85].map(at).find(([x, y]) => clear(x, y)) || at(.5); s += `<text x="${lx + (vert ? 3.5 : 0)}" y="${ly + (vert ? 0 : 1.1)}" text-anchor="${vert ? 'start' : 'middle'}" font-size="2.6" font-style="italic">${esc(it.label)}</text>`; } }
     else if (it.t === 'path') s += `<polyline points="${pts(it.pts)}" stroke="#8a7a5a" stroke-width=".8" stroke-dasharray="1.6 1" fill="none"/>`;
     else if (it.t === 'rect') s += `<rect x="${it.x}" y="${it.y}" width="${it.w}" height="${it.h}" fill="#e9e4d6" stroke="#666" stroke-width=".4" rx=".6"/>` + (it.label ? `<text x="${it.x + it.w / 2}" y="${it.y + it.h / 2 + 1}" text-anchor="middle">${esc(it.label)}</text>` : '');
     else if (it.t === 'water') s += `<rect x="${it.x}" y="${it.y}" width="${it.w}" height="${it.h}" fill="#cfe6f5" stroke="#7aa9c9" stroke-width=".4" rx="6"/>` + (it.label ? `<text x="${it.x + it.w / 2}" y="${it.y + it.h / 2 + 1}" text-anchor="middle" font-style="italic">${esc(it.label)}</text>` : '');
@@ -167,16 +171,23 @@ function closeExam() { stopAudio(); clearInterval(EX && EX.timer); EX = null; co
 function renderStart() {
   const sp = EX.spec, L = sp.sections.some(s => s.skill === 'L'), Rd = sp.sections.some(s => s.skill === 'R');
   const nq = EX.secs.reduce((a, s) => a + s.data.groups.reduce((b, g) => b + (g.to - g.from + 1), 0), 0);
+  // placement test: full (4 skills) or quick (listening + reading now, writing + speaking later from Today)
+  const choice = sp.full4 ? `<div class="pl-choice" role="radiogroup" dir="${AR() ? 'rtl' : 'ltr'}" aria-label="${_('نوع اختبار تحديد المستوى', 'Placement test type')}">
+    <button type="button" class="xl-opt rec" role="radio" aria-checked="true" data-plmode="full"><b>${_('اختبار كامل: المهارات الأربع', 'Full placement: all 4 skills')} <span class="chip pri">${_('نحو ٥٥ دقيقة', 'about 55 min')}</span></b><small>${_(`استماع وقراءة (${numL(nq)} سؤالًا)، ثم كتابة قصيرة (١٥ دقيقة) و٣ أسئلة محادثة. الأدق لخطتك.`, `Listening and reading (${nq} questions), then a short writing task (15 min) and 3 speaking questions. The most accurate start for your plan.`)}</small></button>
+    <button type="button" class="xl-opt" role="radio" aria-checked="false" data-plmode="quick"><b>${_('اختبار سريع: استماع وقراءة', 'Quick placement: listening + reading')} <span class="chip">${_('نحو ٣٥ دقيقة', 'about 35 min')}</span></b><small>${_('أضف الكتابة والمحادثة لاحقًا من صفحة «اليوم» في ١٥ دقيقة، عندما يناسبك الوقت والمكان.', 'Add writing and speaking later from Today in 15 minutes, when the time and place suit you.')}</small></button>
+  </div>` : '';
   $('#exam').innerHTML = `<div class="ex-top"><span class="cand"><span class="ex-logo">IELTS</span>${esc(sp.title)}</span><button id="ex-x">${_('خروج', 'Exit')}</button></div>
-  <div class="ex-start"><span class="eyebrow">IELTS Academy</span><h2>${esc(sp.title)}</h2>
-  <ul>${sp.full4 ? `<li><b>4 parts:</b> Listening and Reading (${nq} questions), then a short Writing task (15 minutes) and 3 Speaking questions. About 55 minutes in total.</li><li>Speaking needs a microphone. If you cannot speak, you can describe your level instead.</li>` : `<li>${nq} questions${Rd && sp.time ? ` · ${Math.round(sp.time / 60)} minutes` : ''}</li>`}${L ? `<li>${EX.mode === 'exam' ? 'You will hear each recording ONCE only. The test continues automatically.' : 'Practice mode: you can pause and replay the recording.'}</li>` : ''}<li>Answers are saved automatically. Use the bar at the bottom to move between questions and flag any you want to check.</li></ul>
-  <div class="rtl" dir="rtl">${L ? (EX.mode === 'exam' ? 'وضع الاختبار الحقيقي: ستسمع التسجيل مرة واحدة فقط كما في الاختبار المحوسب. ' : 'وضع التدريب: يمكنك إيقاف التسجيل وإعادته. ') + 'شغّل السماعات وتأكد من مستوى الصوت. ' : ''}${Rd ? 'يمكنك تظليل أي جزء من النص بتحديده، والضغط على التظليل يزيله. ' : ''}${sp.full4 ? 'يقيس الاختبار المهارات الأربع: الاستماع ثم القراءة، ثم كتابة قصيرة، ثم ٣ أسئلة محادثة. ' : ''}بعد الانتهاء ترى درجتك في كل مهارة وشرح كل إجابة بالعربية مع موضع الدليل.</div>
+  <div class="ex-start"><span class="eyebrow">IELTS Academy</span><h2>${esc(sp.title)}</h2>${choice}
+  <ul>${sp.full4 ? `<li>Listening and Reading (${nq} questions, about 35 minutes), then, in the full test, a short Writing task (15 minutes) and 3 Speaking questions.</li><li>Speaking needs a microphone. If you cannot speak, you can describe your level instead.</li>` : `<li>${nq} questions${Rd && sp.time ? ` · ${Math.round(sp.time / 60)} minutes` : ''}</li>`}${L ? `<li>${EX.mode === 'exam' ? 'You will hear each recording ONCE only. The test continues automatically.' : 'Practice mode: you can pause and replay the recording.'}</li>` : ''}<li>Answers are saved automatically. Use the bar at the bottom to move between questions and flag any you want to check.</li></ul>
+  <div class="rtl" dir="rtl">${L ? (EX.mode === 'exam' ? 'وضع الاختبار الحقيقي: ستسمع التسجيل مرة واحدة فقط كما في الاختبار المحوسب. ' : 'وضع التدريب: يمكنك إيقاف التسجيل وإعادته. ') + 'شغّل السماعات وتأكد من مستوى الصوت. ' : ''}${Rd ? 'يمكنك تظليل أي جزء من النص بتحديده، والضغط على التظليل يزيله. ' : ''}${sp.full4 ? 'الاختبار الكامل يقيس المهارات الأربع: الاستماع ثم القراءة، ثم كتابة قصيرة، ثم ٣ أسئلة محادثة. وفي الاختبار السريع تؤدي الاستماع والقراءة الآن وتكمل الباقي لاحقًا. ' : ''}بعد الانتهاء ترى درجتك في كل مهارة وشرح كل إجابة بالعربية مع موضع الدليل.</div>
   ${L ? `<div class="ex-audio"><button id="ex-test-snd" class="btn sm ghost">🔊 ${_('اختبر الصوت', 'Test sound')}</button> <label class="vol-l">Volume <input type="range" class="vol" id="ex-vol0" min="0" max="1" step="0.05" value="${S.vol ?? 0.9}"></label></div>` : ''}
   <button class="btn primary go" id="ex-go">Start test →</button></div>`;
   $('#ex-x').onclick = () => closeExam();
+  EX.plMode = 'full';
+  $$('#exam [data-plmode]').forEach(b => b.onclick = () => { EX.plMode = b.dataset.plmode; $$('#exam [data-plmode]').forEach(x => { const on = x === b; x.classList.toggle('rec', on); x.setAttribute('aria-checked', on ? 'true' : 'false'); }); });
   const ts = $('#ex-test-snd'); if (ts) ts.onclick = () => { const a = new Audio('/audio/sp/p2stop.mp3'); a.volume = +($('#ex-vol0').value); a.play().catch(() => toast(_('تعذّر تشغيل الصوت', 'Audio could not play'))); };
   const v0 = $('#ex-vol0'); if (v0) v0.oninput = () => { S.vol = +v0.value; };
-  $('#ex-go').onclick = () => { EX.started = true; EX.t0 = Date.now(); renderExam(); if (EX.secs[0].skill === 'L') playPart(0); startClock(); };
+  $('#ex-go').onclick = () => { if (sp.full4 && EX.plMode === 'quick') { sp.full4 = false; sp.quick = true; } EX.started = true; EX.t0 = Date.now(); renderExam(); if (EX.secs[0].skill === 'L') playPart(0); startClock(); };
 }
 function startClock() {
   clearInterval(EX.timer);
@@ -285,7 +296,7 @@ function bindExam() {
   const ps = ex.querySelector('#ex-passage');
   if (ps && !EX.review) {
     ps.addEventListener('mouseup', hlSel); ps.addEventListener('touchend', () => setTimeout(hlSel, 50));
-    ps.addEventListener('click', e => { if (e.target.tagName === 'MARK' && !e.target.classList.contains('ev')) { const m = e.target; m.replaceWith(...m.childNodes); saveHL(); } });
+    ps.addEventListener('click', e => { if (e.target.tagName === 'MARK' && !e.target.classList.contains('ev')) hlRemove(e.target); });
   }
 }
 function updNav() { const n = $('#exam .ex-nav'); if (!n) return; const acts = n.querySelector('.acts').outerHTML; n.innerHTML = navHTML() + acts; bindNavOnly(); }
@@ -312,8 +323,17 @@ function unanswered() { let n = 0; for (const s of EX.secs) for (const g of s.da
 function hlSel() {
   const sel = window.getSelection(); if (!sel || sel.isCollapsed || !sel.rangeCount) return;
   const r = sel.getRangeAt(0), ps = $('#ex-passage'); if (!ps.contains(r.commonAncestorContainer)) return;
-  try { const m = document.createElement('mark'); r.surroundContents(m); sel.removeAllRanges(); saveHL(); } catch (e) { /* selection crosses paragraphs: ignore */ }
+  // wrap every text run the selection touches: it may cross paragraphs, sub-headings, paragraph letters or earlier highlights
+  const nodes = [], w = document.createTreeWalker(ps, NodeFilter.SHOW_TEXT);
+  while (w.nextNode()) { const n = w.currentNode; if (r.intersectsNode(n) && n.nodeValue.trim() && !n.parentElement.closest('.pl, h2, .sub')) nodes.push(n); }
+  if (!nodes.length) return;
+  const last = nodes[nodes.length - 1]; if (last === r.endContainer && r.endOffset < last.length) last.splitText(r.endOffset);
+  const first = nodes[0]; if (first === r.startContainer && r.startOffset > 0) nodes[0] = first.splitText(r.startOffset);
+  const id = uid(); // one highlight = one click to remove, even when it spans several runs
+  for (const n of nodes) { if (!n.nodeValue.trim() || n.parentElement.tagName === 'MARK') continue; const m = document.createElement('mark'); m.dataset.hl = id; n.parentNode.insertBefore(m, n); m.appendChild(n); }
+  sel.removeAllRanges(); saveHL();
 }
+function hlRemove(m) { const ps = $('#ex-passage'), id = m.dataset.hl; (id ? [...ps.querySelectorAll(`mark[data-hl="${id}"]`)] : [m]).forEach(x => x.replaceWith(...x.childNodes)); ps.normalize(); saveHL(); }
 function saveHL() { const ps = $('#ex-passage'); if (!ps || EX.review) return; EX.hl = EX.hl || {}; EX.hl[EX.secs[EX.cur].key] = ps.innerHTML; }
 function showEvidence(q) {
   const ps = $('#ex-passage'); if (!ps) return;

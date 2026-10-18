@@ -215,10 +215,13 @@ function drawClock() {
 const fmtT = s => { s = Math.max(0, Math.floor(s)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); };
 
 /* ---------- listening audio ---------- */
-function stopAudio() { if (EX && EX.audioEl) { const a = EX.audioEl; a.onended = a.onerror = null; a.pause(); a.removeAttribute('src'); a.load(); EX.audioEl = null; } }
+function stopAudio() { if (EX && EX.audioEl) { const a = EX.audioEl; a.onended = a.onerror = null; a.pause(); } }
+/* one <audio> element for the whole test: iOS only lets an element that a tap started keep playing, so the
+   automatic move to the next part (no tap) must reuse the element the Start button unlocked */
+function examAudio() { if (!EX.audioEl) { const a = new Audio(); a.preload = 'auto'; EX.audioEl = a; } return EX.audioEl; }
 function playPart(i) {
   const s = EX.secs[i]; stopAudio();
-  const a = new Audio(s.audio); a.volume = S.vol ?? .9; a.preload = 'auto'; EX.audioEl = a; EX.playing = i;
+  const a = examAudio(); a.volume = S.vol ?? .9; a.src = s.audio; EX.playing = i;
   a.onended = () => {
     if (!EX || EX.review) return;
     const nx = i + 1;
@@ -229,7 +232,7 @@ function playPart(i) {
     } else { EX.checking = true; EX.left = 120; toast('You now have 2 minutes to check your answers.', 4000); renderExam(); }
   };
   a.onerror = () => toast(_('تعذّر تحميل التسجيل الصوتي.', 'The recording could not be loaded.'), 4000);
-  a.play().catch(e => { if (e && e.name === 'NotAllowedError') { toast(_('اضغط تشغيل لبدء التسجيل', 'Press play to start the recording'), 4000); EX.needTap = true; renderExam(); } else toast(_('تعذّر تحميل التسجيل. تحقق من اتصالك ثم أعد المحاولة.', 'The recording could not be loaded. Check your connection and try again.'), 5000); });
+  a.load(); a.play().catch(e => { if (e && e.name === 'NotAllowedError') { toast(_('اضغط تشغيل لبدء التسجيل', 'Press play to start the recording'), 4000); EX.needTap = true; renderExam(); } else toast(_('تعذّر تحميل التسجيل. تحقق من اتصالك ثم أعد المحاولة.', 'The recording could not be loaded. Check your connection and try again.'), 5000); });
 }
 
 /* ---------- main exam screen ---------- */

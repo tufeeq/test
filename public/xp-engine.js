@@ -97,7 +97,7 @@ function askChoice(stage,A){ return new Promise(res=>{
   const gs=opts.map((t,i)=>{ const g=el('g',{class:'hot',tabindex:0,role:'button','aria-label':t},stage);
     const w=two?250:(A.w||420), h=two?54:48, cx=two?(LG==='en'?[170,470]:[470,170])[i%2]:(A.x??320), cy=two?y0+Math.floor(i/2)*70:y0+i*58;
     el('rect',{x:cx-w/2+4,y:cy-h/2+4,width:w,height:h,rx:12,class:'f-edge'},g); const r=el('rect',{x:cx-w/2,y:cy-h/2,width:w,height:h,rx:12,class:'f-surface hot-ring',stroke:'var(--edge)','stroke-width':2},g);
-    txt(g,{x:cx,y:cy+7,s:A.s||21,text:t,dir:(A.ltr||LG==='en')?'ltr':undefined}); return {g,r}; });
+    fit(txt(g,{x:cx,y:cy+7,s:A.s||21,text:t,dir:(A.ltr||LG==='en')?'ltr':undefined}),w-24); return {g,r}; });
   gsap.from(gs.map(o=>o.g),{opacity:0,y:18,stagger:.1,duration:.3});
   gs.forEach((o,i)=>{ const pick=()=>{ gs.forEach(x=>x.g.style.pointerEvents='none'); o.r.setAttribute('class',(i===A.a?'f-oksoft':'f-badsoft')+' hot-ring'); if(i!==A.a) gs[A.a].r.setAttribute('class','f-oksoft hot-ring');
       gsap.to(gs.filter((x,j)=>j!==A.a&&j!==i).map(x=>x.g),{opacity:.35,duration:.3}); setTimeout(()=>{ if(A.show&&A.show.length) gsap.to(gs.map(x=>x.g),{opacity:0,duration:.4}); },1400); res(i===A.a); };

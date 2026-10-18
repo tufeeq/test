@@ -41,13 +41,13 @@ B({ key:'xp-W-t1', sk:'W-t1', ord:10, title:['المهمة الأولى: الن�
     ]},
   { t:['دورك: أي جملة نظرة عامة؟','Your turn: which is an overview?'],
     items:{
-      bars:{type:'bars',x:180,y:70,w:280,h:110,values:[60,45,30,20],labels:['2000','2005','2010','2015'],c:'n1',vals:false},
-      ans:{type:'note',x:320,y:330,w:460,h:46,c:'n3',size:18,rot:-1,text:'Overall, the figure declined steadily.'},
+      bars:{type:'bars',x:180,y:44,w:280,h:110,values:[60,45,30,20],labels:['2000','2005','2010','2015'],c:'n1',vals:false},
+      ans:{type:'note',x:320,y:332,w:460,h:46,c:'n3',size:18,rot:-1,text:'Overall, the figure declined steadily.'},
     },
     beats:[
       { say:['دورك. أي الجمل تصلح نظرة عامة لهذا الرسم؟','Your turn. Which sentence works as an overview for this chart?'], show:['bars'] },
     ],
-    ask:{ opts:['In 2000 the figure was 60%.','Overall, the figure declined steadily.','I think this is a worrying trend.','The figure was 45% in 2005.'], a:1, y:216, s:16,
+    ask:{ opts:['In 2000 the figure was 60%.','Overall, the figure declined steadily.','I think this is a worrying trend.','The figure was 45% in 2005.'], a:1, y:226, s:16,
       right:['صحيح. اتجاه عام، بلا أرقام وبلا رأي.','Correct: the general trend, with no numbers and no opinion.'],
       wrong:['الصحيح Overall, the figure declined steadily. الجمل الأخرى تفاصيل برقم، أو رأي شخصي لا مكان له هنا.','It is “Overall, the figure declined steadily.” The others are single numbers or an opinion.'],
       show:['ans'] } },

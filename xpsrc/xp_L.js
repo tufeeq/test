@@ -248,7 +248,7 @@ B({ key:'xp-L-notes', sk:'L-notes', ord:10, title:['المحاضرة: اتبع �
     items:{
       g:{type:'text',x:320,y:96,s:23,text:'made glass ______ and everyday'},
       p:{type:'note',x:320,y:166,w:380,h:56,c:'n0',size:21,rot:-1,text:['بعد made glass نحتاج صفة','After “made glass” we need an adjective']},
-      h:{type:'text',x:320,y:236,s:21,text:'“…glass became cheap, and it was soon an everyday material…”'},
+      h:{type:'text',x:320,y:236,s:21,fit:600,text:'“…glass became cheap, and it was soon an everyday material…”'},
       a:{type:'note',x:320,y:300,w:200,h:54,c:'n3',size:26,rot:2,text:'cheap'},
     },
     beats:[

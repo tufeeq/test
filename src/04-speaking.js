@@ -22,8 +22,9 @@ async function pageSpeak(mode, id) {
   const [p1, p2] = await Promise.all([content('part1'), content('part23')]);
   let steps = [], title = '';
   if ((mode === 'p1' && p1.items.findIndex(x => x.id === id) >= freeCount(p1.items.length)) || (mode === 'p2' && p2.items.findIndex(x => x.id === id) >= freeCount(p2.items.length))) { setTimeout(() => openUpgrade('speaking'), 0); return pageSpeaking(); }
-  if (mode === 'p1') { const t = p1.items.find(x => x.id === id); if (!t) return ''; title = L(t.topic); steps = t.qs.map((q, i) => ({ part: 1, clip: `${t.id}-q${i}`, text: q.q, model: q.model, tip: q.tip, max: 45 })); steps.unshift({ part: 1, clip: `${t.id}-t`, text: `Let’s talk about ${t.topic.en.toLowerCase()}.`, info: true }); }
-  else if (mode === 'p2') { const t = p2.items.find(x => x.id === id); if (!t) return ''; title = t.card.title; steps = [{ part: 2, clip: 'p2intro', text: 'Now I’m going to give you a topic…', info: true }, { part: 2, card: t.card, notes: t.notes, clip: `${t.id}-card`, text: t.card.title, model: t.model, prep: 60, max: 120 }, { part: 3, clip: 'p3intro', text: 'We’ve been talking about this topic…', info: true }, ...t.p3.map((q, i) => ({ part: 3, clip: `${t.id}-p3q${i}`, text: q.q, model: q.model, max: 75 }))]; }
+  const missing = () => { toast(_('الموضوع غير موجود.', 'Topic not found.')); return pageSpeaking(); };
+  if (mode === 'p1') { const t = p1.items.find(x => x.id === id); if (!t) return missing(); title = L(t.topic); steps = t.qs.map((q, i) => ({ part: 1, clip: `${t.id}-q${i}`, text: q.q, model: q.model, tip: q.tip, max: 45 })); steps.unshift({ part: 1, clip: `${t.id}-t`, text: `Let’s talk about ${t.topic.en.toLowerCase()}.`, info: true }); }
+  else if (mode === 'p2') { const t = p2.items.find(x => x.id === id); if (!t) return missing(); title = t.card.title; steps = [{ part: 2, clip: 'p2intro', text: 'Now I’m going to give you a topic…', info: true }, { part: 2, card: t.card, notes: t.notes, clip: `${t.id}-card`, text: t.card.title, model: t.model, prep: 60, max: 120 }, { part: 3, clip: 'p3intro', text: 'We’ve been talking about this topic…', info: true }, ...t.p3.map((q, i) => ({ part: 3, clip: `${t.id}-p3q${i}`, text: q.q, model: q.model, max: 75 }))]; }
   else if (mode === 'mock') {
     if (!PRO()) { setTimeout(() => openUpgrade('speaking'), 0); return pageSpeaking(); }
     const a = p1.items[Math.floor(Math.random() * p1.items.length)], b = p1.items[(p1.items.indexOf(a) + 1) % p1.items.length], c = p2.items[Math.floor(Math.random() * p2.items.length)];
@@ -31,6 +32,7 @@ async function pageSpeak(mode, id) {
     steps = [{ part: 1, clip: 'intro', text: 'Good morning. My name is Sarah…', info: true }, { part: 1, clip: `${a.id}-t`, text: `Let’s talk about ${a.topic.en.toLowerCase()}.`, info: true }, ...a.qs.slice(0, 3).map((q, i) => ({ part: 1, clip: `${a.id}-q${i}`, text: q.q, model: q.model, max: 40 })), { part: 1, clip: `${b.id}-t`, text: `Let’s talk about ${b.topic.en.toLowerCase()}.`, info: true }, ...b.qs.slice(0, 3).map((q, i) => ({ part: 1, clip: `${b.id}-q${i}`, text: q.q, model: q.model, max: 40 })),
       { part: 2, clip: 'p2intro', text: 'Now I’m going to give you a topic…', info: true }, { part: 2, card: c.card, notes: c.notes, clip: `${c.id}-card`, text: c.card.title, model: c.model, prep: 60, max: 120 }, { part: 3, clip: 'p3intro', text: 'We’ve been talking about…', info: true }, ...c.p3.map((q, i) => ({ part: 3, clip: `${c.id}-p3q${i}`, text: q.q, model: q.model, max: 75 })), { part: 3, clip: 'end', text: 'Thank you. That is the end of the speaking test.', info: true }];
   }
+  if (!steps.length) return missing();
   SP = { mode, id, title, steps, i: 0, answers: [], rec: null, stream: null };
   setTimeout(() => spRender(), 0);
   return `<div class="spread"><a href="#speaking" class="btn ghost sm">${BK()}${_('غرفة المحادثة', 'Speaking room')}</a><span class="chip pri" dir="auto">${esc(title)}</span></div><div id="sp-stage" class="grid"></div>`;

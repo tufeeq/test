@@ -166,7 +166,7 @@ function drRender() {
     ${isL ? `<div class="row"><button class="btn teal" id="dr-play">${ic('play')} ${_('استمع', 'Listen')}</button><span class="small muted">${_('في الاختبار تسمع مرة واحدة؛ هنا يمكنك الإعادة مرة.', 'In the test you hear it once; here you may replay once.')}</span></div>` : ''}
     ${it.src ? `<div class="src">${esc(it.src)}</div>` : ''}
     <div class="dq ltr-text">${esc(it.q)}</div>
-    ${it.kind === 'mcq' ? `<div class="opt-btns ltr-text">${it.opts.map((o, k) => `<button class="opt-btn" data-k="${LET[k]}"><span class="L">${LET[k]}</span>${esc(o)}</button>`).join('')}</div>` : `<div class="row"><input class="inp ltr-text" id="dr-in" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="${_('اكتب إجابتك بالإنجليزية', 'Type your answer')}" style="flex:1;min-width:200px"><button class="btn primary" id="dr-check">${_('تحقق', 'Check')}</button></div>`}
+    ${it.kind === 'mcq' ? `<div class="opt-btns ltr-text">${(DS.view = drView(it)).opts.map((o, k) => `<button class="opt-btn" data-k="${LET[k]}"><span class="L">${LET[k]}</span>${esc(o)}</button>`).join('')}</div>` : `<div class="row"><input class="inp ltr-text" id="dr-in" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="${_('اكتب إجابتك بالإنجليزية', 'Type your answer')}" style="flex:1;min-width:200px"><button class="btn primary" id="dr-check">${_('تحقق', 'Check')}</button></div>`}
     <div class="row"><button class="btn ghost sm" id="dr-hint">💡 ${_('تلميح', 'Hint')}</button>${it.kind === 'type' ? `<button class="btn ghost sm" id="dr-skip">${_('لا أعرف', 'I don’t know')}</button>` : ''}</div>
     <div id="dr-hint-b" hidden class="hint-box"></div>
     <div id="dr-fb"></div>
@@ -176,18 +176,30 @@ function drRender() {
   if (it.kind === 'mcq') el.querySelectorAll('.opt-btn').forEach(b => b.onclick = () => drAnswer(it, b.dataset.k, b));
   else { const go = () => drAnswer(it, $('#dr-in').value); $('#dr-check').onclick = go; $('#dr-in').onkeydown = e => { if (e.key === 'Enter') go(); }; $('#dr-skip').onclick = () => drAnswer(it, ''); setTimeout(() => { const i = $('#dr-in'); if (i && !isL) i.focus(); }, 50); }
 }
+/* Multiple-choice drills were written with the key mostly under A or B. Items whose hint/explanation do not refer to
+   option letters are shown with their options rotated (stable per item), so the key position cannot be guessed. */
+function drView(it) {
+  if (it.kind !== 'mcq' || !Array.isArray(it.opts) || it.opts.length < 3) return { opts: it.opts || [], a: it.a };
+  const txt = ['why', 'hint'].map(k => it[k] ? (it[k].en || '') + ' ' + (it[k].ar || '') : '').join(' ');
+  if (/(^|[^A-Za-z])[A-D]([^A-Za-z]|$)/.test(txt.replace(/\bA (?=[a-z])/g, ''))) return { opts: it.opts, a: it.a };
+  let h = 0; for (const c of String(it.id || '')) h = (h * 31 + c.charCodeAt(0)) >>> 0;
+  const r = h % it.opts.length; if (!r) return { opts: it.opts, a: it.a };
+  const opts = it.opts.map((_, k) => it.opts[(k + r) % it.opts.length]);
+  return { opts, a: LET[(LET.indexOf(it.a) - r + it.opts.length) % it.opts.length] };
+}
 function drAnswer(it, val, btn) {
   if (DS.answered) return; DS.answered = true;
   const secs = (Date.now() - DS.qt0) / 1000;
   const cmp = x => nrm(x).replace(/[.,;:!?"“”()]/g, ' ').replace(/\s+/g, ' ').trim();
-  const ok = it.kind === 'mcq' ? val === it.a : (it.a || []).some(a => cmp(a) === cmp(val));
-  if (it.kind === 'mcq') $$('#drill-stage .opt-btn').forEach(b => { b.disabled = true; if (b.dataset.k === it.a) b.classList.add('ok'); }), btn && !ok && btn.classList.add('bad');
+  const V = it.kind === 'mcq' ? (DS.view && DS.view.opts.length === (it.opts || []).length ? DS.view : drView(it)) : null;
+  const ok = it.kind === 'mcq' ? val === V.a : (it.a || []).some(a => cmp(a) === cmp(val));
+  if (it.kind === 'mcq') $$('#drill-stage .opt-btn').forEach(b => { b.disabled = true; if (b.dataset.k === V.a) b.classList.add('ok'); }), btn && !ok && btn.classList.add('bad');
   else { $('#dr-in').disabled = true; $('#dr-check').disabled = true; }
   DS.res.push({ it, ok, secs, hint: DS.hint });
   recordAns(it.sk, ok, secs, it.id); useDaily(1); markDay();
   if (!it.gen) { const st = S.dr[it.id] || { c: 0, t: 0 }; st.t++; if (ok) st.c++; st.ok = ok; st.due = addDays(todayStr(), ok ? 7 : 1); S.dr[it.id] = st; }
   save();
-  const tech = techOf(it.tech), right = it.kind === 'mcq' ? `${it.a}. ${it.opts[LET.indexOf(it.a)]}` : (it.a || []).join(' / ');
+  const tech = techOf(it.tech), right = it.kind === 'mcq' ? `${V.a}. ${V.opts[LET.indexOf(V.a)]}` : (it.a || []).join(' / ');
   const transcript = it.lines ? it.lines.map(l => l.t).join(' ') : it.tts || '';
   $('#dr-fb').innerHTML = `<div class="fb ${ok ? 'ok' : 'no'}"><b>${ok ? '✓ ' + _('إجابة صحيحة', 'Correct') + (DS.hint ? ' ' + _('(بمساعدة التلميح)', '(with a hint)') : '') : '✗ ' + _('الإجابة الصحيحة', 'Correct answer') + ': <span class="ltr-text">' + esc(right) + '</span>'}</b>
     ${xlBi(it.why)}

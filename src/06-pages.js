@@ -140,7 +140,7 @@ async function pageLessons() {
   ${Object.keys(grp).map(g => { const items = ls.filter(l => l.skill === g); if (!items.length) return ''; return `<div class="card"><h2>${grp[g]}</h2><div class="list">${items.map(l => { const lk = ls.indexOf(l) >= open; return `<a class="li ${lk ? 'locked' : ''}" href="${lk ? '#upgrade' : '#lesson/' + l.id}" data-lock="${lk ? 'lesson' : ''}"><span class="li-t"><b>${esc(L(l.title))}</b><small class="muted">${esc(L(l.why))}</small></span>${lk ? `<span class="lock-b">${ic('lock')}${_('برو', 'Pro')}</span>` : S.lessons[l.id] ? `<span class="chip ok">${ic('check')}</span>` : `<span class="chip">${numL(l.min)} ${_('د', 'min')}</span>`}</a>`; }).join('')}</div></div>`; }).join('')}`;
 }
 async function pageLesson(id) {
-  const ls = (await content('lessons')).items, l = ls.find(x => x.id === id); if (!l) return '';
+  const ls = (await content('lessons')).items, l = ls.find(x => x.id === id); if (!l) { toast(_('الدرس غير موجود.', 'Lesson not found.')); return pageLessons(); }
   if (ls.indexOf(l) >= freeCount(ls.length)) { setTimeout(() => openUpgrade('lesson'), 0); return pageLessons(); }
   setTimeout(() => {
     $$('.lesson [data-chk]').forEach(b => b.onclick = () => {

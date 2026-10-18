@@ -294,10 +294,20 @@ app.put("/api/progress", needUser, wrap(async (req, res) => {
   const summary = { est: num(s.est), readiness: num(s.readiness), solved: num(s.solved), acc: num(s.acc), models: num(s.models), streak: num(s.streak),
     L: num(s.L), R: num(s.R), W: num(s.W), S: num(s.S),
     lastActive: /^\d{4}-\d{2}-\d{2}$/.test(s.lastActive || "") ? s.lastActive : "" };
-  await pool.query(`INSERT INTO progress(user_id,track,target,lang,exam_date,p,summary,updated_at) VALUES($1,$2,$3,$4,$5,$6,$7,now())
-    ON CONFLICT (user_id) DO UPDATE SET track=$2,target=$3,lang=$4,exam_date=$5,p=$6,summary=$7,updated_at=now()`,
+  // optimistic concurrency: the client says which cloud copy its state is based on; if another device saved a newer
+  // copy since then, hand it back (409) so the client merges instead of overwriting it
+  const basedOn = b.basedOn ? new Date(b.basedOn) : null;
+  if (basedOn && !isNaN(basedOn)) {
+    const u = await pool.query(`UPDATE progress SET track=$2,target=$3,lang=$4,exam_date=$5,p=$6,summary=$7,updated_at=now()
+      WHERE user_id=$1 AND date_trunc('milliseconds', updated_at) <= $8::timestamptz RETURNING updated_at`, [req.user.id, track, target, lang, examDate, p, summary, basedOn]);
+    if (u.rows[0]) return res.json({ ok: true, updatedAt: u.rows[0].updated_at });
+    const cur = await pool.query("SELECT p, updated_at FROM progress WHERE user_id=$1", [req.user.id]);
+    if (cur.rows[0]) return res.status(409).json({ error: "progress-conflict", p: cur.rows[0].p, updatedAt: cur.rows[0].updated_at });
+  }
+  const r = await pool.query(`INSERT INTO progress(user_id,track,target,lang,exam_date,p,summary,updated_at) VALUES($1,$2,$3,$4,$5,$6,$7,now())
+    ON CONFLICT (user_id) DO UPDATE SET track=$2,target=$3,lang=$4,exam_date=$5,p=$6,summary=$7,updated_at=now() RETURNING updated_at`,
     [req.user.id, track, target, lang, examDate, p, summary]);
-  res.json({ ok: true });
+  res.json({ ok: true, updatedAt: r.rows[0].updated_at });
 }));
 
 // ---------- admin ----------

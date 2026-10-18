@@ -8,13 +8,13 @@ async function api(method, url, body) {
   try { r = await fetch(url, { method, headers: H, credentials: "same-origin", cache: "no-store", body: body ? JSON.stringify(body) : undefined }); }
   catch (e) { const x = new Error("network"); x.code = "network-request-failed"; throw x; }
   const j = await r.json().catch(() => ({}));
-  if (!r.ok) { const x = new Error(j.error || "server"); x.code = j.error || (r.status === 413 ? "too-large" : "other"); x.status = r.status; throw x; }
+  if (!r.ok) { const x = new Error(j.error || "server"); x.code = j.error || (r.status === 413 ? "too-large" : "other"); x.status = r.status; x.body = j; throw x; }
   return j;
 }
-let user = null, timer = null, status = "idle", lastSync = null, retry = 0, pulled = false;
+let user = null, timer = null, status = "idle", lastSync = null, retry = 0, pulled = false, cloudAt = null; // cloudAt: updated_at of the cloud copy our local state is based on
 const A = () => window.__app;
 const safe = f => { try { f(); } catch (e) {} };
-function reset() { clearTimeout(timer); timer = null; user = null; status = "idle"; lastSync = null; retry = 0; pulled = false; }
+function reset() { clearTimeout(timer); timer = null; user = null; status = "idle"; lastSync = null; retry = 0; pulled = false; cloudAt = null; }
 /* ---------- plan, config, usage events ---------- */
 const PLAN_KEY = "ielts_plan"; // last known tier (cosmetic only, avoids a flash of locks; premium content is enforced by the server)
 const FREE_PLAN = { tier: "free", until: null, source: null };
@@ -50,10 +50,17 @@ async function push() {
   if (p.length > 900000) { status = "error"; A().cloudStatus(); return; }
   status = "saving"; A().cloudStatus();
   try {
-    await api("PUT", "/api/progress", { p, track: S.module, target: S.target, lang: S.lang, examDate: S.examDate || "", summary: A().summary() });
+    const r = await api("PUT", "/api/progress", { p, basedOn: cloudAt, track: S.module, target: S.target, lang: S.lang, examDate: S.examDate || "", summary: A().summary() });
+    if (r.updatedAt) cloudAt = r.updatedAt;
     status = "ok"; lastSync = Date.now(); retry = 0;
   } catch (e) {
     if (e.code === "unauthenticated") return expired();
+    if (e.code === "progress-conflict" && e.body) { // another device saved since we last read: merge its copy, then save the union
+      try { if (e.body.p) A().mergeCloud(JSON.parse(e.body.p)); } catch (x) {}
+      cloudAt = e.body.updatedAt || null; safe(() => A().render());
+      if (!push.conflicts) push.conflicts = 0;
+      if (push.conflicts++ < 3) return push();
+    }
     status = "error";
     // retry transient failures (network / 5xx / rate limit) with backoff; a 4xx like bad-progress/too-large won't fix itself
     if ((e.code === "network-request-failed" || !e.status || e.status >= 500 || e.status === 429) && retry < 5) { retry++; timer = setTimeout(push, Math.min(60000, 4000 * 2 ** (retry - 1))); }
@@ -64,7 +71,7 @@ async function pull() {
   try {
     const r = await api("GET", "/api/progress");
     if (r.p) { try { A().mergeCloud(JSON.parse(r.p)); } catch (e) {} }
-    pulled = true; retry = 0;
+    cloudAt = r.updatedAt || null; pulled = true; retry = 0; push.conflicts = 0;
   } catch (e) {
     if (e.code === "unauthenticated") return expired();
     // couldn't read the cloud copy (flaky network): keep local data, don't push, try again later
@@ -77,7 +84,10 @@ async function pull() {
 async function afterLogin(u) {
   const email = String(u.email || "").toLowerCase(), owner = ls.get(OWNER);
   // progress in this browser belongs to a different account (shared device): don't merge it into this one
-  if (owner && owner !== email) { ls.del("ielts_v1"); ls.set(OWNER, email); location.reload(); return new Promise(() => {}); }
+  if (owner && owner !== email) {
+    let lang = "ar"; try { lang = A().getS().lang || document.documentElement.lang || "ar"; } catch (e) { lang = document.documentElement.lang || "ar"; }
+    ls.del("ielts_v1"); ls.set(OWNER, email); location.replace("/app?lang=" + (lang === "en" ? "en" : "ar") + location.hash); return new Promise(() => {});
+  }
   ls.set(OWNER, email);
   reset(); user = { email: u.email, name: u.name || "", emailVerified: true, isAdmin: !!u.isAdmin };
   setPlan(u.isAdmin && (!u.plan || u.plan.tier !== "pro") ? { tier: "pro", until: null, source: "admin" } : u.plan);
@@ -114,8 +124,9 @@ window.CLOUD = {
   async signIn(email, password) { const r = await api("POST", "/api/login", { email, password }); await afterLogin(r.user); },
   async signOut() {
     if (user && pulled && status !== "ok") { try { await push(); } catch (e) {} } // flush unsynced changes first
+    flush(true); // pending usage events must go out while the session cookie is still valid
     try { await api("POST", "/api/logout"); } catch (e) { if (e.code !== "unauthenticated") throw e; }
-    flush(true); reset(); setPlan(null); safe(() => A().render());
+    reset(); setPlan(null); safe(() => A().render());
   },
   async reset() { const x = new Error("reset"); x.code = "reset-admin"; throw x; },
   async changePassword(current, next) { await api("POST", "/api/password", { current, next }); },

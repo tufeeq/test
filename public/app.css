@@ -186,7 +186,7 @@ main{max-width:1160px;margin:0 auto;padding-inline:var(--gut);padding-block:26px
 .mtile .pips{grid-area:p}
 .mt-f{grid-area:f;display:flex;justify-content:space-between;font-size:.8rem;color:var(--muted)}
 .mtile.l4{background:var(--pri-soft);border-color:var(--pri)}
-@media (max-width:640px){.mmap{grid-template-columns:1fr}}
+@media (max-width:640px){.mmap{grid-template-columns:1fr}.mtiles{grid-template-columns:1fr 1fr}.mtile{grid-template-areas:"n n" "p p" "f f";grid-template-columns:1fr;padding:10px 12px;gap:6px}.mt-n{font-size:.9rem;line-height:1.4}}
 .pips{display:inline-flex;gap:3px}
 .pips i{inline-size:15px;block-size:7px;border-radius:4px;background:var(--surface2);display:block}
 .pips i.on.l1{background:var(--l1)} .pips i.on.l2{background:var(--l2)} .pips i.on.l3{background:var(--l3)} .pips i.on.l4{background:var(--l4)}
@@ -359,7 +359,7 @@ a.rcard:hover{border-color:var(--pri);transform:translateY(-1px)}
 .mb-s{font-size:.76rem;color:var(--muted)}
 .mbox.done{background:var(--pri-soft);border-color:var(--pri)} .mbox.done .mb-s{color:var(--pri);font-weight:800}
 .mbox.star{background:var(--n0);border-color:var(--edge);box-shadow:var(--pop);color:var(--note-ink)} .mbox.star .mb-s,.mbox.star .mb-n{color:var(--note-ink)}
-.skgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px}
+.skgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
 .skbtn{font:inherit;text-align:start;background:var(--surface);border:1.5px solid var(--line);border-radius:14px;padding:12px 14px;cursor:pointer;color:var(--ink);display:grid;gap:6px;min-block-size:44px}
 .skbtn:hover{border-color:var(--pri)}
 .sk-n{font-weight:800}
@@ -403,7 +403,7 @@ a.rcard:hover{border-color:var(--pri);transform:translateY(-1px)}
 .cause-row{display:grid;gap:4px;padding-block:4px}
 .cr-h{display:flex;justify-content:space-between}
 .chart{overflow-x:auto}
-.chart svg{inline-size:100%;min-width:360px;height:auto;display:block;stroke:none}
+.chart svg{inline-size:100%;height:auto;display:block;stroke:none}
 .chart .grid{stroke:var(--line);stroke-width:1}
 .chart .ax{font-family:var(--f-mono);font-size:11px;fill:var(--muted)}
 .chart .tgt{stroke:var(--pink);stroke-width:1.8;stroke-dasharray:5 4}
@@ -886,3 +886,92 @@ body.sheet-open{overflow:hidden}
 
 /* long math in explanations may wrap */
 .fb p .m,.rev-exp .m{white-space:normal}
+
+/* ================= round 3 polish ================= */
+.nowrap{white-space:nowrap}
+/* progress chart: stays legible when it scales down to a phone card */
+@media (max-width:560px){.chart .ax{font-size:17px}.chart .lab{font-size:19px}.chart .ln{stroke-width:3.4}.chart .pt circle{r:6}.chart .pt circle.hit{r:16}}
+/* mastery tiles: two per row on phones (the map was ten full-width rows) */
+@media (max-width:640px){.mtile .pips i{inline-size:13px}.mt-f{gap:6px}}
+/* hero streak pill */
+.pill.streak{background:rgba(255,213,74,.14);border-color:rgba(255,213,74,.35)}
+.pill.streak svg{color:var(--butter);inline-size:15px;block-size:15px}
+/* coupon field: the code is monospaced and spaced, the Arabic placeholder keeps its letters joined */
+.up-cp-row input::placeholder{font-family:var(--f-body);letter-spacing:0;text-transform:none}
+/* progress KPIs: an odd last tile spans the row instead of leaving a hole */
+@media (max-width:520px){.kpis:not(.rep-k)>.kpi:last-child:nth-child(even){grid-column:1 / -1}}
+/* flashcard / vocab answer buttons: room above the bottom tab bar when scrolled into view */
+.vbtns{scroll-margin-block-end:110px}
+
+/* ---- test engine ---- */
+.ex-title span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ex-timer{min-inline-size:5.2ch;text-align:center}
+.ex-timer.low{animation:tlow 1s ease-in-out infinite alternate}
+@keyframes tlow{from{box-shadow:0 0 0 0 color-mix(in srgb,var(--coral) 55%,transparent)}to{box-shadow:0 0 0 6px color-mix(in srgb,var(--coral) 0%,transparent)}}
+.ex-bar{block-size:5px}
+.ex-stem{font-size:1.16rem;line-height:2}
+.ex-passage p{font-size:1.02rem}
+/* phones: the passage scrolls inside its own box so the question and options stay in the first screen */
+@media (max-width:860px){.ex-body.with-passage .ex-passage{max-block-size:38vh;overflow-y:auto;overscroll-behavior:contain;padding:14px 16px;box-shadow:inset 0 -14px 12px -12px rgba(29,24,56,.18)}}
+.opt{line-height:1.55}
+.opt:active:not(:disabled){transform:scale(.985)}
+.bub svg{inline-size:18px;block-size:18px;stroke-width:3}
+.opt.right{animation:optok .38s cubic-bezier(.3,1.6,.5,1)}
+.opt.wrong{animation:optbad .36s ease}
+@keyframes optok{0%{transform:scale(.97)}60%{transform:scale(1.02)}100%{transform:scale(1)}}
+@keyframes optbad{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}50%{transform:translateX(4px)}75%{transform:translateX(-2px)}}
+.fb{scroll-margin-block-end:96px;animation:fbin .3s ease both}
+@keyframes fbin{from{opacity:0;transform:translateY(6px) rotate(-.4deg)}to{opacity:1;transform:rotate(-.4deg)}}
+.fb strong{display:flex;align-items:center;gap:8px}
+.fb-i{inline-size:26px;block-size:26px;border-radius:50%;display:grid;place-items:center;background:var(--note-ink);color:#fff;flex-shrink:0}
+.fb-i svg{inline-size:15px;block-size:15px;stroke-width:3.2}
+.fb.bad .fb-i{background:#B3123F}
+/* footer: icons, the main action is the widest */
+.ex-foot .btn svg{inline-size:19px;block-size:19px;flex-shrink:0}
+[dir="rtl"] .ex-foot .arr{transform:scaleX(-1)}
+.ex-nav#ex-prev .arr-b{display:inline-flex;transform:scaleX(-1)}
+[dir="rtl"] .ex-nav#ex-prev .arr-b{transform:none}
+[dir="rtl"] .ex-nav#ex-prev .arr-b .arr{transform:none}
+.ex-tool .l-short{display:none}
+.ex-tool.on{border-color:var(--pri);background:var(--pri-soft);color:var(--pri)}
+.btn.flagged svg{fill:currentColor}
+@media (max-width:480px){
+  .ex-foot-in{grid-template-columns:1fr 1fr 1fr 1.5fr;grid-auto-flow:row}
+  .ex-foot-in:not(:has(#ex-flag)){grid-template-columns:1fr 1fr 1.6fr}
+  .ex-tool{flex-direction:column;gap:1px;font-size:.74rem!important;padding-block:4px;line-height:1.2}
+  .ex-tool .l-long{display:none}.ex-tool .l-short{display:inline}
+  .ex-nav#ex-prev .arr-b{display:none}
+}
+.ex-map .dot{transition:transform .1s}
+.ex-map .dot:hover{transform:translateY(-1px)}
+
+/* ---- results ---- */
+.rs-head{display:grid;gap:16px;align-items:stretch}
+.rs-top{display:flex;gap:18px;align-items:center}
+.rs-top .ring{flex-shrink:0}
+.rs-verdict{display:grid;gap:6px;justify-items:start;min-inline-size:0}
+.rs-verdict .eyebrow{margin:0}
+.rs-verdict h2{font-size:clamp(1.08rem,2.6vw,1.35rem);line-height:1.5}
+.rs-kpis{grid-template-columns:repeat(auto-fit,minmax(88px,1fr));gap:8px;border-block-start:1.5px dashed var(--line);padding-block-start:14px}
+.rs-kpis>div{background:var(--surface2);border-radius:12px;padding:8px 10px;justify-items:start;align-content:start}
+.rs-kpis b{line-height:1.25}
+.rs-head.t3{background:var(--n0);color:var(--note-ink)}
+.rs-head.t3 h2,.rs-head.t3 .rs-kpis b{color:var(--note-ink)} .rs-head.t3 .eyebrow{color:#7A1240}
+.rs-head.t3 .rs-kpis>div{background:rgba(255,255,255,.55)} .rs-head.t3 .rs-kpis span{color:rgba(29,24,56,.72)}
+.rs-head.t3 .r-track{stroke:rgba(29,24,56,.12)} .rs-head.t3 .r-val{stroke:var(--note-ink)} .rs-head.t3 .r-txt{fill:var(--note-ink)}
+.rs-head.t3 .rs-kpis{border-color:rgba(29,24,56,.2)}
+.rs-head .r-val{animation:ringin .9s cubic-bezier(.3,.8,.3,1) both}
+@keyframes ringin{from{stroke-dasharray:0 264}}
+.rs-rev-head{scroll-margin-block-start:76px}
+@media (max-width:520px){.rs-top{gap:14px}.rs-top .ring{inline-size:96px!important}.rs-kpis{grid-template-columns:repeat(3,1fr)}.rs-kpis b{font-size:1.25rem}}
+@media (prefers-reduced-motion:reduce){.rs-head .r-val,.opt.right,.opt.wrong,.fb,.ex-timer.low{animation:none!important}}
+@media (max-width:640px){.mtiles>.mtile:last-child:nth-child(odd){grid-column:1 / -1}}
+/* skill table on phones: bar and time share a row (each skill was three rows tall) */
+@media (max-width:620px){.srow{grid-template-areas:"n l" "b t";row-gap:2px}.srow .stime{text-align:end;white-space:nowrap}.srow .bar-row{padding-block:2px}}
+@media (max-width:520px){.tbl th,.tbl td{padding:8px 7px;font-size:.84rem}.tbl .rev-link{font-size:.8rem}}
+.opt.right .bub,.opt.wrong .bub{color:var(--paper)}
+/* touch: question map dots, review filters and mistake-cause chips reach 44px */
+@media (pointer:coarse){.dot{inline-size:44px;block-size:44px}.cchip{min-block-size:44px}.seg button{min-block-size:42px}.dchip{min-block-size:44px}}
+@media (max-width:520px){.settings-form>.btn{flex:1 1 100%}}
+.rule .m{white-space:normal;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+@media (max-width:640px){.lcard .lc-ill .ill{max-width:190px}}

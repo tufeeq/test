@@ -182,7 +182,7 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
     if (!(await isPremiumClip(req.params.id))) return next();
     const { auth } = app.locals; await new Promise(r => auth(req, res, r));
     const p = await planOf(req.user);
-    if (p.tier !== "pro") return res.status(402).end();
+    if (p.tier !== "pro") return res.status(402).set("Cache-Control", "private, no-store").end(); // never remembered: the student may subscribe a minute later
     res.set("X-Premium", "1"); next();
   }));
 

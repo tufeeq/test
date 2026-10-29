@@ -136,8 +136,9 @@ window.CLOUD = {
   async signIn(email, password) { const r = await api("POST", "/api/login", { email, password }); await afterLogin(r.user); },
   async signOut() {
     if (user && pulled && status !== "ok") { try { await push(); } catch (e) {} } // flush unsynced changes first
+    flush(true); // queued usage events go out while the session is still valid (after the logout they were refused with a 401)
     try { await api("POST", "/api/logout"); } catch (e) { if (e.code !== "unauthenticated") throw e; }
-    flush(true); reset(); setPlan(null); safe(() => A().render());
+    evq = []; reset(); setPlan(null); safe(() => A().render());
   },
   droppedElsewhere() { reset(); setPlan(null); }, // another tab of this browser signed this account out
   async reset() { const x = new Error("reset"); x.code = "reset-admin"; throw x; },

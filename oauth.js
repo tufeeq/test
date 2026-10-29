@@ -62,7 +62,14 @@ module.exports = function oauth(app, { pool, wrap, createSession, cleanName, par
       if (!email) return { error: "no-email" };
       let nm = cleanName(name); if (nm.length < 2 || nm.length > 60) nm = cleanName(email.split("@")[0]).slice(0, 60) || "طالب";
       const id = crypto.randomUUID(), hash = await bcrypt.hash(crypto.randomBytes(24).toString("base64url"), 11); // no usable password until they set one
-      await pool.query(`INSERT INTO users(id,email,pass_hash,name,${col}) VALUES($1,$2,$3,$4,$5)`, [id, email, hash, nm, pid]);
+      try { await pool.query(`INSERT INTO users(id,email,pass_hash,name,${col}) VALUES($1,$2,$3,$4,$5)`, [id, email, hash, nm, pid]); }
+      catch (e) { // the same sign-in finished in another tab a moment ago (double-clicked button): use the account it created
+        if (e.code !== "23505") throw e;
+        u = (await pool.query(`SELECT id,email,name FROM users WHERE ${col}=$1 OR email=$2 ORDER BY (${col}=$1) IS TRUE DESC LIMIT 1`, [pid, email])).rows[0];
+        if (!u) throw e;
+        await pool.query(`UPDATE users SET ${col}=$1 WHERE id=$2 AND ${col} IS NULL`, [pid, u.id]);
+        return { user: u };
+      }
       u = { id, email, name: nm, created: true };
     } else if (!u.name && name) { const nm = cleanName(name); if (nm.length >= 2 && nm.length <= 60) await pool.query("UPDATE users SET name=$1 WHERE id=$2", [nm, u.id]); }
     return { user: u };

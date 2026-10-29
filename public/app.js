@@ -1610,7 +1610,11 @@ const T2={
     mergedGuest:'ضممنا ما تدرّبت عليه على هذا الجهاز قبل الدخول إلى حسابك.',
     errPageT:'تعذّر عرض هذه الصفحة',errPageD:'حدث خطأ غير متوقع. جرّب إعادة التحميل، وإن تكرر فراسلنا على info@gat.academy.',reload:'أعد التحميل',errUnexpected:'حدث خطأ غير متوقع. إن تكرر فأعد تحميل الصفحة.',
     goHome:'إلى الصفحة الرئيسية',tooMany:n=>`محاولات كثيرة. يمكنك المحاولة مجددًا بعد ${n} دقيقة.`,pwLong:'كلمة المرور طويلة جدًا؛ الحد ٢٠٠ حرف.',resetMail:'إعادة تعيين كلمة المرور',resetMailBody:e=>`أرغب في إعادة تعيين كلمة المرور لحسابي في أكاديمية القدرات. بريد الحساب: ${e}`,sendMail:'أرسل الطلب بالبريد',
-    reportLink:'تقرير بدايتك جاهز: أين كنت، وأين أنت الآن.'},
+    reportLink:'تقرير بدايتك جاهز: أين كنت، وأين أنت الآن.',
+    vShort:'لفظي',qShort:'كمي',
+    sessFree:n=>n>=3?`${numL(n)} ${n<=10?'أسئلة':'سؤالًا'} اخترناها لك من أخطائك وأضعف مهاراتك`:n>0?'آخر أسئلتك المجانية لهذا اليوم':'جلستك القادمة جاهزة غدًا',
+    verdict:[ 'كل خطأ هنا درس. ابدأ بمراجعة أخطائك.','بداية جيدة، وأخطاؤك هي خريطة تحسّنك.','أحسنت! أنت تقترب من هدفك.','ممتاز! أداء على مستوى الـ ١٠٠.' ],
+    flagS:'علّم',mapS:'الخريطة',resultE:'نتيجتك',seeMistakes:n=>`راجع أخطاءك (${n})`},
   en:{emptyT:'No data yet',emptyD:'This page shows your actual numbers: estimated score, accuracy, time and the level of each skill. Start with the diagnostic (20 questions in 15 minutes) to find your starting point.',
     recoStartH:'Start with the diagnostic',recoStartP:'It measures your level in all ten skills, and your plan and daily sessions are built on it.',greetN:n=>'Your target: '+n,
     finishQ:'Finish the test and see your result?',endSecQ:'End this section and move to the next one?',curPwWrong:'Your current password is incorrect.',gateT:'Sign up to start',gateMsg:'Create your free account before your first test, so your results, mistakes and progress are saved to your account and you can pick them up on any device. Your test starts right after.',gateLater:'Not now',
@@ -1632,13 +1636,19 @@ const T2={
     mergedGuest:'What you practiced on this device before signing in was added to your account.',
     errPageT:'This page couldn’t be shown',errPageD:'Something unexpected went wrong. Try reloading; if it keeps happening, email info@gat.academy.',reload:'Reload',errUnexpected:'Something unexpected went wrong. If it keeps happening, reload the page.',
     goHome:'Go to the home page',tooMany:n=>`Too many attempts. You can try again in ${n} minutes.`,pwLong:'Password is too long; the limit is 200 characters.',resetMail:'Password reset',resetMailBody:e=>`I would like to reset the password of my GAT Academy account. Account email: ${e}`,sendMail:'Send the request by email',
-    reportLink:'Your progress report is ready: where you started, where you are now.'}
+    reportLink:'Your progress report is ready: where you started, where you are now.',
+    vShort:'Verbal',qShort:'Quantitative',
+    sessFree:n=>n>=3?`${n} questions picked from your mistakes and weakest skills`:n>0?'Your last free questions for today':'Your next session is ready tomorrow',
+    verdict:[ 'Every mistake here is a lesson. Start by reviewing them.','A good start, and your mistakes map out what to fix next.','Well done! You are getting close to your target.','Excellent! That is 100-level work.' ],
+    flagS:'Flag',mapS:'Map',resultE:'Your result',seeMistakes:n=>`Review your mistakes (${n})`}
 };
 (()=>{ for(const l of ['ar','en']){ const d=T[l]; for(const [k,v] of Object.entries(T2[l])){ if(v&&typeof v==='object'&&!Array.isArray(v)&&typeof v!=='function'){ d[k]=d[k]||{}; for(const [k2,v2] of Object.entries(v)) if(!(k2 in d[k])) d[k][k2]=v2; } else if(!(k in d)) d[k]=v; } } })();
 const $=s=>document.querySelector(s);
 const dateH=d=>`<bdi dir="ltr" class="num">${numL(d||'')}</bdi>`;
 /* a readable date ("6 November 2026" / "٦ نوفمبر ٢٠٢٦"), Gregorian in both languages; falls back to the ISO form */
 const dateLong=d=>{ try{ const x=new Date(String(d).slice(0,10)+'T12:00:00'); if(isNaN(x)) throw 0; return `<bdi class="num">${x.toLocaleDateString(S.lang==='ar'?'ar-SA-u-ca-gregory-nu-arab':'en-GB',{day:'numeric',month:'long',year:'numeric'})}</bdi>`; }catch(e){ return dateH(String(d||'').slice(0,10)); } };
+/* a compact date for tables ("29 Oct" / "٢٩ أكتوبر"; the year only when it is not this year) */
+const dateShort=d=>{ try{ const x=new Date(String(d).slice(0,10)+'T12:00:00'); if(isNaN(x)) throw 0; const o={day:'numeric',month:'short'}; if(x.getFullYear()!==new Date().getFullYear()) o.year='numeric'; return `<bdi class="num nowrap">${x.toLocaleDateString(S.lang==='ar'?'ar-SA-u-ca-gregory-nu-arab':'en-GB',o)}</bdi>`; }catch(e){ return dateH(String(d||'').slice(0,10)); } };
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 function M(str){ return String(str).replace(/⟦(.+?)⟧/g,(_,m)=>{ m=m.replace(/\^\(([^)]+)\)/g,'<sup>$1</sup>').replace(/\^([0-9A-Za-z؀-ۿ−-]+)/g,'<sup>$1</sup>'); m=m.replace(/([\u0600-\u06FF]+)/g,'$1\u200E'); return `<span class="m" dir="ltr">${m}</span>`; }); }
 const numL=n=>S.lang==='ar'?String(n).replace(/\d/g,d=>'٠١٢٣٤٥٦٧٨٩'[d]):String(n);
@@ -1841,8 +1851,8 @@ function startTest(kind,o={}){
   else if(kind==='verbal'){ title=t('pVerbal'); sections=[sec(title,verbalSection(lang,used),25)]; }
   else if(kind==='quant'){ title=t('pQuant'); sections=[sec(title,quantSection(lang,used),25)]; }
   else if(kind==='mock'){ title=t('pMock'); const ord=S.track==='sci'?['V','Q','V','Q']:['V','V','Q','V'];
-    sections=ord.map((a,i)=>sec(`${t('sectionLabel')} ${numL(i+1)} · ${a==='V'?t('verbal'):t('quant')}`,a==='V'?verbalSection(lang,used):quantSection(lang,used),25)); }
-  else if(kind==='model'){ title=`${t('model')} ${numL(o.k+1)}`; sections=modelSections(o.k,lang).map((x,i)=>sec(`${t('sectionLabel')} ${numL(i+1)} · ${x.a==='V'?t('verbal'):t('quant')}`,x.qs,25)); }
+    sections=ord.map((a,i)=>sec(`${t('sectionLabel')} ${numL(i+1)} · ${a==='V'?t('vShort'):t('qShort')}`,a==='V'?verbalSection(lang,used):quantSection(lang,used),25)); }
+  else if(kind==='model'){ title=`${t('model')} ${numL(o.k+1)}`; sections=modelSections(o.k,lang).map((x,i)=>sec(`${t('sectionLabel')} ${numL(i+1)} · ${x.a==='V'?t('vShort'):t('qShort')}`,x.qs,25)); }
   else if(kind==='skill'){ mode='learn'; title=SKILLS[o.skill][lang]; sections=[sec(title,buildSkill(o.skill,10,lang,used),15)]; }
   else if(kind==='session'){ mode='learn'; title=t('sessionTitle'); let qs=sessionSet(lang); const left=dailyLeft(); if(qs.length>left) qs=qs.slice(0,left); sections=[sec(title,qs,Math.max(5,Math.round(qs.length*1.3)))]; }
   else if(kind==='review'){ const d=dueList(lang).slice(0,Math.min(20,dailyLeft())); if(!d.length){ toast(t('noDue')); return; } mode='learn'; title=t('pReview'); sections=[sec(title,d.map(m=>({...m})),Math.max(5,d.length*1.5))]; }
@@ -1865,7 +1875,8 @@ function tick(){ if(!X||X.result||X.reviewOnly||X.between) return; const s=cur()
   if(now-(X.liveAt||0)>=10000){ X.liveAt=now; saveLive(); } const el=$('#ex-timer'); if(el){ el.textContent=clock(s.left); el.classList.toggle('low',s.left<=180); } if(s.left<=0){ toast(t('timeUp')); closeSection(); } }
 function logTime(){ const s=cur(); const n=Date.now(); if(!s.locked[X.qi]) s.tsp[X.qi]+=(n-X.qStart)/1000; X.qStart=n; }
 function go(i){ logTime(); X.qi=Math.max(0,Math.min(cur().qs.length-1,i)); X.confirm=null; X.showMap=false; renderExam(); $('#exam').scrollTop=0; }
-function choose(k){ const s=cur(); if(s.locked[X.qi]) return; s.ans[X.qi]=k; if(X.mode==='learn'){ logTime(); s.locked[X.qi]=true; } renderExam(); }
+function choose(k){ const s=cur(); if(s.locked[X.qi]) return; s.ans[X.qi]=k; if(X.mode==='learn'){ logTime(); s.locked[X.qi]=true; } renderExam();
+  if(X.mode==='learn') requestAnimationFrame(()=>{ try{ $('#exam .fb')?.scrollIntoView({block:'nearest',behavior:SMOOTH()}); }catch(e){} }); }
 function closeSection(){ logTime(); X.confirm=null; if(X.si<X.sections.length-1){ X.si++; X.qi=0; X.between=true; /* a pause screen before the next section; its clock starts on "start" */ renderExam(); } else finishTest(); }
 function answeredN(){ return X.sections.reduce((a,s)=>a+s.ans.filter(x=>x!=null).length,0); }
 function quitTest(){ takePending(); if(X&&!X.result&&!X.reviewOnly&&(X.kind==='session'||X.kind==='review')){ addDaily(answeredN()); save(); }
@@ -1896,7 +1907,7 @@ function finishTest(){
   saveDetail(att,all);
   save();
   track('test_done',X.kind,att.pct); if(X.kind==='diag') track('diag_done',null,att.pct);
-  X.result={all,bySkill,correct,skipped,att,filter:'wrong'}; renderExam(); renderRoute(); toast(STORE_OK?t('resultSaved'):t('saveFail'));
+  X.result={all,bySkill,correct,skipped,att,filter:'wrong'}; renderExam(); renderRoute(); { const st=calcStreak(); toast(STORE_OK?t('resultSaved')+(st>1?` · ${t('kStreak')}: ${numL(st)}`:''):t('saveFail')); }
 }
 
 function renderExam(){
@@ -1914,7 +1925,7 @@ function renderExam(){
   el.innerHTML=`
   <div class="ex-top">
     <button class="icon-btn" id="ex-quit" aria-label="${tt.quit}">${ICON.x}</button>
-    <div class="ex-title"><strong>${esc(X.title)}</strong><span>${s.name!==X.title?esc(s.name)+' · ':''}${tt.q} ${numL(X.qi+1)} ${tt.of} ${numL(s.qs.length)}</span></div>
+    <div class="ex-title"><strong>${esc(X.title)}</strong><span>${tt.q} ${numL(X.qi+1)} ${tt.of} ${numL(s.qs.length)}${s.name!==X.title?' · '+esc(s.name):''}</span></div>
     <div class="ex-timer ${s.left<=180?'low':''}" id="ex-timer">${clock(s.left)}</div>
   </div>
   <div class="ex-bar"><span style="inline-size:${pct}%"></span></div>
@@ -1925,15 +1936,15 @@ function renderExam(){
     <section class="ex-q">
       <div class="ex-qhead"><span class="chip">${SKILLS[q.s][X.lang]}</span>${q.box!=null?`<span class="chip sand">${tt.kinds.review}</span>`:''}</div>
       <div class="ex-stem ${q.s==='analogy'?'analogy':''}">${q.cmp?`<div class="eyebrow">${COMPARE_INTRO[X.lang]}</div>`:''}${stem(q.q)}</div>
-      <div class="ex-opts">${q.opts.map((o,k)=>`<button class="opt ${optClass(k)}" data-k="${k}" aria-pressed="${a===k}" ${locked?'disabled':''}><span class="bub">${L4[k]}</span><span class="otx">${optH(o)}</span></button>`).join('')}</div>
-      ${X.mode==='learn'&&locked?`<div class="fb ${a===q.ans?'ok':'bad'}"><strong>${a===q.ans?tt.correctFb:tt.wrongFb+': '+L4[q.ans]}</strong><p>${M(esc(q.exp))}</p></div>`:''}
+      <div class="ex-opts">${q.opts.map((o,k)=>`<button class="opt ${optClass(k)}" data-k="${k}" aria-pressed="${a===k}" ${locked?'disabled':''}><span class="bub">${X.mode==='learn'&&locked&&k===q.ans?ICON.check:X.mode==='learn'&&locked&&k===a?ICON.xmark:L4[k]}</span><span class="otx">${optH(o)}</span></button>`).join('')}</div>
+      ${X.mode==='learn'&&locked?`<div class="fb ${a===q.ans?'ok':'bad'}" role="status"><strong><span class="fb-i" aria-hidden="true">${a===q.ans?ICON.check:ICON.xmark}</span>${a===q.ans?tt.correctFb:tt.wrongFb+': '+L4[q.ans]}</strong><p>${M(esc(q.exp))}</p></div>`:''}
     </section>
   </div>
   <div class="ex-foot"><div class="ex-foot-in">
-    <button class="btn ghost" id="ex-prev" ${X.qi===0?'disabled':''}>${tt.prev}</button>
-    ${X.mode==='exam'?`<button class="btn ghost ${s.flag[X.qi]?'flagged':''}" id="ex-flag">${s.flag[X.qi]?tt.flagged:tt.flag}</button>`:''}
-    <button class="btn ghost" id="ex-map">${tt.map}</button>
-    ${last?`<button class="btn primary" id="ex-end">${lastSec?tt.finishTest:tt.finishSection}</button>`:`<button class="btn primary" id="ex-next">${tt.next}</button>`}
+    <button class="btn ghost ex-nav" id="ex-prev" ${X.qi===0?'disabled':''}><span class="arr-b">${ICON.arrow}</span><span>${tt.prev}</span></button>
+    ${X.mode==='exam'?`<button class="btn ghost ex-tool ${s.flag[X.qi]?'flagged':''}" id="ex-flag" aria-pressed="${!!s.flag[X.qi]}">${ICON.flag}<span class="l-long">${s.flag[X.qi]?tt.flagged:tt.flag}</span><span class="l-short">${s.flag[X.qi]?tt.flagged:tt.flagS}</span></button>`:''}
+    <button class="btn ghost ex-tool ${X.showMap?'on':''}" id="ex-map" aria-expanded="${!!X.showMap}">${ICON.grid}<span class="l-long">${tt.map}</span><span class="l-short">${tt.mapS}</span></button>
+    ${last?`<button class="btn primary ex-nav" id="ex-end">${lastSec?tt.finishTest:tt.finishSection}</button>`:`<button class="btn primary ex-nav" id="ex-next"><span>${tt.next}</span>${ICON.arrow}</button>`}
   </div></div>`;
   el.querySelectorAll('.opt').forEach(b=>b.onclick=()=>choose(+b.dataset.k));
   el.querySelectorAll('.dot').forEach(b=>b.onclick=()=>go(+b.dataset.i));
@@ -1963,15 +1974,16 @@ document.addEventListener('keydown',e=>{
 function renderResult(el){
   const r=X.result,tt=T[X.lang],a=r.att,L4=tt.letters; const avg=a.total?Math.round(a.time/a.total):0;
   const list=r.all.map((x,i)=>({...x,i})).filter(x=>r.filter==='all'||x.your!==x.q.ans);
+  const nWrong=a.total-a.correct, tier=a.pct>=90?3:a.pct>=75?2:a.pct>=50?1:0;
   el.innerHTML=`
-  <div class="ex-top"><div class="ex-title"><strong>${esc(X.title)}</strong><span>${X.reviewOnly?tt.reviewOf+' '+dateH(a.date):tt.resultTitle}</span></div>${X.reviewOnly&&X.kind==='model'?`<button class="btn ghost sm" id="rs-retake">${tt.retake}</button>`:''}<button class="btn primary sm" id="rs-close">${tt.done}</button></div>
+  <div class="ex-top"><div class="ex-title"><strong>${esc(X.title)}</strong><span>${X.reviewOnly?tt.reviewOf+' '+dateLong(a.date):tt.resultTitle}</span></div>${X.reviewOnly&&X.kind==='model'?`<button class="btn ghost sm" id="rs-retake">${tt.retake}</button>`:''}<button class="btn primary sm" id="rs-close">${tt.done}</button></div>
   <div class="rs">
-    <div class="rs-head card">${ring(a.pct,'%',120)}<div class="rs-kpis">
+    <div class="rs-head card t${tier}"><div class="rs-top">${ring(a.pct,'%',120)}<div class="rs-verdict"><div class="eyebrow">${tt.resultE}</div><h2>${tt.verdict[tier]}</h2>${nWrong&&!r.noDetail?`<button class="btn primary sm" id="rs-go-rev">${tt.seeMistakes(numL(nWrong))}</button>`:''}</div></div><div class="rs-kpis">
       <div><b class="num">${numL(a.correct)}</b><span>${tt.correct}</span></div><div><b class="num">${r.skipped==null?'—':numL(a.total-a.correct-r.skipped)}</b><span>${tt.wrong}</span></div>
       <div><b class="num">${r.skipped==null?'—':numL(r.skipped)}</b><span>${tt.skipped}</span></div><div><b class="num">${numL(avg)}${tt.sec}</b><span>${tt.avgTime}</span></div>
       ${a.est!=null?(PRO()?`<div><b class="num">${numL(a.est)}</b><span>${tt.estGat}</span></div>`:`<div><button class="kpi-lock" data-lock="analytics" aria-label="${tt.estGat}: ${t('lockT')}">${LOCKSVG}</button><span>${tt.estGat}</span></div>`):''}</div></div>
     ${X.kind==='diag'&&!r.noDetail?diagBlock(r):''}
-    ${r.noDetail?`<section class="card"><h3>${tt.summaryOnly}</h3><p class="muted">${tt.noDetail}</p></section>`:`<section class="card"><h3>${tt.bySkill}</h3>${Object.entries(r.bySkill).map(([s,b])=>barRow(SKILLS[s][X.lang],b.c/b.t,`${numL(b.c)}/${numL(b.t)}`)).join('')}</section>
+    ${r.noDetail?`<section class="card"><h3>${tt.summaryOnly}</h3><p class="muted">${tt.noDetail}</p></section>`:`${X.kind==='diag'?'':`<section class="card"><h3>${tt.bySkill}</h3>${Object.entries(r.bySkill).map(([s,b])=>barRow(SKILLS[s][X.lang],b.c/b.t,`${numL(b.c)}/${numL(b.t)}`)).join('')}</section>`}
     ${!PRO()&&!X.reviewOnly&&r.all.some(x=>x.your!==x.q.ans)?lockLine('analytics',t('ben').causes):''}
     <div class="rs-rev-head"><h3>${tt.review}</h3><div class="seg"><button class="${r.filter==='wrong'?'on':''}" data-f="wrong">${tt.onlyWrong}</button><button class="${r.filter==='all'?'on':''}" data-f="all">${tt.all}</button></div></div>
     <div class="rev-list">${list.map(x=>{ const ok=x.your===x.q.ans; const m=S.mistakes.find(z=>z.key===x.q.key); return `
@@ -1987,6 +1999,7 @@ function renderResult(el){
   </div>`;
   el.querySelectorAll('[data-lock]').forEach(b=>b.onclick=()=>hitLimit(b.dataset.lock));
   const rx=el.querySelector('#rs-xp'); if(rx) rx.onclick=()=>{ const k=rx.dataset.k; quitTest(); XP_BACK=k; track('xp_start',k); XP.open(k); };
+  { const g=el.querySelector('#rs-go-rev'); if(g) g.onclick=()=>{ r.filter='wrong'; renderResult(el); el.querySelector('.rs-rev-head')?.scrollIntoView({behavior:SMOOTH(),block:'start'}); }; }
   el.querySelector('#rs-close').onclick=quitTest; const rt=el.querySelector('#rs-retake'); if(rt) rt.onclick=()=>{ const k=X.mk; quitTest(); startTest('model',{k}); };
   el.querySelectorAll('.seg button').forEach(b=>b.onclick=()=>{ r.filter=b.dataset.f; renderResult(el); });
   el.querySelectorAll('.ai-btn').forEach(b=>b.onclick=()=>explainAI(r.all[+b.dataset.i],+b.dataset.i,b));
@@ -2032,6 +2045,11 @@ const ICON={
   book:'<svg viewBox="0 0 24 24"><path d="M5 4.5h11a3 3 0 0 1 3 3V20H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h11"/></svg>',
   official:'<svg viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z"/><path d="M9 12l2 2 4-4"/></svg>',
   check:'<svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+  flag:'<svg viewBox="0 0 24 24"><path d="M6 21V4.5"/><path d="M6 5h11l-2.5 4L17 13H6"/></svg>',
+  grid:'<svg viewBox="0 0 24 24"><rect x="4" y="4" width="6" height="6" rx="1.5"/><rect x="14" y="4" width="6" height="6" rx="1.5"/><rect x="4" y="14" width="6" height="6" rx="1.5"/><rect x="14" y="14" width="6" height="6" rx="1.5"/></svg>',
+  arrow:'<svg viewBox="0 0 24 24" class="arr"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
+  xmark:'<svg viewBox="0 0 24 24"><path d="M7 7l10 10M17 7L7 17"/></svg>',
+  flame:'<svg viewBox="0 0 24 24" class="i16"><path d="M12 3c.5 3.5 4.5 5.5 4.5 10a4.5 4.5 0 0 1-9 0c0-2 1-3.5 2-4.5.3 1.6 1 2.5 2 3 .2-3.2-.5-5.6.5-8.5z"/></svg>',
   gear:'<svg viewBox="0 0 24 24" class="i16"><circle cx="12" cy="12" r="3"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/></svg>'
 };
 for(const k in ICON) ICON[k]=ICON[k].replace('<svg ','<svg aria-hidden="true" focusable="false" ');
@@ -2100,7 +2118,7 @@ function taskItem(tk){ const d=taskDone(tk);
 function pageToday(){
   const dl=daysLeft(), est=estimate(), rd=readiness(), plan=buildPlan(), cw=currentWeek(), wk=plan[cw];
   const hasData=S.attempts.length>0, sp=sessionPlan(), doneToday=S.sessionDays.includes(todayStr()), checks=readyChecks();
-  const invite=!diagTaken()&&!hasData, dl2=acct()?dailyLeft():Infinity;
+  const invite=!diagTaken()&&!hasData, dl2=acct()?dailyLeft():Infinity, streak=calcStreak();
   const repCard=CLOUD_BUILD&&!PRO()&&!S.repHide&&!S.repSeen&&reportReady()?`<section class="card rep-card"><div><div class="eyebrow">${t('reportReadyE')}</div><h2>${t('reportReadyT')}</h2><p class="muted">${t('reportReadyD')}</p></div><div class="row"><a class="btn primary" href="#report">${t('reportOpen')}</a><button class="btn ghost sm" id="rp-hide">${t('dismiss')}</button></div></section>`:'';
   return `
   <section class="hero">
@@ -2111,6 +2129,7 @@ function pageToday(){
       <div class="hero-meta">
         ${dl!=null?`<span class="pill"><b class="num">${numL(Math.max(0,dl))}</b> ${t('daysLeft')}</span>`:PRO()?`<span class="pill"><a href="#plan">${t('setDate')}</a></span>`:`<button class="pill link pill-lock" data-lock="custom">${t('setDate')} ${LOCKSVG}</button>`}
         ${PRO()?`<span class="pill">${t('estScore')} <b class="num">${est==null?'—':numL(est)}</b></span>`:`<button class="pill link pill-lock" data-lock="analytics">${t('estScore')} ${LOCKSVG}</button>`}
+        ${streak>1?`<span class="pill streak">${ICON.flame} ${t('kStreak')} <b class="num">${numL(streak)}</b></span>`:''}
         <a class="pill link" href="#plan">${ICON.gear} ${t('settings')}</a>
       </div>
     </div>
@@ -2123,8 +2142,8 @@ function pageToday(){
   </section>`:`<section class="session card">
     <div class="sess-txt">
       <div class="eyebrow">${t('sessionTitle')}</div>
-      <h2>${doneToday?t('sessionDone'):t('sessionSub')}</h2>
-      <p class="muted">${t('sessionParts')(numL(sp.due.length),numL(sp.nWeak),numL(sp.nMix))}</p><div class="chips">${sp.weak.map(s=>`<span class="chip">${SKILLS[s][S.lang]}</span>`).join('')}</div>
+      <h2>${doneToday?t('sessionDone'):dl2===Infinity?t('sessionSub'):t('sessFree')(Math.min(25,dl2))}</h2>
+      ${dl2===Infinity?`<p class="muted">${t('sessionParts')(numL(sp.due.length),numL(sp.nWeak),numL(sp.nMix))}</p>`:''}<div class="chips">${sp.weak.map(s=>`<span class="chip">${SKILLS[s][S.lang]}</span>`).join('')}</div>
       ${dl2!==Infinity?`<p class="daily-left small">${dl2>0?t('dailyLeft')(numL(dl2),numL(FREE.dailyQuestions)):t('dailyOut')}</p>`:''}
     </div>
     ${dl2<=0?`<button class="btn primary xl" data-lock="daily">${LOCKSVG} ${t('unlock')}</button>`:`<button class="btn primary xl" data-start="session">${t('startSession')}</button>`}
@@ -2248,7 +2267,7 @@ function vocabAct(ok){ const st=S.vocab[S.lang]||(S.vocab[S.lang]={}); const due
 function pagePractice(){
   const due=dueList().length, pro=PRO(), dl=acct()?dailyLeft():Infinity, dt=diagTaken();
   const card=(k,title,desc,cls='',meta='')=>{ const lk=!pro&&(PRO_KINDS[k]||(k==='diag'&&dt));
-    if(lk) return `<article class="pcard locked ${cls}"><div><h3>${title} ${lockBadge()}</h3><p>${desc}</p>${meta}<p class="ben small">${k==='diag'?t('ben').diag:t('ben').test}</p></div><button class="btn soft" data-start="${k}">${LOCKSVG} ${t('unlock')}</button></article>`;
+    if(lk) return `<article class="pcard locked ${cls}"><div><h3>${title} ${lockBadge()}</h3><p>${desc}</p>${meta}${k==='diag'?`<p class="ben small">${t('ben').diag}</p>`:''}</div><button class="btn soft" data-start="${k}">${LOCKSVG} ${t('unlock')}</button></article>`;
     const out=!pro&&(k==='session'||k==='review')&&dl<=0;
     return `<article class="pcard ${cls}"><div><h3>${title}</h3><p>${desc}</p>${meta}</div>${out?`<button class="btn ${cls==='feature'?'primary':'soft'}" data-lock="daily">${LOCKSVG} ${t('unlock')}</button>`:`<button class="btn ${cls==='feature'?'primary':cls==='dark'?'sand':'soft'}" data-start="${k}" ${k==='review'&&!due?'disabled':''}>${t('start')}</button>`}</article>`; };
   const nMist=openMistakes().length;
@@ -2259,7 +2278,7 @@ function pagePractice(){
   <h2 class="sr-only">${t('practiceKinds')}</h2><div class="pgrid">
     ${card('session',t('pSession'),t('pSessionD'),'feature',dmeta)}
     ${card('diag',t('pDiag'),t('pDiagD'),'',dt&&!pro?`<p class="small">✓ ${t('diagDone')}</p>`:'')}
-    ${card('review',t('pReview'),t('pReviewD'),'',`<p class="due-n"><b class="num">${numL(due)}</b> ${t('due')}</p>${revHint}${!pro&&nMist>(+FREE.mistakesMax||0)?`<p class="small muted">${t('mistCap')(numL(FREE.mistakesMax))}</p>`:''}`)}
+    ${card('review',t('pReview'),t('pReviewD'),'',`${due?`<p class="due-n"><b class="num">${numL(due)}</b> ${t('due')}</p>`:''}${revHint}${!pro&&nMist>(+FREE.mistakesMax||0)?`<p class="small muted">${t('mistCap')(numL(FREE.mistakesMax))}</p>`:''}`)}
     ${card('mock',t('pMock'),t('pMockD'),'dark',`<p class="small">${S.track==='sci'?(S.lang==='ar'?'علمي: لفظي، كمي، لفظي، كمي':'Science: V, Q, V, Q'):(S.lang==='ar'?'نظري: لفظي، لفظي، كمي، لفظي':'Humanities: V, V, Q, V')}</p>`)}
     ${card('verbal',t('pVerbal'),t('pVerbalD'))}
     ${card('quant',t('pQuant'),t('pQuantD'))}
@@ -2296,7 +2315,7 @@ function pageProgress(){
     <section class="card"><h2>${t('trendTitle')}</h2>${pro?trend(D.attempts.filter(a=>a.est!=null)):lockLine('analytics',t('ben').est)}</section>
     <section class="card"><h2>${t('causesTitle')}</h2>${!pro?lockLine('analytics',t('ben').causes):ctot?Object.entries(cz).map(([k,v])=>`<div class="cause-row"><div class="cr-h"><b>${t('causes')[k]}</b><span class="num">${numL(Math.round(100*v/ctot))}%</span></div><span class="bt"><span class="bf sand" style="inline-size:${Math.round(100*v/ctot)}%"></span></span><p class="small muted">${t('causeFix')[k]}</p></div>`).join(''):`<p class="muted">${t('noCauses')}</p>`}</section>
     <section class="card"><h2>${t('roadTitle')}</h2><ul class="checks">${t('ready').map((x,i)=>`<li class="${checks[i]?'ok':''}"><span class="ck">${checks[i]?ICON.check:''}</span>${x}</li>`).join('')}</ul></section>
-    <section class="card"><h2>${t('historyTitle')}</h2>${D.attempts.length?`<div class="tbl"><table><thead><tr><th>${t('date')}</th><th>${t('type')}</th><th>${t('score')}</th><th>${t('estGat')}</th><th></th></tr></thead><tbody>${D.attempts.slice(-30).reverse().map(a=>{ const has=!!a.id&&pro; return `<tr class="${has?'clickable':''}" ${has?`data-review="${a.id}" tabindex="0"`:''}><td class="num">${dateH(a.date)}</td><td>${t('kinds')[a.kind]||a.kind}${a.mk?' '+numL(a.mk):''}${a.skill?' · '+SKILLS[a.skill][S.lang]:''}</td><td class="num">${numL(a.pct)}%</td><td class="num">${a.est==null?'—':pro?numL(a.est):LOCKSVG}</td><td>${has?`<span class="rev-link">${getDetail(a.id)?t('reviewBtn'):t('summaryOnly')}</span>`:!pro&&a.id?`<button type="button" class="rev-lock" data-lock="review" aria-label="${t('reviewBtn')} · ${t('lockT')}">${LOCKSVG}${t('reviewBtn')}</button>`:''}</td></tr>`; }).join('')}</tbody></table></div><p class="small muted">${pro?t('reviewHint'):t('ben').review}</p>`:`<p class="muted">${t('noHistory')}</p>`}</section>
+    <section class="card"><h2>${t('historyTitle')}</h2>${D.attempts.length?`<div class="tbl"><table><thead><tr><th>${t('date')}</th><th>${t('type')}</th><th>${t('score')}</th><th>${t('estGat')}</th><th></th></tr></thead><tbody>${D.attempts.slice(-30).reverse().map(a=>{ const has=!!a.id&&pro; return `<tr class="${has?'clickable':''}" ${has?`data-review="${a.id}" tabindex="0"`:''}><td class="num">${dateShort(a.date)}</td><td>${t('kinds')[a.kind]||a.kind}${a.mk?' '+numL(a.mk):''}${a.skill?' · '+SKILLS[a.skill][S.lang]:''}</td><td class="num">${numL(a.pct)}%</td><td class="num">${a.est==null?'—':pro?numL(a.est):LOCKSVG}</td><td>${has?`<span class="rev-link">${getDetail(a.id)?t('reviewBtn'):t('summaryOnly')}</span>`:!pro&&a.id?`<button type="button" class="rev-lock" data-lock="review" aria-label="${t('reviewBtn')} · ${t('lockT')}">${LOCKSVG}${t('reviewBtn')}</button>`:''}</td></tr>`; }).join('')}</tbody></table></div><p class="small muted">${pro?t('reviewHint'):t('ben').review}</p>`:`<p class="muted">${t('noHistory')}</p>`}</section>
     <section class="card wide save-card" id="save"><h2>${t('saveTitle')}</h2>
       <div class="save-grid">
         ${window.CLOUD?`<div class="save-opt cloud ${window.CLOUD.user?'ok':''}"><b>${t('cloudT')}</b><p class="small">${window.CLOUD.user?t('cloudOn')+' '+esc(window.CLOUD.user.email||''):t('cloudOff')}</p><p class="small muted" id="cloud-line">${cloudLine()}</p><button class="btn ${window.CLOUD.user?'ghost':'primary'} sm" data-acct="1">${window.CLOUD.user?t('acctManage'):t('acctJoin')}</button></div>`:''}
@@ -2326,11 +2345,11 @@ function trend(att){
   const W0=560,H=220,p={l:34,r:14,t:18,b:24},n=att.length; const lo=Math.max(0,Math.floor((Math.min(...att.map(a=>a.est))-10)/10)*10), hi=100;
   const x=i=>p.l+(n===1?(W0-p.l-p.r)/2:i*(W0-p.l-p.r)/(n-1)), y=v=>p.t+(hi-v)*(H-p.t-p.b)/(hi-lo);
   const g=[]; for(let v=lo;v<=hi;v+=10) g.push(v); const line=att.map((a,i)=>`${i?'L':'M'}${x(i).toFixed(1)} ${y(a.est).toFixed(1)}`).join(' ');
-  return `<div class="chart" dir="ltr"><svg viewBox="0 0 ${W0} ${H}" role="img" aria-label="${t('trendTitle')}">${g.map(v=>`<line x1="${p.l}" x2="${W0-p.r}" y1="${y(v)}" y2="${y(v)}" class="grid"/><text x="${p.l-6}" y="${y(v)+4}" text-anchor="end" class="ax">${v}</text>`).join('')}
+  return `<div class="chart" dir="ltr"><svg viewBox="0 0 ${W0} ${H}" role="img" aria-label="${t('trendTitle')}">${g.map(v=>`<line x1="${p.l}" x2="${W0-p.r}" y1="${y(v)}" y2="${y(v)}" class="grid"/><text x="${p.l-6}" y="${y(v)+4}" text-anchor="end" class="ax">${numL(v)}</text>`).join('')}
   <line x1="${p.l}" x2="${W0-p.r}" y1="${y(S.target)}" y2="${y(S.target)}" class="tgt"/>
   <path d="${line} L${x(n-1).toFixed(1)} ${y(lo)} L${x(0).toFixed(1)} ${y(lo)} Z" class="area"/><path d="${line}" class="ln"/>
   ${att.map((a,i)=>`<g class="pt"><circle cx="${x(i)}" cy="${y(a.est)}" r="${i===n-1?6:4}"/><circle cx="${x(i)}" cy="${y(a.est)}" r="14" class="hit"><title>${a.date} · ${t('kinds')[a.kind]||a.kind}: ${a.est}</title></circle></g>`).join('')}
-  <text x="${x(n-1)}" y="${y(att[n-1].est)-12}" text-anchor="middle" class="lab">${att[n-1].est}</text></svg></div>`;
+  <text x="${x(n-1)}" y="${y(att[n-1].est)-12}" text-anchor="middle" class="lab">${numL(att[n-1].est)}</text></svg></div>`;
 }
 function pageGuide(){
   const g=GUIDE[S.lang]; const secs=[{id:'method',h:t('methodTitle')},...g];
@@ -2511,8 +2530,9 @@ function bindMain(){
   m.querySelectorAll('[data-scroll]').forEach(a=>a.onclick=e=>{ e.preventDefault(); document.getElementById(a.dataset.scroll)?.scrollIntoView({behavior:SMOOTH(),block:'start'}); });
   bindSettings('pf');
   const on=(id,f)=>{ const b=$(id); if(b) b.onclick=f; };
-  on('#vcard',()=>{ if(!VC.flip){ VC.flip=true; renderRoute(); } });
-  on('#fc-card',()=>{ FCV.flip=!FCV.flip; renderRoute(); }); on('#fc-know',()=>cardAct(true)); on('#fc-again',()=>cardAct(false));
+  const showBtns=()=>requestAnimationFrame(()=>{ try{ $('#main .vbtns:not(:empty)')?.scrollIntoView({block:'nearest',behavior:SMOOTH()}); }catch(e){} }); /* the answer buttons appear under the card: bring them on screen on phones */
+  on('#vcard',()=>{ if(!VC.flip){ VC.flip=true; renderRoute(); showBtns(); } });
+  on('#fc-card',()=>{ FCV.flip=!FCV.flip; renderRoute(); if(FCV.flip) showBtns(); }); on('#fc-know',()=>cardAct(true)); on('#fc-again',()=>cardAct(false));
   m.querySelectorAll('[data-deck]').forEach(b=>b.onclick=()=>{ FCV.deck=b.dataset.deck; FCV.flip=false; renderRoute(); });
   m.querySelectorAll('[data-model]').forEach(b=>b.onclick=()=>startTest('model',{k:+b.dataset.model}));
   on('#v-know',()=>vocabAct(true)); on('#v-again',()=>vocabAct(false));
@@ -2619,7 +2639,7 @@ function renderAcct(){
   const pwf=el.querySelector('#ac-pwf'); if(pwf) pwf.onsubmit=e=>{ e.preventDefault(); AC.pwOpen=true; const cu=el.querySelector('#ac-cur').value, nw=el.querySelector('#ac-new').value; if(nw.length<8){ AC.err=t('authErr')['weak-password']; return renderAcct(); } if(nw.length>200){ AC.err=t('pwLong'); return renderAcct(); }
     run(async()=>{ try{ await C.changePassword(cu,nw); }catch(x){ if(x&&x.code==='invalid-credential'){ const y=new Error('cur'); y.code='cur-pw'; throw y; } throw x; } AC.info=t('pwChanged'); AC.pwOpen=false; }); };
   // sign out: sync first, then remove this account's progress from the device (it is safe in the cloud)
-  on('#ac-out',()=>run(async()=>{ if(C.pushNow){ await C.pushNow(); if(C.status==='error'){ const x=new Error('sync'); x.code='sync-first'; throw x; } } await C.signOut(); clearLocal(); AC.info=t('signedOut'); if(PREM){ try{ sessionStorage.setItem('masar100_msg','signedOut'); }catch(e){} setTimeout(()=>location.reload(),600); } /* drop premium lessons from memory; the confirmation is shown again after the reload */ }));
+  on('#ac-out',()=>run(async()=>{ if(C.pushNow){ await C.pushNow(); if(C.status==='error'){ const x=new Error('sync'); x.code='sync-first'; throw x; } } await C.signOut(); clearLocal(); AC.info=t('signedOut'); AC.tab='signin'; /* the message says "sign in again": show the sign-in form, not sign-up */ if(PREM){ try{ sessionStorage.setItem('masar100_msg','signedOut'); }catch(e){} setTimeout(()=>location.reload(),600); } /* drop premium lessons from memory; the confirmation is shown again after the reload */ }));
   on('#ac-del',()=>{ AC.confirmDel=true; renderAcct(); }); on('#ac-nodel',()=>{ AC.confirmDel=false; renderAcct(); });
   on('#ac-del2',()=>run(async()=>{ await C.deleteAccount(); if(X) { clearInterval(timer); X=null; examShow(false); } clearLocal(); AC.confirmDel=false; AC.deleted=true; }));
 }
@@ -2794,7 +2814,7 @@ if(XPOK()){ XP.setHooks({onDone:(k,sc,n)=>{ S.xp=S.xp||{}; const w=S.xp[k]; if(!
     /* the student finished every free explainer of this skill and more are waiting: one warm invitation after the player closes */
     if(!PRO()){ const L0=XP.get?.(k), sk=L0&&L0.sk; if(sk&&lockedXp(sk).length&&xpList(sk).every(x=>S.xp[x.key])) XP_NUDGE=true; } },
   onClose:()=>{ const y=window.scrollY; renderRoute(); window.scrollTo(0,y); if(XP_NUDGE){ XP_NUDGE=false; maybeNudge('xp'); } const b=XP_BACK&&document.querySelector(`[data-xp="${XP_BACK}"]`); if(b) b.focus({preventScroll:true}); }}); XP.loadTracks(); }
-window.addEventListener('hashchange',()=>{ if(document.body.classList.contains('xp-open')&&XPOK()) XP.close(); closeUpgrade(); renderRoute(); authIntent(); window.scrollTo(0,0); });
+window.addEventListener('hashchange',()=>{ if(document.body.classList.contains('xp-open')&&XPOK()) XP.close(); closeUpgrade(); if(NUDGE){ NUDGE=null; renderNudge(); } /* the nudge belongs to the moment it was shown; moving on dismisses it so it never covers another page's buttons */ renderRoute(); authIntent(); window.scrollTo(0,0); });
 renderRoute(); initAI(); checkLive();
 if(!STORE_OK){ SAVE_WARNED=true; setTimeout(()=>toast(t('saveFail')),900); }
 try{ const msg=sessionStorage.getItem('masar100_msg'); if(msg){ sessionStorage.removeItem('masar100_msg'); if(T[S.lang][msg]) setTimeout(()=>toast(t(msg)),700); } }catch(e){} /* a message carried over a reload (e.g. sign-out) */

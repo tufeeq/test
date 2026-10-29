@@ -11,8 +11,8 @@ const $x=s=>document.querySelector(s);
 let LG='ar';
 const AD=s=>LG==='en'?String(s):String(s).replace(/\d/g,d=>'٠١٢٣٤٥٦٧٨٩'[d]).replace(/\./g,'٫');
 const UI={
- ar:{close:'إغلاق',of:(a,b)=>`شرح ${a} من ${b}`,start:'ابدأ الشرح',startSub:'شغّل الصوت. يتوقف الشرح عند الوقفات التفاعلية حتى تجرّب بنفسك.',play:'تشغيل',pause:'إيقاف مؤقت',prev:'المشهد السابق',rep:'أعد المشهد',next:'المشهد التالي',speed:'السرعة',voice:'الصوت',cc:'النص المكتوب',scenes:'المشاهد',after:'بعد هذا الشرح',press:'اضغط «ابدأ الشرح».',inter:'تفاعلي',final:'التحدي الختامي',yourTurn:'دورك: جرّب على اللوحة.',clipEnd:'انتهى المقطع',fullQ:'تريد الشرح كاملًا مع التحدي؟',openFull:'افتح الشرح الكامل',again:'أعد المقطع',quizIntro:'التحدي الختامي: أسئلة سريعة على الفكرة نفسها.',qn:(a,b)=>`التحدي ${a} من ${b}`,right:'صحيح.',wrong:'ليس هذا.',nextQ:'التالي',result:'النتيجة',passed:'أتممت الشرح.',failed:'راجع الفكرة ثم أعد التحدي.',nextL:'الشرح التالي: ',done:'تم',retry:'أعد التحدي',rewatch:'أعد الشرح',bravo:'أحسنت!',retryCap:'أعد المحاولة بعد مراجعة المشهد الذي أخطأت فيه.',sp:['٠٫٨٥×','١×','١٫٢٥×']},
- en:{close:'Close',of:(a,b)=>`Explainer ${a} of ${b}`,start:'Start the explainer',startSub:'Turn your sound on. The explainer pauses at interactive stops so you can try it yourself.',play:'Play',pause:'Pause',prev:'Previous scene',rep:'Replay scene',next:'Next scene',speed:'Speed',voice:'Voice',cc:'Captions',scenes:'Scenes',after:'After this explainer',press:'Press “Start the explainer”.',inter:'Interactive',final:'Final challenge',yourTurn:'Your turn: try it on the board.',clipEnd:'Clip finished',fullQ:'Want the full explainer with the challenge?',openFull:'Open the full explainer',again:'Replay clip',quizIntro:'Final challenge: quick questions on the same idea.',qn:(a,b)=>`Challenge ${a} of ${b}`,right:'Correct.',wrong:'Not quite.',nextQ:'Next',result:'Result',passed:'Explainer complete.',failed:'Review the idea, then retry the challenge.',nextL:'Next explainer: ',done:'Done',retry:'Retry the challenge',rewatch:'Rewatch',bravo:'Well done!',retryCap:'Try again after reviewing the scene you missed.',sp:['0.85×','1×','1.25×']}};
+ ar:{close:'إغلاق',of:(a,b)=>`شرح ${a} من ${b}`,start:'ابدأ الشرح',startSub:'شغّل الصوت. يتوقف الشرح عند الوقفات التفاعلية حتى تجرّب بنفسك.',play:'تشغيل',pause:'إيقاف مؤقت',prev:'المشهد السابق',rep:'أعد المشهد',next:'المشهد التالي',speed:'السرعة',voice:'الصوت',cc:'النص المكتوب',scenes:'المشاهد',after:'بعد هذا الشرح',press:'اضغط «ابدأ الشرح».',inter:'تفاعلي',final:'التحدي الختامي',yourTurn:'دورك: جرّب على اللوحة.',clipEnd:'انتهى المقطع',fullQ:'تريد الشرح كاملًا مع التحدي؟',openFull:'افتح الشرح الكامل',again:'أعد المقطع',quizIntro:'التحدي الختامي: أسئلة سريعة على الفكرة نفسها.',qn:(a,b)=>`التحدي ${a} من ${b}`,right:'صحيح.',wrong:'ليس هذا.',nextQ:'التالي',result:'النتيجة',passed:'أتممت الشرح.',failed:'راجع الفكرة ثم أعد التحدي.',nextL:'الشرح التالي: ',done:'تم',retry:'أعد التحدي',rewatch:'أعد الشرح',bravo:'أحسنت!',retryCap:'أعد المحاولة بعد مراجعة المشهد الذي أخطأت فيه.',rotate:'أدر هاتفك أفقيًا لترى اللوحة أكبر.',need:(n,m)=>`تحتاج إلى ${n} من ${m} لإتمام الشرح.`,backL:'العودة إلى المشهد الأخير',sp:['٠٫٨٥×','١×','١٫٢٥×']},
+ en:{close:'Close',of:(a,b)=>`Explainer ${a} of ${b}`,start:'Start the explainer',startSub:'Turn your sound on. The explainer pauses at interactive stops so you can try it yourself.',play:'Play',pause:'Pause',prev:'Previous scene',rep:'Replay scene',next:'Next scene',speed:'Speed',voice:'Voice',cc:'Captions',scenes:'Scenes',after:'After this explainer',press:'Press “Start the explainer”.',inter:'Interactive',final:'Final challenge',yourTurn:'Your turn: try it on the board.',clipEnd:'Clip finished',fullQ:'Want the full explainer with the challenge?',openFull:'Open the full explainer',again:'Replay clip',quizIntro:'Final challenge: quick questions on the same idea.',qn:(a,b)=>`Challenge ${a} of ${b}`,right:'Correct.',wrong:'Not quite.',nextQ:'Next',result:'Result',passed:'Explainer complete.',failed:'Review the idea, then retry the challenge.',nextL:'Next explainer: ',done:'Done',retry:'Retry the challenge',rewatch:'Rewatch',bravo:'Well done!',retryCap:'Try again after reviewing the scene you missed.',rotate:'Turn your phone sideways for a bigger board.',need:(n,m)=>`You need ${n} of ${m} to complete it.`,backL:'Back to the last scene',sp:['0.85×','1×','1.25×']}};
 const u=k=>UI[LG][k];
 const escx=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const escq=s=>LG==='ar'?escx(s).replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹]+/g,m=>'<sup>'+m.replace(/./g,c=>SUP[c]||c)+'</sup>'):escx(s);  /* quiz text: Arabic exponents as raised Arabic-Indic digits */
@@ -98,10 +98,14 @@ function compileScene(sc){
 /* option buttons drawn on the stage; resolves with true/false */
 function askChoice(stage,A){ return new Promise(res=>{
   const opts=A.opts, n=opts.length, two=n===4&&!A.column, y0=A.y??(two?182:150);
+  /* on a phone the board is drawn at ~60% size: option labels get a larger font, and any label too wide for its button shrinks to fit */
+  const narrow=(stage.clientWidth||640)<520, fs0=A.s||21, fs=narrow?Math.round(fs0*1.2):fs0;
   const gs=opts.map((t,i)=>{ const g=el('g',{class:'hot',tabindex:0,role:'button','aria-label':t},stage);
     const w=two?250:420, h=two?54:48, cx=two?(LG==='en'?[170,470]:[470,170])[i%2]:320, cy=two?y0+Math.floor(i/2)*70:y0+i*58;
     el('rect',{x:cx-w/2+4,y:cy-h/2+4,width:w,height:h,rx:12,class:'f-edge'},g); const r=el('rect',{x:cx-w/2,y:cy-h/2,width:w,height:h,rx:12,class:'f-surface hot-ring',stroke:'var(--edge)','stroke-width':2},g);
-    txt(g,{x:cx,y:cy+7,s:A.s||21,text:t,dir:(A.ltr||LG==='en')?'ltr':undefined}); return {g,r}; });
+    const tx=txt(g,{x:cx,y:cy+fs*0.33,s:fs,text:t,dir:(A.ltr||LG==='en')?'ltr':undefined});
+    try{ const len=tx.getComputedTextLength(), room=w-28; if(len>room){ const f=Math.max(12,fs*room/len); tx.setAttribute('font-size',f); tx.setAttribute('y',cy+f*0.33); } }catch(e){}
+    return {g,r}; });
   gsap.from(gs.map(o=>o.g),{opacity:0,y:18,stagger:.1,duration:.3});
   gs.forEach((o,i)=>{ const pick=()=>{ gs.forEach(x=>x.g.style.pointerEvents='none'); o.r.setAttribute('class',(i===A.a?'f-oksoft':'f-badsoft')+' hot-ring'); if(i!==A.a) gs[A.a].r.setAttribute('class','f-oksoft hot-ring');
       gsap.to(gs.filter((x,j)=>j!==A.a&&j!==i).map(x=>x.g),{opacity:.35,duration:.3}); gsap.delayedCall(1.4,()=>{ if(A.show&&A.show.length) gsap.to(gs.map(x=>x.g),{opacity:0,duration:.4}); }); res(i===A.a); };
@@ -156,6 +160,50 @@ const IC={
   cc:'<svg class="xp-ic" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M10 10.5a2.5 2.5 0 1 0 0 3M17 10.5a2.5 2.5 0 1 0 0 3"/></svg>',
   x:'<svg class="xp-ic" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>',
   check:'<svg class="xp-ic" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7"/></svg>' };
+/* Player refinements that belong to the engine (the base player styles live in app.css): 44px tap targets, the final
+   challenge laid out in the page flow instead of squeezed inside the 16:9 board on phones, a side-by-side layout for
+   phones held sideways, answer marks that do not rely on colour alone, and the result card. Injected once. */
+const XCSS=`
+.xp .xp-ib{inline-size:44px;block-size:44px}.xp .xp-ib.main{inline-size:52px;block-size:52px}
+.xp .xp-ib:disabled{opacity:.35;cursor:default;box-shadow:none}
+.xp .xp-speed button{block-size:44px;min-inline-size:44px}
+.xp .xp-btn{min-block-size:44px;padding:8px 16px;display:inline-flex;align-items:center;justify-content:center;gap:6px;text-align:center;line-height:1.35}
+.xp .xp-btn:active{transform:translate(1px,1px);box-shadow:1px 1px 0 var(--edge)}
+.xp .xp-chap button{min-block-size:44px}
+.xp .xp-opt{min-block-size:48px;display:flex;align-items:center;gap:8px;line-height:1.5;transition:border-color .15s,background-color .15s}
+.xp .xp-opt .mk{margin-inline-start:auto;inline-size:22px;block-size:22px;flex:none;border-radius:50%;display:none;place-items:center}
+.xp .xp-opt .mk .xp-ic{inline-size:14px;block-size:14px;stroke-width:3}
+.xp .xp-opt.right .mk{display:grid;background:var(--ok);color:var(--surface)} .xp .xp-opt.wrong .mk{display:grid;background:var(--bad);color:var(--surface)}
+.xp .xp-opt:disabled{cursor:default;color:var(--ink)} .xp .xp-opt:disabled:not(.right):not(.wrong){opacity:.6}
+.xp .xp-why{border-inline-start:4px solid var(--line);line-height:1.7}.xp .xp-why.ok{border-inline-start-color:var(--ok)}.xp .xp-why.no{border-inline-start-color:var(--bad)}
+.xp .xp-quiz h3{line-height:1.6}
+.xp .xp-quiz h3:focus{outline:none}
+.xp-stage-wrap.xp-q .xp-stage,.xp-stage-wrap.xp-q .xp-scene-t{display:none}
+.xp-stage-wrap.xp-q .xp-quiz{position:relative;inset:auto;aspect-ratio:16/9;overflow:visible;background:var(--surface);border-start-start-radius:16px;border-start-end-radius:16px}
+.xp .xp-eyebrow .xp-dot:first-child::before{display:none}
+.xp-res{display:flex;align-items:center;gap:14px}
+.xp-res .ic{inline-size:56px;block-size:56px;border-radius:50%;display:grid;place-items:center;flex:none;border:2px solid var(--edge);box-shadow:2px 2px 0 var(--edge)}
+.xp-res .ic .xp-ic{inline-size:28px;block-size:28px;stroke-width:3}
+.xp-res.ok .ic{background:var(--pri);color:var(--pri-ink)} .xp-res.no .ic{background:var(--butter);color:var(--note-ink)}
+.xp-need{margin:0;color:var(--ink2);font-size:.92rem}
+.xp-rot{display:none;margin-top:4px;color:var(--ink2);font-size:.8rem}
+@media (orientation:portrait) and (max-width:560px){.xp-rot{display:block}}
+@media (max-width:560px){.xp .xp-ctl{gap:6px;padding:8px 10px}.xp .xp-speed button{padding:0 8px}
+ .xp .xp-stage-wrap{display:flex;flex-direction:column}.xp .xp-segs{order:-2}
+ .xp .xp-scene-t{position:static;order:-1;padding:6px 14px 0;min-block-size:1.5em;line-height:1.4}}  /* the scene title sits above the small board instead of over its top corner */
+@media (orientation:landscape) and (max-height:540px) and (min-width:600px){
+ .xp .xp-in{padding:6px 12px 16px}.xp .xp-top{margin-block:0 6px}.xp .xp-top h2{font-size:1.05rem}.xp .xp-eyebrow{font-size:.85rem}
+ .xp .xp-grid{grid-template-columns:1fr}
+ .xp .xp-main{display:grid;grid-template-columns:minmax(0,calc((100dvh - 96px) * 16 / 9)) minmax(200px,1fr);grid-template-rows:1fr auto;align-items:stretch}
+ .xp .xp-stage-wrap{grid-row:1 / 3;border-radius:0;border-start-start-radius:18px;border-end-start-radius:18px}
+ .xp .xp-cap{border-block-start:2px solid var(--edge);border-inline-start:0;border-start-end-radius:18px;font-size:.95rem;line-height:1.75;overflow:auto;min-block-size:0}
+ .xp .xp-ctl{border-inline-start:0;border-radius:0;border-end-end-radius:18px;gap:6px;padding:8px}
+ .xp .xp-ctl .xp-sp{display:none}
+ .xp-stage-wrap.xp-q{grid-row:1 / 3}
+}
+@media (prefers-reduced-motion:reduce){.xp .xp-btn:active{transform:none}.xp .xp-opt{transition:none}}
+`;
+function injectCss(){ if(document.getElementById('xp-ux')) return; const st=document.createElement('style'); st.id='xp-ux'; st.textContent=XCSS; document.head.appendChild(st); }
 let P=null, RUN=0;
 /* One <audio> element per player session. Mobile browsers only let an element make sound after it was started from a tap,
    so the first tap inside the player calls play() on it (no source yet: it fails harmlessly) and every clip reuses it. */
@@ -167,10 +215,11 @@ function trackFor(key){ const T=TRACKS[key]; return T&&T.segs&&T.segs.length?T:n
 function close(){ stopPlayer(); const o=$x('#xp'); if(o) o.remove(); document.body.classList.remove('xp-open'); document.removeEventListener('keydown',onKey); HOOKS.onClose(); }
 function onKey(e){ if(!P) return; if(e.key==='Escape'){ close(); return; }
   if(e.key===' '&&!e.target.closest('button,input,textarea,[role=button],.hot')){ e.preventDefault(); $x('#xp-pp').click(); return; }
+  if((e.key==='ArrowLeft'||e.key==='ArrowRight')&&P.started&&!e.altKey&&!e.ctrlKey&&!e.metaKey&&!e.target.closest('input,textarea,.hot,.xp-opt,.xp-speed')){ const fwd=(e.key==='ArrowRight')===(LG==='en'); const b=$x(fwd?'#xp-nxt':'#xp-prev'); if(b&&!b.disabled){ e.preventDefault(); b.click(); } return; }
   if(e.key==='Tab'){ /* keep keyboard focus inside the dialog */ const o=$x('#xp'); if(!o) return; const f=[...o.querySelectorAll('button:not([disabled]),[tabindex="0"],a[href]')].filter(x=>x.offsetParent!==null||x.getClientRects().length); if(!f.length) return;
     const first=f[0], last=f[f.length-1], a=document.activeElement; if(e.shiftKey&&(a===first||!o.contains(a))){ e.preventDefault(); last.focus(); } else if(!e.shiftKey&&(a===last||!o.contains(a))){ e.preventDefault(); first.focus(); } } }
 function open(key,opt={}){
-  if(!HAS_GSAP) return; stopPlayer(); const L=LESSONS[key]; if(!L) return; LG=L.lang; TTS.pick();
+  if(!HAS_GSAP) return; stopPlayer(); const L=LESSONS[key]; if(!L) return; LG=L.lang; TTS.pick(); injectCss();
   const only=opt.only; const scenes=only!=null?[only]:L.scenes.map((_,i)=>i);
   P={L,key,scenes,idx:0,playing:false,started:false,only,tl:null,cc:true,waiting:false,au:null,primed:false,noTrack:false};
   let o=$x('#xp'); if(!o){ o=document.createElement('div'); o.id='xp'; o.className='xp'; o.setAttribute('role','dialog'); o.setAttribute('aria-modal','true'); document.body.appendChild(o);
@@ -179,14 +228,14 @@ function open(key,opt={}){
   document.body.classList.add('xp-open'); o.setAttribute('aria-label',L.title);
   const sibs=forSkill(L.sk,L.lang), ix=sibs.indexOf(L);
   o.innerHTML=`<div class="xp-in">
-    <div class="xp-top"><button class="xp-ib" id="xp-x" aria-label="${u('close')}">${IC.x}</button><div class="xp-tt"><span class="xp-eyebrow"><span>${u('of')(AD(ix+1),AD(sibs.length))}</span>${L.min?`<span class="xp-dot">${L.min}</span>`:''}</span><h2>${escx(opt.title||L.title)}</h2></div></div>
+    <div class="xp-top"><button class="xp-ib" id="xp-x" aria-label="${u('close')}">${IC.x}</button><div class="xp-tt"><span class="xp-eyebrow">${sibs.length>1?`<span>${u('of')(AD(ix+1),AD(sibs.length))}</span>`:''}${L.min?`<span class="xp-dot">${L.min}</span>`:''}</span><h2>${escx(opt.title||L.title)}</h2></div></div>
     <div class="xp-grid">
-      <div>
+      <div class="xp-main">
         <div class="xp-stage-wrap" id="xp-sw">
-          <div class="xp-segs" id="xp-segs">${scenes.map(()=>'<i><b></b></i>').join('')}</div>
+          <div class="xp-segs" id="xp-segs" aria-hidden="true">${scenes.map(()=>'<i><b></b></i>').join('')}</div>
           <svg id="xp-stage" class="xp-stage" viewBox="0 0 640 360" role="img" aria-label="${escx(L.title)}"></svg>
           <div class="xp-scene-t" id="xp-scene-t"></div>
-          <div class="xp-cover" id="xp-cover"><button class="xp-big" id="xp-start"><span class="c">${IC.play}</span><b>${u('start')}</b><small>${u('startSub')}</small></button></div>
+          <div class="xp-cover" id="xp-cover"><button class="xp-big" id="xp-start"><span class="c">${IC.play}</span><b>${u('start')}</b><small>${u('startSub')}<span class="xp-rot">${u('rotate')}</span></small></button></div>
         </div>
         <div class="xp-cap" id="xp-cap" aria-live="polite"></div>
         <div class="xp-ctl">
@@ -209,7 +258,7 @@ function open(key,opt={}){
   renderChapters(); setSceneTitle(); document.addEventListener('keydown',onKey);
   $x('#xp-x').onclick=close;
   $x('#xp-start').onclick=()=>{ $x('#xp-cover').hidden=true; P.started=true; playScene(0); };
-  $x('#xp-pp').onclick=()=>{ if(!P.started){ $x('#xp-start').click(); return; } P.playing?pause():resume(); };
+  $x('#xp-pp').onclick=()=>{ if(!P.started){ $x('#xp-start').click(); return; } if(P.waiting){ const h=$x('#xp-stage .hot'); if(h) h.focus(); return; } P.playing?pause():resume(); };
   $x('#xp-nxt').onclick=()=>go(P.idx+1); $x('#xp-prev').onclick=()=>go(P.idx-1); $x('#xp-rep').onclick=()=>go(P.idx);
   $x('#xp-vo').onclick=()=>{ TTS.on=!TTS.on; $x('#xp-vo').setAttribute('aria-pressed',String(TTS.on)); if(P.started&&!P.waiting&&P.idx<P.scenes.length) playScene(P.idx); };
   $x('#xp-ccb').onclick=()=>{ P.cc=!P.cc; $x('#xp-ccb').setAttribute('aria-pressed',String(P.cc)); $x('#xp-cap').classList.toggle('off',!P.cc); };
@@ -225,7 +274,11 @@ function pause(){ if(!P) return; setPlaying(false); if(P.trk&&P.trk.audio){ P.tr
 function resume(){ if(!P) return; setPlaying(true); if(P.trk&&P.trk.audio){ gsap.globalTimeline.resume(); if(!P.waiting) P.trk.audio.play().catch(()=>{}); return; } if(P.tl) P.tl.resume(); TTS.resume(); }
 function go(i){ if(!P) return; if(i<0) i=0; if(i>=P.scenes.length){ P.only!=null?finishQuick():showQuiz(); return; } playScene(i); }
 function segProgress(i,frac){ document.querySelectorAll('#xp-segs i').forEach((s,j)=>{ s.classList.toggle('done',j<i); const b=s.querySelector('b'); if(j===i) b.style.inlineSize=Math.round(frac*100)+'%'; else if(j>i) b.style.inlineSize='0'; else b.style.inlineSize=''; }); }
-function setupSceneAt(pi){ if(P.tl) P.tl.kill(); gsap.killTweensOf('*'); gsap.globalTimeline.resume(); const q=$x('#xp-quiz'); if(q) q.remove();
+/* the final challenge / end card replaces the board: scene-only controls are disabled meanwhile */
+function quizMode(on){ ['#xp-pp','#xp-rep','#xp-nxt'].forEach(id=>{ const b=$x(id); if(b) b.disabled=on; }); const w=$x('#xp-sw'); if(w) w.classList.toggle('xp-q',on); }
+function clearQuiz(){ const q=$x('#xp-quiz'); const back=q&&q.contains(document.activeElement); if(q) q.remove(); quizMode(false); if(back) $x('#xp-pp')?.focus(); }
+function quizBox(){ let d=$x('#xp-quiz'); if(!d){ d=document.createElement('div'); d.className='xp-quiz'; d.id='xp-quiz'; $x('#xp-sw').appendChild(d); } quizMode(true); return d; }
+function setupSceneAt(pi){ if(P.tl) P.tl.kill(); gsap.killTweensOf('*'); gsap.globalTimeline.resume(); clearQuiz();
   P.idx=pi; renderChapters(); setSceneTitle();
   const sc=P.L.scenes[P.scenes[pi]], stage=$x('#xp-stage'); stage.innerHTML=''; P.ctx=sc.setup(stage); P.ctx._stage=stage; P.ctxScene=P.scenes[pi]; gsap.fromTo(stage,{opacity:0},{opacity:1,duration:.25}); return P.ctx; }
 async function playScene(i){
@@ -256,7 +309,7 @@ function playClip(src,onTick,start=0,dur=0){ return new Promise((resolve,reject)
   a.onloadedmetadata=goPlay; a.preservesPitch=true; a.defaultPlaybackRate=TTS.rate; a.src=src; a.load(); }); }
 function capBeat(text,frac){ const w=text.split(/\s+/); if(CAPW.join(' ')!==w.join(' ')) captionWords(w); captionIdx(Math.min(w.length-1,Math.max(0,Math.floor(frac*w.length)))); }
 async function playTrack(pi){
-  const my=++RUN; TTS.stop(); stopTrack(); const T=trackFor(P.key), L=P.L, sceneIdx=P.scenes[pi];
+  const my=++RUN; TTS.stop(); stopTrack(); clearQuiz(); const T=trackFor(P.key), L=P.L, sceneIdx=P.scenes[pi];
   P.trk={dead:false}; P.ctx=null; P.ctxScene=null; P.waiting=false; setPlaying(true);
   let si=T.segs.findIndex(g=>g.beats.some(b=>{ const l=beatById(L,b.id); return l&&l.si===sceneIdx; }));
   if(si<0){ P.trk=null; P.noTrack=true; return playScene(pi); }
@@ -294,19 +347,21 @@ async function playTrack(pi){
   only?finishQuick():showQuiz();
 }
 function finishQuick(){ RUN++; TTS.stop(); stopTrack(); setPlaying(false); segProgress(P.scenes.length,0); captionText(u('clipEnd'));
-  const d=document.createElement('div'); d.className='xp-quiz'; d.id='xp-quiz';
+  const d=quizBox();
   d.innerHTML=`<p class="xp-qn">${u('clipEnd')}</p><h3>${u('fullQ')}</h3><div class="xp-row"><button class="xp-btn pri" id="xp-full">${u('openFull')}</button><button class="xp-btn" id="xp-again">${u('again')}</button><button class="xp-btn" id="xp-bk">${u('close')}</button></div>`;
-  $x('#xp-sw').appendChild(d); $x('#xp-full').onclick=()=>open(P.key); $x('#xp-again').onclick=()=>playScene(0); $x('#xp-bk').onclick=close; }
+  $x('#xp-full').onclick=()=>open(P.key); $x('#xp-again').onclick=()=>playScene(0); $x('#xp-bk').onclick=close; $x('#xp-full').focus({preventScroll:true}); }
 function showQuiz(){
   RUN++; TTS.stop(); stopTrack(); if(P.tl) P.tl.kill(); setPlaying(false); P.idx=P.scenes.length; renderChapters(); segProgress(P.scenes.length,0); $x('#xp-scene-t').textContent='';
-  const Q=P.L.quiz||[]; if(!Q.length){ close(); return; } let k=0, score=0; let d=$x('#xp-quiz'); if(!d){ d=document.createElement('div'); d.className='xp-quiz'; d.id='xp-quiz'; $x('#xp-sw').appendChild(d); }
+  const Q=P.L.quiz||[]; if(!Q.length){ close(); return; } let k=0, score=0; const d=quizBox();
   captionText(u('quizIntro'));
-  const show=()=>{ const it=Q[k]; d.innerHTML=`<p class="xp-qn">${u('qn')(AD(k+1),AD(Q.length))}</p><h3 ${it.ltr||LG==='en'?'dir="ltr"':''}>${escq(it.q)}</h3><div class="xp-opts">${it.o.map((o,i)=>`<button class="xp-opt" data-i="${i}">${escq(o)}</button>`).join('')}</div><div id="xp-fb"></div>`;
-    d.querySelectorAll('.xp-opt').forEach(b=>b.onclick=()=>{ const i=+b.dataset.i, ok=i===it.a; if(ok) score++; d.querySelectorAll('.xp-opt').forEach((x,j)=>{ x.disabled=true; if(j===it.a) x.classList.add('right'); else if(j===i) x.classList.add('wrong'); });
-      $x('#xp-fb').innerHTML=`<p class="xp-why"><b>${ok?u('right'):u('wrong')}</b> ${escq(it.e)}</p><div class="xp-row"><button class="xp-btn pri" id="xp-qn">${k<Q.length-1?u('nextQ'):u('result')}</button></div>`; $x('#xp-qn').focus(); $x('#xp-qn').onclick=()=>{ k++; k<Q.length?show():end(); }; }); };
+  const mk=`<span class="mk" aria-hidden="true"></span>`;
+  const show=()=>{ const it=Q[k]; d.innerHTML=`<p class="xp-qn">${u('qn')(AD(k+1),AD(Q.length))}</p><h3 tabindex="-1" ${it.ltr||LG==='en'?'dir="ltr"':''}>${escq(it.q)}</h3><div class="xp-opts">${it.o.map((o,i)=>`<button class="xp-opt" data-i="${i}"><span>${escq(o)}</span>${mk}</button>`).join('')}</div><div id="xp-fb" aria-live="polite"></div>`;
+    d.querySelector('h3').focus({preventScroll:true});  /* keyboard and screen-reader users land on the new question */
+    d.querySelectorAll('.xp-opt').forEach(b=>b.onclick=()=>{ const i=+b.dataset.i, ok=i===it.a; if(ok) score++; d.querySelectorAll('.xp-opt').forEach((x,j)=>{ x.disabled=true; const m=x.querySelector('.mk'); if(j===it.a){ x.classList.add('right'); m.innerHTML=IC.check; } else if(j===i){ x.classList.add('wrong'); m.innerHTML=IC.x; } });
+      $x('#xp-fb').innerHTML=`<p class="xp-why ${ok?'ok':'no'}"><b>${ok?u('right'):u('wrong')}</b> ${escq(it.e)}</p><div class="xp-row"><button class="xp-btn pri" id="xp-qn">${k<Q.length-1?u('nextQ'):u('result')}</button></div>`; $x('#xp-qn').focus({preventScroll:true}); $x('#xp-qn').scrollIntoView({block:'nearest',behavior:RM?'auto':'smooth'}); $x('#xp-qn').onclick=()=>{ k++; k<Q.length?show():end(); }; }); };
   const end=()=>{ const need=Math.ceil(Q.length*2/3), pass=score>=need; if(pass) HOOKS.onDone(P.key,score,Q.length);
     const sibs=forSkill(P.L.sk,P.L.lang), nx=sibs[sibs.indexOf(P.L)+1];
-    d.innerHTML=`<p class="xp-qn">${u('result')}</p><div class="xp-score">${AD(score)} / ${AD(Q.length)}</div><h3>${pass?u('passed'):u('failed')}</h3>
+    d.innerHTML=`<div class="xp-res ${pass?'ok':'no'}"><span class="ic" aria-hidden="true">${pass?IC.check:IC.replay}</span><div><p class="xp-qn">${u('result')}</p><div class="xp-score">${AD(score)} / ${AD(Q.length)}</div></div></div><h3 tabindex="-1">${pass?u('passed'):u('failed')}</h3>${pass?'':`<p class="xp-need">${u('need')(AD(need),AD(Q.length))}</p>`}
       <div class="xp-row">${pass?(nx?`<button class="xp-btn pri" id="xp-nx">${u('nextL')}${escx(nx.title)}</button>`:`<button class="xp-btn pri" id="xp-done">${u('done')}</button>`):`<button class="xp-btn pri" id="xp-retry">${u('retry')}</button>`}<button class="xp-btn" id="xp-rw">${u('rewatch')}</button><button class="xp-btn" id="xp-bk">${u('close')}</button></div>`;
     captionText(pass?u('bravo'):u('retryCap'));
     const on=(id,f)=>{ const b=$x(id); if(b) b.onclick=f; }; on('#xp-nx',()=>open(nx.key)); on('#xp-done',close); on('#xp-retry',showQuiz); on('#xp-rw',()=>playScene(0)); on('#xp-bk',close);

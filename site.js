@@ -246,6 +246,37 @@ module.exports = function site(app, { PUB, loadConfig }) {
     if (qa.length) graph.push({ "@type": "FAQPage", "@id": url + "#faq", inLanguage: lang, mainEntity: qa });
     return JSON.stringify({ "@context": "https://schema.org", "@graph": graph }).replace(/</g, "\\u003c");
   }
+  // the paid plan cards and the refund line, rendered like landing.js renderPlans()/renderRefund() so prices are in the
+  // first paint (no skeleton swap, no layout shift) and visible to crawlers; landing.js re-renders the same markup
+  const enNum = n => String(n);
+  function plansHtml(lang, cfg) {
+    const ar = lang === "ar", N = ar ? n => arNum(n).replace(/\./g, "٫") : enNum;
+    const money = n => { n = Number(n) || 0; return N(Number.isInteger(n) ? n : n.toFixed(2)); };
+    const days = n => ar ? arDays(n) : N(n) + (n === 1 ? " day" : " days");
+    const cur = !cfg.currency || cfg.currency === "SAR" ? (ar ? "ر.س" : "SAR") : escText(cfg.currency);
+    const href = "/app?lang=" + lang;
+    const plans = cfg.plans || [];
+    if (!plans.length) return null;
+    return plans.map(p => {
+      const name = escText(ar ? (p.ar || p.en || p.id) : (p.en || p.ar || p.id));
+      const price = Number(p.price) || 0, d = Number(p.days) || 0, per = d ? Math.round(price / d * 100) / 100 : 0;
+      const perTxt = per && (!cfg.currency || cfg.currency === "SAR") ? (ar ? "≈ " + money(per) + " ر.س في اليوم" : "≈ " + money(per) + " SAR a day") : "";
+      return `<div class="lp-opt${p.best ? " best" : ""}">` + (p.best ? `<span class="lp-best">${ar ? "الأفضل قيمة" : "Best value"}</span>` : "") +
+        `<h4>${name}</h4><p class="lp-price"><b>${money(price)}</b><span>${cur}${d ? " · " + days(d) : ""}</span></p><p class="lp-per">${perTxt}</p>` +
+        `<a class="btn ${p.best ? "primary" : "ghost"} block" href="${href}#upgrade?plan=${encodeURIComponent(p.id)}">${ar ? "اشترك" : "Subscribe"}</a></div>`;
+    }).join("");
+  }
+  function liveParts(html, lang, cfg) {
+    if (!cfg) return html;
+    const ph = plansHtml(lang, cfg);
+    if (ph) html = html.replace(/(<div class="lp-opts" id="lp-opts" aria-live="polite">)[\s\S]*?(<\/div>\s*<\/div>)(\s*<p class="lp-refund")/, (m, a, b, c) => a + ph + "</div>" + c);
+    const r = cfg.refund;
+    if (r && r.on && r.days) {
+      const d = +r.days, t = lang === "ar" ? "ضمان استرداد كامل خلال " + arDays(d) + " من الاشتراك" : "Full refund within " + d + (d === 1 ? " day" : " days") + " of subscribing";
+      html = html.replace('<p class="lp-refund" id="lp-refund" hidden>', '<p class="lp-refund" id="lp-refund">').replace('<span id="lp-refund-t"></span>', `<span id="lp-refund-t">${escText(t)}</span>`);
+    }
+    return html;
+  }
   async function sendLanding(req, res) {
     const lang = req.query.lang === "en" ? "en" : "ar";
     let cfg = null; try { cfg = await loadConfig(); } catch (e) { cfg = null; }
@@ -274,6 +305,7 @@ module.exports = function site(app, { PUB, loadConfig }) {
       } else {
         html = html.replace(/<span id="lp-year">\d+<\/span>/, `<span id="lp-year">${arNum(new Date().getFullYear())}</span>`);
       }
+      html = liveParts(html, lang, cfg);
       return html.replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>/, `<script type="application/ld+json">${jsonLd(lang, html, cfg)}</script>`);
     } });
   }

@@ -390,3 +390,76 @@ dialog.dlg .row{justify-content:flex-end}
 @media (max-width:1360px){.pay-t .acts .lbl{display:none}}
 @media (max-width:700px){.pay-t td.stu{max-inline-size:150px;white-space:normal}.pay-t td,.pay-t th{padding-inline:8px}.pay-t .show-sm{white-space:normal}}
 .au .au-d{font-size:.76rem;color:var(--ink2);margin:2px 0;white-space:normal;overflow-wrap:anywhere;text-align:start}
+
+/* ---------- round 3 ---------- */
+/* main column never grows past the screen: wide tables scroll inside their card (content analytics overflowed at 390px) */
+.mainc{grid-template-columns:minmax(0,1fr)}
+.mainc .card{grid-template-columns:minmax(0,1fr)}
+.tbl{-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}
+/* app.css styles .ck as a 22px round tick; in admin forms it is a checkbox label (coupon plans were overlapping) */
+.fld .ck,.checks .ck{inline-size:auto;block-size:auto;min-block-size:36px;border:0;border-radius:0;display:inline-flex;place-items:normal;color:var(--ink);background:none;padding-inline-end:4px}
+.checks{display:flex}
+/* search boxes: physical padding/icon side, so the placeholder never runs under the icon whatever the input's own direction */
+[dir=rtl] .toolbar .search input{padding-right:36px;padding-left:12px}
+[dir=ltr] .toolbar .search input{padding-left:36px;padding-right:12px}
+[dir=rtl] .toolbar .search svg{right:11px;left:auto}
+[dir=ltr] .toolbar .search svg{left:11px;right:auto}
+/* wide tables: soft shadows at the edge that still has columns to scroll to */
+.tbl{background:
+  linear-gradient(90deg,var(--surface) 30%,transparent) left/36px 100% no-repeat local,
+  linear-gradient(270deg,var(--surface) 30%,transparent) right/36px 100% no-repeat local,
+  radial-gradient(farthest-side at 0 50%,rgba(29,24,56,.22),transparent) left/12px 100% no-repeat scroll,
+  radial-gradient(farthest-side at 100% 50%,rgba(29,24,56,.22),transparent) right/12px 100% no-repeat scroll,
+  var(--surface)}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]) .tbl{background:
+  linear-gradient(90deg,var(--surface) 30%,transparent) left/36px 100% no-repeat local,
+  linear-gradient(270deg,var(--surface) 30%,transparent) right/36px 100% no-repeat local,
+  radial-gradient(farthest-side at 0 50%,rgba(0,0,0,.6),transparent) left/12px 100% no-repeat scroll,
+  radial-gradient(farthest-side at 100% 50%,rgba(0,0,0,.6),transparent) right/12px 100% no-repeat scroll,
+  var(--surface)}}
+:root[data-theme=dark] .tbl{background:
+  linear-gradient(90deg,var(--surface) 30%,transparent) left/36px 100% no-repeat local,
+  linear-gradient(270deg,var(--surface) 30%,transparent) right/36px 100% no-repeat local,
+  radial-gradient(farthest-side at 0 50%,rgba(0,0,0,.6),transparent) left/12px 100% no-repeat scroll,
+  radial-gradient(farthest-side at 100% 50%,rgba(0,0,0,.6),transparent) right/12px 100% no-repeat scroll,
+  var(--surface)}
+/* coupons on phones: one card per code (code + status, discount + usage, switch + delete) */
+@media (max-width:700px){
+  .cp-t{border:0;background:none;overflow:visible}
+  .cp-t thead{display:none}
+  .cp-t table,.cp-t tbody{display:block}
+  .cp-t tr{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"code st" "use off" "on del";align-items:center;gap:8px 12px;padding:12px 14px;border:1.5px solid var(--line);border-radius:14px;margin-block-end:10px;background:var(--surface)}
+  .cp-t td{display:block;border:0!important;padding:0!important;white-space:normal}
+  .cp-t td.c-code{grid-area:code;font-size:1rem}
+  .cp-t td.c-st{grid-area:st;justify-self:end}
+  .cp-t td.c-use{grid-area:use;color:var(--ink2)}
+  .cp-t td.c-off{grid-area:off;justify-self:end;font-size:1.05rem}
+  .cp-t td.c-on{grid-area:on;display:flex;align-items:center;gap:10px;font-size:.8rem;font-weight:700;color:var(--ink2)}
+  .cp-t td.c-on::after{content:attr(data-l)}
+  .cp-t td.c-del{grid-area:del;justify-self:end}
+  .cp-t td.c-exp,.cp-t td.hide-md{display:none}
+  .cp-t .tg{min-block-size:28px}
+}
+/* student drawer: plan & access comes first; the facts grid is denser on phones */
+@media (max-width:640px){
+  .dr-facts{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+  .dr-facts div{padding:7px 9px;border-radius:10px}
+  .dr-facts span{font-size:.68rem}
+  .dr-facts b{font-size:.92rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+}
+.dlg select{inline-size:100%}
+/* phones: the header row keeps its height when a page is shorter than the screen (the spare height went to the header) */
+@media (max-width:900px){.shell{grid-template-rows:auto minmax(0,1fr)}}
+/* touch screens: comfortable tap targets without changing the desktop density */
+@media (pointer:coarse){
+  .side nav a{min-block-size:44px}
+  .side-acts .row .btn{inline-size:44px;min-block-size:44px}
+  .btn.sm{min-block-size:40px}
+  .btn.xs{min-block-size:38px;min-inline-size:38px}
+  .btn.sm.icon{inline-size:40px}
+  .seg button{min-block-size:40px}
+  .ck input{inline-size:22px;block-size:22px}
+}
+/* period switch on narrow phones: labels stay on one line */
+.ph-acts .seg button{white-space:nowrap}
+@media (max-width:400px){.ph-acts .seg button{font-size:.76rem;padding-inline:4px}.ph-acts{gap:6px}}

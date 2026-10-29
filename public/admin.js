@@ -30,7 +30,8 @@ applyTheme(); applyLang();
 
 /* ================= formatting ================= */
 const fmtN = (n, max = 0) => new Intl.NumberFormat(LOC(), { maximumFractionDigits: max }).format(num(n));
-const fmtMoney = n => fmtN(n, 2) + " " + _("ر.س", "SAR");
+// SAR amounts: whole riyals without decimals, otherwise always two (95.2 → ٩٥٫٢٠), with grouping
+const fmtMoney = n => { const v = num(n), whole = Math.abs(v - Math.round(v)) < 0.005; return new Intl.NumberFormat(LOC(), { minimumFractionDigits: whole ? 0 : 2, maximumFractionDigits: whole ? 0 : 2 }).format(whole ? Math.round(v) : v) + "\u00a0" + _("ر.س", "SAR"); };
 const fmtPct = (x, max = 1) => new Intl.NumberFormat(LOC(), { style: "percent", maximumFractionDigits: max }).format(num(x));
 const toDate = v => (v ? new Date(/^\d{4}-\d{2}-\d{2}$/.test(v) ? v + "T00:00:00Z" : v) : null);
 // the owner works in Saudi time: timestamps are shown in Asia/Riyadh whatever the device's zone; plain dates (YYYY-MM-DD) stay as they are
@@ -604,8 +605,6 @@ function renderDrawer() {
     ${u.isAdmin ? `<span class="chip admin">${_("مشرف", "Admin")}</span>` : isPro ? `<span class="chip pro">${_("برو", "Pro")}</span>` : `<span class="chip free">${_("مجاني", "Free")}</span>`}
     <button class="btn ghost sm icon" type="button" data-close aria-label="${_("إغلاق", "Close")}">${ic("x")}</button></header>
   <div class="dr-b">
-    <div class="facts">${facts.map(([k, v]) => `<div><span>${esc(k)}</span><b>${esc(v)}</b></div>`).join("")}</div>
-
     <section class="card"><div class="card-h"><h2>${_("الخطة والوصول", "Plan & access")}</h2>${isPro ? `<span class="chip pro">${esc(srcL(p.source))}</span>` : ""}</div>
       <p>${u.isAdmin ? _("حسابات المشرفين تملك وصول برو دائمًا.", "Admin accounts always have pro access.") : isPro ? _(`مشترك برو حتى <b>${esc(fmtDate(p.until))}</b>.`, `Pro until <b>${esc(fmtDate(p.until))}</b>.`) : _("على الخطة المجانية.", "On the free plan.")}</p>
       <form id="f-grant" class="fgrid" novalidate>
@@ -615,6 +614,8 @@ function renderDrawer() {
         <div class="row wide" style="grid-column:1/-1"><button class="btn primary sm" type="submit">${ic("gift")}${_("منح", "Grant")}</button>
         ${isPro && p.source !== "admin" ? (DR.revokeAsk ? `<span class="small" style="align-self:center">${_("إلغاء كل الاشتراكات السارية لهذا الطالب؟", "Revoke all active subscriptions for this student?")}</span><button class="btn danger sm" type="button" id="b-revoke-y">${_("نعم، ألغِ", "Yes, revoke")}</button><button class="btn ghost sm" type="button" id="b-revoke-n">${_("تراجع", "Cancel")}</button>` : `<button class="btn danger-ghost sm" type="button" id="b-revoke">${ic("ban")}${_("إلغاء الاشتراك", "Revoke")}</button>`) : ""}</div>
       </form></section>
+
+    <div class="facts dr-facts">${facts.map(([k, v]) => `<div><span>${esc(k)}</span><b>${esc(v)}</b></div>`).join("")}</div>
 
     <section class="card"><div class="card-h"><h2>${_("الحساب", "Account")}</h2></div>
       <form id="f-name" class="row" novalidate><label class="fld" style="flex:1;min-width:200px"><span>${_("الاسم", "Name")}</span><input type="text" id="n-name" value="${esc(u.name || "")}" minlength="2" maxlength="60" dir="auto"></label><button class="btn ghost sm" type="submit" style="align-self:flex-end">${ic("edit")}${_("حفظ الاسم", "Save name")}</button></form>
@@ -762,7 +763,7 @@ function refundDialog(p, ret) {
   const d = dialog(`<form novalidate><h2>${_("استرداد دفعة", "Refund payment")}</h2>
     <p class="small">${esc(p.email || "")} · ${esc(planName(p.plan_id))} · <b>${fmtMoney(p.amount)}</b>${p.refunded_amount ? ` · ${_("استُرد سابقًا", "already refunded")} ${fmtMoney(p.refunded_amount)}` : ""}</p>
     <label class="fld">${_("المبلغ المسترد", "Refund amount")}<span class="unit"><input type="number" id="rf-amt" min="0.01" max="${max}" step="0.01" value="${max}" required><span>${_("ر.س", "SAR")}</span></span><span class="hint">${_("الحد الأقصى ", "Up to ")}${fmtMoney(max)}</span></label>
-    <label class="fld">${_("السبب", "Reason")}<input type="text" id="rf-why" maxlength="100" list="rf-reasons" value="requested_by_customer" dir="ltr"><datalist id="rf-reasons"><option value="requested_by_customer"><option value="duplicate"><option value="fraudulent"></datalist></label>
+    <label class="fld">${_("السبب", "Reason")}<select id="rf-why"><option value="requested_by_customer">${_("بطلب من الطالب", "Requested by the student")}</option><option value="duplicate">${_("دفعة مكررة", "Duplicate payment")}</option><option value="fraudulent">${_("عملية احتيالية", "Fraudulent")}</option></select></label>
     <label class="tgl"><input type="checkbox" class="tg" id="rf-rev" checked>${_("إلغاء الاشتراك المرتبط بهذه الدفعة (تتقدّم أي مدة لاحقة اشتراها الطالب فلا تنقطع)", "Revoke the subscription bought with this payment (any later period the student bought moves up, with no gap)")}</label>
     <p class="small muted" id="rf-hint">${_("عند الاسترداد الجزئي يبقى الاشتراك عادةً.", "For a partial refund the subscription usually stays.")}</p>
     ${p.provider || p.tap_id ? `<p class="small muted">${_(`يُرسل طلب الاسترداد إلى ${provL(p.provider) || "بوابة الدفع"} ويُعاد المبلغ إلى وسيلة الدفع الأصلية. لا يمكن التراجع عنه.`, `The refund is sent to ${provL(p.provider) || "the payment gateway"} and returned to the original payment method. It can't be undone.`)}</p>` : ""}
@@ -797,16 +798,16 @@ async function vCoupons(tok) {
       <div class="row wide" style="grid-column:1/-1"><button class="btn primary sm" type="submit">${ic("plus")}${_("إنشاء القسيمة", "Create coupon")}</button></div>
     </form></section>
   <section class="card"><div class="card-h"><h2>${_("القسائم", "Coupons")}</h2><span class="sub">${fmtN(r.coupons.length)}</span></div>
-    ${r.coupons.length ? `<div class="tbl"><table><thead><tr><th scope="col">${_("الرمز", "Code")}</th><th scope="col" class="num">${_("الخصم", "Off")}</th><th scope="col">${_("الاستخدام", "Usage")}</th><th scope="col" class="hide-sm">${_("الانتهاء", "Expires")}</th><th scope="col" class="hide-md">${_("الباقات", "Plans")}</th><th scope="col" class="hide-md">${_("ملاحظة", "Note")}</th><th scope="col">${_("الحالة", "Status")}</th><th scope="col">${_("مفعّلة", "Enabled")}</th><th scope="col"><span class="sr">${_("حذف", "Delete")}</span></th></tr></thead><tbody>
+    ${r.coupons.length ? `<div class="tbl cp-t"><table><thead><tr><th scope="col">${_("الرمز", "Code")}</th><th scope="col" class="num">${_("الخصم", "Off")}</th><th scope="col">${_("الاستخدام", "Usage")}</th><th scope="col" class="hide-sm">${_("الانتهاء", "Expires")}</th><th scope="col" class="hide-md">${_("الباقات", "Plans")}</th><th scope="col" class="hide-md">${_("ملاحظة", "Note")}</th><th scope="col">${_("الحالة", "Status")}</th><th scope="col">${_("مفعّلة", "Enabled")}</th><th scope="col"><span class="sr">${_("حذف", "Delete")}</span></th></tr></thead><tbody>
     ${r.coupons.map(c => { const [sc, sl] = status(c); const u = num(c.used), m = c.max_uses; return `<tr>
-      <td><b class="mono">${esc(c.code)}</b></td><td class="num"><b>${fmtN(c.pct)}${LANG === "ar" ? "٪" : "%"}</b></td>
-      <td><span class="nowrap">${fmtN(u)}${m != null ? " / " + fmtN(m) : ` <span class="muted small">${_("(بلا حد)", "(no cap)")}</span>`}${m ? `<span class="mini" data-tip="${esc(fmtPct(u / m, 0))}"><span style="inline-size:${Math.min(100, 100 * u / m).toFixed(1)}%"></span></span>` : ""}</span></td>
-      <td class="hide-sm">${c.expires_at ? esc(fmtDate(c.expires_at)) : "—"}</td>
+      <td class="c-code"><b class="mono">${esc(c.code)}</b></td><td class="num c-off"><b>${fmtN(c.pct)}${LANG === "ar" ? "٪" : "%"}</b></td>
+      <td class="c-use"><span class="nowrap">${fmtN(u)}${m != null ? " / " + fmtN(m) : ` <span class="muted small">${_("(بلا حد)", "(no cap)")}</span>`}${m ? `<span class="mini" data-tip="${esc(fmtPct(u / m, 0))}"><span style="inline-size:${Math.min(100, 100 * u / m).toFixed(1)}%"></span></span>` : ""}</span></td>
+      <td class="hide-sm c-exp">${c.expires_at ? esc(fmtDate(c.expires_at)) : "—"}</td>
       <td class="hide-md">${c.plan_ids && c.plan_ids.length ? c.plan_ids.map(id => `<span class="chip">${esc(planName(id))}</span>`).join(" ") : `<span class="muted">${_("الكل", "All")}</span>`}</td>
       <td class="hide-md wrap small">${esc(c.note || "")}</td>
-      <td><span class="chip ${sc}">${esc(sl)}</span></td>
-      <td><input type="checkbox" class="tg" data-toggle="${esc(c.code)}" ${c.active ? "checked" : ""} aria-label="${esc(_("تفعيل القسيمة ", "Enable coupon ") + c.code)}"></td>
-      <td>${u ? `<span tabindex="0" data-tip="${esc(_("لا تُحذف القسيمة بعد استخدامها؛ عطّلها بدلًا من ذلك.", "Used coupons can't be deleted; disable instead."))}"><button class="btn ghost xs icon" type="button" disabled aria-label="${_("حذف (غير متاح)", "Delete (unavailable)")}">${ic("trash")}</button></span>` : `<button class="btn danger-ghost xs icon" type="button" data-del="${esc(c.code)}" aria-label="${esc(_("حذف القسيمة ", "Delete coupon ") + c.code)}">${ic("trash")}</button>`}</td></tr>`; }).join("")}
+      <td class="c-st"><span class="chip ${sc}">${esc(sl)}</span></td>
+      <td class="c-on" data-l="${esc(c.active ? _("مفعّلة", "Enabled") : _("معطّلة", "Disabled"))}"><input type="checkbox" class="tg" data-toggle="${esc(c.code)}" ${c.active ? "checked" : ""} aria-label="${esc(_("تفعيل القسيمة ", "Enable coupon ") + c.code)}"></td>
+      <td class="c-del">${u ? `<span tabindex="0" data-tip="${esc(_("لا تُحذف القسيمة بعد استخدامها؛ عطّلها بدلًا من ذلك.", "Used coupons can't be deleted; disable instead."))}"><button class="btn ghost xs icon" type="button" disabled aria-label="${_("حذف (غير متاح)", "Delete (unavailable)")}">${ic("trash")}</button></span>` : `<button class="btn danger-ghost xs icon" type="button" data-del="${esc(c.code)}" aria-label="${esc(_("حذف القسيمة ", "Delete coupon ") + c.code)}">${ic("trash")}</button>`}</td></tr>`; }).join("")}
     </tbody></table></div>` : `<p class="tbl-empty">${_("لا قسائم بعد. أنشئ أول قسيمة من الأعلى.", "No coupons yet. Create the first one above.")}</p>`}
   </section>`;
   onRefresh(route);

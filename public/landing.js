@@ -78,12 +78,12 @@
     brand: 'GAT Academy', brandSub: 'Prep for the General Aptitude Test',
     navAria: 'Page sections', navHow: 'How it works', navFeatures: 'Features', navSkills: 'Skills', navPricing: 'Pricing', navFaq: 'FAQ',
     themeAria: 'Dark mode', signIn: 'Sign in', startFree: 'Start free',
-    heroEyebrow: 'General Aptitude Test · Qudurat · GAT',
+    heroEyebrow: 'For high-school students · the GAT (Qudurat)',
     heroH: 'The GAT isn’t luck.<br>It’s <span class="lp-mark">ten skills' + SCRIB + '</span>, mastered.',
-    heroLead: 'Start with a short diagnostic that pinpoints your level. Then a daily plan takes you all the way to test day: animated, narrated explainers, fresh practice, model tests in the computer-based format, and a mistake box that brings back what you got wrong before you forget it.',
+    heroLead: 'A short diagnostic finds your level in every skill, then a daily plan takes you to test day: animated, narrated explainers, fresh practice and model tests in the computer-based format.', heroCta: 'Take the free diagnostic',
     watch: 'Watch an explainer', proofAria: 'What you get',
     p1b: '33', p1: 'narrated explainers per language', p2b: '30', p2: 'model tests', p3b: '10', p3: 'skills measured and tracked',
-    heroMicro: 'Free plan forever · No card needed · English & عربي',
+    heroMicro: 'The diagnostic is free: 20 questions in about 15 minutes, no card needed',
     artMap: 'Mastery map', artSample: 'Illustration', verbal: 'Verbal', quant: 'Quantitative',
     sk_analogy: 'Verbal Analogy', sk_completion: 'Sentence Completion', sk_context: 'Contextual Error', sk_odd: 'Odd Word Out', sk_reading: 'Reading Comprehension',
     sk_arith: 'Arithmetic', sk_algebra: 'Algebra', sk_geometry: 'Geometry', sk_stats: 'Analysis & Statistics', sk_comparison: 'Quantitative Comparison',
@@ -146,7 +146,7 @@
     pl7: 'Estimated score and time analysis per skill', pl8: 'Review any past attempt question by question',
     priceLoading: 'Current prices show here, and in the app.', seePlans: 'See plans in the app',
     payLine: '', // from PAY below
-    cmpH: 'Full comparison', cmpAria: 'Plan comparison', cmpFeat: 'Feature', cmpFree: 'Free', cmpPro: 'Full access',
+    cmpH: 'Compare the plans in detail', payAria: 'Accepted payment methods', mada: 'mada', cmpAria: 'Plan comparison', cmpFeat: 'Feature', cmpFree: 'Free', cmpPro: 'Full access',
     c1: 'Diagnostic test', c2: 'Animated, narrated explainers', c2f: '8 per language', c2p: '33 per language',
     c3: 'Practice questions', c3f: '10 a day', c3p: 'Unlimited', c4: 'Targeted practice on a skill or pattern',
     c5: 'The 30 model tests', c6: 'Section tests and full timed mocks', c7: 'Review past attempts question by question',
@@ -175,20 +175,18 @@
     finEyebrow: 'Five minutes is enough to start', finH: 'Find your level today. Start your plan tomorrow.',
     finP: 'Take the diagnostic for free, then watch the explainer for your weakest skill.',
     readGuide: 'Read the test guide',
-    footD: 'A complete kit to prepare for the General Aptitude Test, in Arabic and English.', footAria: 'Links',
-    footApp: 'Open the app', footGuide: 'Test guide', footPrivacy: 'Privacy Policy', footTerms: 'Terms'
+    footD: 'A complete kit to prepare for the General Aptitude Test, in Arabic and English.', footAria: 'Links', footApp: 'Open the app', footGuide: 'Test guide', footPrivacy: 'Privacy Policy', footTerms: 'Terms'
   };
   /* payment wording follows the gateway that is live (the server marks it on <html data-pay="moyasar|tap|none"> and
      renders the Arabic and English text from this table; site.js reads it, so keep it a plain literal) */
-  var M = ' مدى، و <bdi>Apple Pay</bdi>، و <bdi>STC Pay</bdi>، و <bdi>Visa</bdi> و <bdi>Mastercard</bdi>.';
   var MA = ' مدى، و <bdi>Apple Pay</bdi>، و <bdi>STC Pay</bdi>، وبطاقات <bdi>Visa</bdi> و <bdi>Mastercard</bdi>. ولا نحتفظ ببيانات بطاقتك.</p>';
   var PAY = {
-    moyasar: { ar: { payLine: 'الدفع آمن عبر بوابة ميسّر:' + M, a4: '<p>تدفع عبر بوابة ميسّر الآمنة، وتُقبل فيها:' + MA },
-               en: { payLine: 'Secure payment via Moyasar: mada, Apple Pay, STC Pay, Visa and Mastercard.', a4: '<p>You pay through Moyasar’s secure checkout, which accepts mada, Apple Pay, STC Pay, Visa and Mastercard. We never store your card details.</p>' } },
-    tap:     { ar: { payLine: 'الدفع آمن عبر بوابة تاب (<bdi>Tap</bdi>):' + M, a4: '<p>تدفع عبر بوابة تاب (<bdi>Tap</bdi>) الآمنة، وتُقبل فيها:' + MA },
-               en: { payLine: 'Secure payment via Tap: mada, Apple Pay, STC Pay, Visa and Mastercard.', a4: '<p>You pay through Tap’s secure checkout, which accepts mada, Apple Pay, STC Pay, Visa and Mastercard. We never store your card details.</p>' } },
-    none:    { ar: { payLine: 'الدفع عبر بوابة دفع آمنة:' + M, a4: '<p>تدفع عبر بوابة دفع آمنة، وتُقبل فيها:' + MA },
-               en: { payLine: 'Pay through a secure payment gateway: mada, Apple Pay, STC Pay, Visa and Mastercard.', a4: '<p>You pay through a secure payment gateway, which accepts mada, Apple Pay, STC Pay, Visa and Mastercard. We never store your card details.</p>' } }
+    moyasar: { ar: { payLine: 'الدفع آمن عبر بوابة ميسّر، ولا نحتفظ ببيانات بطاقتك.', a4: '<p>تدفع عبر بوابة ميسّر الآمنة، وتُقبل فيها:' + MA },
+               en: { payLine: 'Secure payment via Moyasar. We never store your card details.', a4: '<p>You pay through Moyasar’s secure checkout, which accepts mada, Apple Pay, STC Pay, Visa and Mastercard. We never store your card details.</p>' } },
+    tap:     { ar: { payLine: 'الدفع آمن عبر بوابة تاب (<bdi>Tap</bdi>)، ولا نحتفظ ببيانات بطاقتك.', a4: '<p>تدفع عبر بوابة تاب (<bdi>Tap</bdi>) الآمنة، وتُقبل فيها:' + MA },
+               en: { payLine: 'Secure payment via Tap. We never store your card details.', a4: '<p>You pay through Tap’s secure checkout, which accepts mada, Apple Pay, STC Pay, Visa and Mastercard. We never store your card details.</p>' } },
+    none:    { ar: { payLine: 'الدفع عبر بوابة دفع آمنة، ولا نحتفظ ببيانات بطاقتك.', a4: '<p>تدفع عبر بوابة دفع آمنة، وتُقبل فيها:' + MA },
+               en: { payLine: 'Pay through a secure payment gateway. We never store your card details.', a4: '<p>You pay through a secure payment gateway, which accepts mada, Apple Pay, STC Pay, Visa and Mastercard. We never store your card details.</p>' } }
   };
   var PAYK = PAY[R.getAttribute('data-pay')] ? R.getAttribute('data-pay') : 'none';
   EN.payLine = PAY[PAYK].en.payLine; EN.a4 = PAY[PAYK].en.a4;
@@ -266,7 +264,8 @@
     var box = $('#lp-opts'); if (!box) return;
     var href = '/app?lang=' + LANG;
     if (!CFG) {
-      if (CFG_FAILED) box.innerHTML = '<div class="lp-opt"><p>' + T('تعذّر تحميل الأسعار الآن. تجدها داخل المنصة.', 'Couldn’t load prices right now. You’ll find them in the app.') + '</p><a class="btn primary block" href="' + href + '#upgrade">' + T('اعرض الخطط في المنصة', 'See plans in the app') + '</a></div>';
+      // the server already rendered the live plans: keep them if the config request fails
+      if (CFG_FAILED && $('.lp-opt-load', box)) box.innerHTML = '<div class="lp-opt"><p>' + T('تعذّر تحميل الأسعار الآن. تجدها داخل المنصة.', 'Couldn’t load prices right now. You’ll find them in the app.') + '</p><a class="btn primary block" href="' + href + '#upgrade">' + T('اعرض الخطط في المنصة', 'See plans in the app') + '</a></div>';
       return;
     }
     var plans = (CFG.plans || []).slice();
@@ -460,7 +459,14 @@
     });
   }
 
+  /* the detailed comparison is a collapsible block: open on wide screens, a tap away on phones */
+  function initCompare() {
+    var d = $('#lp-cmp');
+    if (d && window.matchMedia && matchMedia('(min-width: 900px)').matches) d.open = true;
+  }
+
   function start() {
+    initCompare();
     translate();
     R.classList.remove('lp-pending');
     renderLive();

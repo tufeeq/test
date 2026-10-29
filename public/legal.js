@@ -89,6 +89,53 @@
       });
     }
     observe();
+    initToc();
+  }
+
+  /* ---------- table of contents on phones: collapsed behind a button, plus a floating "Contents" button ---------- */
+  var narrow = window.matchMedia ? matchMedia('(max-width: 999px)') : null;
+  function initToc() {
+    var tocs = D.querySelectorAll('.lg-toc');
+    if (!tocs.length) return;
+    for (var i = 0; i < tocs.length; i++) (function (toc, n) {
+      var h = toc.querySelector('h2'), ol = toc.querySelector('ol');
+      if (!h || !ol) return;
+      if (!ol.id) ol.id = 'lg-toc-list-' + n;
+      var b = D.createElement('button');
+      b.type = 'button'; b.className = 'lg-toc-btn'; b.setAttribute('aria-controls', ol.id);
+      b.innerHTML = '<span>' + h.innerHTML + '</span><i aria-hidden="true"></i>';
+      h.innerHTML = ''; h.appendChild(b);
+      b.addEventListener('click', function () { setToc(toc, !toc.classList.contains('open')); });
+      ol.addEventListener('click', function (e) { if (e.target.closest('a') && narrow && narrow.matches) setToc(toc, false); });
+    })(tocs[i], i);
+    function sync() { for (var j = 0; j < tocs.length; j++) setToc(tocs[j], !(narrow && narrow.matches)); }
+    sync();
+    if (narrow && narrow.addEventListener) narrow.addEventListener('change', sync);
+
+    // floating button: shown on phones once the contents block has scrolled away
+    var fab = D.createElement('button');
+    fab.type = 'button'; fab.className = 'lg-fab'; fab.hidden = true;
+    fab.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></svg><span data-l="ar" lang="ar">المحتويات</span><span data-l="en" lang="en">Contents</span>';
+    D.body.appendChild(fab);
+    fab.addEventListener('click', function () {
+      var toc = D.querySelector('.lg-doc[data-l="' + LANG + '"] .lg-toc');
+      if (!toc) return;
+      setToc(toc, true);
+      toc.scrollIntoView({ block: 'start' });
+      var first = toc.querySelector('a'); if (first) { try { first.focus({ preventScroll: true }); } catch (e) {} }
+    });
+    var fabTick = false;
+    function fabSync() {
+      fabTick = false;
+      var toc = D.querySelector('.lg-doc[data-l="' + LANG + '"] .lg-toc');
+      fab.hidden = !(narrow && narrow.matches && toc && toc.getBoundingClientRect().bottom < 0);
+    }
+    window.addEventListener('scroll', function () { if (!fabTick) { fabTick = true; requestAnimationFrame(fabSync); } }, { passive: true });
+    fabSync();
+  }
+  function setToc(toc, open) {
+    toc.classList.toggle('open', open);
+    var b = toc.querySelector('.lg-toc-btn'); if (b) b.setAttribute('aria-expanded', open ? 'true' : 'false');
   }
 
   function sections() {

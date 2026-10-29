@@ -147,3 +147,52 @@ html:has(body.lg){scroll-padding-top:84px;scroll-behavior:smooth}
   .lg .lg-sec{break-inside:avoid-page}
 }
 .lg [lang="ar"] .lg-sec ol{list-style-type:arabic-indic}
+
+/* ---------- 404 (same shell as the legal pages) ---------- */
+.lg-404{min-block-size:100vh;display:flex;flex-direction:column}
+.lg .nf{flex:1;max-width:560px;inline-size:100%;padding-block:clamp(40px,10vh,96px) 56px;display:grid;gap:18px;justify-items:center;align-content:start;text-align:center}
+.lg .nf-note{position:relative;inline-size:150px;block-size:132px;background:var(--n1);color:var(--note-ink);border-radius:4px 4px 18px 4px;display:grid;place-items:center;transform:rotate(-4deg);box-shadow:0 14px 22px -14px rgba(29,24,56,.55),0 2px 0 rgba(29,24,56,.08);margin-block-end:8px}
+.lg .nf-note b{font-family:var(--f-head);font-weight:800;font-size:3.1rem;line-height:1;letter-spacing:.02em;direction:ltr}
+.lg .nf-tape{position:absolute;top:-10px;inset-inline-start:50%;inline-size:64px;block-size:20px;background:rgba(255,255,255,.6);border:1px solid rgba(29,24,56,.08);transform:translateX(-50%) rotate(-3deg)}
+.lg .nf-q{position:absolute;inset-inline-end:-18px;top:-16px;inline-size:40px;block-size:40px;border-radius:50%;background:var(--butter);border:2px solid var(--edge);box-shadow:2px 2px 0 var(--edge);display:grid;place-items:center;font-family:var(--f-head);font-weight:800;font-size:1.3rem;transform:rotate(10deg)}
+.lg .nf-txt{display:grid;gap:8px}
+.lg .nf-txt h1{font-size:clamp(1.6rem,5vw,2.2rem);line-height:1.3}
+.lg .nf-txt p{color:var(--ink2);margin:0}
+.lg .nf-links{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-block-start:6px}
+.lg .nf-links .btn{min-block-size:46px}
+@media (max-width:480px){.lg .nf-links{display:grid;inline-size:100%}.lg .nf-links .btn{inline-size:100%;justify-content:center}}
+.lg .nf-help{font-size:.9rem;color:var(--muted);margin:6px 0 0}
+.lg .nf-help a{color:var(--pri);font-weight:700}
+@media (prefers-reduced-motion:no-preference){.lg .nf-note{animation:nf-in .5s cubic-bezier(.2,.8,.3,1.3) both}@keyframes nf-in{from{opacity:0;transform:rotate(-12deg) scale(.85)}}}
+
+/* the language switch reads "English" / "العربية" on phones too, like the landing page */
+@media (max-width:560px){
+  .lg .lg-switch .full{display:inline}
+  .lg .lg-switch .short{display:none}
+  .lg .lg-switch{min-block-size:44px}
+  .lg .lg-nav a.lg-cta{min-block-size:44px;display:inline-flex;align-items:center}
+}
+@media (max-width:380px){.lg .lg-brand b{display:none}}
+
+/* ---------- table of contents: collapsible on phones (legal.js adds the button) ---------- */
+.lg .lg-toc-btn{all:unset;box-sizing:border-box;display:flex;align-items:center;justify-content:space-between;gap:10px;inline-size:100%;cursor:default;font:inherit;color:inherit}
+.lg .lg-toc-btn i{display:none}
+@media (max-width:999px){
+  .lg .lg-toc{padding:4px 6px}
+  .lg .lg-toc h2{margin:0;padding:0}
+  .lg .lg-toc-btn{cursor:pointer;min-block-size:48px;padding-inline:10px;font-size:.98rem;color:var(--ink);font-family:var(--f-head);font-weight:800;border-radius:12px}
+  .lg .lg-toc-btn:focus-visible{outline:3px solid var(--pri);outline-offset:2px}
+  .lg .lg-toc-btn i{display:block;inline-size:30px;block-size:30px;border-radius:50%;flex-shrink:0;background:var(--pri-soft) center/14px no-repeat url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236A4BF2' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");transition:transform .2s}
+  .lg .lg-toc.open .lg-toc-btn i{transform:rotate(180deg)}
+  .lg .lg-toc:not(.open) ol{display:none}
+  .lg .lg-toc.open ol{padding:0 4px 10px}
+  .lg .lg-toc a{min-block-size:44px;align-items:center;padding-block:4px}
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .lg .lg-toc-btn i{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23B3A1FF' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")}}
+:root[data-theme="dark"] .lg .lg-toc-btn i{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23B3A1FF' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")}
+.lg .lg-fab{position:fixed;z-index:25;inset-inline-end:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));display:inline-flex;align-items:center;gap:8px;min-block-size:46px;padding:8px 16px;border-radius:99px;font:inherit;font-weight:800;font-size:.92rem;color:var(--deep-ink);background:var(--deep);border:2px solid var(--edge);box-shadow:3px 3px 0 var(--pink);cursor:pointer}
+.lg .lg-fab[hidden]{display:none}
+.lg .lg-fab svg{inline-size:18px;block-size:18px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round}
+.lg .lg-fab:focus-visible{outline:3px solid var(--butter);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){.lg .lg-toc-btn i{transition:none}}
+@media print{.lg .lg-fab{display:none!important}}

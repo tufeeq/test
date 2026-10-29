@@ -112,22 +112,22 @@
 <section class="lp-hero" aria-labelledby="hero-h">
   <div class="lp-wrap lp-hero-in">
     <div class="lp-hero-txt">
-      <p class="lp-eyebrow" data-i="heroEyebrow">اختبار القدرات العامة · قدرات · GAT</p>
+      <p class="lp-eyebrow" data-i="heroEyebrow">لطلاب الثانوية · اختبار القدرات العامة</p>
       <h1 id="hero-h" data-i="heroH">القدرات ليست حظًا.<br>هي <span class="lp-mark">عشر مهارات<svg class="lp-scrib" viewBox="0 0 220 18" preserveAspectRatio="none" aria-hidden="true"><path d="M3 12c38-7 76-9 114-6s66 4 100-3"/></svg></span> تُتقن.</h1>
-      <p class="lp-lead" data-i="heroLead">ابدأ باختبار تشخيصي قصير يحدد مستواك، ثم ترافقك خطة يومية حتى موعد اختبارك: شروحات متحركة مسموعة، وتدريب متجدد، ونماذج محاكية بصيغة الاختبار المحوسب، وصندوق أخطاء يعيد إليك ما أخطأت فيه قبل أن تنساه.</p>
+      <p class="lp-lead" data-i="heroLead">اختبار تشخيصي قصير يحدد مستواك في كل مهارة، ثم خطة يومية حتى موعد اختبارك: شروحات متحركة مسموعة، وتدريب متجدد، ونماذج محاكية بصيغة الاختبار المحوسب.</p>
       <div class="lp-cta">
-        <a class="btn primary xl" href="/app" data-app="" data-i="startFree">ابدأ مجانًا</a>
+        <a class="btn primary xl lp-hero-go" href="/app" data-app="" data-i="heroCta">اعرف مستواك مجانًا</a>
         <a class="btn ghost xl lp-watch" href="#demo" data-xp-hero="">
           <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path class="f" d="M10 8.3v7.4l6-3.7z"/></svg>
           <span data-i="watch">شاهد شرحًا</span>
         </a>
       </div>
+      <p class="lp-micro" data-i="heroMicro">التشخيص مجاني: ٢٠ سؤالًا في نحو ١٥ دقيقة، بلا بطاقة دفع</p>
       <ul class="lp-proof" aria-label="ما تحصل عليه" data-i-aria="proofAria">
         <li><b data-i="p1b">٣٣</b> <span data-i="p1">شرحًا مسموعًا بكل لغة</span></li>
         <li><b data-i="p2b">٣٠</b> <span data-i="p2">نموذجًا محاكيًا</span></li>
         <li><b data-i="p3b">١٠</b> <span data-i="p3">مهارات تُقاس وتُتابَع</span></li>
       </ul>
-      <p class="lp-micro" data-i="heroMicro">خطة مجانية دائمة · بلا بطاقة دفع · عربي و <bdi>English</bdi></p>
     </div>
 
     <div class="lp-art" aria-hidden="true">
@@ -401,12 +401,15 @@
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8l7.5 3v6c0 4.6-3.2 8.2-7.5 9.4-4.3-1.2-7.5-4.8-7.5-9.4v-6z"/><path d="M8.5 12l2.5 2.5 4.5-5"/></svg>
           <span id="lp-refund-t"></span>
         </p>
-        <p class="lp-pay" data-i="payLine">الدفع عبر بوابة دفع آمنة: مدى، و <bdi>Apple Pay</bdi>، و <bdi>STC Pay</bdi>، و <bdi>Visa</bdi> و <bdi>Mastercard</bdi>.</p>
+        <div class="lp-paybox">
+          <p class="lp-pay" data-i="payLine">الدفع عبر بوابة دفع آمنة، ولا نحتفظ ببيانات بطاقتك.</p>
+          <ul class="lp-paym" aria-label="طرق الدفع المقبولة" data-i-aria="payAria"><li data-i="mada">مدى</li><li lang="en">Apple Pay</li><li lang="en">STC Pay</li><li lang="en">Visa</li><li lang="en">Mastercard</li></ul>
+        </div>
       </article>
     </div>
 
-    <div class="lp-cmp-wrap">
-      <h3 class="lp-cmp-h" data-i="cmpH">مقارنة تفصيلية</h3>
+    <details class="lp-cmp-wrap" id="lp-cmp">
+      <summary class="lp-cmp-sum"><h3 class="lp-cmp-h" data-i="cmpH">قارن الخطتين بالتفصيل</h3><span class="lp-cmp-ic" aria-hidden="true"></span></summary>
       <div class="lp-cmp-scroll" tabindex="0" role="region" aria-label="مقارنة الخطط" data-i-aria="cmpAria">
         <table class="lp-cmp">
           <thead><tr><th scope="col" data-i="cmpFeat">الميزة</th><th scope="col" data-i="cmpFree">المجانية</th><th scope="col" class="pro" data-i="cmpPro">الاشتراك الكامل</th></tr></thead>
@@ -432,7 +435,7 @@
           </tbody>
         </table>
       </div>
-    </div>
+    </details>
   </div>
 </section>
 
@@ -466,7 +469,7 @@
         <p data-i="finP">ابدأ بالاختبار التشخيصي مجانًا، وشاهد بعده الشرح المناسب لأضعف مهاراتك.</p>
       </div>
       <div class="lp-band-cta">
-        <a class="btn sand xl" href="/app" data-app="" data-i="startFree">ابدأ مجانًا</a>
+        <a class="btn sand xl" href="/app" data-app="" data-i="heroCta">اعرف مستواك مجانًا</a>
         <a class="lp-band-link" href="/app#guide" data-app="#guide" data-i="readGuide">اقرأ دليل الاختبار</a>
       </div>
     </div>

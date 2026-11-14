@@ -177,14 +177,12 @@
     readGuide: 'Read the test guide',
     footD: 'A complete kit to prepare for the General Aptitude Test, in Arabic and English.', footAria: 'Links', footApp: 'Open the app', footGuide: 'Test guide', footPrivacy: 'Privacy Policy', footTerms: 'Terms', footX: 'X: <bdi dir="ltr">@GATacademy1</bdi>', footWa: 'WhatsApp: <bdi dir="ltr">+966 53 352 2513</bdi>'
   };
-  /* payment wording follows the gateway that is live (the server marks it on <html data-pay="moyasar|tap|none"> and
+  /* payment wording follows the gateway that is live (the server marks it on <html data-pay="store|moyasar|none"> and
      renders the Arabic and English text from this table; site.js reads it, so keep it a plain literal) */
   var MA = ' مدى، و <bdi>Apple Pay</bdi>، و <bdi>STC Pay</bdi>، وبطاقات <bdi>Visa</bdi> و <bdi>Mastercard</bdi>. ولا نحتفظ ببيانات بطاقتك.</p>';
   var PAY = {
     moyasar: { ar: { payLine: 'الدفع آمن عبر بوابة ميسّر، ولا نحتفظ ببيانات بطاقتك.', a4: '<p>تدفع عبر بوابة ميسّر الآمنة، وتُقبل فيها:' + MA },
                en: { payLine: 'Secure payment via Moyasar. We never store your card details.', a4: '<p>You pay through Moyasar’s secure checkout, which accepts mada, Apple Pay, STC Pay, Visa and Mastercard. We never store your card details.</p>' } },
-    tap:     { ar: { payLine: 'الدفع آمن عبر بوابة تاب (<bdi>Tap</bdi>)، ولا نحتفظ ببيانات بطاقتك.', a4: '<p>تدفع عبر بوابة تاب (<bdi>Tap</bdi>) الآمنة، وتُقبل فيها:' + MA },
-               en: { payLine: 'Secure payment via Tap. We never store your card details.', a4: '<p>You pay through Tap’s secure checkout, which accepts mada, Apple Pay, STC Pay, Visa and Mastercard. We never store your card details.</p>' } },
     store:   { ar: { payLine: 'تدفع في متجرنا الآمن على منصة زد، ويصلك رابط التفعيل فور الدفع.', a4: '<p>تشتري باقتك من متجرنا على منصة زد، وتدفع بمدى أو <bdi>Apple Pay</bdi> أو بطاقات <bdi>Visa</bdi> و <bdi>Mastercard</bdi>. يصلك بعد الدفع رابط تفعيل بالبريد الإلكتروني ورسالة الجوال، تفتحه فيُفعَّل اشتراكك على حسابك مباشرة. ولا نحتفظ ببيانات بطاقتك.</p>' },
                en: { payLine: 'You pay in our secure store on Zid, and your activation link arrives right after payment.', a4: '<p>You buy your plan from our store on the Zid platform and pay with mada, Apple Pay, Visa or Mastercard. After payment you receive an activation link by email and SMS; open it and your plan is activated on your account right away. We never store your card details.</p>' } },
     none:    { ar: { payLine: 'الدفع عبر بوابة دفع آمنة، ولا نحتفظ ببيانات بطاقتك.', a4: '<p>تدفع عبر بوابة دفع آمنة، وتُقبل فيها:' + MA },

@@ -81,7 +81,7 @@ const SCHEMA = {
   narration: "id mime data updated_at",
   settings: "key value updated_at",
   subscriptions: "id user_id plan_id source starts_at ends_at payment_id note created_by revoked_at created_at",
-  payments: "id user_id email plan_id amount currency coupon status tap_id tap_status refunded_amount refund_id created_at paid_at provider ext_id days refunded_at",
+  payments: "id user_id email plan_id amount currency coupon status gw_status refunded_amount refund_id created_at paid_at provider ext_id days refunded_at",
   coupons: "code pct max_uses used expires_at plan_ids active note created_at",
   events: "id user_id type k v day at",
   admin_audit: "id admin_email action target meta at"
@@ -233,7 +233,7 @@ const needUser = (req, res, next) => req.user ? next() : fail(res, 401, "unauthe
 const needAdmin = (req, res, next) => !req.user ? fail(res, 401, "unauthenticated") : isAdminEmail(req.user.email) ? next() : fail(res, 403, "forbidden");
 // CSRF guard: state-changing API calls must carry our header (browsers block it cross-site without CORS)
 // (payment-provider webhooks are server-to-server and verified by signature instead)
-const WEBHOOKS = new Set(["/billing/webhook", "/billing/refund-webhook", "/billing/moyasar/callback"]);
+const WEBHOOKS = new Set(["/billing/moyasar/callback"]);
 app.use("/api", (req, res, next) => (req.method === "GET" || req.get("X-Masar") === "1" || WEBHOOKS.has(req.path)) ? next() : fail(res, 403, "bad-origin"));
 const wrap = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 app.use("/api", (req, res, next) => { res.set("Cache-Control", "no-store"); next(); }); // per-user data: never cache

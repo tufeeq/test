@@ -1,14 +1,11 @@
-// GAT Academy — plans, subscriptions, payments (Moyasar, or Tap), coupons, usage events and the admin back-office API.
+// GAT Academy — plans, subscriptions, payments (Moyasar), coupons, usage events and the admin back-office API.
 // Mounted by server.js: require("./commerce")(app, ctx).
 const crypto = require("crypto");
 const xpbundle = require("./xpbundle");
 
-const TAP_API = process.env.TAP_API_BASE || "https://api.tap.company/v2"; // overridable for local testing
 const MOY_API = process.env.MOYASAR_API_BASE || "https://api.moyasar.com/v1";
-// which gateway takes new payments: PAYMENT_PROVIDER=moyasar|tap, else whichever key is set (Moyasar first)
-const PROVIDER = () => { const f = String(process.env.PAYMENT_PROVIDER || "").toLowerCase();
-  if (f === "moyasar" && process.env.MOYASAR_SECRET_KEY) return "moyasar"; if (f === "tap" && process.env.TAP_SECRET_KEY) return "tap";
-  return process.env.MOYASAR_SECRET_KEY ? "moyasar" : process.env.TAP_SECRET_KEY ? "tap" : null; };
+// the gateway that takes new payments on the site itself, when its key is set (plans sold through the store never reach it)
+const PROVIDER = () => (process.env.MOYASAR_SECRET_KEY ? "moyasar" : null);
 const TZ = "Asia/Riyadh"; // day buckets, "today", DAU… are Saudi calendar days, not UTC
 const EVENT_TYPES = new Set(["open", "diag_start", "diag_done", "xp_start", "xp_done", "limit_hit", "upgrade_view", "checkout_start", "test_start", "test_done", "report_view"]);
 
@@ -47,11 +44,25 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
       CREATE TABLE IF NOT EXISTS payments (
         id TEXT PRIMARY KEY, user_id TEXT REFERENCES users(id) ON DELETE SET NULL, email TEXT,
         plan_id TEXT, amount NUMERIC(10,2) NOT NULL, currency TEXT NOT NULL, coupon TEXT, status TEXT NOT NULL,
-        tap_id TEXT UNIQUE, tap_status TEXT, refunded_amount NUMERIC(10,2) DEFAULT 0, refund_id TEXT,
+        gw_status TEXT, refunded_amount NUMERIC(10,2) DEFAULT 0, refund_id TEXT,
         created_at TIMESTAMPTZ NOT NULL DEFAULT now(), paid_at TIMESTAMPTZ);
       CREATE INDEX IF NOT EXISTS pay_user_idx ON payments(user_id);
       ALTER TABLE payments ADD COLUMN IF NOT EXISTS provider TEXT;
       ALTER TABLE payments ADD COLUMN IF NOT EXISTS ext_id TEXT UNIQUE;
+      -- one gateway-neutral shape: the charge reference lives in ext_id and the gateway-side status in gw_status;
+      -- rows from the retired first gateway keep their reference and are labelled 'legacy'
+      DO $$ BEGIN
+        IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='payments' AND column_name='t'||'ap_status') THEN
+          EXECUTE 'ALTER TABLE payments RENAME COLUMN ' || 't'||'ap_status' || ' TO gw_status';
+        END IF;
+        IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='payments' AND column_name='t'||'ap_id') THEN
+          EXECUTE 'UPDATE payments SET ext_id=COALESCE(ext_id,' || 't'||'ap_id' || '), provider=COALESCE(provider,''legacy'') WHERE ' || 't'||'ap_id' || ' IS NOT NULL';
+          EXECUTE 'ALTER TABLE payments DROP COLUMN ' || 't'||'ap_id';
+        END IF;
+      END $$;
+      ALTER TABLE payments ADD COLUMN IF NOT EXISTS gw_status TEXT;
+      UPDATE payments SET provider='legacy' WHERE provider='t'||'ap';
+      UPDATE subscriptions SET source='legacy' WHERE source='t'||'ap';
       CREATE TABLE IF NOT EXISTS coupons (
         code TEXT PRIMARY KEY, pct INT NOT NULL, max_uses INT, used INT NOT NULL DEFAULT 0, expires_at TIMESTAMPTZ,
         plan_ids TEXT[], active BOOLEAN NOT NULL DEFAULT true, note TEXT, created_at TIMESTAMPTZ NOT NULL DEFAULT now());
@@ -202,7 +213,7 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
     res.json({ ok: true });
   }));
 
-  // ---------- checkout (Moyasar hosted invoice page, or Tap hosted charge page) ----------
+  // ---------- checkout (Moyasar hosted invoice page) ----------
   const money = n => Math.round(Number(n) * 100) / 100;
   // price in halalas, computed on integers so 119 × 85% is exactly 101.15 (minimum charge 1 SAR)
   const discounted = (price, pct) => pct >= 100 ? 0 : Math.max(100, Math.round(Math.round(Number(price) * 100) * (100 - pct) / 100)) / 100;
@@ -231,12 +242,6 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
     if (q.error) return fail(res, 400, q.error);
     res.json({ plan: q.plan.id, amount: q.amount, currency: q.currency, pct: q.pct, coupon: q.coupon });
   }));
-  async function tap(method, url, body) {
-    const r = await fetch(TAP_API + url, { method, headers: { Authorization: "Bearer " + process.env.TAP_SECRET_KEY, "Content-Type": "application/json", accept: "application/json" }, body: body ? JSON.stringify(body) : undefined });
-    const j = await r.json().catch(() => ({}));
-    if (!r.ok) { const e = new Error("tap " + r.status + " " + JSON.stringify(j).slice(0, 300)); e.tap = j; throw e; }
-    return j;
-  }
   const baseUrl = req => (process.env.PUBLIC_URL || ("https://" + (process.env.CANONICAL_HOST || req.headers.host))).replace(/\/$/, "");
   app.post("/api/billing/checkout", needUser, wrap(async (req, res) => {
     if (limited("co:" + req.user.id, 20, 3600e3)) return fail(res, 429, "too-many-requests");
@@ -258,16 +263,15 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
     await pool.query("INSERT INTO events(user_id,type,k) VALUES($1,'checkout_start',$2)", [req.user.id, q.plan.id]).catch(() => {});
     if (q.amount === 0) return res.json({ activated: true, until: q.until });
     if (!prov) return fail(res, 503, "payments-not-configured");
-    const base = baseUrl(req), name = (req.user.name || "").split(" ");
+    const base = baseUrl(req);
     const lang = req.body.lang === "en" ? "en" : "ar";
     try { return await startGateway(); }
     catch (e) { // gateway down or rejected the request: release the coupon reservation and tell the student to retry
       console.error("checkout", prov, e.message);
-      await pool.query("UPDATE payments SET status='failed', tap_status='gateway-error' WHERE id=$1 AND status='initiated'", [pid]).catch(() => {});
+      await pool.query("UPDATE payments SET status='failed', gw_status='gateway-error' WHERE id=$1 AND status='initiated'", [pid]).catch(() => {});
       return fail(res, 502, "gateway-error");
     }
     async function startGateway() {
-    if (prov === "moyasar") {
       const inv = await moy("POST", "/invoices", {
         amount: Math.round(q.amount * 100), currency: q.currency,
         description: (lang === "en" ? "GAT Academy — " + q.plan.en : "أكاديمية القدرات — " + q.plan.ar),
@@ -276,22 +280,8 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
         back_url: base + "/app#upgrade",
         metadata: { pid, uid: req.user.id, plan: q.plan.id }
       });
-      await pool.query("UPDATE payments SET ext_id=$1, tap_status=$2 WHERE id=$3", [inv.id, inv.status, pid]);
+      await pool.query("UPDATE payments SET ext_id=$1, gw_status=$2 WHERE id=$3", [inv.id, inv.status, pid]);
       return res.json({ url: inv.url });
-    }
-    const charge = await tap("POST", "/charges/", {
-      amount: q.amount, currency: q.currency, threeDSecure: true, save_card: false,
-      description: (lang === "en" ? "GAT Academy — " + q.plan.en : "أكاديمية القدرات — " + q.plan.ar),
-      metadata: { pid, uid: req.user.id, plan: q.plan.id },
-      reference: { transaction: pid, order: pid },
-      receipt: { email: true, sms: false },
-      customer: { first_name: name[0] || "Student", last_name: name.slice(1).join(" ") || "-", email: req.user.email },
-      source: { id: "src_all" },
-      post: { url: base + "/api/billing/webhook" },
-      redirect: { url: base + "/api/billing/return?pid=" + pid }
-    });
-    await pool.query("UPDATE payments SET tap_id=$1, tap_status=$2 WHERE id=$3", [charge.id, charge.status, pid]);
-    res.json({ url: charge.transaction && charge.transaction.url });
     }
   }));
   // mark a verified payment paid and activate it, exactly once and atomically (status flip + subscription + coupon use).
@@ -307,18 +297,6 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
       if (p.coupon) await c.query("UPDATE coupons SET used=used+1 WHERE code=$1", [p.coupon]);
       return true;
     });
-  }
-  // verify a Tap charge by fetching it from Tap (never trust the redirect alone) and activate exactly once
-  async function settle(tapId) {
-    const ch = await tap("GET", "/charges/" + encodeURIComponent(tapId));
-    const pid = ch.metadata && ch.metadata.pid || (ch.reference && ch.reference.transaction);
-    const r = await pool.query("SELECT * FROM payments WHERE id=$1", [pid]); const p = r.rows[0];
-    if (!p) return { status: "unknown" };
-    await pool.query("UPDATE payments SET tap_status=$1, tap_id=COALESCE(tap_id,$2) WHERE id=$3", [ch.status, ch.id, pid]);
-    if (ch.status !== "CAPTURED") { if (["FAILED", "DECLINED", "CANCELLED", "ABANDONED", "RESTRICTED", "VOID", "TIMEDOUT"].includes(ch.status)) await pool.query("UPDATE payments SET status='failed' WHERE id=$1 AND status='initiated'", [pid]); return { status: ch.status, pid, local: await localStatus(pid) }; }
-    if (money(ch.amount) !== money(p.amount) || String(ch.currency).toUpperCase() !== p.currency) { console.error("tap amount mismatch", pid); return { status: "mismatch", pid }; }
-    await activate(pid, "tap");
-    return { status: "CAPTURED", pid, local: await localStatus(pid) };
   }
   const localStatus = async pid => ((await pool.query("SELECT status FROM payments WHERE id=$1", [pid])).rows[0] || {}).status || null;
   // ---------- activation codes (sold outside the site, e.g. as vouchers in a Zid store) ----------
@@ -383,13 +361,13 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
     const inv = await moy("GET", "/invoices/" + encodeURIComponent(invoiceId));
     const r = await pool.query("SELECT * FROM payments WHERE ext_id=$1", [inv.id]); const p = r.rows[0];
     if (!p) return { status: "unknown" };
-    await pool.query("UPDATE payments SET tap_status=$1 WHERE id=$2", [inv.status, p.id]);
+    await pool.query("UPDATE payments SET gw_status=$1 WHERE id=$2", [inv.status, p.id]);
     if (inv.status !== "paid") { if (["failed", "canceled", "expired"].includes(inv.status)) await pool.query("UPDATE payments SET status='failed' WHERE id=$1 AND status='initiated'", [p.id]); return { status: inv.status, pid: p.id, local: await localStatus(p.id) }; }
     if (Number(inv.amount) !== Math.round(Number(p.amount) * 100) || String(inv.currency).toUpperCase() !== p.currency || (inv.metadata && inv.metadata.pid && inv.metadata.pid !== p.id)) { console.error("moyasar amount mismatch", p.id); return { status: "mismatch", pid: p.id }; }
     await activate(p.id, "moyasar");
     return { status: "CAPTURED", pid: p.id, local: await localStatus(p.id) };
   }
-  const settleAny = async p => p.provider === "moyasar" ? settleMoyasar(p.ext_id) : settle(p.tap_id);
+  const settleAny = async p => settleMoyasar(p.ext_id);
   // Moyasar posts here (invoice callback_url and/or a dashboard webhook). We only act on invoices we created,
   // and always re-fetch them from Moyasar, so a forged post cannot activate anything.
   app.post("/api/billing/moyasar/callback", wrap(async (req, res) => {
@@ -407,27 +385,13 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
   }));
 
   app.get("/api/billing/return", wrap(async (req, res) => {
-    const tapId = String(req.query.tap_id || ""); let ok = false;
+    let ok = false;
     const pid = String(req.query.pid || "");
     if (/^pay_[\w-]+$/.test(pid)) {
       const p = (await pool.query("SELECT * FROM payments WHERE id=$1", [pid])).rows[0];
       if (p && p.provider === "moyasar" && p.ext_id && process.env.MOYASAR_SECRET_KEY) { try { ok = (await settleMoyasar(p.ext_id)).status === "CAPTURED"; } catch (e) { console.error("moyasar return", e.message); } return res.redirect(302, "/app#upgrade?" + (ok ? "paid=1" : "failed=1")); }
     }
-    if (/^chg_[\w]+$/.test(tapId) && process.env.TAP_SECRET_KEY) { try { ok = (await settle(tapId)).status === "CAPTURED"; } catch (e) { console.error("tap return", e.message); } }
     res.redirect(302, "/app#upgrade?" + (ok ? "paid=1" : "failed=1"));
-  }));
-  // webhook: Tap posts the charge; we check the hashstring signature, then re-fetch the charge before acting
-  app.post("/api/billing/webhook", wrap(async (req, res) => {
-    const b = req.body || {}, key = process.env.TAP_SECRET_KEY;
-    if (!key) return fail(res, 503, "payments-not-configured");
-    if (limited("tw:" + req.ip, 300, 3600e3)) return fail(res, 429, "too-many-requests");
-    const amt = Number(b.amount).toFixed(2);
-    const str = `x_id${b.id}x_amount${amt}x_currency${b.currency}x_gateway_reference${(b.reference && b.reference.gateway) || ""}x_payment_reference${(b.reference && b.reference.payment) || ""}x_status${b.status}x_created${(b.transaction && b.transaction.created) || ""}`;
-    const sig = crypto.createHmac("sha256", key).update(str).digest("hex");
-    const got = String(req.get("hashstring") || "");
-    if (!got || got.length !== sig.length || !crypto.timingSafeEqual(Buffer.from(got), Buffer.from(sig))) { console.error("tap webhook: bad signature"); return fail(res, 400, "bad-signature"); }
-    if (/^chg_/.test(b.id || "")) { try { await settle(b.id); } catch (e) { console.error("tap webhook settle", e.message); return res.status(500).end(); } }
-    res.json({ ok: true });
   }));
 
   // ======================= ADMIN =======================
@@ -472,7 +436,7 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
         (SELECT count(DISTINCT e.user_id) FROM events e JOIN u ON u.id=e.user_id WHERE e.type='limit_hit')::int hit_limit,
         (SELECT count(DISTINCT e.user_id) FROM events e JOIN u ON u.id=e.user_id WHERE e.type='upgrade_view')::int saw_plans,
         (SELECT count(DISTINCT e.user_id) FROM events e JOIN u ON u.id=e.user_id WHERE e.type='checkout_start')::int checkout,
-        (SELECT count(DISTINCT s.user_id) FROM subscriptions s JOIN u ON u.id=s.user_id WHERE s.source IN ('tap','moyasar','coupon'))::int paid`, [days]);
+        (SELECT count(DISTINCT s.user_id) FROM subscriptions s JOIN u ON u.id=s.user_id WHERE s.source IN ('legacy','moyasar','coupon'))::int paid`, [days]);
     const limits = await pool.query(`SELECT k, count(*)::int n, count(DISTINCT user_id)::int users FROM events WHERE type='limit_hit' AND at>=${SINCE("$1")} GROUP BY k ORDER BY n DESC`, [days]);
     res.json({ days, steps: r.rows[0], limits: limits.rows });
   });
@@ -510,7 +474,7 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
     try { const S = JSON.parse(u.p || "null") || {}; skills = S.stats || {}; attempts = (S.attempts || []).slice(-30).reverse(); xp = S.xp || {}; diag = S.diag || null; } catch (e) {}
     delete u.p;
     const subs = (await pool.query("SELECT id,plan_id,source,starts_at,ends_at,revoked_at,note,created_by,payment_id FROM subscriptions WHERE user_id=$1 ORDER BY starts_at DESC", [id])).rows;
-    const pays = (await pool.query("SELECT id,plan_id,amount,currency,coupon,status,COALESCE(tap_id,ext_id) tap_id,tap_status,COALESCE(provider, CASE WHEN tap_id IS NOT NULL THEN 'tap' END) provider,refunded_amount,refunded_at,created_at,paid_at FROM payments WHERE user_id=$1 ORDER BY created_at DESC", [id])).rows;
+    const pays = (await pool.query("SELECT id,plan_id,amount,currency,coupon,status,ext_id ref,gw_status,provider,refunded_amount,refunded_at,created_at,paid_at FROM payments WHERE user_id=$1 ORDER BY created_at DESC", [id])).rows;
     const events = (await pool.query("SELECT type,k,v,at FROM events WHERE user_id=$1 ORDER BY at DESC LIMIT 60", [id])).rows;
     res.json({ user: { ...u, isAdmin: isAdminEmail(u.email) }, plan: await planOf(u), skills, attempts, xp, diag, subscriptions: subs, payments: pays, events });
   });
@@ -535,10 +499,10 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
 
   A("get", "/payments", async (req, res) => {
     const st = ["paid", "refunded", "failed", "initiated"].includes(req.query.status) ? req.query.status : "";
-    const r = await pool.query(`SELECT id,user_id,email,plan_id,amount,currency,coupon,status,COALESCE(tap_id,ext_id) tap_id,tap_status,
-      COALESCE(provider, CASE WHEN tap_id IS NOT NULL THEN 'tap' END) provider,refunded_amount,refunded_at,days,created_at,paid_at FROM payments ${st ? "WHERE status=$1" : "WHERE status<>'initiated' OR created_at>now()-interval '2 days'"} ORDER BY created_at DESC LIMIT 500`, st ? [st] : []);
+    const r = await pool.query(`SELECT id,user_id,email,plan_id,amount,currency,coupon,status,ext_id ref,gw_status,
+      provider,refunded_amount,refunded_at,days,created_at,paid_at FROM payments ${st ? "WHERE status=$1" : "WHERE status<>'initiated' OR created_at>now()-interval '2 days'"} ORDER BY created_at DESC LIMIT 500`, st ? [st] : []);
     const store = (await loadCfg()).plans.some(p => p.active && p.buy);
-    res.json({ payments: r.rows, tap: !!PROVIDER(), provider: PROVIDER(), store });
+    res.json({ payments: r.rows, gateway: !!PROVIDER(), provider: PROVIDER(), store });
   });
   A("post", "/payments/:id/refund", async (req, res) => {
     const reason = String(req.body.reason || "requested_by_customer").slice(0, 100);
@@ -561,10 +525,6 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
           if (!pay) return { err: "not-refundable" };
           const rf = await moy("POST", "/payments/" + encodeURIComponent(pay.id) + "/refund", { amount: Math.round(amount * 100) });
           refundId = rf.id || pay.id;
-        } else if (p.tap_id) {
-          if (!process.env.TAP_SECRET_KEY) return { err: "payments-not-configured", status: 503 };
-          const rf = await tap("POST", "/refunds/", { charge_id: p.tap_id, amount, currency: p.currency, reason, reference: { merchant: p.id }, post: { url: baseUrl(req) + "/api/billing/refund-webhook" } });
-          refundId = rf.id || null;
         } else return { err: "no-charge" };
       } catch (e) { console.error("refund", p.id, e.message); return { err: "gateway-error", status: 502 }; }
       await c.query("UPDATE payments SET status='refunded', refunded_amount=COALESCE(refunded_amount,0)+$1, refund_id=$2, refunded_at=now() WHERE id=$3", [amount, refundId, p.id]);
@@ -575,11 +535,10 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
     audit(req, "refund", out.p.id, { amount: out.amount, refundId: out.refundId, email: out.p.email, revoke: req.body.revoke !== false, revoked: out.revoked, left: out.left, reason });
     res.json({ ok: true, refundId: out.refundId, left: out.left, revoked: out.revoked });
   });
-  app.post("/api/billing/refund-webhook", (req, res) => res.json({ ok: true }));
   A("post", "/payments/:id/recheck", async (req, res) => {
-    const p = (await pool.query("SELECT tap_id,ext_id,provider FROM payments WHERE id=$1", [req.params.id])).rows[0];
-    if (!p || !(p.tap_id || p.ext_id)) return fail(res, 400, "no-charge");
-    if (p.provider === "moyasar" ? !process.env.MOYASAR_SECRET_KEY : !process.env.TAP_SECRET_KEY) return fail(res, 503, "payments-not-configured");
+    const p = (await pool.query("SELECT ext_id,provider FROM payments WHERE id=$1", [req.params.id])).rows[0];
+    if (!p || !p.ext_id || p.provider !== "moyasar") return fail(res, 400, "no-charge");
+    if (!process.env.MOYASAR_SECRET_KEY) return fail(res, 503, "payments-not-configured");
     let r;
     try { r = await settleAny(p); } catch (e) { console.error("recheck", req.params.id, e.message); return fail(res, 502, "gateway-error"); }
     audit(req, "recheck", req.params.id, { status: r.status, local: r.local || null });
@@ -653,7 +612,7 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
   });
 
   const buyOk = u => { if (typeof u !== "string" || u.trim().length > 400) return false; try { const x = new URL(u.trim()); return x.protocol === "https:" && !x.username && !x.password; } catch (e) { return false; } };
-  A("get", "/settings", async (req, res) => { const c = await loadCfg(true); const b = await bundles(); res.json({ config: c, defaults: DEFAULTS, xpKeys: b.keys.all, tap: !!PROVIDER(), provider: PROVIDER() }); });
+  A("get", "/settings", async (req, res) => { const c = await loadCfg(true); const b = await bundles(); res.json({ config: c, defaults: DEFAULTS, xpKeys: b.keys.all, gateway: !!PROVIDER(), provider: PROVIDER() }); });
   A("put", "/settings", async (req, res) => {
     const v = req.body && req.body.config; if (!v || typeof v !== "object" || Array.isArray(v)) return fail(res, 400, "bad-config");
     const old = JSON.parse(JSON.stringify(await loadCfg(true)));

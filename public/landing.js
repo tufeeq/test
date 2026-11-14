@@ -175,7 +175,7 @@
     finEyebrow: 'Five minutes is enough to start', finH: 'Find your level today. Start your plan tomorrow.',
     finP: 'Take the diagnostic for free, then watch the explainer for your weakest skill.',
     readGuide: 'Read the test guide',
-    footD: 'A complete kit to prepare for the General Aptitude Test, in Arabic and English.', footAria: 'Links', footApp: 'Open the app', footGuide: 'Test guide', footPrivacy: 'Privacy Policy', footTerms: 'Terms'
+    footD: 'A complete kit to prepare for the General Aptitude Test, in Arabic and English.', footAria: 'Links', footApp: 'Open the app', footGuide: 'Test guide', footPrivacy: 'Privacy Policy', footTerms: 'Terms', footWa: 'WhatsApp: <bdi dir="ltr">+966 53 352 2513</bdi>'
   };
   /* payment wording follows the gateway that is live (the server marks it on <html data-pay="moyasar|tap|none"> and
      renders the Arabic and English text from this table; site.js reads it, so keep it a plain literal) */

@@ -1424,7 +1424,7 @@ Object.assign(T.ar,{
   rdDoneT:'تم تفعيل اشتراكك', rdDoneD:(p,d)=>`فُتحت لك ${p}، واشتراكك فعّال حتى ${d}.`, rdMineD:d=>`هذا الرمز مفعّل على حسابك، واشتراكك فعّال حتى ${d}.`, rdStart:'ابدأ المذاكرة الآن',
   rdGateT:'خطوة أخيرة لتفعيل اشتراكك', rdGateD:'أنشئ حسابك المجاني (أو سجّل دخولك) وسيُفعَّل الاشتراك عليه فورًا.',
   rdErr:{'bad-code':'لم نجد هذا الرمز. تأكد من كتابته كما وصلك بالضبط.','code-used':'هذا الرمز استُخدم على حساب آخر. إن كنت اشتريته ولم تستخدمه فراسلنا وسنحل الأمر.','code-expired':'انتهت صلاحية هذا الرمز. راسلنا وسنساعدك.','code-disabled':'هذا الرمز موقوف. راسلنا وسنساعدك.','too-many-requests':'محاولات كثيرة. انتظر دقائق ثم حاول مجددًا.'},
-  rdHelp:'تحتاج مساعدة؟ راسلنا على info@gat.academy مع رقم طلبك من المتجر.',
+  rdHelp:'تحتاج مساعدة؟ راسلنا على info@gat.academy أو <a class="mail-link" href="https://wa.me/966533522513" target="_blank" rel="noopener">واتساب <bdi dir="ltr">053 352 2513</bdi></a> مع رقم طلبك من المتجر.',
   youArePro:'أنت مشترك', activeUntil:d=>`اشتراكك فعّال حتى ${d}`, proForever:'اشتراكك فعّال.', goToday:'إلى يومي', allOpen:'كل المزايا متاحة لك.',
   signupFirstT:'سجّل أولًا', signupFirst:'أنشئ حسابك المجاني أولًا ثم اختر باقتك، ليرتبط اشتراكك بحسابك وتستخدمه من أي جهاز.',
   errGeneric:'تعذّر إكمال الطلب. حاول مجددًا.', errNet:'تعذّر الاتصال. تحقق من الإنترنت ثم حاول مجددًا.', errAuth:'انتهت جلستك. سجّل الدخول من جديد.',
@@ -1464,7 +1464,7 @@ Object.assign(T.en,{
   rdDoneT:'Your plan is active', rdDoneD:(p,d)=>`${p} is unlocked, active until ${d}.`, rdMineD:d=>`This code is already active on your account, until ${d}.`, rdStart:'Start studying now',
   rdGateT:'One last step to activate your plan', rdGateD:'Create your free account (or sign in) and the plan is activated on it instantly.',
   rdErr:{'bad-code':'We couldn’t find this code. Type it exactly as you received it.','code-used':'This code was already used on another account. If you bought it and didn’t use it, email us and we’ll sort it out.','code-expired':'This code has expired. Email us and we’ll help.','code-disabled':'This code is disabled. Email us and we’ll help.','too-many-requests':'Too many attempts. Wait a few minutes and try again.'},
-  rdHelp:'Need help? Email info@gat.academy with your store order number.',
+  rdHelp:'Need help? Email info@gat.academy or <a class="mail-link" href="https://wa.me/966533522513" target="_blank" rel="noopener">WhatsApp <bdi dir="ltr">+966 53 352 2513</bdi></a> with your store order number.',
   signupFirstT:'Sign up first', signupFirst:'Create your free account first, then choose a plan, so it’s linked to your account and works on any device.',
   errGeneric:'Something went wrong. Please try again.', errNet:'Could not connect. Check your internet and try again.', errAuth:'Your session ended. Please sign in again.',
   ctxStart:'Start free, and go Pro when you’re ready for more.', ctxDaily:n=>`You finished today's ${n} free questions.`, ctxXp:n=>`You finished ${n} explainer${n==='1'?'':'s'}.`, ctxAcc:(s,a,b)=>`Your ${s} accuracy rose from ${a}% to ${b}%.`, ctxDays:n=>`You have practiced on ${n} day${n==='1'?'':'s'}.`, ctxMore:n=>n==='1'?'One more explainer is waiting.':`${n} more explainers are waiting.`,
@@ -2565,7 +2565,7 @@ function renderRoute(){
   $('#nav').innerHTML=links; $('#tabbar').innerHTML=links;
   const ab=$('#acct-btn'); if(ab){ const u=window.CLOUD?.user, nm=(u&&u.name)||''; ab.hidden=!window.CLOUD; ab.classList.toggle('on',!!u); ab.classList.toggle('has-name',!!nm); ab.title=u?(nm?nm+' · ':'')+(u.email||''):t('acctJoin');
     let sp=ab.querySelector('.acct-name'); if(nm){ if(!sp){ sp=document.createElement('span'); sp.className='acct-name'; ab.appendChild(sp); } sp.textContent=nm.split(' ')[0]; ab.setAttribute('aria-label',(S.lang==='ar'?'الحساب: ':'Account: ')+nm); } else if(sp) sp.remove(); }
-  let html; try{ html=r.v(); }catch(e){ console.error(e); html=errorCard(); } $('#main').innerHTML=notices()+html; $('#foot').innerHTML=esc(t('footer')).replace('info@gat.academy','<a class="mail-link" dir="ltr" href="mailto:info@gat.academy">info@gat.academy</a>')+(window.CLOUD?` · <a class="foot-home" href="/?home=1${S.lang==='en'?'&lang=en':''}">${t('aboutSite')}</a> · <a class="foot-home" href="/privacy${S.lang==='en'?'?lang=en':''}">${t('legalPrivacy')}</a> · <a class="foot-home" href="/terms${S.lang==='en'?'?lang=en':''}">${t('legalTerms')}</a>`:''); bindMain();
+  let html; try{ html=r.v(); }catch(e){ console.error(e); html=errorCard(); } $('#main').innerHTML=notices()+html; $('#foot').innerHTML=esc(t('footer')).replace('info@gat.academy','<a class="mail-link" dir="ltr" href="mailto:info@gat.academy">info@gat.academy</a>')+` · <a class="foot-home" href="https://wa.me/966533522513" target="_blank" rel="noopener">${S.lang==='ar'?'واتساب':'WhatsApp'}</a>`+(window.CLOUD?` · <a class="foot-home" href="/?home=1${S.lang==='en'?'&lang=en':''}">${t('aboutSite')}</a> · <a class="foot-home" href="/privacy${S.lang==='en'?'?lang=en':''}">${t('legalPrivacy')}</a> · <a class="foot-home" href="/terms${S.lang==='en'?'?lang=en':''}">${t('legalTerms')}</a>`:''); bindMain();
   renderBanner(); renderProChip(); loadPremium(); if(NUDGE) renderNudge();
 }
 /* device/session notices shown above the page: a corrupt saved copy, a lost session, an unreachable server */

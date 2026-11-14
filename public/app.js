@@ -2438,7 +2438,8 @@ async function requote(){ const C=window.CLOUD, p=curPlan(), code=(UP.coupon||''
     if(e.code==='bad-coupon'){ try{ const i=await C.redeemInfo(code); if(seq===UP.qseq&&i&&i.plan){ UP.coupon=''; UP.qerr=''; closeUpgrade(); location.hash='#redeem?c='+encodeURIComponent(i.code); return; } }catch(x){} } }
   paintQuote(); }
 async function doCheckout(){ const C=window.CLOUD; if(!C) return; const p=curPlan(); UP.err=''; UP.note='';
-  if(storeOf(p)){ track('checkout_start',p.id); track('store_click',p.id); const w=window.open(storeOf(p),'_blank','noopener'); if(!w) location.href=storeOf(p); return; }
+  if(storeOf(p)){ track('checkout_start',p.id); track('store_click',p.id); /* open the store in a new tab and keep the site open behind it (window.open returns null with noopener, so its result says nothing) */
+    const a=document.createElement('a'); a.href=storeOf(p); a.target='_blank'; a.rel='noopener'; document.body.appendChild(a); a.click(); a.remove(); return; }
   if(!C.user){ const k=UP.k; closeUpgrade(); PEND={fn:()=>openUpgrade(k)}; AC.tab='signup'; AC.gate=true; AC.gateUp=true; openAcct(); return; }
   if(!p||UP.busy) return; UP.busy=true; paintQuote();
   try{ const r=await C.checkout(p.id,(UP.coupon||'').trim()||undefined);

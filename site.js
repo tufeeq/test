@@ -281,8 +281,9 @@ module.exports = function site(app, { PUB, loadConfig }) {
     const lang = req.query.lang === "en" ? "en" : "ar";
     let cfg = null; try { cfg = await loadConfig(); } catch (e) { cfg = null; }
     const { EN, META, PAY, sig } = landingDict();
-    // the payment gateway named on the page is the one that takes payments now (moyasar / tap), else neutral wording
-    const prov = cfg && PAY[cfg.provider] ? cfg.provider : "none";
+    // the payment wording follows how plans are sold now: the external store (plans carry a buy link), or the live
+    // gateway (moyasar / tap), else neutral wording
+    const prov = cfg && PAY.store && (cfg.plans || []).some(p => p.buy) ? "store" : cfg && PAY[cfg.provider] ? cfg.provider : "none";
     const key = lang + "|" + sig + "|" + prov + "|" + sha1(JSON.stringify(cfg && { p: cfg.plans, c: cfg.currency, r: cfg.refund }));
     sendPage(req, res, "index.html", { key, transform: html => {
       html = html.replace(/<html lang="ar" dir="rtl"/, `<html lang="ar" dir="rtl" data-pay="${prov}"`);

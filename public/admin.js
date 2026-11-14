@@ -642,7 +642,7 @@ function renderDrawer() {
       ${subs.map(x => { const [c, l] = subStatus(x); return `<tr><td>${esc(srcL(x.source))}</td><td>${esc(x.plan_id ? planName(x.plan_id) : "—")}</td><td>${esc(fmtDate(x.starts_at))}</td><td>${esc(fmtDate(x.ends_at))}</td><td><span class="chip ${c}">${esc(l)}</span></td><td class="wrap small">${esc(x.note || "")}${x.created_by ? ` <span class="muted ltr">${esc(x.created_by)}</span>` : ""}</td></tr>`; }).join("")}</tbody></table></div>` : `<p class="empty">${_("لا اشتراكات.", "No subscriptions.")}</p>`}</section>
 
     <section class="card"><div class="card-h"><h2>${_("المدفوعات", "Payments")}</h2></div>
-      ${pays.length ? `<div class="tbl"><table><thead><tr><th scope="col">${_("التاريخ", "Date")}</th><th scope="col">${_("الباقة", "Plan")}</th><th scope="col" class="num">${_("المبلغ", "Amount")}</th><th scope="col">${_("القسيمة", "Coupon")}</th><th scope="col">${_("الحالة", "Status")}</th></tr></thead><tbody>
+      ${pays.length ? `<div class="tbl"><table><thead><tr><th scope="col" class="hide-sm">${_("التاريخ", "Date")}</th><th scope="col">${_("الباقة", "Plan")}</th><th scope="col" class="num">${_("المبلغ", "Amount")}</th><th scope="col">${_("القسيمة", "Coupon")}</th><th scope="col">${_("الحالة", "Status")}</th></tr></thead><tbody>
       ${pays.map(x => { const [sc, sl] = payStat(x); return `<tr><td>${esc(fmtDate(x.paid_at || x.created_at))}${x.provider ? `<br><small class="muted">${esc(provL(x.provider))}</small>` : ""}</td><td>${esc(planName(x.plan_id))}</td><td class="num">${num(x.amount) ? fmtMoney(x.amount) : _("قسيمة ١٠٠٪", "100% coupon")}${num(x.refunded_amount) ? `<br><small class="muted">−${fmtMoney(x.refunded_amount)}</small>` : ""}</td><td class="mono">${esc(x.coupon || "—")}</td><td><span class="chip ${esc(sc)}">${esc(sl)}</span></td></tr>`; }).join("")}</tbody></table></div>` : `<p class="empty">${_("لا مدفوعات.", "No payments.")}</p>`}</section>
 
     <section class="card"><div class="card-h"><h2>${_("آخر الأحداث", "Recent events")}</h2><span class="sub">${fmtN(evs.length)}</span></div>
@@ -797,6 +797,23 @@ async function vCoupons(tok) {
       <label class="fld wide">${_("ملاحظة داخلية", "Internal note")}<input type="text" id="cp-note" maxlength="200" placeholder="${_("مثال: شراكة مدرسة الرياض", "e.g. Riyadh school partnership")}"></label>
       <div class="row wide" style="grid-column:1/-1"><button class="btn primary sm" type="submit">${ic("plus")}${_("إنشاء القسيمة", "Create coupon")}</button></div>
     </form></section>
+  <section class="card" id="zid"><div class="card-h"><h2>${_("أكواد تفعيل للبيع في المتجر", "Activation codes to sell in the store")}</h2><span class="sub">${_("متجر زد", "Zid store")}</span></div>
+    <p class="small muted">${_("أكواد تُستخدم مرة واحدة، وكل كود يفعّل باقة واحدة كاملة. حمّل الملف وارفع عمود <b>link</b> (أو <b>code</b>) في منتج «قسائم» بمتجر زد. يضغط الطالب الرابط بعد الشراء، فيسجّل ويُفعَّل اشتراكه مباشرة دون صفحة دفع. ويستطيع أيضًا كتابة الكود في <span class='mono'>gat.academy/r</span>.", "Single-use codes, each activating one full plan. Download the file and load the <b>link</b> (or <b>code</b>) column into a Zid voucher product. After buying, the student taps the link, signs up and the plan activates right away, with no payment page. They can also type the code at <span class='mono'>gat.academy/r</span>.")}</p>
+    <form id="f-bt" class="fgrid" novalidate>
+      <label class="fld">${_("الباقة", "Plan")}<select id="bt-plan">${plans.map(p => `<option value="${esc(p.id)}">${esc(_(p.ar || p.id, p.en || p.id))}${p.active ? "" : _(" (مخفية)", " (hidden)")} — ${fmtN(p.days)} ${_("يومًا", "days")}</option>`).join("")}</select></label>
+      <label class="fld">${_("عدد الأكواد", "How many codes")}<input type="number" id="bt-n" min="1" max="2000" step="1" value="100"><span class="hint">${_("حتى ٢٠٠٠ في الدفعة", "Up to 2,000 per batch")}</span></label>
+      <label class="fld">${_("تاريخ الانتهاء (اختياري)", "Expires (optional)")}<input type="date" id="bt-exp" min="${today()}"><span class="hint">${_("اتركه فارغًا ليبقى الكود صالحًا دائمًا", "Leave empty so codes never expire")}</span></label>
+      <label class="fld">${_("ملاحظة داخلية", "Internal note")}<input type="text" id="bt-note" maxlength="200" placeholder="${_("مثال: متجر زد، دفعة نوفمبر", "e.g. Zid store, November batch")}"></label>
+      <div class="row wide" style="grid-column:1/-1"><button class="btn primary sm" type="submit">${ic("download")}${_("أنشئ الأكواد وحمّل الملف", "Create codes and download")}</button></div>
+    </form>
+    ${(r.batches || []).length ? `<div class="tbl"><table><thead><tr><th scope="col" class="hide-sm">${_("التاريخ", "Date")}</th><th scope="col">${_("الباقة", "Plan")}</th><th scope="col">${_("المستخدم", "Used")}</th><th scope="col" class="hide-md">${_("ملاحظة", "Note")}</th><th scope="col">${_("مفعّلة", "Enabled")}</th><th scope="col"><span class="sr">${_("الملف", "File")}</span></th></tr></thead><tbody>
+    ${r.batches.map(b => `<tr><td class="hide-sm">${esc(fmtDate(b.created_at))}${b.expires_at ? `<br><small class="muted">${_("تنتهي ", "expires ")}${esc(fmtDate(b.expires_at))}</small>` : ""}</td><td><span class="chip">${esc(planName(b.plan))}</span></td>
+      <td class="nowrap">${fmtN(b.used)} / ${fmtN(b.n)}<span class="mini"><span style="inline-size:${Math.min(100, 100 * b.used / Math.max(1, b.n)).toFixed(1)}%"></span></span></td>
+      <td class="hide-md wrap small">${esc(b.note || "")}</td>
+      <td><input type="checkbox" class="tg" data-btoggle="${esc(b.id)}" ${b.active ? "checked" : ""} aria-label="${esc(_("تفعيل الدفعة", "Enable batch"))}"></td>
+      <td><a class="btn ghost xs" href="/api/admin/coupons/batch/${encodeURIComponent(b.id)}.csv" download>${ic("download")}CSV</a></td></tr>`).join("")}
+    </tbody></table></div>` : ""}
+  </section>
   <section class="card"><div class="card-h"><h2>${_("القسائم", "Coupons")}</h2><span class="sub">${fmtN(r.coupons.length)}</span></div>
     ${r.coupons.length ? `<div class="tbl cp-t"><table><thead><tr><th scope="col">${_("الرمز", "Code")}</th><th scope="col" class="num">${_("الخصم", "Off")}</th><th scope="col">${_("الاستخدام", "Usage")}</th><th scope="col" class="hide-sm">${_("الانتهاء", "Expires")}</th><th scope="col" class="hide-md">${_("الباقات", "Plans")}</th><th scope="col" class="hide-md">${_("ملاحظة", "Note")}</th><th scope="col">${_("الحالة", "Status")}</th><th scope="col">${_("مفعّلة", "Enabled")}</th><th scope="col"><span class="sr">${_("حذف", "Delete")}</span></th></tr></thead><tbody>
     ${r.coupons.map(c => { const [sc, sl] = status(c); const u = num(c.used), m = c.max_uses; return `<tr>
@@ -812,6 +829,19 @@ async function vCoupons(tok) {
   </section>`;
   onRefresh(route);
   const code = $("#cp-code"); code.addEventListener("input", () => { const p = code.selectionStart; code.value = code.value.toUpperCase().replace(/\s/g, ""); code.setSelectionRange(p, p); code.classList.remove("invalid"); });
+  $("#f-bt").addEventListener("submit", async e => {
+    e.preventDefault();
+    const body = { plan: $("#bt-plan").value, count: Math.round(num($("#bt-n").value)) };
+    if (!(body.count >= 1 && body.count <= 2000)) { $("#bt-n").classList.add("invalid"); toast(_("عدد الأكواد من ١ إلى ٢٠٠٠", "Codes: 1 to 2,000"), "err"); return; }
+    const ex = $("#bt-exp").value; if (ex) body.expires = new Date(ex + "T23:59:59+03:00").toISOString();
+    const note = $("#bt-note").value.trim(); if (note) body.note = note;
+    const btn = e.target.querySelector("button[type=submit]"); btn.disabled = true;
+    try {
+      const r = await api("POST", "/api/admin/coupons/batch", body);
+      const a = document.createElement("a"); a.href = `/api/admin/coupons/batch/${encodeURIComponent(r.batch)}.csv`; a.download = ""; document.body.appendChild(a); a.click(); a.remove();
+      toast(_(`أُنشئ ${fmtN(r.count)} كود`, `Created ${r.count} codes`), "ok", _("يُحمَّل الملف الآن", "Downloading the file")); route();
+    } catch (x) { btn.disabled = false; fail(x, _("تعذّر إنشاء الأكواد", "Couldn't create the codes")); }
+  });
   $("#f-cp").addEventListener("submit", async e => {
     e.preventDefault();
     const body = { code: code.value.trim().toUpperCase(), pct: Math.round(num($("#cp-pct").value)) };
@@ -827,6 +857,11 @@ async function vCoupons(tok) {
     catch (x) { if (x.code === "exists" || x.code === "bad-code") code.classList.add("invalid"); fail(x, _("تعذّر إنشاء القسيمة", "Couldn't create the coupon")); }
   });
   MAIN.addEventListener("change", async e => {
+    const bt = e.target.closest("[data-btoggle]");
+    if (bt) { const on = bt.checked; bt.disabled = true;
+      try { await api("PATCH", `/api/admin/coupons/batch/${encodeURIComponent(bt.dataset.btoggle)}`, { active: on }); toast(on ? _("فُعّلت الدفعة", "Batch enabled") : _("أُوقفت أكواد الدفعة غير المستخدمة", "Batch disabled"), "ok"); route(); }
+      catch (x) { bt.checked = !on; bt.disabled = false; fail(x, _("تعذّر تغيير حالة الدفعة", "Couldn't change the batch")); }
+      return; }
     const t = e.target.closest("[data-toggle]"); if (!t) return; const on = t.checked; t.disabled = true;
     try { const r = await api("PATCH", `/api/admin/coupons/${encodeURIComponent(t.dataset.toggle)}`, { active: on }); if (r.ok === false) throw Object.assign(new Error(), { code: "not-found" }); toast(on ? _("فُعّلت القسيمة ", "Coupon enabled: ") + t.dataset.toggle : _("عُطّلت القسيمة ", "Coupon disabled: ") + t.dataset.toggle, "ok"); route(); }
     catch (x) { t.checked = !on; t.disabled = false; fail(x, _("تعذّر تغيير حالة القسيمة", "Couldn't change the coupon")); }
@@ -1035,6 +1070,10 @@ const AUD = {
   coupon_on: ["ticket", "pink", (m, t) => _(`فعّل القسيمة ${t}`, `Enabled coupon ${t}`)],
   coupon_off: ["ticket", "", (m, t) => _(`عطّل القسيمة ${t}`, `Disabled coupon ${t}`)],
   coupon_delete: ["trash", "coral", (m, t) => _(`حذف القسيمة ${t}`, `Deleted coupon ${t}`)],
+  coupon_batch: ["ticket", "pink", (m, t) => _(`أنشأ ${fmtN(m.n)} كود تفعيل لباقة ${planName(m.plan)}`, `Created ${m.n} activation codes for ${planName(m.plan)}`)],
+  coupon_batch_export: ["download", "sky", (m, t) => _(`حمّل ملف أكواد التفعيل (${fmtN(m.n)})`, `Downloaded activation codes (${m.n})`)],
+  coupon_batch_on: ["ticket", "pink", (m, t) => _("فعّل دفعة أكواد تفعيل", "Enabled an activation-code batch")],
+  coupon_batch_off: ["ticket", "", (m, t) => _("أوقف دفعة أكواد تفعيل", "Disabled an activation-code batch")],
   settings: ["gear", "", m => _("حدّث الإعدادات", "Updated the settings") + (m.changed && !m.changed.length ? _(" (بلا تغيير)", " (no change)") : ""), m => (m.changed || []).join("  ·  ")],
   export_users: ["download", "sky", m => _(`صدّر قائمة الطلاب (${fmtN(m.n)})`, `Exported the student list (${m.n})`)]
 };

@@ -1417,6 +1417,13 @@ Object.assign(T.ar,{
   payNote:p=>p?`مدى، Apple Pay، STC Pay والبطاقات. دفع آمن عبر ${p}.`:'مدى، Apple Pay، STC Pay والبطاقات. دفع آمن.', payOff:'الدفع الإلكتروني غير متاح مؤقتًا', payOffD:'الدفع الإلكتروني غير متاح الآن. إن كان لديك رمز اشتراك فأدخله في خانة رمز الخصم ليُفعَّل اشتراكك فورًا.',
   refund:d=>`لم يناسبك الاشتراك؟ نعيد إليك المبلغ كاملًا إن طلبت ذلك خلال ${d} أيام. راسلنا على info@gat.academy`,
   paidT:'تم تفعيل اشتراكك', paidD:'فُتح كل شيء. بالتوفيق في اختبارك!', paidWait:'نتحقق من الدفع الآن، وتُفتح لك المزايا خلال لحظات.', failedT:'لم تكتمل عملية الدفع', failedD:'يمكنك المحاولة مجددًا أو اختيار وسيلة دفع أخرى. إن خُصم المبلغ ولم يُفعَّل اشتراكك فراسلنا وسنحل الأمر.',
+  rdT:'فعّل اشتراكك', rdIntro:'أدخل رمز التفعيل الذي وصلك بعد الشراء من متجرنا.', rdPh:'GAT-XXXX-XXXX', rdGo:'تحقق من الرمز', rdChecking:'نتحقق من الرمز...',
+  rdValidT:'رمزك صالح', rdValidD:(p,d)=>`يفتح لك ${p} كاملة لمدة ${d} يومًا.`, rdNeedAcct:'أنشئ حسابك المجاني ليُفعَّل الاشتراك عليه مباشرة، فتستخدمه من أي جهاز.',
+  rdSignup:'أنشئ حسابي وفعّل الاشتراك', rdSignin:'لدي حساب، سجّل دخولي', rdBusy:'جارٍ تفعيل اشتراكك...',
+  rdDoneT:'تم تفعيل اشتراكك', rdDoneD:(p,d)=>`فُتحت لك ${p}، واشتراكك فعّال حتى ${d}.`, rdMineD:d=>`هذا الرمز مفعّل على حسابك، واشتراكك فعّال حتى ${d}.`, rdStart:'ابدأ المذاكرة الآن',
+  rdGateT:'خطوة أخيرة لتفعيل اشتراكك', rdGateD:'أنشئ حسابك المجاني (أو سجّل دخولك) وسيُفعَّل الاشتراك عليه فورًا.',
+  rdErr:{'bad-code':'لم نجد هذا الرمز. تأكد من كتابته كما وصلك بالضبط.','code-used':'هذا الرمز استُخدم على حساب آخر. إن كنت اشتريته ولم تستخدمه فراسلنا وسنحل الأمر.','code-expired':'انتهت صلاحية هذا الرمز. راسلنا وسنساعدك.','code-disabled':'هذا الرمز موقوف. راسلنا وسنساعدك.','too-many-requests':'محاولات كثيرة. انتظر دقائق ثم حاول مجددًا.'},
+  rdHelp:'تحتاج مساعدة؟ راسلنا على info@gat.academy مع رقم طلبك من المتجر.',
   youArePro:'أنت مشترك', activeUntil:d=>`اشتراكك فعّال حتى ${d}`, proForever:'اشتراكك فعّال.', goToday:'إلى يومي', allOpen:'كل المزايا متاحة لك.',
   signupFirstT:'سجّل أولًا', signupFirst:'أنشئ حسابك المجاني أولًا ثم اختر باقتك، ليرتبط اشتراكك بحسابك وتستخدمه من أي جهاز.',
   errGeneric:'تعذّر إكمال الطلب. حاول مجددًا.', errNet:'تعذّر الاتصال. تحقق من الإنترنت ثم حاول مجددًا.', errAuth:'انتهت جلستك. سجّل الدخول من جديد.',
@@ -1449,6 +1456,13 @@ Object.assign(T.en,{
   refund:d=>`Not the right fit? Ask within ${d} days for a full refund. Email info@gat.academy`,
   paidT:'Your Pro plan is active', paidD:'Everything is open. Good luck on your test!', paidWait:'We’re confirming your payment. Pro will unlock in a moment.', failedT:'The payment didn’t go through', failedD:'You can try again or use another payment method. If you were charged but your plan isn’t active, email us and we’ll sort it out.',
   youArePro:'You are on Pro', activeUntil:d=>`Pro until ${d}`, proForever:'Your plan is active.', goToday:'Go to Today', allOpen:'Everything is unlocked for you.',
+  rdT:'Activate your plan', rdIntro:'Enter the activation code you received after buying from our store.', rdPh:'GAT-XXXX-XXXX', rdGo:'Check code', rdChecking:'Checking your code...',
+  rdValidT:'Your code is valid', rdValidD:(p,d)=>`It unlocks ${p} in full for ${d} days.`, rdNeedAcct:'Create your free account and the plan is activated on it right away, so it works on any device.',
+  rdSignup:'Create my account and activate', rdSignin:'I have an account, sign me in', rdBusy:'Activating your plan...',
+  rdDoneT:'Your plan is active', rdDoneD:(p,d)=>`${p} is unlocked, active until ${d}.`, rdMineD:d=>`This code is already active on your account, until ${d}.`, rdStart:'Start studying now',
+  rdGateT:'One last step to activate your plan', rdGateD:'Create your free account (or sign in) and the plan is activated on it instantly.',
+  rdErr:{'bad-code':'We couldn’t find this code. Type it exactly as you received it.','code-used':'This code was already used on another account. If you bought it and didn’t use it, email us and we’ll sort it out.','code-expired':'This code has expired. Email us and we’ll help.','code-disabled':'This code is disabled. Email us and we’ll help.','too-many-requests':'Too many attempts. Wait a few minutes and try again.'},
+  rdHelp:'Need help? Email info@gat.academy with your store order number.',
   signupFirstT:'Sign up first', signupFirst:'Create your free account first, then choose a plan, so it’s linked to your account and works on any device.',
   errGeneric:'Something went wrong. Please try again.', errNet:'Could not connect. Check your internet and try again.', errAuth:'Your session ended. Please sign in again.',
   ctxStart:'Start free, and go Pro when you’re ready for more.', ctxDaily:n=>`You finished today's ${n} free questions.`, ctxXp:n=>`You finished ${n} explainer${n==='1'?'':'s'}.`, ctxAcc:(s,a,b)=>`Your ${s} accuracy rose from ${a}% to ${b}%.`, ctxDays:n=>`You have practiced on ${n} day${n==='1'?'':'s'}.`, ctxMore:n=>n==='1'?'One more explainer is waiting.':`${n} more explainers are waiting.`,
@@ -2412,7 +2426,9 @@ async function requote(){ const C=window.CLOUD, p=curPlan(), code=(UP.coupon||''
   if(!code||!p){ UP.quote=null; UP.qerr=''; return paintQuote(); }
   if(!C?.user){ UP.qerr=t('couponSignup'); return paintQuote(); }
   try{ const q=await C.quote(p.id,code); if(seq!==UP.qseq) return; UP.quote=q; UP.qerr=''; }
-  catch(e){ if(seq!==UP.qseq) return; UP.quote=null; UP.qerr=e.code==='bad-coupon'?t('couponBad'):e.code==='bad-plan'?t('errGeneric'):t('errNet'); }
+  catch(e){ if(seq!==UP.qseq) return; UP.quote=null; UP.qerr=e.code==='bad-coupon'?t('couponBad'):e.code==='bad-plan'?t('errGeneric'):t('errNet');
+    /* a store activation code is tied to one plan: rather than "not valid for this plan", take the student to activate it */
+    if(e.code==='bad-coupon'){ try{ const i=await C.redeemInfo(code); if(seq===UP.qseq&&i&&i.plan){ UP.coupon=''; UP.qerr=''; closeUpgrade(); location.hash='#redeem?c='+encodeURIComponent(i.code); return; } }catch(x){} } }
   paintQuote(); }
 async function doCheckout(){ const C=window.CLOUD; if(!C) return; const p=curPlan(); UP.err=''; UP.note='';
   if(!C.user){ const k=UP.k; closeUpgrade(); PEND={fn:()=>openUpgrade(k)}; AC.tab='signup'; AC.gate=true; AC.gateUp=true; openAcct(); return; }
@@ -2434,12 +2450,53 @@ function renderUpsheet(){ const el=$('#upsheet'); if(!el) return; el.dir=S.lang=
   el.innerHTML=`<div class="up-sheet" role="dialog" aria-modal="true" aria-labelledby="up-h"><button class="icon-btn acct-x" id="up-x" aria-label="${t('close')}">${ICON.x}</button>
     <div class="up-head">${lockBadge()}<h2 id="up-h">${ben?esc(ben):t('upTitle')}</h2><p class="muted small">${t('upIntro')}</p></div>${upgradeBody(true)}</div>`;
   el.querySelector('#up-x').onclick=closeUpgrade; bindUpgrade(el,true); }
-function pageUpgrade(q){ const paid=/(^|&)paid=1/.test(q), failed=/(^|&)failed=1/.test(q); { const m=/(^|&)plan=([\w-]+)/.exec(q); if(m&&!UP.plan) UP.plan=m[2]; }
+function pageUpgrade(q){ const paid=/(^|&)paid=1/.test(q), failed=/(^|&)failed=1/.test(q); { const m=/(^|&)plan=([\w-]+)/.exec(q); if(m&&!UP.plan) UP.plan=m[2]; } { const m=/(^|&)coupon=([\w-]+)/.exec(q); if(m&&!UP.coupon){ UP.coupon=m[2]; setTimeout(requote,0); } }
   const proNow=PRO()&&!!window.CLOUD?.user;
   return `<header class="page-h"><a class="back" href="#today">${t('nav.today')}</a><h1><span class="hl">${proNow?t('subT'):t('upTitle')}</span></h1>${proNow?'':`<p>${t('upIntro')}</p>`}</header>
   ${paid?`<div class="up-banner ok" role="status"><b>${t('paidT')}</b><span>${PRO()?t('paidD'):t('paidWait')}</span></div>`:''}
   ${failed?`<div class="up-banner bad" role="alert"><b>${t('failedT')}</b><span>${t('failedD')}</span></div>`:''}
   ${window.CLOUD?`<div class="up-page">${upgradeBody(false)}</div>`:`<div class="card"><p>${t('allOpen')}</p></div>`}`; }
+/* ============ ACTIVATION CODE (#redeem?c=CODE, reached from gat.academy/r/CODE after buying in the store) ============
+   One screen, no plan to pick: check the code -> sign up / sign in if needed -> activate automatically -> start. */
+const RD_KEY='gat_redeem'; /* survives a sign-up that leaves the page (e.g. Google sign-in) */
+let RD={code:'',info:null,err:'',busy:false,done:null,tried:''};
+const rdNorm=c=>String(c||'').trim().toUpperCase().replace(/\s+/g,'').slice(0,40);
+function rdSet(code){ if(code===RD.code) return; RD={code,info:null,err:'',busy:false,done:null,tried:''}; if(code){ try{ localStorage.setItem(RD_KEY,code); }catch(e){} rdCheck(); } }
+const rdRerender=()=>{ if(/^#redeem/.test(location.hash)) renderRoute(); };
+async function rdCheck(){ const C=window.CLOUD, code=RD.code; if(!C||!code) return;
+  try{ const i=await C.redeemInfo(code); if(code!==RD.code) return;
+    if(i.needsPlan){ try{ localStorage.removeItem(RD_KEY); }catch(e){} location.hash='#upgrade?coupon='+encodeURIComponent(code); return; }
+    RD.info=i; RD.err=''; }
+  catch(e){ if(code!==RD.code) return; RD.err=e.code==='network-request-failed'?'net':e.code; }
+  rdRerender(); }
+async function rdRedeem(){ const C=window.CLOUD, code=RD.code; if(!C?.user||!RD.info||RD.busy||RD.done) return;
+  RD.busy=true; RD.tried=code+'|'+C.user.email; RD.err=''; rdRerender();
+  try{ const r=await C.redeem(code); if(code!==RD.code) return; RD.done=r; try{ localStorage.removeItem(RD_KEY); }catch(e){} await C.refresh(); }
+  catch(e){ if(code!==RD.code) return; RD.err=e.code==='network-request-failed'?'net':e.code; }
+  RD.busy=false; rdRerender(); }
+function rdAcct(tab){ AC.tab=tab; AC.gate=true; AC.gateRd=true; PEND={fn:rdRerender}; openAcct(); }
+function pageRedeem(q){ const C=window.CLOUD; const m=/(^|&)c=([\w-]+)/.exec(q);
+  let code=m?rdNorm(decodeURIComponent(m[2])):''; if(!code){ try{ code=rdNorm(localStorage.getItem(RD_KEY)); }catch(e){} }
+  const head=`<header class="page-h"><a class="back" href="#today">${t('nav.today')}</a><h1><span class="hl">${t('rdT')}</span></h1></header>`;
+  if(!C) return head+`<div class="card"><p>${t('allOpen')}</p></div>`;
+  rdSet(code);
+  const help=`<p class="small muted rd-help">${t('rdHelp')}</p>`;
+  const form=`<form class="up-coupon card rd-form" id="rd-f" novalidate><label for="rd-c">${t('rdIntro')}</label><div class="up-cp-row"><input id="rd-c" type="text" dir="ltr" autocomplete="one-time-code" autocapitalize="characters" spellcheck="false" maxlength="40" placeholder="${t('rdPh')}" value="${esc(code)}"><button class="btn primary sm" type="submit">${t('rdGo')}</button></div></form>`;
+  const planN=p=>p?esc(S.lang==='ar'?(p.ar||p.en||p.id):(p.en||p.ar||p.id)):'';
+  if(!code) return head+form+help;
+  if(RD.done||(RD.info&&RD.info.mine&&C.user)){ const until=(RD.done&&RD.done.until)||C.plan?.until, p=(RD.done&&RD.done.plan)||RD.info.plan;
+    return head+`<div class="up-pro card rd-ok" role="status"><span class="pro-chip big" lang="en">${t('proChip')}</span><h2>${t('rdDoneT')}</h2><p>${RD.done&&!RD.done.already?t('rdDoneD')(planN(p),until?dateLong(until):''):t('rdMineD')(until?dateLong(until):'')}</p><div class="row"><a class="btn primary xl" href="#today">${t('rdStart')}</a></div></div>`; }
+  if(RD.err&&!RD.busy){ const msg=(t('rdErr')||{})[RD.err]||(RD.err==='net'?t('errNet'):RD.err==='unauthenticated'?t('errAuth'):t('errGeneric'));
+    return head+`<div class="up-banner bad" role="alert"><b>${esc(msg)}</b></div>`+form+help; }
+  if(!RD.info) return head+`<div class="card"><p class="muted">${t('rdChecking')}</p></div>`;
+  const valid=`<div class="up-banner ok"><b>${t('rdValidT')} <bdi class="mono">${esc(code)}</bdi></b><span>${t('rdValidD')(planN(RD.info.plan),numL(RD.info.plan.days))}</span></div>`;
+  if(!C.user) return head+valid+`<div class="card rd-acct"><p>${t('rdNeedAcct')}</p><div class="row"><button class="btn primary xl" id="rd-up">${t('rdSignup')}</button><button class="btn ghost" id="rd-in">${t('rdSignin')}</button></div></div>`+help;
+  /* signed in with a valid code: activate right away (once per code and account), nothing more to click */
+  if(!RD.busy&&RD.tried!==code+'|'+C.user.email) setTimeout(rdRedeem,0);
+  return head+valid+`<div class="card" role="status" aria-live="polite"><p>${t('rdBusy')}</p></div>`; }
+function bindRedeem(m){ const f=m.querySelector('#rd-f'); if(f) f.onsubmit=e=>{ e.preventDefault(); const c=rdNorm(m.querySelector('#rd-c').value); if(!c) return; const h='#redeem?c='+encodeURIComponent(c); RD.code=''; if(location.hash===h) renderRoute(); else location.hash=h; };
+  const up=m.querySelector('#rd-up'); if(up) up.onclick=()=>rdAcct('signup');
+  const inn=m.querySelector('#rd-in'); if(inn) inn.onclick=()=>rdAcct('signin'); }
 /* trial report */
 function pageReport(){ const ar=S.lang==='ar', d=S.diag, since=startDate(), n=daysBetween(since,todayStr()), est=estimate(), xpDone=Object.keys(S.xp||{}).filter(k=>xpLang(k)===S.lang).length, streak=calcStreak();
   const ready=reportReady(), left=Math.max(0,reportDays()-n);
@@ -2484,6 +2541,7 @@ function route(){ let h=(location.hash||'#today').slice(1);
   if(h.startsWith('learn')) return {p:'learn',v:()=>pageLearn(h.split('-')[1]||'cards')};
   if(h==='plan') return {p:'today',v:pagePlan};
   if(h.startsWith('upgrade')) return {p:'upgrade',v:()=>pageUpgrade(h.split('?')[1]||'')};
+  if(h==='redeem'||h.startsWith('redeem?')) return {p:'upgrade',v:()=>pageRedeem(h.split('?')[1]||'')};
   if(h==='report') return {p:'report',v:pageReport};
   if(h.startsWith('guide')) return {p:'guide',v:pageGuide};
   const m={today:pageToday,practice:pagePractice,progress:pageProgress}; return {p:m[h]?h:'today',v:m[h]||pageToday}; }
@@ -2523,7 +2581,7 @@ function bindMain(){
   m.querySelectorAll('[data-xp]').forEach(b=>b.onclick=()=>{ XP_BACK=b.dataset.xp; track('xp_start',b.dataset.xp); XP.open(b.dataset.xp); });
   m.querySelectorAll('[data-lock]').forEach(b=>b.onclick=e=>{ e.preventDefault(); e.stopPropagation(); if(b.dataset.lock==='report') openUpgrade('report'); else hitLimit(b.dataset.lock); });
   m.querySelectorAll('[data-href]').forEach(b=>b.onclick=()=>{ location.hash=b.dataset.href; });
-  if(route().p==='upgrade') bindUpgrade(m,false);
+  if(/^#redeem/.test(location.hash)) bindRedeem(m); else if(route().p==='upgrade') bindUpgrade(m,false);
   if(route().p==='report') m.querySelectorAll('[data-plan]').forEach(b=>b.onclick=()=>{ UP.plan=b.dataset.plan; openUpgrade('report'); });
   { const rh=$('#rp-hide'); if(rh) rh.onclick=()=>{ S.repHide=1; save(); renderRoute(); }; }
   m.querySelectorAll('[data-task]').forEach(b=>b.onclick=()=>{ const tk=buildPlan().flatMap(w=>w.tasks).find(x=>x.id===b.dataset.task); if(tk) runTask(tk); });
@@ -2572,7 +2630,7 @@ function openAcct(){ AC.err=''; AC.info=''; AC.infoHtml=''; AC.confirmDel=false;
   const C=window.CLOUD; if(C?.user&&C.planInfo) C.planInfo().then(r=>{ AC.planInfo=r; if(!$('#acct').hidden) renderAcct(); }).catch(()=>{ AC.planInfo={payments:[]}; if(!$('#acct').hidden) renderAcct(); });
   renderAcct(); setTimeout(()=>($('#ac-email')||$('#ac-x')||$('#acct button'))?.focus(),0); }
 let AC_RET=null, UP_RET=null;
-function closeAcct(){ AC.fPass=''; { const pw=$('#ac-pass'); if(pw) pw.value=''; } PEND=null; AC.gate=false; AC.gateUp=false; AC.deleted=false; $('#acct').hidden=true; overlayInert(); const r=AC_RET; AC_RET=null; (r&&r.isConnected&&r!==document.body?r:$('#acct-btn'))?.focus?.(); }
+function closeAcct(){ AC.fPass=''; { const pw=$('#ac-pass'); if(pw) pw.value=''; } PEND=null; AC.gate=false; AC.gateUp=false; AC.gateRd=false; AC.deleted=false; $('#acct').hidden=true; overlayInert(); const r=AC_RET; AC_RET=null; (r&&r.isConnected&&r!==document.body?r:$('#acct-btn'))?.focus?.(); }
 /* while a dialog (account, upgrade sheet, test) is open, everything behind it is inert: Tab and screen readers stay inside */
 function overlayInert(){ const ex=document.body.classList.contains('exam-open'), acct=!$('#acct').hidden, up=!!($('#upsheet')&&!$('#upsheet').hidden), modal=acct||up;
   ['header.top','#main','footer','#tabbar','#banner','#nudge'].forEach(q=>{ const e=$(q); if(e) e.inert=ex||modal; }); const x=$('#exam'); if(x) x.inert=modal&&ex; const xp=$('#xp'); if(xp) xp.inert=modal; const a=$('#acct'); if(a) a.inert=up&&acct; }
@@ -2599,7 +2657,7 @@ function renderAcct(){
       ${C.changePassword?`<details class="acct-priv" ${AC.pwOpen?'open':''}><summary>${t('chPw')}</summary><form id="ac-pwf" class="acct-form" novalidate><label>${t('curPw')}<input type="password" id="ac-cur" autocomplete="current-password" dir="ltr"></label><label>${t('newPw')}<input type="password" id="ac-new" autocomplete="new-password" minlength="8" maxlength="200" dir="ltr"></label><button class="btn ghost" type="submit">${t('chPwBtn')}</button></form></details>`:''}
       <details class="acct-priv"><summary>${t('privT')}</summary><p class="small">${t('privD')}</p></details>
       ${AC.confirmDel?`<div class="ex-confirm inline"><p>${t('delConfirm')}</p><div class="row"><button class="btn danger" id="ac-del2">${t('delYes')}</button><button class="btn ghost" id="ac-nodel">${t('cancel')}</button></div></div>`:`<button class="btn danger-ghost sm" id="ac-del">${t('delAcct')}</button>`}
-      `:AC.deleted?`<h2 id="acct-h">${t('deleted')}</h2><p class="small">${t('deletedD')}</p><div class="row"><a class="btn primary" href="/?home=1${S.lang==='en'?'&lang=en':''}">${t('goHome')}</a><button class="btn ghost" id="ac-x2">${t('close')}</button></div>`:`<h2 id="acct-h">${AC.gateUp?t('signupFirstT'):AC.gate?t('gateT'):AC.tab==='signin'?t('signinT'):t('acctJoinT')}</h2><p class="small ${AC.gate?'gate-msg':'muted'}">${AC.gateUp?t('signupFirst'):AC.gate?t('gateMsg'):AC.tab==='signin'?t('signinWhy'):t('acctWhy')}</p>
+      `:AC.deleted?`<h2 id="acct-h">${t('deleted')}</h2><p class="small">${t('deletedD')}</p><div class="row"><a class="btn primary" href="/?home=1${S.lang==='en'?'&lang=en':''}">${t('goHome')}</a><button class="btn ghost" id="ac-x2">${t('close')}</button></div>`:`<h2 id="acct-h">${AC.gateRd?t('rdGateT'):AC.gateUp?t('signupFirstT'):AC.gate?t('gateT'):AC.tab==='signin'?t('signinT'):t('acctJoinT')}</h2><p class="small ${AC.gate?'gate-msg':'muted'}">${AC.gateRd?t('rdGateD'):AC.gateUp?t('signupFirst'):AC.gate?t('gateMsg'):AC.tab==='signin'?t('signinWhy'):t('acctWhy')}</p>
       <div class="seg acct-seg"><button class="${AC.tab==='signup'?'on':''}" data-tab="signup">${t('signUp')}</button><button class="${AC.tab==='signin'?'on':''}" data-tab="signin">${t('signIn')}</button></div>
       ${(()=>{ const so=(C.config&&C.config.social)||{}; if(!so.google&&!so.facebook) return ''; const nx=encodeURIComponent('/app'+(location.hash&&!/^#sign/.test(location.hash)?location.hash:''));
         return `<div class="acct-social">${so.google?`<a class="btn social" href="/auth/google?next=${nx}"><svg class="sic" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.3 0-9.7-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg><span>${t('withGoogle')}</span></a>`:''}${so.facebook?`<a class="btn social" href="/auth/facebook?next=${nx}"><svg class="sic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="12" fill="#1877F2"/><path fill="#fff" d="M15.1 12.9l.4-2.9h-2.8V8.1c0-.8.4-1.6 1.7-1.6h1.3V4c0 0-1.2-.2-2.3-.2-2.3 0-3.8 1.4-3.8 3.9V10H7v2.9h2.6V20h3.1v-7.1h2.4z"/></svg><span>${t('withFacebook')}</span></a>`:''}

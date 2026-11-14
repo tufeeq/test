@@ -156,7 +156,10 @@ window.CLOUD = {
   track, flush,
   async quote(planId, coupon) { return api("POST", "/api/billing/quote", { plan: planId, coupon: coupon || undefined }); },
   async checkout(planId, coupon) { const lang = (A() && A().getS && A().getS().lang) || "ar"; return api("POST", "/api/billing/checkout", { plan: planId, coupon: coupon || undefined, lang }); },
-  async planInfo() { return api("GET", "/api/plan"); }
+  async planInfo() { return api("GET", "/api/plan"); },
+  // activation codes (bought outside the site, e.g. from the Zid store)
+  async redeemInfo(code) { return api("GET", "/api/redeem/" + encodeURIComponent(code)); },
+  async redeem(code) { return api("POST", "/api/redeem", { code }); }
 };
 /* the tab comes back (after the phone was locked, another tab or device was used): is the session still valid, did the cloud copy change? */
 let lastWake = 0, lastMe = 0;

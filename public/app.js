@@ -1413,6 +1413,7 @@ Object.assign(T.ar,{
   incT:'ماذا يشمل كل خيار؟', colFree:'مجاني', colPro:'Pro', seeAll:'قارن الخيارات بالتفصيل',
   cmpRows:v=>[['الاختبار التشخيصي (٢٠ سؤالًا)','مرة واحدة','متى شئت'],['الشروحات المتحركة المسموعة',`${v.xp} من ${v.xpAll}`,`كلها (${v.xpAll})`],['أسئلة التدريب',`${v.daily} يوميًا`,'بلا حد'],['البطاقات والمفردات','مختارات من كل مهارة','كلها'],['الخطة الدراسية',v.weeksN===2?'أول أسبوعين':v.weeksN===1?'الأسبوع الأول':`أول ${v.weeks} أسابيع`,'حتى يوم الاختبار'],['صندوق الأخطاء',`آخر ${v.mist} من أخطائك`,'بلا حد'],['التقنيات والأنماط','مختارات','كلها'],['التحليلات','خريطة الإتقان وتحليل مهارتين','كل المهارات'],['٣٠ نموذجًا والأقسام والمحاكاة الكاملة',false,true],['مراجعة أي محاولة سابقة',false,true],['الدرجة التقديرية وتحليل الزمن',false,true],['التكرار المتباعد الذكي',false,true],['تحليل أسباب الأخطاء',false,true],['تدريب موجّه على مهارة أو نمط',false,true],['تخصيص الخطة بموعد الاختبار والهدف',false,true]],
   couponL:'لديك رمز خصم؟', couponPh:'رمز الخصم', applyBtn:'تطبيق', couponOk:p=>`خصم ${p}٪`, couponBad:'رمز الخصم غير صالح لهذه الباقة.', couponSignup:'سجّل حسابك أولًا لتطبيق الرمز.',
+  buyStore:'اشترِ الآن', storeNote:'تدفع في متجرنا الآمن على زد (مدى، Apple Pay والبطاقات)، ويصلك رابط التفعيل فورًا بالبريد والجوال. افتحه فيُفعَّل اشتراكك.', haveCode:'اشتريت من المتجر؟', haveCodeA:'فعّل اشتراكك برمز التفعيل', storeNewTab:'يُفتح المتجر في نافذة جديدة',
   total:'الإجمالي', free100:'مجانًا بالرمز', payBtn:'ادفع وابدأ الآن', payBusy:'جارٍ التحويل...', activateBtn:'فعّل اشتراكي الآن', signupToBuy:'سجّل حسابك المجاني للمتابعة',
   payNote:p=>p?`مدى، Apple Pay، STC Pay والبطاقات. دفع آمن عبر ${p}.`:'مدى، Apple Pay، STC Pay والبطاقات. دفع آمن.', payOff:'الدفع الإلكتروني غير متاح مؤقتًا', payOffD:'الدفع الإلكتروني غير متاح الآن. إن كان لديك رمز اشتراك فأدخله في خانة رمز الخصم ليُفعَّل اشتراكك فورًا.',
   refund:d=>`لم يناسبك الاشتراك؟ نعيد إليك المبلغ كاملًا إن طلبت ذلك خلال ${d} أيام. راسلنا على info@gat.academy`,
@@ -1451,6 +1452,7 @@ Object.assign(T.en,{
   incT:'What each option includes', colFree:'Free', colPro:'Pro', seeAll:'Compare the options in detail',
   cmpRows:v=>[['Diagnostic test (20 questions)','Once','Any time'],['Animated, narrated explainers',`${v.xp} of ${v.xpAll}`,`All ${v.xpAll}`],['Daily practice',`${v.daily} questions a day`,'Unlimited'],['Flashcards and vocabulary','A selection from every skill','All'],['Study plan',v.weeksN===1?'First week':`First ${v.weeks} weeks`,'Up to test day'],['Mistake box',`Last ${v.mist}`,'Unlimited'],['Techniques and patterns','A selection','All'],['Analytics','Mastery map and 2 skills in detail','All skills'],['30 model tests, sections and full mocks',false,true],['Review any past attempt',false,true],['Estimated score and time analysis',false,true],['Smart spaced repetition',false,true],['Mistake-cause analysis',false,true],['Targeted skill and pattern practice',false,true],['Plan with your test date and target',false,true]],
   couponL:'Have a coupon?', couponPh:'Coupon code', applyBtn:'Apply', couponOk:p=>`${p}% off`, couponBad:'This coupon is not valid for this plan.', couponSignup:'Sign up first to apply a coupon.',
+  buyStore:'Buy now', storeNote:'You pay in our secure Zid store (mada, Apple Pay and cards), and the activation link arrives right away by email and SMS. Open it to activate your plan.', haveCode:'Bought from the store?', haveCodeA:'Activate your plan with your code', storeNewTab:'Opens the store in a new tab',
   total:'Total', free100:'Free with this code', payBtn:'Pay and start now', payBusy:'Redirecting...', activateBtn:'Activate my plan now', signupToBuy:'Create your free account to continue',
   payNote:p=>p?`mada, Apple Pay, STC Pay and cards. Secure checkout by ${p}.`:'mada, Apple Pay, STC Pay and cards. Secure checkout.', payOff:'Online payment is temporarily unavailable', payOffD:'Online payment isn’t available right now. If you have a subscription code, enter it in the coupon field to activate your plan right away.',
   refund:d=>`Not the right fit? Ask within ${d} days for a full refund. Email info@gat.academy`,
@@ -2395,7 +2397,12 @@ function compareTable(){ const F=FREE, fx=(F.xp||[]).filter(k=>xpLang(k)===S.lan
 function priceLine(){ const p=curPlan(); if(!p) return ''; const q=UP.quote&&UP.quote.plan===p.id?UP.quote:null;
   if(q&&q.pct) return `<span class="up-total">${t('total')}: <s class="num">${money(p.price)}</s> <b class="num">${q.amount===0?t('free100'):money(q.amount)+' '+CURR()}</b> <span class="chip">${t('couponOk')(numL(q.pct))}</span></span>`;
   return `<span class="up-total">${t('total')}: <b class="num">${money(p.price)} ${CURR()}</b></span>`; }
+/* a plan with a store link (config plan.buy) is bought in the external store (Zid), which sends an activation link;
+   the site only markets and activates. No account is needed to buy: the activation page creates it. */
+const storeOf=p=>p&&typeof p.buy==='string'&&/^https:\/\//.test(p.buy)?p.buy:null;
+const storeMode=()=>plansOf().some(p=>storeOf(p));
 function payState(){ const C=window.CLOUD, p=curPlan(), q=UP.quote&&p&&UP.quote.plan===p.id?UP.quote:null, pays=!!CFG()?.payments, freeQ=q&&q.amount===0;
+  if(storeOf(p)) return {label:t('buyStore'),dis:false,store:true};
   if(!C?.user) return {label:t('signupToBuy'),dis:false};
   if(!p) return {label:t('payBtn'),dis:true};
   if(freeQ) return {label:t('activateBtn'),dis:UP.busy};
@@ -2405,9 +2412,9 @@ function upgradeBody(sheet){ const C=window.CLOUD, cfg=CFG(), p=curPlan(), pro=P
   if(pro&&C?.user){ const u=C.plan?.until; return `<div class="up-pro card"><span class="pro-chip big" lang="en">${t('proChip')}</span><h2>${t('youArePro')}</h2><p class="muted">${u?t('activeUntil')(dateLong(u)):t('proForever')}</p><div class="row"><a class="btn primary" href="#today">${t('goToday')}</a>${sheet?'':`<button class="btn ghost" data-acct="1">${t('acctManage')}</button>`}</div></div>${sheet?'':`<section class="up-inc"><h2 class="sec-h hl">${t('incT')}</h2>${compareTable()}</section>`}`; }
   return `${UP.k||sheet?`<p class="up-ctx">${esc(ctxMsg(UP.k))}</p>`:''}
     ${planCards(p)}
-    <form class="up-coupon" id="up-cf" novalidate><label for="up-cp">${t('couponL')}</label><div class="up-cp-row"><input id="up-cp" type="text" dir="ltr" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="40" placeholder="${t('couponPh')}" value="${esc(UP.coupon)}"><button class="btn ghost sm" type="submit">${t('applyBtn')}</button></div><p class="up-qerr small" id="up-qerr" role="alert">${UP.qerr?esc(UP.qerr):''}</p></form>
+${storeMode()?`<p class="up-code small">${t('haveCode')} <a href="#redeem">${t('haveCodeA')}</a></p>`:`<form class="up-coupon" id="up-cf" novalidate><label for="up-cp">${t('couponL')}</label><div class="up-cp-row"><input id="up-cp" type="text" dir="ltr" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="40" placeholder="${t('couponPh')}" value="${esc(UP.coupon)}"><button class="btn ghost sm" type="submit">${t('applyBtn')}</button></div><p class="up-qerr small" id="up-qerr" role="alert">${UP.qerr?esc(UP.qerr):''}</p></form>`}
     <div class="up-pay"><div id="up-price">${priceLine()}</div><button class="btn primary xl block" id="up-pay" ${ps.dis?'disabled':''}>${ps.label}</button>
-      ${!pays&&C?.user?`<p class="up-off small">${t('payOffD')}</p>`:''}${pays?`<p class="small muted">${t('payNote')(provName())}</p>`:''}
+      ${storeOf(p)?`<p class="small muted">${t('storeNote')}</p>`:`${!pays&&C?.user?`<p class="up-off small">${t('payOffD')}</p>`:''}${pays?`<p class="small muted">${t('payNote')(provName())}</p>`:''}`}
       ${cfg?.refund?.on?`<p class="up-refund small">${ICON.official}<span>${t('refund')(numL(cfg.refund.days))}</span></p>`:''}
       ${UP.err?`<p class="acct-err" role="alert">${esc(UP.err)}</p>`:''}${UP.note?`<p class="acct-info" role="status">${esc(UP.note)}</p>`:''}</div>
     ${sheet?`<details class="up-more"><summary>${t('incT')}</summary>${compareTable()}</details><a class="up-all" href="#upgrade" id="up-all">${t('seeAll')}</a>`:`<section class="up-inc"><h2 class="sec-h hl">${t('incT')}</h2>${compareTable()}</section>`}`; }
@@ -2431,6 +2438,7 @@ async function requote(){ const C=window.CLOUD, p=curPlan(), code=(UP.coupon||''
     if(e.code==='bad-coupon'){ try{ const i=await C.redeemInfo(code); if(seq===UP.qseq&&i&&i.plan){ UP.coupon=''; UP.qerr=''; closeUpgrade(); location.hash='#redeem?c='+encodeURIComponent(i.code); return; } }catch(x){} } }
   paintQuote(); }
 async function doCheckout(){ const C=window.CLOUD; if(!C) return; const p=curPlan(); UP.err=''; UP.note='';
+  if(storeOf(p)){ track('checkout_start',p.id); track('store_click',p.id); const w=window.open(storeOf(p),'_blank','noopener'); if(!w) location.href=storeOf(p); return; }
   if(!C.user){ const k=UP.k; closeUpgrade(); PEND={fn:()=>openUpgrade(k)}; AC.tab='signup'; AC.gate=true; AC.gateUp=true; openAcct(); return; }
   if(!p||UP.busy) return; UP.busy=true; paintQuote();
   try{ const r=await C.checkout(p.id,(UP.coupon||'').trim()||undefined);

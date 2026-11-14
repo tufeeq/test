@@ -93,7 +93,7 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
     return CFG;
   }
   const publicCfg = c => ({
-    plans: c.plans.filter(p => p.active).map(({ id, ar, en, days, price, best }) => ({ id, ar, en, days, price, best: !!best })),
+    plans: c.plans.filter(p => p.active).map(({ id, ar, en, days, price, best, buy }) => ({ id, ar, en, days, price, best: !!best, buy: buy || null })),
     currency: c.currency, refund: c.refund, free: c.free, banner: c.banner, trialReportDays: c.trialReportDays,
     payments: !!PROVIDER(), provider: PROVIDER(),
     social: require("./oauth").enabled()
@@ -651,6 +651,7 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
     audit(req, "coupon_delete", code); res.json({ ok: true });
   });
 
+  const buyOk = u => { if (typeof u !== "string" || u.trim().length > 400) return false; try { const x = new URL(u.trim()); return x.protocol === "https:" && !x.username && !x.password; } catch (e) { return false; } };
   A("get", "/settings", async (req, res) => { const c = await loadCfg(true); const b = await bundles(); res.json({ config: c, defaults: DEFAULTS, xpKeys: b.keys.all, tap: !!PROVIDER(), provider: PROVIDER() }); });
   A("put", "/settings", async (req, res) => {
     const v = req.body && req.body.config; if (!v || typeof v !== "object" || Array.isArray(v)) return fail(res, 400, "bad-config");
@@ -667,7 +668,10 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
     const ids = new Set();
     if (!Array.isArray(c.plans) || !c.plans.length || c.plans.length > 12 || c.plans.some(p => !obj(p) || !/^[\w-]{1,20}$/.test(p.id || "") || ids.has(p.id) || !ids.add(p.id) ||
       !(Number(p.price) >= 1 && Number(p.price) <= 100000) || !(Number(p.days) >= 1 && Number(p.days) <= 3650))) return fail(res, 400, "bad-plans");
-    c.plans = c.plans.map(p => ({ id: p.id, ar: String(p.ar || "").slice(0, 60), en: String(p.en || "").slice(0, 60), days: Math.round(Number(p.days)), price: money(p.price), active: p.active !== false, best: !!p.best }));
+    // buy: optional https link to this plan in an external store (e.g. the Zid product page); when set, the plans page
+    // sends students there to pay instead of to the payment gateway, and the store delivers an activation code
+    if (c.plans.some(p => p.buy != null && p.buy !== "" && !buyOk(p.buy))) return fail(res, 400, "bad-buy");
+    c.plans = c.plans.map(p => ({ id: p.id, ar: String(p.ar || "").slice(0, 60), en: String(p.en || "").slice(0, 60), days: Math.round(Number(p.days)), price: money(p.price), active: p.active !== false, best: !!p.best, buy: buyOk(p.buy) ? String(p.buy).trim() : null }));
     if (!c.plans.some(p => p.active)) return fail(res, 400, "bad-plans");
     const f = c.free; f.dailyQuestions = Math.max(0, Math.min(500, Math.round(Number(f.dailyQuestions) || 0)));
     ["cardsFrac", "techFrac"].forEach(k => { f[k] = Math.max(0, Math.min(1, Number(f[k]) || 0)); });
@@ -686,7 +690,7 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
     const out = [], J = x => JSON.stringify(x), S = x => (typeof x === "string" ? x : J(x));
     const ap = new Map((a.plans || []).map(p => [p.id, p])), bp = new Map((b.plans || []).map(p => [p.id, p]));
     for (const [id, p] of bp) { const o = ap.get(id); if (!o) { out.push(`+plan ${id} (${p.price} / ${p.days}d)`); continue; }
-      ["price", "days", "active", "best", "ar", "en"].forEach(k => { if (J(o[k]) !== J(p[k])) out.push(`${id}.${k}: ${S(o[k])} → ${S(p[k])}`); }); }
+      ["price", "days", "active", "best", "ar", "en", "buy"].forEach(k => { if (J(o[k]) !== J(p[k])) out.push(`${id}.${k}: ${S(o[k])} → ${S(p[k])}`); }); }
     for (const id of ap.keys()) if (!bp.has(id)) out.push(`-plan ${id}`);
     for (const k of Object.keys(b.free)) if (J(a.free && a.free[k]) !== J(b.free[k])) {
       if (k === "xp") { const A = new Set(a.free.xp || []), B = new Set(b.free.xp); const add = [...B].filter(x => !A.has(x)), rm = [...A].filter(x => !B.has(x)); out.push(`free.xp: ${add.length ? "+" + add.join(",") : ""}${add.length && rm.length ? " " : ""}${rm.length ? "-" + rm.join(",") : ""}`); }

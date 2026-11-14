@@ -62,6 +62,17 @@ run(async () => {
   const F = "ALL" + runId.toUpperCase(); await A("POST", "/api/admin/coupons", { code: F, pct: 100, maxUses: 5 });
   r = await anon("GET", "/api/redeem/" + F); ok(r.s === 200 && r.j.needsPlan, "100% coupon for any plan -> pick a plan", r.j);
 
+  section("store links per plan");
+  const withBuy = { ...cfg, plans: cfg.plans.map(p => p.id === m3.id ? { ...p, buy: "https://gat-academy.zid.store/products/abc" } : p) };
+  r = await A("PUT", "/api/admin/settings", { config: { ...cfg, plans: cfg.plans.map(p => ({ ...p, buy: "http://insecure.example/x" })) } }); ok(r.s === 400 && r.j.error === "bad-buy", "http link rejected", r.j);
+  r = await A("PUT", "/api/admin/settings", { config: { ...cfg, plans: cfg.plans.map(p => ({ ...p, buy: "javascript:alert(1)" })) } }); ok(r.s === 400 && r.j.error === "bad-buy", "javascript: link rejected", r.j);
+  r = await A("PUT", "/api/admin/settings", { config: withBuy }); ok(r.s === 200, "https link saved", r.j);
+  r = await anon("GET", "/api/config"); const pc = r.j.config.plans;
+  ok(pc.find(p => p.id === m3.id).buy === "https://gat-academy.zid.store/products/abc" && pc.filter(p => p.id !== m3.id).every(p => p.buy === null), "public config carries the store link", pc);
+  r = await A("PUT", "/api/admin/settings", { config: { ...withBuy, plans: withBuy.plans.map(p => ({ ...p, buy: "" })) } }); ok(r.s === 200, "clearing the link");
+  r = await anon("GET", "/api/config"); ok(r.j.config.plans.every(p => p.buy === null), "back to gateway checkout");
+  await A("PUT", "/api/admin/settings", { config: cfg });
+
   section("export shows who used what; audit");
   r = await A("GET", `/api/admin/coupons/batch/${batch}.csv`);
   ok(r.t.includes(`${codes[0]},`) && r.t.includes(`rd_${runId}@t.com`) && /,used,/.test(r.t), "CSV marks used codes with the student's email");

@@ -537,7 +537,8 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
     const st = ["paid", "refunded", "failed", "initiated"].includes(req.query.status) ? req.query.status : "";
     const r = await pool.query(`SELECT id,user_id,email,plan_id,amount,currency,coupon,status,COALESCE(tap_id,ext_id) tap_id,tap_status,
       COALESCE(provider, CASE WHEN tap_id IS NOT NULL THEN 'tap' END) provider,refunded_amount,refunded_at,days,created_at,paid_at FROM payments ${st ? "WHERE status=$1" : "WHERE status<>'initiated' OR created_at>now()-interval '2 days'"} ORDER BY created_at DESC LIMIT 500`, st ? [st] : []);
-    res.json({ payments: r.rows, tap: !!PROVIDER(), provider: PROVIDER() });
+    const store = (await loadCfg()).plans.some(p => p.active && p.buy);
+    res.json({ payments: r.rows, tap: !!PROVIDER(), provider: PROVIDER(), store });
   });
   A("post", "/payments/:id/refund", async (req, res) => {
     const reason = String(req.body.reason || "requested_by_customer").slice(0, 100);

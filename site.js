@@ -216,7 +216,7 @@ module.exports = function site(app, { PUB, loadConfig }) {
     const en = lang === "en";
     const url = en ? ORIGIN + "/?lang=en" : ORIGIN + "/";
     const org = { "@type": "EducationalOrganization", "@id": ORIGIN + "/#org", name: "أكاديمية القدرات", alternateName: "GAT Academy", url: ORIGIN + "/",
-      logo: { "@type": "ImageObject", url: ORIGIN + "/icon-512.png", width: 512, height: 512 }, image: ORIGIN + "/og.png", email: "info@gat.academy", telephone: "+966533522513",
+      logo: { "@type": "ImageObject", url: ORIGIN + "/icon-512.png", width: 512, height: 512 }, image: ORIGIN + "/og.png", email: "info@gat.academy", telephone: "+966533522513", sameAs: ["https://x.com/GATacademy1"],
       description: en ? "A platform to prepare for the General Aptitude Test (GAT) in Arabic and English: a diagnostic test, a daily plan, narrated animated explainers and model tests in the computer-based format."
         : "منصة للتحضير لاختبار القدرات العامة (GAT) بالعربية والإنجليزية: اختبار تشخيصي، خطة يومية، شروحات متحركة مسموعة، ونماذج محاكية بصيغة الاختبار المحوسب.",
       areaServed: "SA", knowsLanguage: ["ar", "en"] };

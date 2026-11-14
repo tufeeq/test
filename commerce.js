@@ -75,6 +75,9 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
       CREATE INDEX IF NOT EXISTS pay_paid_idx ON payments(paid_at) WHERE paid_at IS NOT NULL;
       CREATE INDEX IF NOT EXISTS pay_coupon_pending_idx ON payments(coupon) WHERE status='initiated';
       CREATE INDEX IF NOT EXISTS audit_at_idx ON admin_audit(at);
+      -- activation codes made in bulk (to sell outside the site, e.g. Zid store vouchers) share a batch id
+      ALTER TABLE coupons ADD COLUMN IF NOT EXISTS batch TEXT;
+      CREATE INDEX IF NOT EXISTS coupons_batch_idx ON coupons(batch) WHERE batch IS NOT NULL;
       CREATE INDEX IF NOT EXISTS users_created_idx ON users(created_at);
       CREATE INDEX IF NOT EXISTS progress_updated_idx ON progress(updated_at);
     `);
@@ -318,6 +321,56 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
     return { status: "CAPTURED", pid, local: await localStatus(pid) };
   }
   const localStatus = async pid => ((await pool.query("SELECT status FROM payments WHERE id=$1", [pid])).rows[0] || {}).status || null;
+  // ---------- activation codes (sold outside the site, e.g. as vouchers in a Zid store) ----------
+  // An activation code is a 100% coupon tied to one plan. The student opens gat.academy/r/CODE (or types the code at
+  // gat.academy/r), signs up or signs in, and the plan activates; no plan to pick and no payment page. A code keeps
+  // working for the plan it was sold for even after that plan is hidden from the plans page.
+  const normCode = s => String(s || "").trim().toUpperCase().replace(/\s+/g, "").slice(0, 40);
+  const CODE_RE = /^[A-Z0-9_-]{3,40}$/;
+  const planPub = p => p ? { id: p.id, ar: p.ar, en: p.en, days: p.days } : null;
+  // what a code gives, without using it. me: the asking student, so a code they already used reads as theirs, not "used"
+  async function codeInfo(db, code, me, lock) {
+    const cp = (await db.query("SELECT * FROM coupons WHERE code=$1" + (lock ? " FOR UPDATE" : ""), [code])).rows[0];
+    if (!cp || cp.pct < 100) return { error: "bad-code" };
+    const one = cp.plan_ids && cp.plan_ids.length === 1 ? cp.plan_ids[0] : null;
+    const plan = one ? (await loadCfg()).plans.find(p => p.id === one) : null;
+    if (me && plan && (await db.query("SELECT 1 FROM payments WHERE coupon=$1 AND user_id=$2 AND status='paid' LIMIT 1", [code, me])).rowCount) return { cp, plan, mine: true };
+    if (!cp.active) return { error: "code-disabled" };
+    if (cp.expires_at && new Date(cp.expires_at) < new Date()) return { error: "code-expired" };
+    if (cp.max_uses != null && cp.used >= cp.max_uses) return { error: "code-used" };
+    if (!one) return { error: "needs-plan" }; // a 100% coupon for several plans: the student picks one on the plans page
+    if (!plan) return { error: "bad-code" };
+    return { cp, plan };
+  }
+  app.get(["/r", "/r/:code", "/redeem", "/redeem/:code"], (req, res) => {
+    const c = normCode(req.params.code);
+    res.set("Cache-Control", "no-store").redirect(302, "/app#redeem" + (CODE_RE.test(c) ? "?c=" + encodeURIComponent(c) : ""));
+  });
+  app.get("/api/redeem/:code", wrap(async (req, res) => {
+    if (limited("rd:" + req.ip, 120, 600e3)) return fail(res, 429, "too-many-requests");
+    const code = normCode(req.params.code); if (!CODE_RE.test(code)) return fail(res, 400, "bad-code");
+    const i = await codeInfo(pool, code, req.user && req.user.id);
+    if (i.error && i.error !== "needs-plan") return fail(res, 400, i.error);
+    res.json({ code, plan: planPub(i.plan), mine: !!i.mine, needsPlan: i.error === "needs-plan" });
+  }));
+  app.post("/api/redeem", needUser, wrap(async (req, res) => {
+    if (limited("rd:" + req.ip, 120, 600e3) || limited("rdu:" + req.user.id, 30, 3600e3)) return fail(res, 429, "too-many-requests");
+    const code = normCode(req.body.code); if (!CODE_RE.test(code)) return fail(res, 400, "bad-code");
+    const pid = "pay_" + crypto.randomBytes(9).toString("base64url");
+    // the coupon row is locked, so one single-use code can never activate two accounts
+    const r = await tx(async c => {
+      const i = await codeInfo(c, code, req.user.id, true);
+      if (i.error || i.mine) return i;
+      const cfg = await loadCfg();
+      await c.query("INSERT INTO payments(id,user_id,email,plan_id,amount,currency,coupon,status,paid_at,days) VALUES($1,$2,$3,$4,0,$5,$6,'paid',now(),$7)", [pid, req.user.id, req.user.email, i.plan.id, cfg.currency, code, i.plan.days]);
+      await c.query("UPDATE coupons SET used=used+1 WHERE code=$1", [code]);
+      return { plan: i.plan, until: await grant(req.user.id, i.plan.days, "coupon", { planId: i.plan.id, paymentId: pid }, c) };
+    });
+    if (r.error) return fail(res, 400, r.error);
+    if (!r.mine) await pool.query("INSERT INTO events(user_id,type,k) VALUES($1,'redeem',$2)", [req.user.id, r.plan.id]).catch(() => {});
+    res.json({ activated: true, already: !!r.mine, plan: planPub(r.plan), until: r.until || (await planOf(req.user)).until });
+  }));
+
   // ---------- Moyasar ----------
   async function moy(method, url, body) {
     const r = await fetch(MOY_API + url, { method, headers: { Authorization: "Basic " + Buffer.from(process.env.MOYASAR_SECRET_KEY + ":").toString("base64"), "Content-Type": "application/json", Accept: "application/json" }, body: body ? JSON.stringify(body) : undefined });
@@ -532,7 +585,46 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
     res.json(r);
   });
 
-  A("get", "/coupons", async (req, res) => res.json({ coupons: (await pool.query("SELECT * FROM coupons ORDER BY created_at DESC")).rows }));
+  A("get", "/coupons", async (req, res) => {
+    const [c, b] = await Promise.all([pool.query("SELECT * FROM coupons WHERE batch IS NULL ORDER BY created_at DESC"),
+      pool.query(`SELECT batch id, min(plan_ids[1]) plan, count(*)::int n, count(*) FILTER (WHERE used>0)::int used, count(*) FILTER (WHERE active)::int active,
+        min(expires_at) expires_at, min(note) note, min(created_at) created_at FROM coupons WHERE batch IS NOT NULL GROUP BY batch ORDER BY min(created_at) DESC`)]);
+    res.json({ coupons: c.rows, batches: b.rows });
+  });
+  // a batch of single-use activation codes for one plan, to load into a store (e.g. a Zid voucher product)
+  const ALPH = "23456789ABCDEFGHJKMNPQRSTUVWXYZ"; // no 0/O, 1/I/L: easy to read and type from a phone
+  const randCode = () => { let s = ""; for (let i = 0; i < 8; i++) s += ALPH[crypto.randomInt(ALPH.length)]; return "GAT-" + s.slice(0, 4) + "-" + s.slice(4); };
+  const batchOf = req => /^[\w-]{1,40}$/.test(req.params.id) ? req.params.id : null;
+  A("post", "/coupons/batch", async (req, res) => {
+    const plan = (await loadCfg(true)).plans.find(p => p.id === String(req.body.plan || ""));
+    if (!plan) return fail(res, 400, "bad-plan");
+    const n = Math.round(Number(req.body.count)); if (!(n >= 1 && n <= 2000)) return fail(res, 400, "bad-count");
+    const exp = req.body.expires ? new Date(req.body.expires) : null; if (exp && (isNaN(exp) || exp.getFullYear() > 2100)) return fail(res, 400, "bad-date");
+    const note = String(req.body.note || "").slice(0, 200);
+    const batch = "b" + day(new Date()).replace(/-/g, "") + "-" + crypto.randomBytes(3).toString("hex");
+    await tx(async c => { for (let made = 0; made < n;) made += (await c.query("INSERT INTO coupons(code,pct,max_uses,expires_at,plan_ids,note,batch) SELECT x,100,1,$2,$3,$4,$5 FROM unnest($1::text[]) x ON CONFLICT DO NOTHING",
+      [Array.from({ length: n - made }, randCode), exp, [plan.id], note, batch])).rowCount; });
+    audit(req, "coupon_batch", batch, { plan: plan.id, n, exp });
+    res.json({ ok: true, batch, count: n });
+  });
+  A("get", "/coupons/batch/:id.csv", async (req, res) => {
+    const id = batchOf(req); if (!id) return fail(res, 404, "not-found");
+    const r = await pool.query(`SELECT c.code, c.plan_ids[1] plan, c.used, c.active, c.expires_at, p.email used_by, p.paid_at used_at FROM coupons c
+      LEFT JOIN LATERAL (SELECT email, paid_at FROM payments WHERE coupon=c.code AND status='paid' ORDER BY paid_at LIMIT 1) p ON true WHERE c.batch=$1 ORDER BY c.code`, [id]);
+    if (!r.rowCount) return fail(res, 404, "not-found");
+    const esc = v => { let s = v == null ? "" : String(v instanceof Date ? v.toISOString() : v); if (typeof v === "string" && /^[=+\-@\t\r]/.test(s)) s = "'" + s; return /[",\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
+    const base = baseUrl(req), now = new Date();
+    const st = x => x.used > 0 ? "used" : !x.active ? "disabled" : x.expires_at && new Date(x.expires_at) < now ? "expired" : "unused";
+    const rows = r.rows.map(x => [x.code, base + "/r/" + x.code, x.plan, st(x), x.expires_at, x.used_by, x.used_at].map(esc).join(","));
+    audit(req, "coupon_batch_export", id, { n: rows.length });
+    res.set({ "Content-Type": "text/csv; charset=utf-8", "Content-Disposition": `attachment; filename="gat-academy-codes-${id}.csv"` }).send("\ufeff" + "code,link,plan,status,expires_at,used_by,used_at\n" + rows.join("\n"));
+  });
+  A("patch", "/coupons/batch/:id", async (req, res) => {
+    const id = batchOf(req); if (!id) return fail(res, 404, "not-found");
+    const r = await pool.query("UPDATE coupons SET active=$1 WHERE batch=$2", [!!req.body.active, id]);
+    if (!r.rowCount) return fail(res, 404, "not-found");
+    audit(req, req.body.active ? "coupon_batch_on" : "coupon_batch_off", id, { n: r.rowCount }); res.json({ ok: true });
+  });
   A("post", "/coupons", async (req, res) => {
     const code = String(req.body.code || "").trim().toUpperCase();
     if (!/^[A-Z0-9_-]{3,32}$/.test(code)) return fail(res, 400, "bad-code");

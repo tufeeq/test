@@ -104,6 +104,7 @@ const ERR = {
   exists: ["يوجد قسيمة بهذا الرمز مسبقًا.", "A coupon with this code already exists."],
   "in-use": ["لا يمكن حذف قسيمة مستخدمة؛ عطّلها بدلًا من ذلك.", "A used coupon can't be deleted; disable it instead."],
   "bad-config": ["الإعدادات المرسلة غير صالحة.", "The settings sent are invalid."],
+  "bad-buy": ["رابط الشراء يجب أن يبدأ بـ https://", "The store link must start with https://"],
   "bad-plans": ["تحقق من الباقات: معرّف صالح غير مكرر، سعر ١ ر.س على الأقل، مدة يوم على الأقل، وباقة مفعّلة واحدة على الأقل.", "Check the plans: unique valid id, price at least 1 SAR, at least 1 day, and at least one active plan."],
   "too-many-requests": ["طلبات كثيرة، انتظر قليلًا ثم أعد المحاولة.", "Too many requests. Wait a moment and try again."],
   "invalid-credential": ["البريد أو كلمة المرور غير صحيحة.", "Wrong email or password."],
@@ -920,6 +921,7 @@ function validate(c) {
     if (!(num(p.days) >= 1) || p.days === "") E[`plans.${i}.days`] = _("يوم واحد على الأقل", "At least 1 day");
     if (!String(p.ar || "").trim()) E[`plans.${i}.ar`] = _("مطلوب", "Required");
     if (!String(p.en || "").trim()) E[`plans.${i}.en`] = _("مطلوب", "Required");
+    if (p.buy && !/^https:\/\/[^\s]+$/i.test(String(p.buy).trim())) E[`plans.${i}.buy`] = _("رابط يبدأ بـ https://", "A link starting with https://");
   });
   if (!c.plans.length) E.plans = _("أضف باقة واحدة على الأقل", "Add at least one plan");
   else if (!c.plans.some(p => p.active !== false)) E.plans = _("يجب أن تبقى باقة واحدة مفعّلة على الأقل", "Keep at least one plan active");
@@ -935,7 +937,7 @@ function validate(c) {
 }
 function normalize(c) {
   const o = clone(c);
-  o.plans = o.plans.map(p => ({ id: String(p.id).trim(), ar: String(p.ar || "").trim(), en: String(p.en || "").trim(), days: Math.round(num(p.days)), price: num(p.price), active: p.active !== false, best: !!p.best }));
+  o.plans = o.plans.map(p => ({ id: String(p.id).trim(), ar: String(p.ar || "").trim(), en: String(p.en || "").trim(), days: Math.round(num(p.days)), price: num(p.price), active: p.active !== false, best: !!p.best, buy: String(p.buy || "").trim() || null }));
   ["dailyQuestions", "planWeeks", "mistakesMax"].forEach(k => { o.free[k] = Math.round(num(o.free[k])); });
   ["cardsFrac", "techFrac"].forEach(k => { o.free[k] = Math.round(num(o.free[k]) * 1000) / 1000; });
   o.refund = { on: !!o.refund.on, days: Math.round(num(o.refund.days)) }; o.trialReportDays = Math.round(num(o.trialReportDays));
@@ -977,6 +979,11 @@ function renderSettings() {
       <td class="rm"><button class="btn danger-ghost xs icon" type="button" data-rm="${i}" aria-label="${_("حذف الباقة", "Remove plan")}" ${c.plans.length < 2 ? "disabled" : ""}>${ic("trash")}</button></td></tr>`).join("")}
     </tbody></table></div>${E.plans ? `<p class="fld"><span class="err">${esc(E.plans)}</span></p>` : ""}
     <div class="row"><button class="btn ghost sm" type="button" id="s-add">${ic("plus")}${_("إضافة باقة", "Add plan")}</button><span class="small muted" style="align-self:center">${_("الباقة غير المفعّلة تختفي من صفحة الأسعار وتبقى الاشتراكات القائمة. تغيير السعر أو المدة يسري على عمليات الدفع الجديدة فقط.", "Inactive plans are hidden from pricing; existing subscriptions stay. Price or length changes apply to new checkouts only.")}</span></div>
+  </section>
+
+  <section class="card"><div class="card-h"><h2>${_("الشراء عبر متجر زد", "Buying through the Zid store")}</h2></div>
+    <p class="small muted">${_("ضع رابط منتج كل باقة في متجرك. عند وجود الرابط يضغط الطالب «اشترِ الآن» في صفحة الباقات فينتقل إلى المتجر ليدفع، ويصله رابط التفعيل بالبريد والجوال. اترك الحقل فارغًا ليعود الدفع عبر بوابة الموقع.", "Paste each plan's product link from your store. With a link, “Buy now” on the plans page takes the student to the store to pay, and the activation link arrives by email and SMS. Leave it empty to pay through the site's gateway instead.")}</p>
+    <div class="fgrid">${c.plans.map((p, i) => `<label class="fld wide">${esc(_(p.ar || p.id, p.en || p.id))} <span class="mono muted">${esc(p.id)}</span><input type="url" data-p="plans.${i}.buy" value="${esc(p.buy || "")}" dir="ltr" maxlength="400" placeholder="https://gat-academy.zid.store/products/…" ${inv(`plans.${i}.buy`)}>${err(`plans.${i}.buy`)}</label>`).join("")}</div>
   </section>
 
   <section class="card"><div class="card-h"><h2>${_("حدود الخطة المجانية", "Free-plan limits")}</h2><div class="sec-acts">${rst("limits")}</div></div>

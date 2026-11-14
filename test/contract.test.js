@@ -59,7 +59,7 @@ run(async () => {
       ["cardsFrac", "techFrac"].every(k => typeof f[k] === "number" && f[k] >= 0 && f[k] <= 1) && typeof f.diagnostic === "boolean", `${who}: free limits typed`, f);
     ok(cfg.banner && typeof cfg.banner.on === "boolean" && typeof cfg.banner.ar === "string" && typeof cfg.banner.en === "string" && ["info", "promo", "warn"].includes(cfg.banner.tone), `${who}: banner`, cfg.banner);
     ok(Number.isInteger(cfg.trialReportDays), `${who}: trialReportDays`);
-    ok(typeof cfg.payments === "boolean" && (cfg.provider === null || ["moyasar", "tap"].includes(cfg.provider)) && cfg.payments === (cfg.provider !== null), `${who}: payments/provider agree`, [cfg.payments, cfg.provider]);
+    ok(typeof cfg.payments === "boolean" && (cfg.provider === null || ["moyasar"].includes(cfg.provider)) && cfg.payments === (cfg.provider !== null), `${who}: payments/provider agree`, [cfg.payments, cfg.provider]);
     ok(cfg.social && typeof cfg.social.google === "boolean" && typeof cfg.social.facebook === "boolean", `${who}: social flags`, cfg.social);
     const s = JSON.stringify(cfg);
     ok(!/sk_|secret|whsec|password|client_id|app_id/i.test(s), `${who}: no secrets in the public config`);
@@ -208,7 +208,7 @@ run(async () => {
   const start = async extra => {
     const port = await freePort(), log = [];
     const env = { ...process.env, PORT: String(port), DATABASE_URL: freshUrl, ADMIN_EMAILS: "owner@fresh.test", PUBLIC_URL: `http://127.0.0.1:${port}`, NODE_ENV: "test", ...extra };
-    for (const k of ["CANONICAL_HOST", "REDIRECT_HOSTS", "TAP_SECRET_KEY", "MOYASAR_SECRET_KEY", "GOOGLE_CLIENT_ID", "FACEBOOK_APP_ID"]) delete env[k];
+    for (const k of ["CANONICAL_HOST", "REDIRECT_HOSTS", "MOYASAR_SECRET_KEY", "GOOGLE_CLIENT_ID", "FACEBOOK_APP_ID"]) delete env[k];
     const p = spawn(process.execPath, [path.join(ROOT, "server.js")], { cwd: ROOT, env, stdio: ["ignore", "pipe", "pipe"] });
     p.stdout.on("data", d => log.push(d.toString())); p.stderr.on("data", d => log.push(d.toString()));
     const exited = new Promise(res => p.on("exit", code => res(code)));

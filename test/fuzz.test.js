@@ -43,8 +43,6 @@ run(async () => {
     ["POST", "/api/billing/quote", "user", { plan: "m1", coupon: "NOPE" }],
     ["POST", "/api/billing/checkout", "user", { plan: "zz", coupon: "NOPE", lang: "ar" }],   // bad plan: never reaches the gateway
     ["POST", "/api/billing/moyasar/callback", "anon", { id: "00000000-0000-0000-0000-000000000000" }],
-    ["POST", "/api/billing/webhook", "anon", { id: "chg_x" }],
-    ["POST", "/api/billing/refund-webhook", "anon", {}],
     ["POST", `/api/admin/users/${uidRow}/grant`, "admin", { days: 1, note: "n" }],
     ["POST", `/api/admin/users/${uidRow}/name`, "admin", { name: "Name" }],
     ["POST", "/api/admin/payments/pay_nope/refund", "admin", { amount: 1, reason: "r", revoke: true }],
@@ -92,7 +90,7 @@ run(async () => {
   const Q = ["[]=x", "[a]=b", "=1e308", "=-1", "=NaN", "=Infinity", "=%00", "=" + encodeURIComponent("‮"), "=" + "z".repeat(3000), "=__proto__", "=constructor"];
   const gets = [["/api/admin/users?page", "admin"], ["/api/admin/users?size", "admin"], ["/api/admin/users?q", "admin"], ["/api/admin/users?plan", "admin"], ["/api/admin/users?sort", "admin"],
     ["/api/admin/overview?days", "admin"], ["/api/admin/funnel?days", "admin"], ["/api/admin/content?days", "admin"], ["/api/admin/payments?status", "admin"],
-    ["/api/billing/return?pid", "anon"], ["/api/billing/return?tap_id", "anon"], ["/?lang", "anon"], ["/?home", "anon"], ["/app.js?v", "anon"], ["/auth/google?next", "anon"], ["/sitemap.xml?x", "anon"]];
+    ["/api/billing/return?pid", "anon"], ["/?lang", "anon"], ["/?home", "anon"], ["/app.js?v", "anon"], ["/auth/google?next", "anon"], ["/sitemap.xml?x", "anon"]];
   let qbad = 0, qn = 0;
   for (const [base, w] of gets) for (const q of Q) { qn++; const r = await who[w]("GET", base + q); if (!clean(r, `GET ${base}${q.slice(0, 30)}`)) qbad++; }
   ok(qbad === 0, `${qn} fuzzed query strings, ${qbad} unclean`);

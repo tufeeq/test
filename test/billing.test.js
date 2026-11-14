@@ -77,8 +77,8 @@ run(async () => {
   section("expired / failed / canceled invoices");
   for (const s of ["expired", "failed", "canceled"]) {
     const U = await signup(`st_${s}_${runId}@t.com`); const c = await U("POST", "/api/billing/checkout", { plan: "m1", coupon: C15 }); const id = invId(c.j.url); const p = (await sql("select id from payments where ext_id=$1", [id]))[0];
-    await moy(`/_status/${id}?s=${s}`); const r = await client()("GET", "/api/billing/return?pid=" + p.id); const row = (await sql("select status,tap_status from payments where id=$1", [p.id]))[0];
-    ok(/failed=1/.test(r.loc) && row.status === "failed" && row.tap_status === s, s + " -> failed", row);
+    await moy(`/_status/${id}?s=${s}`); const r = await client()("GET", "/api/billing/return?pid=" + p.id); const row = (await sql("select status,gw_status from payments where id=$1", [p.id]))[0];
+    ok(/failed=1/.test(r.loc) && row.status === "failed" && row.gw_status === s, s + " -> failed", row);
   }
   cp = (await sql("select used from coupons where code=$1", [C15]))[0]; ok(cp.used === 1, "failed payments don't use coupon", cp);
 

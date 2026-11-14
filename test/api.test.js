@@ -71,8 +71,8 @@ run(async () => {
 
   section("gateway error on checkout");
   await moy("/_failnext?n=1"); r = await U2("POST", "/api/billing/checkout", { plan: "m1" }); ok(r.s === 502 && r.j.error === "gateway-error", "gateway error -> 502", r);
-  const failed = await sql("SELECT status, tap_status FROM payments WHERE user_id=$1 ORDER BY created_at DESC LIMIT 1", [uid2]);
-  ok(failed[0] && failed[0].status === "failed" && failed[0].tap_status === "gateway-error", "payment row marked failed after gateway error", failed[0]);
+  const failed = await sql("SELECT status, gw_status FROM payments WHERE user_id=$1 ORDER BY created_at DESC LIMIT 1", [uid2]);
+  ok(failed[0] && failed[0].status === "failed" && failed[0].gw_status === "gateway-error", "payment row marked failed after gateway error", failed[0]);
 
   section("audit covers every admin mutation");
   r = await A("PATCH", `/api/admin/coupons/AU${runId}`, { active: false }); ok(r.s === 200, "coupon off");

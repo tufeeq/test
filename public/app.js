@@ -2383,8 +2383,8 @@ function pageGuide(){
 let UP={plan:null,coupon:'',quote:null,qerr:'',note:'',err:'',busy:false,k:null,qt:null,qseq:0};
 const money=n=>{ const v=Math.round(n*100)/100; return numL(Number.isInteger(v)?v:v.toFixed(2)); };
 const CURR=()=>S.lang==='ar'?'ريال':(CFG()?.currency||'SAR');
-/* the payment gateway named in the copy follows config.provider ('moyasar' | 'tap' | null → no name) */
-const provName=()=>{ const p=CFG()?.provider; return p==='moyasar'?(S.lang==='ar'?'ميسّر':'Moyasar'):p==='tap'?(S.lang==='ar'?'تاب':'Tap'):''; };
+/* the payment gateway named in the copy follows config.provider ('moyasar' | null → no name) */
+const provName=()=>{ const p=CFG()?.provider; return p==='moyasar'?(S.lang==='ar'?'ميسّر':'Moyasar'):''; };
 function plansOf(){ return (CFG()?.plans||[]).filter(p=>p&&p.id); }
 function curPlan(){ const ps=plansOf(); if(!ps.length) return null; return ps.find(p=>p.id===UP.plan)||ps.find(p=>p.best)||ps[0]; }
 function planCards(sel){ const ps=plansOf(); if(!ps.length) return `<p class="muted small">${t('plansLoading')}</p>`;

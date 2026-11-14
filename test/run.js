@@ -45,7 +45,7 @@ async function waitFor(url, ms = 20000) {
       // fake OAuth apps + mocked provider calls, so /auth/* callbacks can be tested end to end
       GOOGLE_CLIENT_ID: "test-google-id", GOOGLE_CLIENT_SECRET: "test-google-secret", FACEBOOK_APP_ID: "1", FACEBOOK_APP_SECRET: "fb-secret",
       NODE_ENV: "test" };
-    delete env.CANONICAL_HOST; delete env.REDIRECT_HOSTS; delete env.TAP_SECRET_KEY;
+    delete env.CANONICAL_HOST; delete env.REDIRECT_HOSTS;
     const t0 = Date.now();
     srv = spawn(process.execPath, ["-r", path.join(__dirname, "mock-oauth.cjs"), path.join(ROOT, "server.js")], { cwd: ROOT, env, stdio: ["ignore", "pipe", "pipe"] });
     procs.push(srv);

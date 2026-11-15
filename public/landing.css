@@ -418,3 +418,7 @@ html.lp-pending body{opacity:0}
 @media (max-width:400px){.lp-st-b{top:-22px;inline-size:92px;padding:16px 8px 8px}.lp-st-b .lp-ring{inline-size:48px;block-size:48px}.lp-st-b .lp-ring-n{top:30px;font-size:.95rem}}
 
 html[data-pay="store"] .lp-paym .lp-stc{display:none}
+
+/* UX pass: AA contrast for the "best value" tag (white on bright pink was 3.6:1), and a 44px touch target for the guide link */
+.lp-best{background:var(--pink-t);color:var(--paper)}
+@media (pointer:coarse){.lp-band-link{display:inline-flex;align-items:center;min-block-size:44px}}

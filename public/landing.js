@@ -92,6 +92,9 @@
     demoEyebrow: 'Try it now, no sign-up', demoH: 'Animated, narrated, and it stops so you can try',
     demoP: 'Each skill is taught step by step on the board in a clear voice. The explainer pauses so you can answer, then a short quiz locks the idea in. These ones are in the free plan. Pick one and press play:',
     capDemo: 'The player opens full screen and works with sound or with captions.',
+    /* the four demo explainers, shown before the player scripts load (the player then fills in its own titles) */
+    xt_analogy: 'Analogies: build the bridge', xt_ar_order: 'Order of operations', xt_ge_angles: 'Angles and parallel lines', xt_co_signals: 'Signal words in sentence completion',
+    xm_analogy: '4 min', xm_ar_order: '3 min', xm_ge_angles: '3 min', xm_co_signals: '4 min',
     noJsDemo: 'The interactive demo needs JavaScript enabled in your browser.',
     playAria: 'Play the explainer', playL: 'Play the explainer', pickAria: 'Choose an explainer',
     pickNote: 'GAT Academy has 33 explainers in each language, covering all ten skills.',
@@ -102,12 +105,12 @@
     s1h: 'Diagnostic test', s1p: '20 questions in about 15 minutes, two from each skill, to show your level in all ten skills from day one.',
     s2h: 'Personal plan', s2p: 'A daily plan up to your test date that starts with your weakest skills and spreads review across the days.',
     s3h: 'Learn with explainers', s3p: 'An animated, narrated explainer for each idea, a short quiz after it, then flashcards, techniques and recurring patterns.',
-    s4h: 'Practice and model tests', s4p: 'Fresh practice questions, then model tests in the computer-based format: 4 sections × 24 questions × 25 minutes.',
+    s4h: 'Practice and model tests', s4p: 'Fresh practice questions, then model tests in the test format: 5 sections × 24 questions × 25 minutes.',
     s5h: 'Track your progress', s5p: 'A mastery map and an estimated score, plus a mistake box that brings back every question you missed until you master it.',
     featEyebrow: 'Everything in one place', featH: 'A complete kit, not just a question bank',
     featP: 'Learn the idea, practice it, test yourself under real exam conditions, and always know where you stand.',
     f1h: '33 animated explainers per language', f1p: 'Narrated in Arabic and in English. They pause so you can try it yourself, with a short quiz after.',
-    f2h: '30 model tests', f2p: 'In the computer-based format: 4 sections × 24 questions, 25 minutes per section, with a real timer.',
+    f2h: '30 model tests', f2p: 'In the test format: 5 sections × 24 questions, 25 minutes per section, with a real timer.',
     f3h: 'Fresh practice questions', f3p: 'New questions with changing numbers and wording, so you practice the idea instead of memorizing answers.',
     f4h: 'Illustrated flashcards', f4p: 'Cards that sum up each rule with a drawing. Flip and review them in minutes.',
     f5h: 'Vocabulary deck', f5p: 'Words that keep coming up in analogies, sentence completion and contextual error, with meanings.',
@@ -158,6 +161,10 @@
     faqEyebrow: 'Before you start', faqH: 'Frequently asked questions',
     q1: 'What is the General Aptitude Test (GAT)?',
     a1: '<p>A standardized test from the National Center for Assessment (Qiyas) at the Education and Training Evaluation Commission, taken by secondary school students. Saudi universities use it for admission as part of the weighted score. It doesn’t measure what you memorized from the curriculum; it measures your ability to understand, analyze and infer through language and numbers, in two parts: verbal and quantitative. That’s why it improves with skill practice, not by memorizing answers.</p>',
+    q9: 'How many questions are on the GAT, and how long is it?',
+    a9: '<p>According to the official candidate guide from the Education and Training Evaluation Commission (ETEC): 120 multiple-choice questions in five sections of 24 questions each, with a test time of 2 hours 5 minutes. It is offered on paper in set windows and digitally (computer-based) all year, in Arabic or English, and calculators are not allowed. Our model tests follow the same format: 5 sections × 24 questions × 25 minutes.</p>',
+    q10: 'Who can take the test, and how many times?',
+    a10: '<p>The test is for second- and third-year secondary students and secondary school graduates. The official candidate guide gives five attempts within three years, and a result is valid for five years from the test date. In September 2026 ETEC clarified that the paper test is currently limited to third-year students and graduates, while the digital test is available all year to second- and third-year students and graduates. Dates and fees change, so check them on the <a href="https://etec.gov.sa" target="_blank" rel="noopener">ETEC website</a> before you register.</p>',
     q2: 'Is the free plan really free forever?',
     a2: '<p>Yes. The free plan is permanent: there’s no trial that runs out, and you don’t need a card to sign up. It includes the diagnostic test, selected explainers, daily practice questions, the first two weeks of your plan and more. Everything in it works fully, and subscriber features stay visible with their name and benefit, so you can decide for yourself.</p>',
     q3: 'What do I get when I subscribe?',
@@ -407,7 +414,9 @@
     }
     var saveData = navigator.connection && navigator.connection.saveData;
     if (!saveData) {
-      var idle = function () { (window.requestIdleCallback || function (f) { setTimeout(f, 1); })(function () { loadXP().catch(function () {}); }); };
+      // after the demo scripts: the app's own scripts are fetched into the HTTP cache at idle priority (<template id="lp-app-pre">), so opening the app from here does not wait for them
+      var pre = function () { var tp = $('#lp-app-pre'); if (tp && tp.content) D.head.appendChild(tp.content.cloneNode(true)); };
+      var idle = function () { (window.requestIdleCallback || function (f) { setTimeout(f, 1); })(function () { loadXP().catch(function () {}).then(pre); }); };
       if (D.readyState === 'complete') setTimeout(idle, 2500); else window.addEventListener('load', function () { setTimeout(idle, 2500); });
     }
   }

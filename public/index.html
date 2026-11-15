@@ -31,11 +31,11 @@
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="manifest" href="/site.webmanifest">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<!-- Google Fonts: fetched early but not render-blocking; landing.js turns this preload into a stylesheet (CSP allows no inline onload) -->
-<link rel="preload" as="style" id="lp-fonts" href="https://fonts.googleapis.com/css2?family=Almarai:wght@400;700;800&family=Aref+Ruqaa:wght@400;700&family=Baloo+Bhaijaan+2:wght@500;600;700;800&family=Caveat:wght@600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
-<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Almarai:wght@400;700;800&family=Aref+Ruqaa:wght@400;700&family=Baloo+Bhaijaan+2:wght@500;600;700;800&family=Caveat:wght@600;700&family=IBM+Plex+Mono:wght@500;600&display=swap"></noscript>
+<!-- Web fonts (self-hosted): fetched early but not render-blocking; landing.js turns this preload into a stylesheet (CSP allows no inline onload).
+     Caveat 700 is used on this page only, so its faces are declared here. -->
+<link rel="preload" as="style" id="lp-fonts" href="/fonts.css">
+<noscript><link rel="stylesheet" href="/fonts.css"></noscript>
+<style>@font-face{font-family:'Caveat';font-style:normal;font-weight:700;font-display:swap;src:url(/fonts/caveat-cyrillic-ext-wght-normal.woff2) format('woff2');unicode-range:U+0460-052F,U+1C80-1C8A,U+20B4,U+2DE0-2DFF,U+A640-A69F,U+FE2E-FE2F}@font-face{font-family:'Caveat';font-style:normal;font-weight:700;font-display:swap;src:url(/fonts/caveat-cyrillic-wght-normal.woff2) format('woff2');unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}@font-face{font-family:'Caveat';font-style:normal;font-weight:700;font-display:swap;src:url(/fonts/caveat-latin-ext-wght-normal.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}@font-face{font-family:'Caveat';font-style:normal;font-weight:700;font-display:swap;src:url(/fonts/caveat-latin-wght-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}</style>
 <link rel="stylesheet" href="/app.css">
 <link rel="stylesheet" href="/landing.css">
 <!-- landing.js runs its first lines immediately (theme, language, fonts, old app links), the rest after the DOM is parsed -->
@@ -186,7 +186,7 @@
     </div>
     <div class="lp-demo-grid">
       <div class="lp-stage" id="lp-stage" data-k="analogy">
-        <div class="lp-stage-top"><span class="lp-dots"><i></i><i></i><i></i></span><span class="lp-stage-t" id="lp-stage-t">التناظر اللفظي: ابنِ الجسر</span></div>
+        <div class="lp-stage-top"><span class="lp-dots"><i></i><i></i><i></i></span><span class="lp-stage-t" id="lp-stage-t" data-i="xt_analogy">التناظر اللفظي: ابنِ الجسر</span></div>
         <div class="lp-board">
           <svg class="lp-doodle" data-d="analogy" viewBox="0 0 320 170" aria-hidden="true">
             <text class="d-h" x="160" y="30" text-anchor="middle" data-i="dA3">أداة لـ</text>
@@ -225,23 +225,23 @@
       <div class="lp-pick" role="group" aria-label="اختر شرحًا" data-i-aria="pickAria">
         <button class="lp-pk on" type="button" data-xp="analogy" aria-pressed="true">
           <span class="lp-pk-ic v"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="9" width="7" height="6" rx="1.5"/><rect x="14.5" y="9" width="7" height="6" rx="1.5"/><path d="M9.5 12c1.5-3 3.5-3 5 0"/></svg></span>
-          <span class="lp-pk-t"><small data-i="sk_analogy">التناظر اللفظي</small><b data-xt="analogy">التناظر اللفظي: ابنِ الجسر</b></span>
-          <span class="lp-pk-m" data-xm="analogy">٤ دقائق</span>
+          <span class="lp-pk-t"><small data-i="sk_analogy">التناظر اللفظي</small><b data-xt="analogy" data-i="xt_analogy">التناظر اللفظي: ابنِ الجسر</b></span>
+          <span class="lp-pk-m" data-xm="analogy" data-i="xm_analogy">٤ دقائق</span>
         </button>
         <button class="lp-pk" type="button" data-xp="ar-order" aria-pressed="false">
           <span class="lp-pk-ic q"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h5M7.5 5.5v5M14 8h5M5 16.5l4-4M9 16.5l-4-4M14 15h5M14 18h5"/></svg></span>
-          <span class="lp-pk-t"><small data-i="sk_arith">الحساب</small><b data-xt="ar-order">ترتيب العمليات الحسابية</b></span>
-          <span class="lp-pk-m" data-xm="ar-order">٣ دقائق</span>
+          <span class="lp-pk-t"><small data-i="sk_arith">الحساب</small><b data-xt="ar-order" data-i="xt_ar_order">ترتيب العمليات الحسابية</b></span>
+          <span class="lp-pk-m" data-xm="ar-order" data-i="xm_ar_order">٣ دقائق</span>
         </button>
         <button class="lp-pk" type="button" data-xp="ge-angles" aria-pressed="false">
           <span class="lp-pk-ic q"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8h18M3 16h18M8 3l8 18"/></svg></span>
-          <span class="lp-pk-t"><small data-i="sk_geometry">الهندسة</small><b data-xt="ge-angles">الزوايا والمستقيمات المتوازية</b></span>
-          <span class="lp-pk-m" data-xm="ge-angles">٣ دقائق</span>
+          <span class="lp-pk-t"><small data-i="sk_geometry">الهندسة</small><b data-xt="ge-angles" data-i="xt_ge_angles">الزوايا والمستقيمات المتوازية</b></span>
+          <span class="lp-pk-m" data-xm="ge-angles" data-i="xm_ge_angles">٣ دقائق</span>
         </button>
         <button class="lp-pk" type="button" data-xp="co-signals" aria-pressed="false">
           <span class="lp-pk-ic v"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h4M17 12h4"/><rect x="8" y="8.5" width="8" height="7" rx="2"/></svg></span>
-          <span class="lp-pk-t"><small data-i="sk_completion">إكمال الجمل</small><b data-xt="co-signals">كلمات الإشارة في إكمال الجمل</b></span>
-          <span class="lp-pk-m" data-xm="co-signals">٤ دقائق</span>
+          <span class="lp-pk-t"><small data-i="sk_completion">إكمال الجمل</small><b data-xt="co-signals" data-i="xt_co_signals">كلمات الإشارة في إكمال الجمل</b></span>
+          <span class="lp-pk-m" data-xm="co-signals" data-i="xm_co_signals">٤ دقائق</span>
         </button>
         <p class="lp-pick-note" data-i="pickNote">في أكاديمية القدرات ٣٣ شرحًا بكل لغة، تغطي المهارات العشر.</p>
       </div>
@@ -261,7 +261,7 @@
       <li class="lp-step n0"><span class="lp-step-n" aria-hidden="true" data-i="n1">١</span><h3 data-i="s1h">اختبار تشخيصي</h3><p data-i="s1p">٢٠ سؤالًا في نحو ١٥ دقيقة، سؤالان من كل مهارة، تكشف مستواك في المهارات العشر من اليوم الأول.</p></li>
       <li class="lp-step n1"><span class="lp-step-n" aria-hidden="true" data-i="n2">٢</span><h3 data-i="s2h">خطة شخصية</h3><p data-i="s2p">خطة يومية حتى موعد اختبارك، تبدأ بأضعف مهاراتك وتوزّع المراجعة على الأيام.</p></li>
       <li class="lp-step n2"><span class="lp-step-n" aria-hidden="true" data-i="n3">٣</span><h3 data-i="s3h">تعلّم بالشروحات</h3><p data-i="s3p">شرح متحرك مسموع لكل فكرة، يليه اختبار قصير، ثم بطاقات وتقنيات وأنماط متكررة.</p></li>
-      <li class="lp-step n3"><span class="lp-step-n" aria-hidden="true" data-i="n4">٤</span><h3 data-i="s4h">تدرّب وحاكِ الاختبار</h3><p data-i="s4p">أسئلة تدريب متجددة، ثم نماذج محاكية بصيغة المحوسب: ٤ أقسام × ٢٤ سؤالًا × ٢٥ دقيقة.</p></li>
+      <li class="lp-step n3"><span class="lp-step-n" aria-hidden="true" data-i="n4">٤</span><h3 data-i="s4h">تدرّب وحاكِ الاختبار</h3><p data-i="s4p">أسئلة تدريب متجددة، ثم نماذج محاكية بصيغة الاختبار: ٥ أقسام × ٢٤ سؤالًا × ٢٥ دقيقة.</p></li>
       <li class="lp-step n0"><span class="lp-step-n" aria-hidden="true" data-i="n5">٥</span><h3 data-i="s5h">تابع تقدمك</h3><p data-i="s5p">خريطة إتقان ودرجة تقديرية، وصندوق أخطاء يعيد إليك كل سؤال أخطأت فيه حتى تتقنه.</p></li>
     </ol>
   </div>
@@ -277,7 +277,7 @@
     </div>
     <ul class="lp-feats">
       <li class="lp-feat"><span class="lp-fi c-pri"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="4" width="19" height="13" rx="2.5"/><path d="M8 21h8M12 17v4"/><path class="f" d="M10 7.8v5.4l4.5-2.7z"/></svg></span><h3 data-i="f1h">٣٣ شرحًا متحركًا بكل لغة</h3><p data-i="f1p">شروحات مسموعة بالعربية وبالإنجليزية، تتوقف لتجرّب بنفسك، وبعدها اختبار قصير.</p></li>
-      <li class="lp-feat"><span class="lp-fi c-pink"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H6.5A1.5 1.5 0 0 0 5 4.5v15A1.5 1.5 0 0 0 6.5 21H11"/><path d="M14 3l4 4v3"/><path d="M8 8h4M8 12h3"/><circle cx="17" cy="17" r="4.5"/><path d="M17 15v2l1.3 1"/></svg></span><h3 data-i="f2h">٣٠ نموذجًا محاكيًا</h3><p data-i="f2p">بصيغة الاختبار المحوسب: ٤ أقسام × ٢٤ سؤالًا × ٢٥ دقيقة لكل قسم، مع مؤقت حقيقي.</p></li>
+      <li class="lp-feat"><span class="lp-fi c-pink"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H6.5A1.5 1.5 0 0 0 5 4.5v15A1.5 1.5 0 0 0 6.5 21H11"/><path d="M14 3l4 4v3"/><path d="M8 8h4M8 12h3"/><circle cx="17" cy="17" r="4.5"/><path d="M17 15v2l1.3 1"/></svg></span><h3 data-i="f2h">٣٠ نموذجًا محاكيًا</h3><p data-i="f2p">بصيغة الاختبار: ٥ أقسام × ٢٤ سؤالًا × ٢٥ دقيقة لكل قسم، مع مؤقت حقيقي.</p></li>
       <li class="lp-feat"><span class="lp-fi c-sky"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h3.5c2 0 3 1 4.5 3.5S14.5 17 16.5 17H20"/><path d="M4 17h3.5c1.2 0 2-.4 2.8-1.3M13.7 8.3C14.5 7.4 15.3 7 16.5 7H20"/><path d="M18 5l2 2-2 2M18 15l2 2-2 2"/></svg></span><h3 data-i="f3h">أسئلة تدريب متجددة</h3><p data-i="f3p">أسئلة جديدة بأرقام وصياغات متغيرة، فتتدرب على الفكرة لا على حفظ الإجابة.</p></li>
       <li class="lp-feat"><span class="lp-fi c-butter"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="3.5" width="13" height="16" rx="2" transform="rotate(8 13.5 11.5)"/><rect x="3.5" y="5" width="13" height="16" rx="2"/><path d="M6.5 15l2.5-3 2 2 2-3 2 4"/><circle cx="8" cy="9" r="1.2" class="f"/></svg></span><h3 data-i="f4h">بطاقات مصوّرة</h3><p data-i="f4p">بطاقات تلخّص كل قاعدة برسم توضيحي، تقلبها وتراجعها في دقائق.</p></li>
       <li class="lp-feat"><span class="lp-fi c-pri"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5"/><path d="M8.5 13l2.5-6 2.5 6M9.4 11h3.2"/></svg></span><h3 data-i="f5h">بطاقات المفردات</h3><p data-i="f5p">مفردات تتكرر في التناظر وإكمال الجمل والخطأ السياقي، بمعانيها.</p></li>
@@ -448,6 +448,8 @@
     </div>
     <div class="lp-faqs">
       <details class="lp-q"><summary data-i="q1">ما هو اختبار القدرات العامة؟</summary><div class="lp-a" data-i="a1"><p>اختبار معياري يقدمه المركز الوطني للقياس (قياس) التابع لهيئة تقويم التعليم والتدريب لطلاب المرحلة الثانوية، وتعتمد عليه الجامعات السعودية في القبول ضمن النسبة الموزونة. لا يقيس ما حفظته من المنهج، بل قدرتك على الفهم والتحليل والاستنتاج من خلال اللغة والأرقام، في قسمين: لفظي وكمي. لذلك يتحسن بالتدريب على المهارة، لا بحفظ الإجابات.</p></div></details>
+      <details class="lp-q"><summary data-i="q9">كم سؤالًا في اختبار القدرات، وكم مدته؟</summary><div class="lp-a" data-i="a9"><p>حسب الدليل الإرشادي الرسمي لهيئة تقويم التعليم والتدريب: ١٢٠ سؤالًا من نوع الاختيار من متعدد في خمسة أقسام، في كل قسم ٢٤ سؤالًا، وزمن الاختبار ساعتان وخمس دقائق. يُقدَّم ورقيًا في فترات محددة ورقميًا (محوسبًا) طوال العام، بالعربية أو الإنجليزية، ولا تُستخدم فيه الآلة الحاسبة. ونماذجنا المحاكية تتبع الصيغة نفسها: ٥ أقسام × ٢٤ سؤالًا × ٢٥ دقيقة.</p></div></details>
+      <details class="lp-q"><summary data-i="q10">من يحق له دخول الاختبار، وكم مرة؟</summary><div class="lp-a" data-i="a10"><p>الاختبار لطلاب وطالبات الصف الثاني والثالث الثانوي وخريجي الثانوية. وفي الدليل الإرشادي الرسمي أن للاختبار خمس فرص خلال ثلاث سنوات، وأن النتيجة صالحة خمس سنوات من تاريخ الاختبار. وأوضحت الهيئة في سبتمبر ٢٠٢٦ أن الاختبار الورقي مخصص حاليًا لطلاب الصف الثالث الثانوي والخريجين، وأن الرقمي متاح طوال العام للصف الثاني والثالث والخريجين. المواعيد والرسوم تتغير، فراجعها في <a href="https://etec.gov.sa" target="_blank" rel="noopener">موقع الهيئة</a> قبل التسجيل.</p></div></details>
       <details class="lp-q"><summary data-i="q2">هل الخطة المجانية مجانية فعلًا وإلى الأبد؟</summary><div class="lp-a" data-i="a2"><p>نعم. الخطة المجانية دائمة، فلا فترة تجريبية تنتهي، ولا نطلب بطاقة دفع للتسجيل. تشمل الاختبار التشخيصي، وشروحات مختارة، وأسئلة تدريب يومية، وأول أسبوعين من الخطة، وغيرها. كل ما فيها يعمل كاملًا، وما يتطلب الاشتراك يظهر لك باسمه وفائدته لتقرر بنفسك.</p></div></details>
       <details class="lp-q"><summary data-i="q3">ماذا أحصل عليه عند الاشتراك؟</summary><div class="lp-a" data-i="a3"><p>كل شيء: الشروحات الـ ٣٣ بكل لغة، والنماذج المحاكية الثلاثون واختبارات الأقسام والمحاكاة الكاملة بالوقت، وتدريبًا بلا حد مع تدريب موجّه، وكل البطاقات والمفردات والتقنيات، والخطة كاملة حتى موعد اختبارك، والتكرار المتباعد وتحليل أسباب الأخطاء، والدرجة التقديرية، ومراجعة أي محاولة سابقة. ينتهي الاشتراك بانتهاء مدته، دون تجديد تلقائي.</p></div></details>
       <details class="lp-q"><summary data-i="q4">ما طرق الدفع المتاحة؟</summary><div class="lp-a" data-i="a4"><p>تدفع عبر بوابة دفع آمنة، وتُقبل فيها: مدى، و <bdi>Apple Pay</bdi>، و <bdi>STC Pay</bdi>، وبطاقات <bdi>Visa</bdi> و <bdi>Mastercard</bdi>. ولا نحتفظ ببيانات بطاقتك.</p></div></details>
@@ -501,6 +503,8 @@
   </div>
 </footer>
 
+<!-- the app's scripts: landing.js adds these prefetch hints once the page is idle (never on data-saver connections) -->
+<template id="lp-app-pre"><link rel="prefetch" href="/app.js"><link rel="prefetch" href="/cloud.js"></template>
 <!-- the explainer player for the demo: landing.js loads these when the demo comes near the screen, when a demo
      button is pressed, or once the page is idle, so they never compete with the first paint -->
 <template id="lp-xp-scripts"><script src="/vendor/gsap.min.js"></script><script src="/xp-engine.js"></script><script src="/xp/free.js"></script></template>

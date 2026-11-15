@@ -1419,6 +1419,10 @@ Object.assign(T.ar,{
   payNote:p=>p?`مدى، Apple Pay، STC Pay والبطاقات. دفع آمن عبر ${p}.`:'مدى، Apple Pay، STC Pay والبطاقات. دفع آمن.', payOff:'الدفع الإلكتروني غير متاح مؤقتًا', payOffD:'الدفع الإلكتروني غير متاح الآن. إن كان لديك رمز اشتراك فأدخله في خانة رمز الخصم ليُفعَّل اشتراكك فورًا.',
   refund:d=>`لم يناسبك الاشتراك؟ نعيد إليك المبلغ كاملًا إن طلبت ذلك خلال ${d} أيام. راسلنا على info@gat.academy`,
   paidT:'تم تفعيل اشتراكك', paidD:'فُتح كل شيء. بالتوفيق في اختبارك!', paidWait:'نتحقق من الدفع الآن، وتُفتح لك المزايا خلال لحظات.', failedT:'لم تكتمل عملية الدفع', failedD:'يمكنك المحاولة مجددًا أو اختيار وسيلة دفع أخرى. إن خُصم المبلغ ولم يُفعَّل اشتراكك فراسلنا وسنحل الأمر.',
+  /* UX strings: password field, purchase steps, activation page */
+  passwordIn:'كلمة المرور', pwShow:'إظهار كلمة المرور', pwHide:'إخفاء كلمة المرور',
+  buyStepsT:'كيف يتم الاشتراك؟', buySteps:['ادفع في متجرنا الآمن على زد (مدى، Apple Pay والبطاقات).','يصلك رابط التفعيل ورمزه فورًا بالبريد والجوال.','افتح الرابط أو أدخل الرمز هنا فيُفعَّل اشتراكك.'],
+  rdWhere:'تجد الرمز في رسالة التفعيل التي وصلتك بالبريد والجوال بعد الشراء.', rdNoCode:'ليس لديك رمز بعد؟', rdEmpty:'اكتب رمز التفعيل أولًا.',
   rdT:'فعّل اشتراكك', rdIntro:'أدخل رمز التفعيل الذي وصلك بعد الشراء من متجرنا.', rdPh:'GAT-XXXX-XXXX', rdGo:'تحقق من الرمز', rdChecking:'نتحقق من الرمز...',
   rdValidT:'رمزك صالح', rdValidD:(p,d)=>`يفتح لك ${p} كاملة لمدة ${d} يومًا.`, rdNeedAcct:'أنشئ حسابك المجاني ليُفعَّل الاشتراك عليه مباشرة، فتستخدمه من أي جهاز.',
   rdSignup:'أنشئ حسابي وفعّل الاشتراك', rdSignin:'لدي حساب، سجّل دخولي', rdBusy:'جارٍ تفعيل اشتراكك...',
@@ -1459,6 +1463,9 @@ Object.assign(T.en,{
   refund:d=>`Not the right fit? Ask within ${d} days for a full refund. Email info@gat.academy`,
   paidT:'Your Pro plan is active', paidD:'Everything is open. Good luck on your test!', paidWait:'We’re confirming your payment. Pro will unlock in a moment.', failedT:'The payment didn’t go through', failedD:'You can try again or use another payment method. If you were charged but your plan isn’t active, email us and we’ll sort it out.',
   youArePro:'You are on Pro', activeUntil:d=>`Pro until ${d}`, proForever:'Your plan is active.', goToday:'Go to Today', allOpen:'Everything is unlocked for you.',
+  passwordIn:'Password', pwShow:'Show password', pwHide:'Hide password',
+  buyStepsT:'How it works', buySteps:['Pay in our secure Zid store (mada, Apple Pay and cards).','Your activation link and code arrive right away by email and SMS.','Open the link, or enter the code here, and your plan is active.'],
+  rdWhere:'You’ll find the code in the activation message sent to your email and phone after you buy.', rdNoCode:'Don’t have a code yet?', rdEmpty:'Enter your activation code first.',
   rdT:'Activate your plan', rdIntro:'Enter the activation code you received after buying from our store.', rdPh:'GAT-XXXX-XXXX', rdGo:'Check code', rdChecking:'Checking your code...',
   rdValidT:'Your code is valid', rdValidD:(p,d)=>`It unlocks ${p} in full for ${d} days.`, rdNeedAcct:'Create your free account and the plan is activated on it right away, so it works on any device.',
   rdSignup:'Create my account and activate', rdSignin:'I have an account, sign me in', rdBusy:'Activating your plan...',
@@ -1744,6 +1751,7 @@ const CFG=()=>window.CLOUD?.config||null;
 const EVQ=[]; /* events fired before cloud.js has loaded */
 const track=(type,k,v)=>{ try{ const C=window.CLOUD; if(C&&C.track) C.track(type,k,v); else if(CLOUD_BUILD&&EVQ.length<50) EVQ.push([type,k,v]); }catch(e){} };
 function flushEVQ(){ const C=window.CLOUD; if(C&&C.track) while(EVQ.length) C.track(...EVQ.shift()); }
+const EYE='<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/></svg>', EYE_OFF='<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 4l16 16"/><path d="M9.9 5.8A9.6 9.6 0 0 1 12 5.5c6 0 9.5 6.500 9.500 6.500a17 17 0 0 1-2.800 3.600M6.300 7.700A16.500 16.500 0 0 0 2.500 12S6 18.500 12 18.500a9 9 0 0 0 3.800-.850"/><path d="M9.900 9.900a3 3 0 0 0 4.200 4.200"/></svg>';
 const LOCKSVG='<svg viewBox="0 0 24 24" class="i16 lk" aria-hidden="true"><rect x="5" y="10.5" width="14" height="10" rx="2.5"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/></svg>';
 const lockBadge=()=>`<span class="lock-b">${LOCKSVG}<span>${t('lockT')}</span></span>`;
 /* a visible locked item: one-line benefit + "unlock" (opens the upgrade sheet) */
@@ -2442,11 +2450,12 @@ function upgradeBody(sheet){ const C=window.CLOUD, cfg=CFG(), p=curPlan(), pro=P
   if(pro&&C?.user){ const u=C.plan?.until; return `<div class="up-pro card"><span class="pro-chip big" lang="en">${t('proChip')}</span><h2>${t('youArePro')}</h2><p class="muted">${u?t('activeUntil')(dateLong(u)):t('proForever')}</p><div class="row"><a class="btn primary" href="#today">${t('goToday')}</a>${sheet?'':`<button class="btn ghost" data-acct="1">${t('acctManage')}</button>`}</div></div>${sheet?'':`<section class="up-inc"><h2 class="sec-h hl">${t('incT')}</h2>${compareTable()}</section>`}`; }
   return `${UP.k||sheet?`<p class="up-ctx">${esc(ctxMsg(UP.k))}</p>`:''}
     ${planCards(p)}
-${storeMode()?`<p class="up-code small">${t('haveCode')} <a href="#redeem">${t('haveCodeA')}</a></p>`:`<form class="up-coupon" id="up-cf" novalidate><label for="up-cp">${t('couponL')}</label><div class="up-cp-row"><input id="up-cp" type="text" dir="ltr" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="40" placeholder="${t('couponPh')}" value="${esc(UP.coupon)}"><button class="btn ghost sm" type="submit">${t('applyBtn')}</button></div><p class="up-qerr small" id="up-qerr" role="alert">${UP.qerr?esc(UP.qerr):''}</p></form>`}
-    <div class="up-pay"><div id="up-price">${priceLine()}</div><button class="btn primary xl block" id="up-pay" ${ps.dis?'disabled':''}>${ps.label}</button>
-      ${storeOf(p)?`<p class="small muted">${t('storeNote')}</p>`:`${!pays&&C?.user?`<p class="up-off small">${t('payOffD')}</p>`:''}${pays?`<p class="small muted">${t('payNote')(provName())}</p>`:''}`}
+${storeMode()?'':`<form class="up-coupon" id="up-cf" novalidate><label for="up-cp">${t('couponL')}</label><div class="up-cp-row"><input id="up-cp" type="text" dir="ltr" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="40" placeholder="${t('couponPh')}" value="${esc(UP.coupon)}"><button class="btn ghost sm" type="submit">${t('applyBtn')}</button></div><p class="up-qerr small" id="up-qerr" role="alert">${UP.qerr?esc(UP.qerr):''}</p></form>`}
+    <div class="up-pay"><div id="up-price">${priceLine()}</div><button class="btn primary xl block ${ps.store?'store':''}" id="up-pay" ${ps.store?'aria-describedby="up-nt"':''} ${ps.dis?'disabled':''}>${ps.label}</button>
+      ${storeOf(p)?`<span class="sr-only" id="up-nt">${t('storeNewTab')}</span><div class="up-how"><b class="small">${t('buyStepsT')}</b><ol class="up-steps">${t('buySteps').map(x=>`<li>${x}</li>`).join('')}</ol></div>`:`${!pays&&C?.user?`<p class="up-off small">${t('payOffD')}</p>`:''}${pays?`<p class="small muted">${t('payNote')(provName())}</p>`:''}`}
       ${cfg?.refund?.on?`<p class="up-refund small">${ICON.official}<span>${t('refund')(numL(cfg.refund.days))}</span></p>`:''}
       ${UP.err?`<p class="acct-err" role="alert">${esc(UP.err)}</p>`:''}${UP.note?`<p class="acct-info" role="status">${esc(UP.note)}</p>`:''}</div>
+    ${storeMode()?`<a class="up-code" href="#redeem"><span class="up-code-t"><span class="small muted">${t('haveCode')}</span><b>${t('haveCodeA')}</b></span>${ICON.arrow}</a>`:''}
     ${sheet?`<details class="up-more"><summary>${t('incT')}</summary>${compareTable()}</details><a class="up-all" href="#upgrade" id="up-all">${t('seeAll')}</a>`:`<section class="up-inc"><h2 class="sec-h hl">${t('incT')}</h2>${compareTable()}</section>`}`; }
 function bindUpgrade(root,sheet){
   root.querySelectorAll('[data-plan]').forEach(b=>b.onclick=()=>{ UP.plan=b.dataset.plan; UP.err=''; if(UP.coupon) requote(); rerenderUp(sheet); });
@@ -2458,7 +2467,7 @@ function bindUpgrade(root,sheet){
   root.querySelectorAll('[data-acct]').forEach(b=>b.onclick=()=>{ closeUpgrade(); openAcct(); }); }
 /* refresh only the price and the button, so the coupon field keeps focus */
 function paintQuote(){ document.querySelectorAll('#up-price').forEach(el=>el.innerHTML=priceLine()); document.querySelectorAll('#up-qerr').forEach(el=>el.textContent=UP.qerr||'');
-  const ps=payState(); document.querySelectorAll('#up-pay').forEach(b=>{ b.textContent=ps.label; b.disabled=ps.dis; }); }
+  const ps=payState(); document.querySelectorAll('#up-pay').forEach(b=>{ b.textContent=ps.label; b.disabled=ps.dis; b.classList.toggle('store',!!ps.store); }); }
 async function requote(){ const C=window.CLOUD, p=curPlan(), code=(UP.coupon||'').trim(); const seq=++UP.qseq;
   if(!code||!p){ UP.quote=null; UP.qerr=''; return paintQuote(); }
   if(!C?.user){ UP.qerr=t('couponSignup'); return paintQuote(); }
@@ -2520,20 +2529,21 @@ function pageRedeem(q){ const C=window.CLOUD; const m=/(^|&)c=([\w-]+)/.exec(q);
   if(!C) return head+`<div class="card"><p>${t('allOpen')}</p></div>`;
   rdSet(code);
   const help=`<p class="small muted rd-help">${t('rdHelp')}</p>`;
-  const form=`<form class="up-coupon card rd-form" id="rd-f" novalidate><label for="rd-c">${t('rdIntro')}</label><div class="up-cp-row"><input id="rd-c" type="text" dir="ltr" autocomplete="one-time-code" autocapitalize="characters" spellcheck="false" maxlength="40" placeholder="${t('rdPh')}" value="${esc(code)}"><button class="btn primary sm" type="submit">${t('rdGo')}</button></div></form>`;
+  const form=`<form class="up-coupon card rd-form" id="rd-f" novalidate><label for="rd-c">${t('rdIntro')}</label><div class="up-cp-row"><input id="rd-c" type="text" dir="ltr" autocomplete="one-time-code" autocapitalize="characters" autocorrect="off" spellcheck="false" enterkeyhint="go" maxlength="40" placeholder="${t('rdPh')}" aria-describedby="rd-hint" value="${esc(code)}"><button class="btn primary" type="submit">${t('rdGo')}</button></div><p class="small muted" id="rd-hint">${t('rdWhere')}</p></form><p class="small rd-nocode">${t('rdNoCode')} <a href="#upgrade">${t('upgradeBtn')}</a></p>`;
   const planN=p=>p?esc(S.lang==='ar'?(p.ar||p.en||p.id):(p.en||p.ar||p.id)):'';
   if(!code) return head+form+help;
   if(RD.done||(RD.info&&RD.info.mine&&C.user)){ const until=(RD.done&&RD.done.until)||C.plan?.until, p=(RD.done&&RD.done.plan)||RD.info.plan;
     return head+`<div class="up-pro card rd-ok" role="status"><span class="pro-chip big" lang="en">${t('proChip')}</span><h2>${t('rdDoneT')}</h2><p>${RD.done&&!RD.done.already?t('rdDoneD')(planN(p),until?dateLong(until):''):t('rdMineD')(until?dateLong(until):'')}</p><div class="row"><a class="btn primary xl" href="#today">${t('rdStart')}</a></div></div>`; }
   if(RD.err&&!RD.busy){ const msg=(t('rdErr')||{})[RD.err]||(RD.err==='net'?t('errNet'):RD.err==='unauthenticated'?t('errAuth'):t('errGeneric'));
     return head+`<div class="up-banner bad" role="alert"><b>${esc(msg)}</b></div>`+form+help; }
-  if(!RD.info) return head+`<div class="card"><p class="muted">${t('rdChecking')}</p></div>`;
+  if(!RD.info) return head+`<div class="card rd-wait" role="status"><span class="boot-dot" aria-hidden="true"></span><p class="muted">${t('rdChecking')}</p></div>`;
   const valid=`<div class="up-banner ok"><b>${t('rdValidT')} <bdi class="mono">${esc(code)}</bdi></b><span>${t('rdValidD')(planN(RD.info.plan),numL(RD.info.plan.days))}</span></div>`;
   if(!C.user) return head+valid+`<div class="card rd-acct"><p>${t('rdNeedAcct')}</p><div class="row"><button class="btn primary xl" id="rd-up">${t('rdSignup')}</button><button class="btn ghost" id="rd-in">${t('rdSignin')}</button></div></div>`+help;
   /* signed in with a valid code: activate right away (once per code and account), nothing more to click */
   if(!RD.busy&&RD.tried!==code+'|'+C.user.email) setTimeout(rdRedeem,0);
   return head+valid+`<div class="card" role="status" aria-live="polite"><p>${t('rdBusy')}</p></div>`; }
-function bindRedeem(m){ const f=m.querySelector('#rd-f'); if(f) f.onsubmit=e=>{ e.preventDefault(); const c=rdNorm(m.querySelector('#rd-c').value); if(!c) return; const h='#redeem?c='+encodeURIComponent(c); RD.code=''; if(location.hash===h) renderRoute(); else location.hash=h; };
+function bindRedeem(m){ const f=m.querySelector('#rd-f'); if(f) f.onsubmit=e=>{ e.preventDefault(); const inp=m.querySelector('#rd-c'), c=rdNorm(inp.value); if(!c){ inp.setAttribute('aria-invalid','true'); inp.focus(); toast(t('rdEmpty')); return; } const h='#redeem?c='+encodeURIComponent(c); RD.code=''; if(location.hash===h) renderRoute(); else location.hash=h; };
+  { const inp=m.querySelector('#rd-c'); if(inp){ if(RD.err&&!['net','unauthenticated'].includes(RD.err)&&m.querySelector('.up-banner.bad')) inp.setAttribute('aria-invalid','true'); /* a rejected code, not a lost connection */ inp.oninput=()=>inp.removeAttribute('aria-invalid'); } }
   const up=m.querySelector('#rd-up'); if(up) up.onclick=()=>rdAcct('signup');
   const inn=m.querySelector('#rd-in'); if(inn) inn.onclick=()=>rdAcct('signin'); }
 /* trial report */
@@ -2626,6 +2636,9 @@ function bindMain(){
   m.querySelectorAll('[data-task]').forEach(b=>b.onclick=()=>{ const tk=buildPlan().flatMap(w=>w.tasks).find(x=>x.id===b.dataset.task); if(tk) runTask(tk); });
   m.querySelectorAll('[data-scroll]').forEach(a=>a.onclick=e=>{ e.preventDefault(); document.getElementById(a.dataset.scroll)?.scrollIntoView({behavior:SMOOTH(),block:'start'}); });
   bindSettings('pf');
+  m.querySelectorAll('.tabs,.deck-chips').forEach(sc=>{ const up=()=>{ const max=sc.scrollWidth-sc.clientWidth, x=Math.abs(sc.scrollLeft); sc.classList.toggle('more-end',max-x>6); sc.classList.toggle('more-start',x>6); };
+    const cur=sc.querySelector('.on'); if(cur&&sc.scrollWidth>sc.clientWidth){ const a=cur.getBoundingClientRect(), b=sc.getBoundingClientRect(); if(a.left<b.left+4||a.right>b.right-4) sc.scrollLeft+=a.left-b.left-(b.width-a.width)/2; }
+    sc.addEventListener('scroll',up,{passive:true}); up(); });
   const on=(id,f)=>{ const b=$(id); if(b) b.onclick=f; };
   const showBtns=()=>requestAnimationFrame(()=>{ try{ $('#main .vbtns:not(:empty)')?.scrollIntoView({block:'nearest',behavior:SMOOTH()}); }catch(e){} }); /* the answer buttons appear under the card: bring them on screen on phones */
   on('#vcard',()=>{ if(!VC.flip){ VC.flip=true; renderRoute(); showBtns(); } });
@@ -2665,9 +2678,9 @@ applyTheme();
 function cloudLine(){ const C=window.CLOUD; if(!C||!C.user) return ''; if(C.status==='saving') return t('cloudSaving'); if(C.status==='error') return t('cloudErr'); return C.lastSync?t('cloudSynced')+' '+new Date(C.lastSync).toLocaleTimeString(S.lang==='ar'?'ar-SA':'en-GB',{timeStyle:'short'}):''; }
 let AC={tab:'signup',err:'',busy:false,confirmDel:false,info:''};
 function authIntent(){ const C=window.CLOUD; if(!AUTHQ||!C||!C.ready) return; const q=AUTHQ; AUTHQ=null; if(!C.user){ AC.tab=q; openAcct(); if(AUTHERR){ AC.err=(t('socialErr')||{})[AUTHERR]||(t('socialErr')||{}).failed; AUTHERR=null; renderAcct(); } } }
-function openAcct(){ AC.err=''; AC.info=''; AC.infoHtml=''; AC.confirmDel=false; AC.deleted=false; closeUpgrade(); AC_RET=document.activeElement; $('#acct').hidden=false; overlayInert(); AC.planInfo=null;
+function openAcct(){ AC.err=''; AC.bad=''; AC.pwShow=false; AC.info=''; AC.infoHtml=''; AC.confirmDel=false; AC.deleted=false; closeUpgrade(); AC_RET=document.activeElement; $('#acct').hidden=false; overlayInert(); AC.planInfo=null;
   const C=window.CLOUD; if(C?.user&&C.planInfo) C.planInfo().then(r=>{ AC.planInfo=r; if(!$('#acct').hidden) renderAcct(); }).catch(()=>{ AC.planInfo={payments:[]}; if(!$('#acct').hidden) renderAcct(); });
-  renderAcct(); setTimeout(()=>($('#ac-email')||$('#ac-x')||$('#acct button'))?.focus(),0); }
+  renderAcct(); setTimeout(()=>(['#ac-name','#ac-email','#ac-pass'].map(q=>$(q)).find(x=>x&&!x.value)||$('#ac-email')||$('#ac-x')||$('#acct button'))?.focus(),0); } /* the first field still to fill */
 let AC_RET=null, UP_RET=null;
 function closeAcct(){ AC.fPass=''; { const pw=$('#ac-pass'); if(pw) pw.value=''; } PEND=null; AC.gate=false; AC.gateUp=false; AC.gateRd=false; AC.deleted=false; $('#acct').hidden=true; overlayInert(); const r=AC_RET; AC_RET=null; (r&&r.isConnected&&r!==document.body?r:$('#acct-btn'))?.focus?.(); }
 /* while a dialog (account, upgrade sheet, test) is open, everything behind it is inert: Tab and screen readers stay inside */
@@ -2704,7 +2717,7 @@ function renderAcct(){
       <form id="ac-form" class="acct-form" novalidate>
         ${AC.tab==='signup'&&C.setName?`<label>${t('fullName')}<input type="text" id="ac-name" autocomplete="name" maxlength="60" required placeholder="${t('namePh')}" value="${esc(AC.fName||'')}"></label>`:''}
         <label>${t('email')}<input type="email" id="ac-email" autocomplete="email" required dir="ltr" value="${esc(AC.fEmail||(AC.tab==='signin'?getOwner():''))}"></label>
-        <label>${t('password')}<input type="password" id="ac-pass" autocomplete="${AC.tab==='signup'?'new-password':'current-password'}" minlength="8" maxlength="200" required dir="ltr" value="${esc(AC.fPass||'')}"></label>
+        <label>${t(AC.tab==='signup'?'password':'passwordIn')}<span class="pw-wrap"><input type="${AC.pwShow?'text':'password'}" id="ac-pass" autocomplete="${AC.tab==='signup'?'new-password':'current-password'}" minlength="8" maxlength="200" required dir="ltr" value="${esc(AC.fPass||'')}"><button type="button" class="pw-eye" id="ac-eye" aria-pressed="${!!AC.pwShow}" aria-label="${t(AC.pwShow?'pwHide':'pwShow')}">${AC.pwShow?EYE_OFF:EYE}</button></span></label>
         ${AC.tab==='signup'?`<label class="chkl"><input type="checkbox" id="ac-ok" ${AC.fOk?'checked':''}> <span>${t('consent')}</span></label>`:''}
         ${AC.err?`<p class="acct-err" role="alert">${esc(AC.err)}</p>`:''}
         <button class="btn primary block" type="submit" ${AC.busy?'disabled':''}>${AC.tab==='signup'?t('signUp'):t('signIn')}</button>
@@ -2716,17 +2729,21 @@ function renderAcct(){
   </div>`;
   const on=(id,f)=>{ const b=el.querySelector(id); if(b) b.onclick=f; };
   on('#ac-x',closeAcct); on('#ac-x2',closeAcct); on('#ac-up',()=>closeAcct());
-  el.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{ AC.tab=b.dataset.tab; AC.err=''; renderAcct(); });
-  const run=async fn=>{ AC.busy=true; AC.err=''; AC.info=''; AC.infoHtml=''; renderAcct(); let ok=false; try{ await fn(); ok=true; AC.fPass=''; }catch(e){ AC.err=authMsg(e&&e.code,e); } AC.busy=false; renderAcct(); renderRoute();
+  el.querySelectorAll('.acct-seg [data-tab]').forEach(b=>{ b.setAttribute('aria-pressed',String(b.classList.contains('on'))); b.onclick=()=>{ AC.tab=b.dataset.tab; AC.err=''; AC.bad=''; renderAcct(); el.querySelector('.acct-seg .on')?.focus(); }; });
+  on('#ac-eye',()=>{ AC.pwShow=!AC.pwShow; const i=el.querySelector('#ac-pass'), b=el.querySelector('#ac-eye'); i.type=AC.pwShow?'text':'password'; b.setAttribute('aria-pressed',String(AC.pwShow)); b.setAttribute('aria-label',t(AC.pwShow?'pwHide':'pwShow')); b.innerHTML=AC.pwShow?EYE_OFF:EYE; });
+  /* a failed check marks its field and returns the focus to it (the dialog is redrawn on every change) */
+  if(AC.bad&&AC.err){ const b=el.querySelector('#ac-'+AC.bad), er=el.querySelector('.acct-err'); if(b){ b.setAttribute('aria-invalid','true'); if(er){ er.id='ac-err'; b.setAttribute('aria-describedby','ac-err'); } if(AC.badFocus) b.focus(); } } AC.badFocus=false;
+  const run=async fn=>{ AC.busy=true; AC.bad=''; AC.err=''; AC.info=''; AC.infoHtml=''; renderAcct(); let ok=false; try{ await fn(); ok=true; AC.fPass=''; }catch(e){ AC.err=authMsg(e&&e.code,e); } AC.busy=false; renderAcct(); renderRoute();
     if(ok&&PEND&&C.user){ const p=PEND; closeAcct(); if(p.fn) p.fn(); else startTest(p.kind,p.o); }
     else if(ok&&AC.justIn&&C.user){ closeAcct(); toast(t('welcomeIn')(String(C.user.name||'').split(' ')[0])); }
     AC.justIn=false; };
-  const f=el.querySelector('#ac-form'); if(f) f.onsubmit=e=>{ e.preventDefault(); const em=el.querySelector('#ac-email').value.trim(), pw=el.querySelector('#ac-pass').value; AC.fEmail=em; AC.fPass=pw; { const ok0=el.querySelector('#ac-ok'); if(ok0) AC.fOk=ok0.checked; } { const n0=el.querySelector('#ac-name'); if(n0) AC.fName=n0.value; }
-    if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)){ AC.err=t('authErr')['invalid-email']; return renderAcct(); }
-    if(pw.length<8){ AC.err=t('authErr')['weak-password']; return renderAcct(); } if(pw.length>200){ AC.err=t('pwLong'); return renderAcct(); }
+  const f=el.querySelector('#ac-form'); if(f) f.onsubmit=e=>{ e.preventDefault(); const em=el.querySelector('#ac-email').value.trim(), pw=el.querySelector('#ac-pass').value; AC.fEmail=em; AC.fPass=pw; const bad=k=>{ AC.bad=k; AC.badFocus=true; return renderAcct(); }; { const ok0=el.querySelector('#ac-ok'); if(ok0) AC.fOk=ok0.checked; } { const n0=el.querySelector('#ac-name'); if(n0) AC.fName=n0.value; }
     const nmEl=el.querySelector('#ac-name'), nm=nmEl?nmEl.value.replace(/\s+/g,' ').trim():''; AC.fEmail=em; if(nmEl) AC.fName=nm;
-    if(nmEl&&(nm.length<2||nm.length>60)){ AC.err=t('authErr')['invalid-name']; return renderAcct(); }
-    if(AC.tab==='signup'&&!el.querySelector('#ac-ok').checked){ AC.err=t('authErr').consent||t('needConsent'); return renderAcct(); }
+    /* checked in the order of the fields, so the first mistake from the top is the one reported */
+    if(nmEl&&(nm.length<2||nm.length>60)){ AC.err=t('authErr')['invalid-name']; return bad('name'); }
+    if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)){ AC.err=t('authErr')['invalid-email']; return bad('email'); }
+    if(pw.length<8){ AC.err=t('authErr')['weak-password']; return bad('pass'); } if(pw.length>200){ AC.err=t('pwLong'); return bad('pass'); }
+    if(AC.tab==='signup'&&!el.querySelector('#ac-ok').checked){ AC.err=t('authErr').consent||t('needConsent'); return bad('ok'); }
     run(async()=>{ await (AC.tab==='signup'?C.signUp(em,pw,nm):C.signIn(em,pw)); AC.justIn=true; }); };
   const nf=el.querySelector('#ac-namef'); if(nf) nf.onsubmit=e=>{ e.preventDefault(); const v=el.querySelector('#ac-nm').value.replace(/\s+/g,' ').trim(); if(v.length<2||v.length>60){ AC.err=t('authErr')['invalid-name']; AC.nameOpen=true; return renderAcct(); } run(async()=>{ await C.setName(v); AC.nameOpen=false; AC.info=t('nameSaved'); }); };
   on('#ac-google',()=>run(()=>C.signInGoogle()));

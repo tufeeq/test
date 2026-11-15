@@ -975,3 +975,103 @@ body.sheet-open{overflow:hidden}
 @media (max-width:520px){.settings-form>.btn{flex:1 1 100%}}
 .rule .m{white-space:normal;box-decoration-break:clone;-webkit-box-decoration-break:clone}
 @media (max-width:640px){.lcard .lc-ill .ill{max-width:190px}}
+
+/* ===== UX pass: phone-first fixes (RTL, contrast, tap targets, forms, purchase path) ===== */
+/* the tape on the hero sticker sat off its corner in RTL: centre it with margins instead of a one-way translate */
+.hero-ring::before{inset-inline:0;margin-inline:auto;transform:rotate(-4deg)}
+@media (max-width:640px){.hero::before{display:none}} /* the stars collided with the sticker on phones */
+/* white on the bright coral / pink fills failed AA: use the text-safe tones, with text that follows the theme */
+.btn.danger,.ex-timer.low{background:var(--coral-t);color:var(--paper)}
+.cchip.on{background:var(--pink-t);border-color:var(--pink-t);color:var(--paper)}
+.pro-chip{background:linear-gradient(135deg,var(--pri),var(--pink-t));color:var(--pri-ink)}
+::placeholder{color:var(--muted);opacity:1}
+/* dialogs: mobile browser bars are not part of 100vh */
+.acct-box{max-block-size:calc(100dvh - 32px)}
+/* form fields: a visible invalid state, a ring on the code fields (they had no focus indicator but the border) */
+input[aria-invalid="true"]{border-color:var(--coral)}
+.up-cp-row input:focus{box-shadow:0 0 0 3px color-mix(in srgb,var(--pri) 28%,transparent)}
+.up-cp-row input[aria-invalid="true"]:focus{border-color:var(--coral);box-shadow:0 0 0 3px color-mix(in srgb,var(--coral) 28%,transparent)}
+/* consent: a 22px box that is visible in the dark theme, inside a 44px row */
+.acct-form .chkl{align-items:center;min-block-size:44px;cursor:pointer;gap:10px}
+.acct-form .chkl input{appearance:none;-webkit-appearance:none;inline-size:22px;block-size:22px;min-block-size:0;margin:0;padding:0;flex-shrink:0;border:2px solid var(--muted);border-radius:7px;background:var(--surface);display:grid;place-content:center;cursor:pointer}
+.acct-form .chkl input:checked{background:var(--pri);border-color:var(--pri)}
+.acct-form .chkl input:checked::after{content:"";inline-size:6px;block-size:11px;border:solid var(--pri-ink);border-width:0 2.5px 2.5px 0;transform:translateY(-1px) rotate(45deg)}
+.acct-form .chkl input[aria-invalid="true"]{border-color:var(--coral);box-shadow:0 0 0 3px color-mix(in srgb,var(--coral) 28%,transparent)}
+/* show / hide password: the field is always left-to-right, so the button sits at its physical end */
+.pw-wrap{position:relative;display:block}
+.pw-wrap input{inline-size:100%;padding-right:50px}
+.pw-eye{position:absolute;top:50%;right:3px;transform:translateY(-50%);inline-size:44px;block-size:40px;display:grid;place-items:center;border:0;border-radius:10px;background:none;color:var(--ink2);cursor:pointer}
+.pw-eye svg{inline-size:21px;block-size:21px}
+.pw-eye:hover{color:var(--pri)}
+.pw-eye[aria-pressed="true"]{color:var(--pri)}
+/* plans: every card shows it can be picked; steps of the store purchase; the code row */
+.up-plan::after{content:"";position:absolute;top:12px;inset-inline-end:12px;inline-size:18px;block-size:18px;border-radius:50%;box-shadow:0 0 0 2px var(--line)}
+#up-pay.store::after{content:"↗";font-family:var(--f-mono);font-size:.95em;margin-inline-start:2px}
+[dir="rtl"] #up-pay.store::after{content:"↖"}
+.up-how{display:grid;gap:6px;background:var(--surface2);border-radius:14px;padding:12px 14px}
+.up-steps{list-style:none;margin:0;padding:0;display:grid;gap:8px;counter-reset:us;font-size:.88rem;line-height:1.6;color:var(--ink2)}
+.up-steps li{counter-increment:us;display:grid;grid-template-columns:26px 1fr;gap:10px;align-items:start}
+.up-steps li::before{content:counter(us);inline-size:24px;block-size:24px;border-radius:50%;background:var(--pri);color:var(--pri-ink);font-family:var(--f-head);font-weight:800;font-size:.82rem;display:grid;place-items:center;margin-block-start:1px}
+[lang="ar"] .up-steps li::before{content:counter(us,arabic-indic)}
+.up-code{display:flex;align-items:center;justify-content:space-between;gap:12px;min-block-size:56px;padding:10px 14px;border:2px dashed color-mix(in srgb,var(--pri) 50%,transparent);border-radius:14px;background:var(--surface);color:var(--ink);text-decoration:none;transition:border-color .15s,background .15s}
+.up-code:hover{border-style:solid;border-color:var(--pri);background:var(--pri-soft)}
+.up-code-t{display:grid;line-height:1.5}
+.up-code b{color:var(--pri)}
+.up-code .arr{inline-size:20px;block-size:20px;flex-shrink:0;color:var(--pri)}
+[dir="rtl"] .up-code .arr{transform:scaleX(-1)}
+/* activation page: one comfortable column on phones, a code field that reads like a code */
+.rd-form{max-width:560px;gap:10px}
+.rd-form label{font-size:.95rem;color:var(--ink);line-height:1.6}
+.rd-form .up-cp-row input{font-size:1.1rem;letter-spacing:.08em;min-block-size:52px;text-align:center}
+.rd-form .up-cp-row .btn{flex-shrink:0}
+@media (max-width:520px){.rd-form .up-cp-row{display:grid}.rd-form .up-cp-row .btn{inline-size:100%;min-block-size:50px}}
+.rd-nocode{color:var(--ink2)} .rd-nocode a{font-weight:800}
+.rd-wait{display:flex;align-items:center;gap:12px} .rd-wait .boot-dot{flex-shrink:0;margin-inline-start:4px}
+/* results: five figures as 3 + 2 (and four as 2 + 2) instead of a row with an empty cell */
+@media (max-width:520px){
+  .rs-kpis{grid-template-columns:repeat(6,1fr)}
+  .rs-kpis>div{grid-column:span 2}
+  .rs-kpis>div:nth-child(4):nth-last-child(2),.rs-kpis>div:nth-child(5):last-child,.rs-kpis>div:first-child:nth-last-child(4),.rs-kpis>div:first-child:nth-last-child(4)~div{grid-column:span 3}
+}
+/* diagnostic levels: dots and tags line up in columns whatever the length of the skill name */
+.dl-grid{grid-template-columns:repeat(auto-fill,minmax(270px,1fr))}
+.dl-row{grid-template-columns:minmax(0,1fr) auto auto;min-block-size:48px}
+.dl-n{font-weight:700;line-height:1.4}
+.dl-tag{min-inline-size:8.6em;text-align:center}
+@supports (grid-template-columns:subgrid){@media (max-width:600px){
+  .dl-grid{grid-template-columns:minmax(0,1fr) auto auto;column-gap:10px}
+  .dl-row{grid-column:1 / -1;grid-template-columns:subgrid}
+  .dl-tag{min-inline-size:0}
+}}
+/* horizontal strips: fade the edge where more is off-screen (classes set by the app while scrolling) */
+.tabs.more-end,.deck-chips.more-end{-webkit-mask-image:linear-gradient(to left,transparent 0,#000 36px);mask-image:linear-gradient(to left,transparent 0,#000 36px)}
+.tabs.more-start,.deck-chips.more-start{-webkit-mask-image:linear-gradient(to right,transparent 0,#000 36px);mask-image:linear-gradient(to right,transparent 0,#000 36px)}
+.tabs.more-start.more-end,.deck-chips.more-start.more-end{-webkit-mask-image:linear-gradient(to right,transparent 0,#000 36px,#000 calc(100% - 36px),transparent 100%);mask-image:linear-gradient(to right,transparent 0,#000 36px,#000 calc(100% - 36px),transparent 100%)}
+[dir="rtl"] .tabs.more-end:not(.more-start),[dir="rtl"] .deck-chips.more-end:not(.more-start){-webkit-mask-image:linear-gradient(to right,transparent 0,#000 36px);mask-image:linear-gradient(to right,transparent 0,#000 36px)}
+[dir="rtl"] .tabs.more-start:not(.more-end),[dir="rtl"] .deck-chips.more-start:not(.more-end){-webkit-mask-image:linear-gradient(to left,transparent 0,#000 36px);mask-image:linear-gradient(to left,transparent 0,#000 36px)}
+/* the toast sat over the answers inside a test: lower it there, and let it arrive instead of popping */
+body.exam-open #toast{bottom:calc(84px + env(safe-area-inset-bottom,0px))}
+body.exam-open:has(#exam .rs) #toast{bottom:calc(20px + env(safe-area-inset-bottom,0px))}
+#toast:not([hidden]){animation:toast-in .2s ease-out}
+@keyframes toast-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+/* press feedback on the things students tap most (removed by the reduced-motion rule above) */
+.opt,.mtile,.skbtn,.mbox,.up-plan,#tabbar a,.lcard,.dl-row{-webkit-tap-highlight-color:transparent}
+.opt:active:not(:disabled),.up-plan:active,.skbtn:active,.mbox:active{transform:scale(.985)}
+#tabbar a{transition:background .15s,color .15s,transform .1s} #tabbar a:active{transform:scale(.94)}
+.mtile:active,.lcard:active,.dl-row:active{transform:scale(.99)}
+@media (prefers-reduced-motion:reduce){.opt:active:not(:disabled),.up-plan:active,.skbtn:active,.mbox:active,#tabbar a:active,.mtile:active,.lcard:active,.dl-row:active{transform:none}#toast:not([hidden]){animation:none}}
+/* touch: the remaining controls under 44px */
+@media (pointer:coarse){
+  .seg button,.theme-pop button,.linkbtn,.rev-lock{min-block-size:44px}
+  .kpi-lock{min-block-size:44px;min-inline-size:44px}
+  .toc a{display:inline-flex;align-items:center;min-block-size:44px;padding-block:0}
+  .up-all{display:inline-flex;align-items:center;min-block-size:44px}
+  details:not(.excard):not(.mini-flash)>summary{padding-block:10px}
+  .notice .icon-btn.sm{inline-size:44px;block-size:44px}
+  .top-in>.pro-chip{position:relative} .top-in>.pro-chip::after{content:"";position:absolute;inset:-12px -4px}
+  .rd-nocode a,.rd-help a{display:inline-block;padding-block:9px;margin-block:-9px}
+}
+@media (pointer:coarse){.top .brand{min-block-size:44px}}
+@media (max-width:600px){.dl-row{padding-inline:10px;column-gap:8px}.dl-n{font-size:.94rem}.dl-tag{font-size:.7rem;padding-inline:7px}}
+/* progress: the two locked figures carried the same sentence twice */
+.kpis .kpi-locked~.kpi-locked .ks{display:none}

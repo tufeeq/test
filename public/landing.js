@@ -92,6 +92,9 @@
     demoEyebrow: 'Try it now, no sign-up', demoH: 'Animated, narrated, and it stops so you can try',
     demoP: 'Each skill is taught step by step on the board in a clear voice. The explainer pauses so you can answer, then a short quiz locks the idea in. These ones are in the free plan. Pick one and press play:',
     capDemo: 'The player opens full screen and works with sound or with captions.',
+    /* the four demo explainers, shown before the player scripts load (the player then fills in its own titles) */
+    xt_analogy: 'Analogies: build the bridge', xt_ar_order: 'Order of operations', xt_ge_angles: 'Angles and parallel lines', xt_co_signals: 'Signal words in sentence completion',
+    xm_analogy: '4 min', xm_ar_order: '3 min', xm_ge_angles: '3 min', xm_co_signals: '4 min',
     noJsDemo: 'The interactive demo needs JavaScript enabled in your browser.',
     playAria: 'Play the explainer', playL: 'Play the explainer', pickAria: 'Choose an explainer',
     pickNote: 'GAT Academy has 33 explainers in each language, covering all ten skills.',

@@ -2,7 +2,9 @@
 //  - brotli/gzip compression for every text response (static files and res.send/res.json bodies), cached by content hash
 //  - versioned asset URLs: HTML pages are served with /app.js?v=<hash> etc., and a request that carries the current
 //    hash is cached for a year (immutable); anything else is revalidated with an ETag (no-cache), so deploys and
-//    rebuilds are picked up immediately
+//    rebuilds are picked up immediately. The same goes for the self-hosted web fonts (public/fonts.css + public/fonts/:
+//    every url() in a stylesheet or inline <style> gets ?v=<hash of the font file>) and for the free explainer bundle
+//    (/xp/free.js?v=<hash of the bundle>), so a visit after the first costs one revalidation of the HTML and nothing else
 //  - the landing page rendered on the server in English for ?lang=en (crawlers and first paint get real English HTML),
 //    with JSON-LD (organisation, website, product with live prices, FAQ from the visible questions)
 const fs = require("fs");
@@ -55,8 +57,9 @@ async function sendBody(req, res, body, { type, cache, quality = 11, cacheEnc = 
   const comp = COMPRESSIBLE.test(ctype) && buf.length >= 1024;
   const enc = comp ? pickEncoding(req) : null;
   if (comp) res.vary("Accept-Encoding");
-  const h = hash || sha1(buf);
-  res.set("ETag", `W/"${h.slice(0, 20)}${enc ? "-" + enc : ""}"`);
+  const own = res.get("ETag"); // a handler that knows a cheaper validator (e.g. a row's timestamp) sets it itself
+  const h = hash || (own && !(enc && cacheEnc) ? "" : sha1(buf));
+  if (!own) res.set("ETag", `W/"${h.slice(0, 20)}${enc ? "-" + enc : ""}"`);
   if (res.statusCode >= 200 && res.statusCode < 300 && req.fresh) return res.status(304).end();
   if (req.method === "HEAD") { res.set("Content-Length", buf.length); return res.end(); }
   if (!enc) return res.set("Content-Length", buf.length).end(buf);
@@ -88,18 +91,22 @@ function compressSends(req, res, next) {
 
 // ---------- files ----------
 const fileCache = new Map(); // abs path → {mtime,size,buf,hash}
+// a file is re-checked on disk (stat) at most once a second: a page render looks up a dozen assets, and fonts.css alone
+// refers to 42 font files, so checking each on every request was most of the cost of serving a cached page
+const STAT_MS = 1000;
 function readFile(f) {
-  let st; try { st = fs.statSync(f); } catch (e) { return null; }
-  if (!st.isFile()) return null;
-  const c = fileCache.get(f);
-  if (c && c.mtime === st.mtimeMs && c.size === st.size) return c;
+  const c = fileCache.get(f), now = Date.now();
+  if (c && now - c.at < STAT_MS) return c.buf ? c : null;
+  let st; try { st = fs.statSync(f); } catch (e) { st = null; }
+  if (!st || !st.isFile()) { fileCache.set(f, { at: now, buf: null }); return null; }
+  if (c && c.buf && c.mtime === st.mtimeMs && c.size === st.size) { c.at = now; return c; }
   const buf = fs.readFileSync(f);
-  const n = { mtime: st.mtimeMs, size: st.size, buf, hash: sha1(buf) };
+  const n = { at: now, mtime: st.mtimeMs, size: st.size, buf, hash: sha1(buf) };
   fileCache.set(f, n);
   return n;
 }
 
-module.exports = function site(app, { PUB, loadConfig }) {
+module.exports = function site(app, { PUB, loadConfig, xpFreeVer }) {
   const SEP = PUB.endsWith(path.sep) ? PUB : PUB + path.sep;
   const inPub = rel => {
     let p; try { p = decodeURIComponent(rel); } catch (e) { return null; }
@@ -107,31 +114,64 @@ module.exports = function site(app, { PUB, loadConfig }) {
     const f = path.resolve(PUB, "." + path.posix.normalize("/" + p));
     return f.startsWith(SEP) ? f : null;
   };
-  const verOf = rel => { const f = inPub(rel); const c = f && readFile(f); return c ? c.hash.slice(0, 10) : null; };
+  const rawVer = rel => { const f = inPub(rel); const c = f && readFile(f); return c ? c.hash.slice(0, 10) : null; };
+  // url(/fonts/x.woff2) inside a stylesheet (or an inline <style>) gets ?v=<content hash>, so font files are cached for a year
+  const CSS_URL = /url\((["']?)\/(fonts\/[\w.-]+\.woff2)\1\)/g;
+  const cssUrls = css => css.replace(CSS_URL, (m, q, name) => { const v = rawVer(name); return v ? `url(/${name}?v=${v})` : m; });
+  // a file as it is served: stylesheets carry versioned url()s, so their own hash (and ?v=) changes when a font file does
+  const cssCache = new Map(); // abs path → {src, deps, buf, hash}
+  function asset(f) {
+    const c = readFile(f);
+    if (!c || !f.endsWith(".css")) return c;
+    let hit = cssCache.get(f);
+    if (!hit || hit.src !== c.hash) { // the file changed: find its font references once
+      const names = []; let m; CSS_URL.lastIndex = 0; const raw = c.buf.toString("utf8");
+      while ((m = CSS_URL.exec(raw))) names.push(m[2]);
+      hit = { src: c.hash, names, key: null, buf: null, hash: null, at: 0 }; cssCache.set(f, hit);
+    }
+    if (!hit.names.length) return c;
+    const now = Date.now(); if (hit.buf && now - hit.at < STAT_MS) return hit; hit.at = now; // font files are re-checked once a second too
+    const key = hit.names.map(n => rawVer(n) || "").join(",");
+    if (hit.key !== key) { hit.buf = Buffer.from(cssUrls(c.buf.toString("utf8")), "utf8"); hit.hash = sha1(hit.buf); hit.key = key; }
+    return hit;
+  }
+  const verOf = rel => { const f = inPub(rel); const c = f && asset(f); return c ? c.hash.slice(0, 10) : null; };
 
   // local asset references in HTML get ?v=<content hash>
   const ASSET = /(\s(?:src|href)=")(\/?)((?:vendor\/)?[\w.-]+\.(?:js|css|svg|png|webmanifest))"/g;
   // cloud.js is left as is: app.js finds it with script[src$="cloud.js"]
   const UNVERSIONED = new Set([]);
   function versioned(html) {
-    return html.replace(ASSET, (m, a, slash, name) => { const v = !UNVERSIONED.has(name) && verOf(name); return v ? `${a}${slash}${name}?v=${v}"` : m; });
+    return cssUrls(html.replace(ASSET, (m, a, slash, name) => { const v = !UNVERSIONED.has(name) && verOf(name); return v ? `${a}${slash}${name}?v=${v}"` : m; }));
   }
-  const htmlCache = new Map();
+  const htmlCache = new Map(), pageRefs = new Map(), pageMemo = new Map();
   // render a page from public/<name>; transform(html) may add per-request parts (cached by key)
   function page(name, key, transform) {
     const c = readFile(path.join(PUB, name));
     if (!c) return null;
-    const deps = []; let m; const raw = c.buf.toString("utf8"); ASSET.lastIndex = 0;
-    while ((m = ASSET.exec(raw))) deps.push(verOf(m[3]) || "");
+    // within the one-second file-check window the same page (same file, same per-request key) is the same render
+    const mk = name + "|" + (key || ""), now = Date.now(), memo = pageMemo.get(mk);
+    if (memo && memo.c === c && now - memo.at < STAT_MS) return memo.hit;
+    // the assets a page refers to are found once per version of the file; their current versions are part of the cache key
+    let refs = pageRefs.get(name);
+    if (!refs || refs.src !== c.hash) {
+      refs = { src: c.hash, assets: [], fonts: [] }; let m; const raw = c.buf.toString("utf8");
+      ASSET.lastIndex = 0; while ((m = ASSET.exec(raw))) refs.assets.push(m[3]);
+      CSS_URL.lastIndex = 0; while ((m = CSS_URL.exec(raw))) refs.fonts.push(m[2]);
+      pageRefs.set(name, refs);
+    }
+    const deps = refs.assets.map(n => verOf(n) || "").concat(refs.fonts.map(n => rawVer(n) || ""));
     const ck = name + "|" + c.hash + "|" + deps.join(",") + "|" + (key || "");
     let hit = htmlCache.get(ck);
     if (!hit) {
-      let html = versioned(raw);
+      let html = versioned(c.buf.toString("utf8"));
       if (transform) html = transform(html);
       hit = { html, hash: sha1(html) };
       if (htmlCache.size > 64) htmlCache.clear();
       htmlCache.set(ck, hit);
     }
+    if (pageMemo.size > 64) pageMemo.clear();
+    pageMemo.set(mk, { c, at: now, hit });
     return hit;
   }
   function sendPage(req, res, name, opts = {}) {
@@ -142,12 +182,23 @@ module.exports = function site(app, { PUB, loadConfig }) {
     return true;
   }
 
+  // the free explainer bundle is built by the server (no file to hash): its script tag gets the bundle's own version, so
+  // it is cached for a year like the other scripts instead of costing a revalidation round trip on every visit.
+  // If the version cannot be read (database down), the tag stays unversioned and the bundle is revalidated as before.
+  const XP_TAG = '<script src="/xp/free.js">';
+  async function xpVer() { try { return (xpFreeVer && await xpFreeVer()) || ""; } catch (e) { return ""; } }
+  const withXp = (html, v) => v ? html.split(XP_TAG).join(`<script src="/xp/free.js?v=${v}">`) : html;
+  async function sendApp(req, res) {
+    const v = await xpVer();
+    return sendPage(req, res, "app.html", { key: "xp:" + v, transform: html => withXp(html, v) });
+  }
+
   // static text assets (js/css/svg/json/manifest…): compressed, versioned or revalidated
   function staticText(req, res, next) {
     if (req.method !== "GET" && req.method !== "HEAD") return next();
     const ext = path.extname(req.path).toLowerCase();
     if (!TYPES[ext] || ext === ".html") return next();
-    const f = inPub(req.path); const c = f && readFile(f);
+    const f = inPub(req.path); const c = f && asset(f);
     if (!c) return next();
     const v = typeof req.query.v === "string" ? req.query.v : "";
     const cache = v && v === c.hash.slice(0, 10) ? YEAR : "no-cache";
@@ -155,8 +206,8 @@ module.exports = function site(app, { PUB, loadConfig }) {
   }
   // warm the compression cache for the big assets so the first visitor after a deploy doesn't wait
   function warm() {
-    ["app.js", "app.css", "xp-engine.js", "vendor/gsap.min.js", "landing.js", "landing.css", "cloud.js", "admin.js", "admin.css", "legal.css", "legal.js"].forEach(n => {
-      const c = readFile(path.join(PUB, n)); if (c) ["br", "gzip"].forEach(e => compressCached(c.buf, e, 11, c.hash).catch(() => {}));
+    ["app.js", "app.css", "fonts.css", "xp-engine.js", "vendor/gsap.min.js", "landing.js", "landing.css", "cloud.js", "admin.js", "admin.css", "legal.css", "legal.js"].forEach(n => {
+      const c = asset(path.join(PUB, n)); if (c) ["br", "gzip"].forEach(e => compressCached(c.buf, e, 11, c.hash).catch(() => {}));
     });
   }
 
@@ -281,11 +332,13 @@ module.exports = function site(app, { PUB, loadConfig }) {
     const lang = req.query.lang === "en" ? "en" : "ar";
     let cfg = null; try { cfg = await loadConfig(); } catch (e) { cfg = null; }
     const { EN, META, PAY, sig } = landingDict();
+    const xv = await xpVer();
     // the payment wording follows how plans are sold now: the external store (plans carry a buy link), or the live
     // gateway (moyasar), else neutral wording
     const prov = cfg && PAY.store && (cfg.plans || []).some(p => p.buy) ? "store" : cfg && PAY[cfg.provider] ? cfg.provider : "none";
-    const key = lang + "|" + sig + "|" + prov + "|" + sha1(JSON.stringify(cfg && { p: cfg.plans, c: cfg.currency, r: cfg.refund }));
+    const key = lang + "|" + sig + "|" + prov + "|" + xv + "|" + sha1(JSON.stringify(cfg && { p: cfg.plans, c: cfg.currency, r: cfg.refund }));
     sendPage(req, res, "index.html", { key, transform: html => {
+      html = withXp(html, xv);
       html = html.replace(/<html lang="ar" dir="rtl"/, `<html lang="ar" dir="rtl" data-pay="${prov}"`);
       const pay = PAY[prov] && PAY[prov][lang]; if (pay) html = translateHtml(html, pay);
       if (lang === "en") {
@@ -324,5 +377,5 @@ module.exports = function site(app, { PUB, loadConfig }) {
     sendBody(req, res, body, { type: TYPES[".webmanifest"], cache: "public, max-age=86400" }).catch(() => res.end());
   });
 
-  return { compressSends, staticText, sendPage, sendLanding, sendBody, warm, verOf, translateHtml, landingDict };
+  return { compressSends, staticText, sendPage, sendApp, sendLanding, sendBody, readFile, warm, verOf, translateHtml, landingDict };
 };

@@ -122,6 +122,7 @@ railway up
 ```
 server.js       الخادم: الحسابات، الحفظ، واجهات المشرف، وتقديم الموقع
 public/         الموقع (index.html, app.js, app.css, cloud.js, favicon.svg, 404.html) ولوحة المشرف (admin.html, admin.js)
+public/fonts/   خطوط الموقع مستضافة على الخادم نفسه (رخصة OFL، انظر OFL.txt)، ويعرّفها public/fonts.css
 railway.json    إعدادات التشغيل وفحص الصحة (/healthz)
 package.json    المكتبات: express, pg, bcryptjs
 ```

@@ -156,7 +156,7 @@ app.use((req, res, next) => {
 });
 
 const PUB = path.join(__dirname, "public");
-const S = site(app, { PUB, loadConfig: async () => C.publicCfg(await C.loadCfg()) });
+const S = site(app, { PUB, loadConfig: async () => C.publicCfg(await C.loadCfg()), xpFreeVer: () => C.xpFreeVer() });
 app.use(S.compressSends);
 
 // ---------- helpers ----------
@@ -325,8 +325,17 @@ app.delete("/api/me", needUser, wrap(async (req, res) => {
 }));
 
 // ---------- progress (minimal fields only) ----------
+// The ETag is the row's write time (microseconds): it changes exactly when the saved copy does. The app asks for it with
+// HEAD before and after every save and whenever the tab wakes ("did another device save?"), so HEAD reads only the
+// timestamp and never loads, serialises and hashes the whole progress blob.
+const progressTag = us => `W/"p${us ? BigInt(us).toString(36) : "0"}"`;
 app.get("/api/progress", needUser, wrap(async (req, res) => {
-  const r = await pool.query("SELECT p, updated_at FROM progress WHERE user_id=$1", [req.user.id]);
+  if (req.method === "HEAD") {
+    const h = await pool.query("SELECT (extract(epoch from updated_at)*1000000)::bigint us FROM progress WHERE user_id=$1", [req.user.id]);
+    return res.set("ETag", progressTag(h.rows[0] && h.rows[0].us)).type("json").end();
+  }
+  const r = await pool.query("SELECT p, updated_at, (extract(epoch from updated_at)*1000000)::bigint us FROM progress WHERE user_id=$1", [req.user.id]);
+  res.set("ETag", progressTag(r.rows[0] && r.rows[0].us));
   res.json(r.rows[0] ? { p: r.rows[0].p, updatedAt: r.rows[0].updated_at } : { p: null });
 }));
 // Saving is one atomic UPSERT (never a partial row). Optional optimistic concurrency: when the client sends `base`
@@ -352,12 +361,13 @@ app.put("/api/progress", needUser, wrap(async (req, res) => {
   const r = await pool.query(`INSERT INTO progress(user_id,track,target,lang,exam_date,p,summary,updated_at) VALUES($1,$2,$3,$4,$5,$6,$7,now())
     ON CONFLICT (user_id) DO UPDATE SET track=$2,target=$3,lang=$4,exam_date=$5,p=$6,summary=$7,updated_at=now()
     WHERE $8::timestamptz IS NULL OR date_trunc('milliseconds', progress.updated_at) <= $8::timestamptz
-    RETURNING updated_at`,
+    RETURNING updated_at, (extract(epoch from updated_at)*1000000)::bigint us`,
     [req.user.id, track, target, lang, examDate, p, summary, base]);
   if (!r.rows[0]) {
     const cur = (await pool.query("SELECT p, updated_at FROM progress WHERE user_id=$1", [req.user.id])).rows[0];
     return res.status(409).json({ error: "conflict", p: cur ? cur.p : null, updatedAt: cur ? cur.updated_at : null });
   }
+  res.set("ETag", progressTag(r.rows[0].us)); // the tag GET/HEAD now answer with, so the app need not ask for it again
   res.json({ ok: true, updatedAt: r.rows[0].updated_at });
 }));
 
@@ -396,8 +406,9 @@ app.get("/sitemap.xml", (req, res) => {
 // data/clip_urls.json, when present, lists freshly generated clips ({id,url}) that are imported once at startup.
 const TRACKS_FILE = path.join(__dirname, "data", "tracks.json");
 app.get("/audio/tracks.json", (req, res, next) => {
-  if (!fs.existsSync(TRACKS_FILE)) return res.set("Cache-Control", "no-cache").json({});
-  fs.readFile(TRACKS_FILE, (e, buf) => e ? next(e) : S.sendBody(req, res, buf, { type: "application/json; charset=utf-8", cache: "no-cache" }).catch(next));
+  const c = S.readFile(TRACKS_FILE); // cached with its hash: no disk read or re-hash per request
+  if (!c) return res.set("Cache-Control", "no-cache").json({});
+  S.sendBody(req, res, c.buf, { type: "application/json; charset=utf-8", cache: "no-cache", hash: c.hash }).catch(next);
 });
 app.get("/audio/index.json", wrap(async (req, res) => {
   const r = await pool.query("SELECT id FROM narration ORDER BY id");
@@ -477,7 +488,7 @@ app.get("/", wrap(async (req, res) => {
 const qs = req => { const i = req.originalUrl.indexOf("?"); return i < 0 ? "" : req.originalUrl.slice(i); };
 app.get(["/index.html", "/index"], (req, res) => res.redirect(301, "/" + qs(req)));
 app.get("/app.html", (req, res) => res.redirect(301, "/app" + qs(req)));
-app.get(["/app", "/app/"], (req, res) => { S.sendPage(req, res, "app.html") || res.status(500).end(); });
+app.get(["/app", "/app/"], wrap(async (req, res) => { (await S.sendApp(req, res)) || res.status(500).end(); }));
 app.get(/^\/(privacy|terms|admin)(\.html)?$/, (req, res, next) => { S.sendPage(req, res, req.params[0] + ".html") || next(); });
 app.get(["/404", "/404.html"], (req, res) => S.sendPage(req, res, "404.html", { status: 404 }));
 app.use(S.staticText); // js, css, svg, json…: brotli/gzip, a year of caching for versioned URLs, ETag revalidation otherwise

@@ -407,7 +407,9 @@
     }
     var saveData = navigator.connection && navigator.connection.saveData;
     if (!saveData) {
-      var idle = function () { (window.requestIdleCallback || function (f) { setTimeout(f, 1); })(function () { loadXP().catch(function () {}); }); };
+      // after the demo scripts: the app's own scripts are fetched into the HTTP cache at idle priority (<template id="lp-app-pre">), so opening the app from here does not wait for them
+      var pre = function () { var tp = $('#lp-app-pre'); if (tp && tp.content) D.head.appendChild(tp.content.cloneNode(true)); };
+      var idle = function () { (window.requestIdleCallback || function (f) { setTimeout(f, 1); })(function () { loadXP().catch(function () {}).then(pre); }); };
       if (D.readyState === 'complete') setTimeout(idle, 2500); else window.addEventListener('load', function () { setTimeout(idle, 2500); });
     }
   }

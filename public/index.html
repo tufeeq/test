@@ -501,6 +501,8 @@
   </div>
 </footer>
 
+<!-- the app's scripts: landing.js adds these prefetch hints once the page is idle (never on data-saver connections) -->
+<template id="lp-app-pre"><link rel="prefetch" href="/app.js"><link rel="prefetch" href="/cloud.js"></template>
 <!-- the explainer player for the demo: landing.js loads these when the demo comes near the screen, when a demo
      button is pressed, or once the page is idle, so they never compete with the first paint -->
 <template id="lp-xp-scripts"><script src="/vendor/gsap.min.js"></script><script src="/xp-engine.js"></script><script src="/xp/free.js"></script></template>

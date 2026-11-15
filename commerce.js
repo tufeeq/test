@@ -419,7 +419,7 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
     const s = (await pool.query("SELECT value FROM settings WHERE key=$1", [seenKey(req)])).rows[0];
     const seen = s && s.value && s.value.at ? new Date(s.value.at) : new Date(Date.now() - 864e5);
     const [list, n] = await Promise.all([
-      pool.query(`SELECT id,email,name,created_at,(google_id IS NOT NULL) google,(facebook_id IS NOT NULL) facebook FROM users ORDER BY created_at DESC LIMIT 30`),
+      pool.query(`SELECT id,email,name,phone,created_at,(google_id IS NOT NULL) google,(facebook_id IS NOT NULL) facebook FROM users ORDER BY created_at DESC LIMIT 30`),
       pool.query(`SELECT count(*) FILTER (WHERE created_at>$1)::int unread, count(*) FILTER (WHERE created_at>=${SINCE(1)})::int today FROM users`, [seen])
     ]);
     res.json({ seen_at: seen.toISOString(), unread: n.rows[0].unread, today: n.rows[0].today,
@@ -498,7 +498,7 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
   });
   A("get", "/users/:id", async (req, res) => {
     const id = req.params.id;
-    const u = (await pool.query("SELECT u.id,u.email,u.name,u.created_at,p.track,p.target,p.lang,p.exam_date,p.summary,p.updated_at,p.p FROM users u LEFT JOIN progress p ON p.user_id=u.id WHERE u.id=$1", [id])).rows[0];
+    const u = (await pool.query("SELECT u.id,u.email,u.name,u.phone,u.created_at,p.track,p.target,p.lang,p.exam_date,p.summary,p.updated_at,p.p FROM users u LEFT JOIN progress p ON p.user_id=u.id WHERE u.id=$1", [id])).rows[0];
     if (!u) return fail(res, 404, "not-found");
     let skills = {}, attempts = [], xp = {}, diag = null;
     try { const S = JSON.parse(u.p || "null") || {}; skills = S.stats || {}; attempts = (S.attempts || []).slice(-30).reverse(); xp = S.xp || {}; diag = S.diag || null; } catch (e) {}

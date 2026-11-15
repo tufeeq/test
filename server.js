@@ -66,6 +66,7 @@ async function migrate() {
       updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
     );
     ALTER TABLE users ADD COLUMN IF NOT EXISTS name TEXT;
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS phone TEXT;
   `);
   await C.migrate();
   await O.migrate();
@@ -255,6 +256,20 @@ app.post("/api/name", needUser, wrap(async (req, res) => {
   res.json({ user: pub({ ...req.user, name }) });
 }));
 
+// Mobile number given at sign-up, stored in international form. Saudi numbers may be typed the local way
+// (05XXXXXXXX, 5XXXXXXXX, 9665…, 009665…); anything else must already be +<country><number>. Returns null when invalid.
+function cleanPhone(v) {
+  let p = String(v == null ? "" : v).replace(/[\u0660-\u0669]/g, d => d.charCodeAt(0) - 0x660).replace(/[\u06F0-\u06F9]/g, d => d.charCodeAt(0) - 0x6F0).replace(/[\s\-().]/g, "");
+  if (p.length > 20) return null;
+  if (/^05\d{8}$/.test(p)) p = "+966" + p.slice(1);
+  else if (/^5\d{8}$/.test(p)) p = "+966" + p;
+  else if (/^00\d+$/.test(p)) p = "+" + p.slice(2);
+  else if (/^9665\d{8}$/.test(p)) p = "+" + p;
+  if (/^\+9660?5\d{8}$/.test(p)) return "+966" + p.slice(-9);
+  if (/^\+966/.test(p)) return null; // a Saudi number that is not a mobile
+  return /^\+[1-9]\d{7,14}$/.test(p) ? p : null;
+}
+
 app.post("/api/signup", wrap(async (req, res) => {
   const email = String(req.body.email || "").trim().toLowerCase(), pw = String(req.body.password || "");
   if (limited("su:" + req.ip, 60, 3600e3)) return fail(res, 429, "too-many-requests"); // generous: a whole class may sign up from one school IP
@@ -262,11 +277,13 @@ app.post("/api/signup", wrap(async (req, res) => {
   if (pw.length < 8 || pw.length > 200) return fail(res, 400, "weak-password");
   const name = cleanName(req.body.name);
   if (!validName(name)) return fail(res, 400, "invalid-name");
+  const phone = cleanPhone(req.body.phone);
+  if (!phone) return fail(res, 400, "invalid-phone");
   if (req.body.consent !== true) return fail(res, 400, "consent");
   // a taken address answers before the (slow) hash, so a flood of sign-ups for one address cannot burn CPU
   if ((await pool.query("SELECT 1 FROM users WHERE email=$1", [email])).rows[0]) return fail(res, 409, "email-already-in-use");
   const id = crypto.randomUUID(), hash = await PW.hash(pw, 11);
-  try { await pool.query("INSERT INTO users(id,email,pass_hash,name) VALUES($1,$2,$3,$4)", [id, email, hash, name]); }
+  try { await pool.query("INSERT INTO users(id,email,pass_hash,name,phone) VALUES($1,$2,$3,$4,$5)", [id, email, hash, name, phone]); }
   catch (e) { if (e.code === "23505") return fail(res, 409, "email-already-in-use"); throw e; }
   if (isAdminEmail(email)) console.log(`admin account claimed: ${email}`);
   await createSession(req, res, id);

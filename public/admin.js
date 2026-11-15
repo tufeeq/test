@@ -92,6 +92,7 @@ const ERR = {
   "not-found": ["العنصر غير موجود، ربما حُذف.", "Not found. It may have been deleted."],
   "bad-days": ["عدد الأيام يجب أن يكون بين ١ و١٠٠٠.", "Days must be between 1 and 1000."],
   "invalid-name": ["الاسم يجب أن يكون بين حرفين و٦٠ حرفًا.", "Name must be 2–60 characters."],
+  "invalid-phone": ["رقم الجوال غير صحيح.", "The mobile number is not valid."],
   "not-refundable": ["لا يمكن استرداد هذه الدفعة (غير مدفوعة أو استُرد كامل مبلغها).", "This payment can't be refunded (not paid, or already fully refunded)."],
   "bad-amount": ["مبلغ الاسترداد غير صحيح: يجب أن يكون أكبر من صفر ولا يتجاوز المتبقي من المبلغ المدفوع.", "Invalid refund amount: must be above zero and no more than what is left of the payment."],
   "payments-not-configured": ["الدفع الإلكتروني غير مفعّل بعد (المتغير MOYASAR_SECRET_KEY غير مضاف).", "Online payment isn't configured yet (MOYASAR_SECRET_KEY is missing)."],
@@ -606,7 +607,7 @@ function renderDrawer() {
   const subs = d.subscriptions || [], pays = d.payments || [], evs = d.events || [];
   const isPro = p.tier === "pro";
   dr.innerHTML = `<header class="dr-h"><span class="av" aria-hidden="true">${esc((u.name || u.email).trim().charAt(0).toUpperCase())}</span>
-    <div class="tt"><b id="dr-t">${esc(u.name || _("بلا اسم", "No name"))}</b><small>${esc(u.email)}</small></div>
+    <div class="tt"><b id="dr-t">${esc(u.name || _("بلا اسم", "No name"))}</b><small>${esc(u.email)}</small>${u.phone ? `<small><a href="tel:${esc(u.phone)}" dir="ltr">${esc(u.phone)}</a></small>` : ""}</div>
     ${u.isAdmin ? `<span class="chip admin">${_("مشرف", "Admin")}</span>` : isPro ? `<span class="chip pro">${_("برو", "Pro")}</span>` : `<span class="chip free">${_("مجاني", "Free")}</span>`}
     <button class="btn ghost sm icon" type="button" data-close aria-label="${_("إغلاق", "Close")}">${ic("x")}</button></header>
   <div class="dr-b">
@@ -1155,7 +1156,7 @@ function drawNotif() {
     ${canAsk ? `<button class="btn ghost sm nt-perm" type="button" id="nt-perm">${ic("bell")}${_("نبّهني على الجهاز حتى لو كانت اللوحة في الخلفية", "Alert me on this device even when the console is in the background")}</button>` : ""}
     ${NT.items.length ? `<ul class="nt-l">${NT.items.map(u => `<li><button type="button" class="nt-i${u.new ? " new" : ""}" data-nt-user="${esc(u.id)}">
         <span class="av" aria-hidden="true">${esc((u.name || u.email || "?").trim().charAt(0).toUpperCase())}</span>
-        <span class="nt-x"><b>${esc(u.name || u.email)}</b>${u.name ? `<small dir="ltr">${esc(u.email)}</small>` : ""}<small class="muted">${esc(provTag(u))}</small></span>
+        <span class="nt-x"><b>${esc(u.name || u.email)}</b>${u.name ? `<small dir="ltr">${esc(u.email)}</small>` : ""}${u.phone ? `<small dir="ltr">${esc(u.phone)}</small>` : ""}<small class="muted">${esc(provTag(u))}</small></span>
         <time datetime="${esc(u.created_at)}" title="${esc(fmtDT(u.created_at))}">${esc(rel(u.created_at))}</time>${u.new ? `<span class="sr">${_("جديد", "new")}</span>` : ""}</button></li>`).join("")}</ul>`
       : `<p class="muted nt-empty">${_("لا يوجد مسجّلون بعد.", "No sign-ups yet.")}</p>`}
     <footer class="nt-f"><a href="#students" data-nt-all>${_("كل الطلاب، الأحدث أولًا", "All students, newest first")}</a></footer>`;

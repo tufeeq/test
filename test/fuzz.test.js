@@ -33,7 +33,7 @@ run(async () => {
   section("JSON body fuzz on every mutating route");
   // [method, path, who, template of valid-ish body]
   const routes = [
-    ["POST", "/api/signup", "anon", { email: "e@x.com", password: "password123", name: "Name", consent: true }],
+    ["POST", "/api/signup", "anon", { email: "e@x.com", password: "password123", name: "Name", phone: "0512345678", consent: true }],
     ["POST", "/api/login", "anon", { email: "e@x.com", password: "password123" }],
     ["POST", "/api/logout", "anon", {}],
     ["POST", "/api/name", "user", { name: "Name" }],

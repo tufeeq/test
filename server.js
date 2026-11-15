@@ -156,7 +156,7 @@ app.use((req, res, next) => {
 });
 
 const PUB = path.join(__dirname, "public");
-const S = site(app, { PUB, loadConfig: async () => C.publicCfg(await C.loadCfg()) });
+const S = site(app, { PUB, loadConfig: async () => C.publicCfg(await C.loadCfg()), xpFreeVer: () => C.xpFreeVer() });
 app.use(S.compressSends);
 
 // ---------- helpers ----------
@@ -396,8 +396,9 @@ app.get("/sitemap.xml", (req, res) => {
 // data/clip_urls.json, when present, lists freshly generated clips ({id,url}) that are imported once at startup.
 const TRACKS_FILE = path.join(__dirname, "data", "tracks.json");
 app.get("/audio/tracks.json", (req, res, next) => {
-  if (!fs.existsSync(TRACKS_FILE)) return res.set("Cache-Control", "no-cache").json({});
-  fs.readFile(TRACKS_FILE, (e, buf) => e ? next(e) : S.sendBody(req, res, buf, { type: "application/json; charset=utf-8", cache: "no-cache" }).catch(next));
+  const c = S.readFile(TRACKS_FILE); // cached with its hash: no disk read or re-hash per request
+  if (!c) return res.set("Cache-Control", "no-cache").json({});
+  S.sendBody(req, res, c.buf, { type: "application/json; charset=utf-8", cache: "no-cache", hash: c.hash }).catch(next);
 });
 app.get("/audio/index.json", wrap(async (req, res) => {
   const r = await pool.query("SELECT id FROM narration ORDER BY id");
@@ -477,7 +478,7 @@ app.get("/", wrap(async (req, res) => {
 const qs = req => { const i = req.originalUrl.indexOf("?"); return i < 0 ? "" : req.originalUrl.slice(i); };
 app.get(["/index.html", "/index"], (req, res) => res.redirect(301, "/" + qs(req)));
 app.get("/app.html", (req, res) => res.redirect(301, "/app" + qs(req)));
-app.get(["/app", "/app/"], (req, res) => { S.sendPage(req, res, "app.html") || res.status(500).end(); });
+app.get(["/app", "/app/"], wrap(async (req, res) => { (await S.sendApp(req, res)) || res.status(500).end(); }));
 app.get(/^\/(privacy|terms|admin)(\.html)?$/, (req, res, next) => { S.sendPage(req, res, req.params[0] + ".html") || next(); });
 app.get(["/404", "/404.html"], (req, res) => S.sendPage(req, res, "404.html", { status: 404 }));
 app.use(S.staticText); // js, css, svg, json…: brotli/gzip, a year of caching for versioned URLs, ETag revalidation otherwise

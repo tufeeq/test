@@ -166,7 +166,13 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
 
   // ---------- explainers: free bundle public, premium only for subscribers ----------
   async function bundles() { const c = await loadCfg(); return xpbundle.build(c.free.xp || []); }
-  app.get("/xp/free.js", wrap(async (req, res) => { const b = await bundles(); res.set({ "Cache-Control": "no-cache" }).type("application/javascript").send(b.free); }));
+  // the free bundle changes only with the code or the admin's free list: pages link it as /xp/free.js?v=<content hash>
+  // (xpFreeVer), and a request carrying the current hash is cached for a year; any other request revalidates as before
+  let fver = { src: null, v: "" };
+  const verOfBundle = b => { if (fver.src !== b.free) fver = { src: b.free, v: require("crypto").createHash("sha1").update(b.free).digest("hex").slice(0, 10) }; return fver.v; };
+  const xpFreeVer = async () => verOfBundle(await bundles());
+  app.get("/xp/free.js", wrap(async (req, res) => { const b = await bundles();
+    res.set({ "Cache-Control": req.query.v === verOfBundle(b) ? "public, max-age=31536000, immutable" : "no-cache" }).type("application/javascript").send(b.free); }));
   app.get("/api/xp/premium.js", needUser, needPro, wrap(async (req, res) => { const b = await bundles(); res.set({ "Cache-Control": "private, no-store" }).type("application/javascript").send(b.premium); }));
   app.get("/api/xp/keys", wrap(async (req, res) => { const b = await bundles(); res.json(b.keys); }));
   // premium narration clips: which clip ids belong to premium explainers (computed from tracks.json)
@@ -696,6 +702,6 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
   });
   A("get", "/audit", async (req, res) => res.json({ audit: (await pool.query("SELECT admin_email,action,target,meta,at FROM admin_audit ORDER BY at DESC LIMIT 300")).rows }));
 
-  return { migrate, planOf, loadCfg, publicCfg, needPro };
+  return { migrate, planOf, loadCfg, publicCfg, needPro, xpFreeVer };
 };
 module.exports.DEFAULTS = DEFAULTS;

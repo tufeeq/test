@@ -969,7 +969,7 @@ const LESSONS = {
    res:[['yt','GAT reading comprehension strategy'],['yt','reading comprehension main idea inference practice'],['url','Khan Academy: reading and vocabulary','https://www.khanacademy.org/ela']]}
  },
  arith:{
-  ar:{concept:['الحساب أكبر أجزاء الكمي وزنًا (نحو ٤٠٪ في العلمي). يشمل: العمليات، الكسور والأعداد العشرية، النسب المئوية، النسبة والتناسب، السرعة والزمن، العمل المشترك، الأعداد الأولية والقواسم والمضاعفات.','لا آلة حاسبة؛ لذلك السرعة الذهنية وحفظ المكافئات الشائعة يحسمان الوقت.'],
+  ar:{concept:['الحساب أكبر أجزاء الكمي وزنًا (نحو نصف الكمي حسب الدليل الرسمي). يشمل: العمليات، الكسور والأعداد العشرية، النسب المئوية، النسبة والتناسب، السرعة والزمن، العمل المشترك، الأعداد الأولية والقواسم والمضاعفات.','لا آلة حاسبة؛ لذلك السرعة الذهنية وحفظ المكافئات الشائعة يحسمان الوقت.'],
    mind:'المشتتات تُبنى من أخطاء متوقعة: القسمة على القيمة الجديدة بدل القديمة، جمع نسبتين متتاليتين، نسيان أن المطلوب «المتبقي» لا «المقروء».',
    steps:['حدد المطلوب بالضبط وضع تحته خطًا ذهنيًا.','حوّل النسب إلى كسور بسيطة: ٢٥٪ = ¼ ، ٢٠٪ = ⅕.','في التناسب الطردي اضرب تبادليًا، وفي العكسي حاصل الضرب ثابت.','قرّب الأرقام لتستبعد الخيارات البعيدة قبل الحساب الدقيق.','جرّب الخيارات في المعادلة إن كانت أسرع.'],
    types:[['نسب مئوية','٤٠٪ من عدد = ٢٤'],['خصم وزيادة','زيادة ١٠٪ ثم نقص ١٠٪'],['تناسب طردي','٣ أقلام بـ ١٢، فكم ٧؟'],['تناسب عكسي','١٥ عاملًا في ٨ أيام'],['سرعة ومسافة','٢٤٠ كم في ٣ ساعات'],['مضاعف مشترك','إشارتان تضيئان معًا'],['كسور','¼ + ⅔']],
@@ -978,7 +978,7 @@ const LESSONS = {
    examples:[{q:'ارتفع سعر ١٠٪ ثم انخفض ١٠٪. ما التغير الكلي؟',a:'نقص ١٪',why:'⟦1.1 × 0.9 = 0.99⟧'},{q:'٤٠٪ من عدد يساوي ٢٤. ما العدد؟',a:'٦٠',why:'⟦24 ÷ 0.4 = 60⟧'},{q:'١٥ عاملًا في ٨ أيام، فكم يومًا لـ ١٠ عمال؟',a:'١٢',why:'⟦15 × 8 ÷ 10 = 12⟧'}],
    speed:['تمرين يومي ١٠ دقائق: جداول الضرب حتى ١٥، والمربعات حتى ٢٠، والمكعبات حتى ١٠.','حفظ مكافئات الكسور يوفر ١٥ ثانية في كل سؤال نسب.','هدفك ٦٠ ثانية.'],
    res:[['yt','شرح الحساب قدرات كمي تأسيس'],['yt','النسب المئوية قدرات كمي'],['yt','التناسب الطردي والعكسي قدرات'],['url','Khan Academy: Arithmetic',KA.arith],['url','Khan Academy: Pre-algebra',KA.pre]]},
-  en:{concept:['Arithmetic is the largest share of quant (around 40% on the science track): operations, fractions and decimals, percentages, ratio and proportion, speed and time, combined work, primes, factors and multiples.','No calculator is allowed, so mental speed and memorized equivalents decide your time.'],
+  en:{concept:['Arithmetic is the largest share of quant (about half of it, per the official guide): operations, fractions and decimals, percentages, ratio and proportion, speed and time, combined work, primes, factors and multiples.','No calculator is allowed, so mental speed and memorized equivalents decide your time.'],
    mind:'Distractors come from predictable mistakes: dividing by the new value instead of the old, adding two successive percentages, forgetting the question asks for what is left.',
    steps:['Identify exactly what is asked.','Turn percentages into simple fractions: 25% = ¼, 20% = ⅕.','Direct proportion: cross-multiply. Inverse: the product stays constant.','Round to eliminate far-off choices before exact work.','Plug in the choices when that is faster.'],
    types:[['Percentages','40% of a number is 24'],['Discounts and increases','up 10% then down 10%'],['Direct proportion','3 pens cost 12, so 7?'],['Inverse proportion','15 workers in 8 days'],['Speed and distance','240 km in 3 hours'],['Common multiples','two lights flashing'],['Fractions','¼ + ⅔']],
@@ -1009,7 +1009,7 @@ const LESSONS = {
    res:[['yt','GAT algebra questions'],['yt','number sequences tricks aptitude test'],['url','Khan Academy: Algebra',KA.algebra]]}
  },
  geometry:{
-  ar:{concept:['الهندسة نحو ربع الكمي في المسار العلمي: الزوايا، المثلثات وفيثاغورس، المضلعات، المحيطات والمساحات، الدائرة، المجسمات البسيطة، وزاوية الساعة.','معظم أسئلتها تعتمد على عشرة قوانين فقط. من يحفظها ويطبقها بسرعة يحسم القسم.'],
+  ar:{concept:['الهندسة نحو خُمس الكمي في نسخة التخصصات العلمية: الزوايا، المثلثات وفيثاغورس، المضلعات، المحيطات والمساحات، الدائرة، المجسمات البسيطة، وزاوية الساعة.','معظم أسئلتها تعتمد على عشرة قوانين فقط. من يحفظها ويطبقها بسرعة يحسم القسم.'],
    mind:'المشتت الأشهر: إعطاء المساحة بدل المحيط، أو المساحة الكلية بدل الحجم، أو استخدام القطر بدل نصف القطر.',
    steps:['ارسم الشكل ولو كان مرسومًا، وضع عليه كل المعطيات.','اكتب القانون قبل التعويض.','ابحث عن مثلث قائم مخفي؛ أكثر الأسئلة تُحل به.','تحقق من الوحدة المطلوبة (سم أم سم²).'],
    types:[['زوايا المثلث','مجموعها ١٨٠°'],['فيثاغورس','(٣، ٤، ٥)'],['مضلعات','مجموع الزوايا ⟦(ن − 2) × 180⟧'],['مساحات ومحيطات','مستطيل، مربع، مثلث'],['دائرة','⟦πنق^2⟧ و ⟦2πنق⟧'],['مجسمات','حجم المكعب ومساحته'],['الساعة','كل ساعة ٣٠°']],
@@ -1018,7 +1018,7 @@ const LESSONS = {
    examples:[{q:'مكعب حرفه ٤ سم، ما حجمه؟',a:'٦٤',why:'٩٦ هي المساحة الكلية.'},{q:'الزاوية الداخلية للسداسي المنتظم',a:'١٢٠°',why:'⟦720 ÷ 6⟧'},{q:'ضلعا قائمة ١٢ و ١٦، الوتر؟',a:'٢٠',why:'مضاعف (٣، ٤، ٥).'}],
    speed:['احفظ ثلاثيات فيثاغورس ومضاعفاتها؛ توفر الجذر كاملًا.','هدفك ٧٠ ثانية.'],
    res:[['yt','شرح الهندسة قدرات كمي'],['yt','فيثاغورس قدرات'],['yt','زوايا المضلعات قدرات'],['url','Khan Academy: Geometry',KA.geometry]]},
-  en:{concept:['Geometry is about a quarter of science-track quant: angles, triangles and Pythagoras, polygons, perimeter and area, circles, simple solids and clock angles.','Most questions rely on about ten rules. Knowing them cold settles the section.'],
+  en:{concept:['Geometry is about a fifth of quant in the science version: angles, triangles and Pythagoras, polygons, perimeter and area, circles, simple solids and clock angles.','Most questions rely on about ten rules. Knowing them cold settles the section.'],
    mind:'Classic distractors: area instead of perimeter, surface area instead of volume, diameter instead of radius.',
    steps:['Sketch the figure and label every given.','Write the rule before substituting.','Look for a hidden right triangle; many questions hinge on one.','Check the unit asked (cm vs cm²).'],
    types:[['Triangle angles','sum to 180°'],['Pythagoras','(3, 4, 5)'],['Polygons','sum ⟦= (n − 2) × 180⟧'],['Area and perimeter','rectangle, square, triangle'],['Circle','⟦πr^2⟧ and ⟦2πr⟧'],['Solids','cube volume and surface'],['Clock','each hour = 30°']],
@@ -1250,7 +1250,7 @@ const T = {
   pDiag:'الاختبار التشخيصي', pDiagD:'سؤالان من كل مهارة · ٢٠ سؤالًا في ١٥ دقيقة.',
   pVerbal:'قسم لفظي', pVerbalD:'٢٤ سؤالًا · ٢٥ دقيقة بتوقيت الاختبار.',
   pQuant:'قسم كمي', pQuantD:'٢٤ سؤالًا · ٢٥ دقيقة بلا آلة حاسبة.',
-  pMock:'محاكاة كاملة', pMockD:'٤ أقسام × ٢٤ سؤالًا × ٢٥ دقيقة، بأسئلة جديدة في كل مرة.', modelsTitle:'النماذج الكاملة', modelsIntro:'٣٠ نموذجًا ثابتًا بصيغة الاختبار المحوسب (٤ أقسام × ٢٤ سؤالًا × ٢٥ دقيقة)، تتبع توزيع أسئلة الاختبار وأنماطه المتكررة. أعد أي نموذج وقارن درجتك.', model:'نموذج', best:'أفضل', notTaken:'لم يُحل', modelsDone:'نماذج محلولة',
+  pMock:'محاكاة كاملة', pMockD:'٥ أقسام × ٢٤ سؤالًا × ٢٥ دقيقة، بأسئلة جديدة في كل مرة.', modelsTitle:'النماذج الكاملة', modelsIntro:'٣٠ نموذجًا ثابتًا بصيغة الاختبار (٥ أقسام × ٢٤ سؤالًا × ٢٥ دقيقة)، تتبع توزيع أسئلة الاختبار وأنماطه المتكررة. أعد أي نموذج وقارن درجتك.', model:'نموذج', best:'أفضل', notTaken:'لم يُحل', modelsDone:'نماذج محلولة',
   bySkillTitle:'تدريب حسب المهارة', start:'ابدأ', questions:'سؤالًا', min:'دقيقة', sec:'ث', q:'سؤال', of:'من',
   due:'مستحقة', noDue:'لا مراجعات مستحقة اليوم',
   sectionLabel:'القسم', finishSection:'إنهاء القسم', finishTest:'إنهاء', prev:'السابق', next:'التالي', check:'تحقق', flag:'علّم للمراجعة', flagged:'معلَّم', map:'خريطة الأسئلة',
@@ -1317,7 +1317,7 @@ const T = {
   pDiag:'Diagnostic test', pDiagD:'Two questions from each skill · 20 questions in 15 minutes.',
   pVerbal:'Verbal section', pVerbalD:'24 questions · 25 minutes, on test timing.',
   pQuant:'Quant section', pQuantD:'24 questions · 25 minutes, no calculator.',
-  pMock:'Full simulation', pMockD:'4 sections × 24 questions × 25 minutes, with new questions every time.', modelsTitle:'Full model tests', modelsIntro:'30 fixed tests in the computer-based format (4 sections × 24 questions × 25 minutes) that follow the test’s question mix and recurring patterns. Retake any test and compare your scores.', model:'Test', best:'best', notTaken:'not taken', modelsDone:'tests completed',
+  pMock:'Full simulation', pMockD:'5 sections × 24 questions × 25 minutes, with new questions every time.', modelsTitle:'Full model tests', modelsIntro:'30 fixed tests in the test format (5 sections × 24 questions × 25 minutes) that follow the test’s question mix and recurring patterns. Retake any test and compare your scores.', model:'Test', best:'best', notTaken:'not taken', modelsDone:'tests completed',
   bySkillTitle:'Practice by skill', start:'Start', questions:'questions', min:'min', sec:'s', q:'Question', of:'of',
   due:'due', noDue:'No reviews due today',
   sectionLabel:'Section', finishSection:'End section', finishTest:'Finish', prev:'Previous', next:'Next', check:'Check', flag:'Mark for review', flagged:'Marked', map:'Question map',
@@ -1336,7 +1336,7 @@ const T = {
   backup:'Move progress to another device', backupD:'Your progress is saved in this browser. Copy the code and paste it on the other device.', copyCode:'Copy code', importCode:'Import', pasteHere:'Paste a progress code here', copied:'Copied', imported:'Imported', badCode:'That code is not valid.', reset:'Erase progress…', resetConfirm:'Your progress will be deleted permanently from this browser.', yesReset:'Yes, erase',
   estNote:'The estimate is based on your recent accuracy and the section weights for your track. The official score uses an unpublished formula, so treat this number as a guide.',
   planTitle:'My plan', planIntro:'Built around your test date and track. Today\'s session is the core, and the weekly tasks build on it.',
-  examDate:'Test date', track:'Track', sci:'Science', lit:'Humanities', targetScore:'Target', weeks:'Plan length (weeks)', save:'Save',
+  examDate:'Test date', track:'Track', sci:'Science', lit:'Theoretical', targetScore:'Target', weeks:'Plan length (weeks)', save:'Save',
   week:'Week', thisWeek:'This week', phaseNames:['Foundation','Mastery','Speed','Simulation'],
   phaseDesc:['Learn every type and reach "Competent" in all ten skills.','Raise every skill to "Mastered" and add timed sections.','Speed and consistency: 95% within target time.','Full simulations until 100 feels familiar.'],
   sessionsWeek:(n)=>`Complete the daily session 5 times this week (${n}/5)`,
@@ -1357,7 +1357,7 @@ const METHOD = {
   ['التدريب المختلط','خلط الأنواع في جلسة واحدة يدرّبك على تمييز نوع السؤال بسرعة، وهي المهارة التي يحتاجها الاختبار.','جلسة اليوم تخلط المهارات'],
   ['التدريب المتعمد وتحليل الخطأ','كل خطأ له سبب: قاعدة، تسرع، وقت، أو فخ. العلاج يختلف باختلاف السبب.','صنّف أخطاءك فتظهر لك خطة العلاج'],
   ['التغذية الراجعة الفورية','تعرف الصواب والسبب فور الإجابة في مرحلة التعلم، فلا يترسخ الخطأ.','وضع التعلم يصحح بعد كل سؤال'],
-  ['المحاكاة المطابقة','الأداء يتحسن حين تشبه ظروف التدريب ظروف الاختبار: التوقيت، الأقسام المقفلة، الواجهة.','محاكاة بصيغة المحوسب ٤ × ٢٤ × ٢٥'],
+  ['المحاكاة المطابقة','الأداء يتحسن حين تشبه ظروف التدريب ظروف الاختبار: التوقيت، الأقسام المقفلة، الواجهة.','محاكاة بصيغة الاختبار ٥ × ٢٤ × ٢٥'],
   ['الآلية والسرعة','حين تصبح القواعد تلقائية يتحرر ذهنك للتفكير. الهدف دقة ٩٥٪ ضمن زمن مستهدف لكل مهارة.','زمن مستهدف لكل مهارة في لوحة التقدم'],
   ['النوم والانتظام','الذاكرة تُثبَّت أثناء النوم، والجلسات القصيرة اليومية أنفع من المذاكرة المكثفة المتقطعة.','جلسة يومية ٣٠ دقيقة وسلسلة أيام متتالية']
  ],
@@ -1368,7 +1368,7 @@ const METHOD = {
   ['Interleaved practice','Mixing types in one session trains you to recognize a question type fast, which is exactly what the test demands.','Today\'s session mixes skills'],
   ['Deliberate practice and error analysis','Every mistake has a cause: a rule, rushing, time, or a trap. The fix depends on the cause.','Tag your mistakes to get the matching fix'],
   ['Immediate feedback','In the learning phase you see the right answer and why immediately, so errors do not set in.','Learning mode corrects after each question'],
-  ['Test-like simulation','Performance improves when practice conditions match test conditions: timing, locked sections, interface.','Computer-format simulation 4 × 24 × 25'],
+  ['Test-like simulation','Performance improves when practice conditions match test conditions: timing, locked sections, interface.','Test-format simulation 5 × 24 × 25'],
   ['Automaticity and speed','When rules become automatic, your mind is free to think. Target: 95% accuracy within a target time for each skill.','Target time per skill on the Progress page'],
   ['Sleep and consistency','Memory consolidates during sleep, and short daily sessions beat irregular cramming.','A 30-minute daily session and a day streak']
  ]
@@ -1376,8 +1376,9 @@ const METHOD = {
 
 const RESOURCES = [
  {cat:{ar:'رسمي',en:'Official'},items:[
-  {k:'official',t:{ar:'هيئة تقويم التعليم والتدريب',en:'Education & Training Evaluation Commission'},d:{ar:'التسجيل والمواعيد والرسوم والأدلة الإرشادية الرسمية مع نماذج أسئلة.',en:'Registration, dates, fees, official guides and sample questions.'},u:'https://www.etec.gov.sa'},
-  {k:'official',t:{ar:'صفحة خدمة القدرات العامة',en:'General Aptitude service page'},d:{ar:'وصف الاختبار وشروطه من المصدر الرسمي.',en:'Official test description and conditions.'},u:'https://www.etec.gov.sa/ar/service/GeneralAbilities'}]},
+  {k:'official',t:{ar:'هيئة تقويم التعليم والتدريب',en:'Education & Training Evaluation Commission'},d:{ar:'التسجيل والمواعيد والرسوم والأدلة الإرشادية الرسمية مع نماذج أسئلة.',en:'Registration, dates, fees, official guides and sample questions.'},u:'https://etec.gov.sa'},
+  {k:'official',t:{ar:'صفحة اختبار القدرات العامة',en:'General Aptitude Test page'},d:{ar:'وصف الاختبار وجدوله والتسجيل فيه من المصدر الرسمي.',en:'Official test description, schedule and registration.'},u:'https://etec.gov.sa/en/eservices-catalogue/individual/p-7d1870ff-a881-4e9a-9f9d-8f2a2c4df032'},
+  {k:'official',t:{ar:'الدليل الإرشادي لاختبار القدرات العامة',en:'Official GAT candidate guide (Arabic PDF)'},d:{ar:'مكونات الاختبار ونسب أنواع الأسئلة وأمثلة محلولة وتعليمات يوم الاختبار.',en:'Test components, question-type weights, worked examples and test-day rules.'},u:'https://media.etec.gov.sa/media/1izihxlo/%D8%A7%D9%84%D8%AF%D9%84%D9%8A%D9%84-%D8%A7%D9%84%D8%A7-%D8%B1%D8%B4%D8%A7%D8%AF%D9%8A-%D9%84%D8%A7%D8%AE%D8%AA%D8%A8%D8%A7%D8%B1-%D8%A7%D9%84%D9%82%D8%AF%D8%B1%D8%A7%D8%AA-%D8%A7%D9%84%D8%B9%D8%A7%D9%85%D8%A9.pdf'}]},
  {cat:{ar:'شرح مرئي (بحث يوتيوب مجهز)',en:'Video lessons (ready YouTube searches)'},items:[
   {k:'video',t:{ar:'تأسيس الكمي من الصفر',en:'Quant foundations from zero'},d:{ar:'قوائم تشغيل كاملة لشرح الحساب والجبر والهندسة. اختر مدرسًا واحدًا وأكمل قائمته.',en:'Full playlists for arithmetic, algebra and geometry. Pick one teacher and finish the playlist.'},yt:{ar:'تأسيس قدرات كمي كامل',en:'GAT quantitative full course'}},
   {k:'video',t:{ar:'استراتيجيات اللفظي',en:'Verbal strategies'},d:{ar:'التناظر واستيعاب المقروء والخطأ السياقي بطرق الحل السريعة.',en:'Analogies, reading and contextual error with fast methods.'},yt:{ar:'شرح قدرات لفظي كامل',en:'GAT verbal full course'}},
@@ -1400,7 +1401,7 @@ const yt = q=>'https://www.youtube.com/results?search_query='+encodeURIComponent
 Object.assign(T.ar,{
   proChip:'Pro', lockT:'للمشتركين', unlock:'افتح بالاشتراك', upgradeBtn:'اعرض الباقات', seePlans:'الباقات', later:'ليس الآن', dismiss:'إخفاء', loading:'جارٍ التحميل...', skill:'المهارة', minShort:'د',
   xpMin:n=>`${n} دقائق`,
-  ben:{test:'أقسام مؤقتة ومحاكاة كاملة بصيغة الاختبار المحوسب: ٤ أقسام، في كل قسم ٢٤ سؤالًا و٢٥ دقيقة.', models:'٣٠ نموذجًا كاملًا، ولكل نموذج مراجعة سؤالًا بسؤال.', skill:'تدريب موجّه على المهارة أو النمط الذي تختاره.', review:'راجع أي محاولة سابقة سؤالًا بسؤال.', analytics:'درجتك التقديرية وتحليل زمنك في كل مهارة.', est:'تطوّر درجتك التقديرية عبر الوقت.', detail:'تحليل تفصيلي للمهارات العشر كلها: الدقة والزمن.', causes:'تحليل أسباب أخطائك: قاعدة، تسرّع، وقت، فخ.', srs:'تكرار متباعد ذكي للأخطاء والبطاقات.', tech:'كل التقنيات والأنماط.', custom:'خصّص خطتك بموعد اختبارك ودرجتك المستهدفة.', plan:'الخطة كاملة حتى يوم اختبارك.', cards:'كل البطاقات والمفردات مع تكرار متباعد ذكي.', xp:'كل الشروحات المتحركة المسموعة.', daily:'تدريب يومي بلا حد.', mistakes:'صندوق أخطاء بلا حد، ومراجعة في مواعيد محسوبة.', diag:'أعد الاختبار التشخيصي متى شئت.'},
+  ben:{test:'أقسام مؤقتة ومحاكاة كاملة بصيغة الاختبار: ٥ أقسام، في كل قسم ٢٤ سؤالًا و٢٥ دقيقة.', models:'٣٠ نموذجًا كاملًا، ولكل نموذج مراجعة سؤالًا بسؤال.', skill:'تدريب موجّه على المهارة أو النمط الذي تختاره.', review:'راجع أي محاولة سابقة سؤالًا بسؤال.', analytics:'درجتك التقديرية وتحليل زمنك في كل مهارة.', est:'تطوّر درجتك التقديرية عبر الوقت.', detail:'تحليل تفصيلي للمهارات العشر كلها: الدقة والزمن.', causes:'تحليل أسباب أخطائك: قاعدة، تسرّع، وقت، فخ.', srs:'تكرار متباعد ذكي للأخطاء والبطاقات.', tech:'كل التقنيات والأنماط.', custom:'خصّص خطتك بموعد اختبارك ودرجتك المستهدفة.', plan:'الخطة كاملة حتى يوم اختبارك.', cards:'كل البطاقات والمفردات مع تكرار متباعد ذكي.', xp:'كل الشروحات المتحركة المسموعة.', daily:'تدريب يومي بلا حد.', mistakes:'صندوق أخطاء بلا حد، ومراجعة في مواعيد محسوبة.', diag:'أعد الاختبار التشخيصي متى شئت.'},
   moreTech:n=>`${n} من التقنيات الأخرى مع الاشتراك`, morePat:n=>`${n} من الأنماط الأخرى مع الاشتراك`, moreCards:n=>`${n} من البطاقات الأخرى مع الاشتراك، ومعها تكرار متباعد ذكي`, moreWords:n=>`${n} من الكلمات الأخرى مع الاشتراك`,
   dailyLeft:(n,m)=>`بقي لك اليوم ${n} من أسئلتك المجانية الـ ${m}`, dailyOut:'أنهيت أسئلتك المجانية لهذا اليوم، وتتجدد غدًا.', mistCap:n=>`تحفظ الخطة المجانية آخر ${n} من أخطائك.`,
   detail2:'تفصيل أضعف مهارتين',
@@ -1439,7 +1440,7 @@ Object.assign(T.ar,{
 Object.assign(T.en,{
   proChip:'Pro', lockT:'Pro', unlock:'Unlock with Pro', upgradeBtn:'See plans', seePlans:'Plans', later:'Not now', dismiss:'Dismiss', loading:'Loading...', skill:'Skill', minShort:'min',
   xpMin:n=>`${n} min`,
-  ben:{test:'Timed sections and full mocks in the computer-based format: 4 sections, each with 24 questions in 25 minutes.', models:'30 full model tests, each with question-by-question review.', skill:'Targeted practice on the skill or pattern you choose.', review:'Review any past attempt question by question.', analytics:'Your estimated score and time analysis per skill.', est:'Your estimated score over time.', detail:'Detailed analysis of all ten skills: accuracy and time.', causes:'Mistake-cause analysis: concept, careless, time, trap.', srs:'Smart spaced repetition for mistakes and cards.', tech:'Every technique and pattern.', custom:'Customize your plan with your test date and target score.', plan:'The full plan up to your test day.', cards:'Every flashcard and word, with smart spaced repetition.', xp:'Every animated, narrated explainer.', daily:'Unlimited daily practice.', mistakes:'An unlimited mistake box, with reviews on a smart schedule.', diag:'Retake the diagnostic any time.'},
+  ben:{test:'Timed sections and full mocks in the test format: 5 sections, each with 24 questions in 25 minutes.', models:'30 full model tests, each with question-by-question review.', skill:'Targeted practice on the skill or pattern you choose.', review:'Review any past attempt question by question.', analytics:'Your estimated score and time analysis per skill.', est:'Your estimated score over time.', detail:'Detailed analysis of all ten skills: accuracy and time.', causes:'Mistake-cause analysis: concept, careless, time, trap.', srs:'Smart spaced repetition for mistakes and cards.', tech:'Every technique and pattern.', custom:'Customize your plan with your test date and target score.', plan:'The full plan up to your test day.', cards:'Every flashcard and word, with smart spaced repetition.', xp:'Every animated, narrated explainer.', daily:'Unlimited daily practice.', mistakes:'An unlimited mistake box, with reviews on a smart schedule.', diag:'Retake the diagnostic any time.'},
   moreTech:n=>`${n} more techniques with Pro`, morePat:n=>`${n} more patterns with Pro`, moreCards:n=>`${n} more cards with Pro, with smart spaced repetition`, moreWords:n=>`${n} more words with Pro`,
   dailyLeft:(n,m)=>`${n} of ${m} free questions left today`, dailyOut:'You used today\'s free questions. They refresh tomorrow.', mistCap:n=>`The free plan keeps your last ${n} mistakes.`,
   detail2:'Detail for your two weakest skills',
@@ -1479,27 +1480,40 @@ Object.assign(T.en,{
 const GUIDE = {
   ar:[
     {id:'what',h:'ما هو اختبار القدرات العامة؟',body:`<p>اختبار معياري يقدمه المركز الوطني للقياس (قياس) التابع لهيئة تقويم التعليم والتدريب لطلاب المرحلة الثانوية، وتعتمد عليه الجامعات السعودية في القبول ضمن «النسبة الموزونة» مع المعدل التراكمي والاختبار التحصيلي.</p><p>لا يقيس ما حفظته من المنهج، بل قدرتك على <strong>الفهم والتحليل والاستنتاج</strong> باللغة والأرقام. لذلك ترتفع درجتك بالتدريب على المهارات، لا بحفظ الإجابات.</p>`},
-    {id:'format',h:'الصيغة والأقسام',body:`<div class="tbl"><table><thead><tr><th>البند</th><th>الورقي</th><th>المحوسب</th></tr></thead><tbody>
-      <tr><td>عدد الأسئلة</td><td>١٢٠ سؤالًا تقريبًا</td><td>نحو ٩٦ سؤالًا (حسب مصادر تعليمية حديثة)</td></tr>
-      <tr><td>الأقسام</td><td>خمسة أقسام</td><td>أربعة أقسام</td></tr>
-      <tr><td>زمن القسم</td><td>٢٥ دقيقة</td><td>٢٥ دقيقة</td></tr>
+    {id:'format',h:'الصيغة والأقسام',body:`<div class="tbl"><table><thead><tr><th>البند</th><th>الورقي</th><th>الرقمي (المحوسب)</th></tr></thead><tbody>
+      <tr><td>عدد الأسئلة</td><td colspan="2">١٢٠ سؤالًا</td></tr>
+      <tr><td>الأقسام</td><td colspan="2">خمسة أقسام، في كل قسم ٢٤ سؤالًا</td></tr>
+      <tr><td>زمن الاختبار</td><td colspan="2">ساعتان وخمس دقائق، أي بمعدل ٢٥ دقيقة للقسم</td></tr>
+      <tr><td>الموعد</td><td>فترات محددة تعلنها الهيئة</td><td>متاح طوال العام</td></tr>
+      <tr><td>المتاح لهم حاليًا</td><td>الصف الثالث الثانوي والخريجون</td><td>الصف الثاني والثالث الثانوي والخريجون</td></tr>
+      <tr><td>ظهور النتيجة</td><td>بعد قرابة شهر</td><td>خلال ٣–٥ أيام عمل</td></tr>
       <tr><td>نوع الأسئلة</td><td colspan="2">اختيار من متعدد بأربعة بدائل (أ، ب، ج، د)</td></tr>
       <tr><td>الآلة الحاسبة</td><td colspan="2">غير مسموح بها</td></tr>
       <tr><td>اللغة</td><td colspan="2">العربية أو الإنجليزية</td></tr>
-      <tr><td>الدرجة</td><td colspan="2">من ١٠٠، وصلاحية النتيجة خمس سنوات</td></tr></tbody></table></div>
-      <p>تتناوب الأقسام بين لفظي وكمي، ولا يمكن العودة إلى قسم بعد انتهاء وقته. والمحاكاة في أكاديمية القدرات تتبع صيغة المحوسب: ٤ أقسام × ٢٤ سؤالًا × ٢٥ دقيقة، أي نحو دقيقة لكل سؤال.</p>`},
-    {id:'weights',h:'وزن اللفظي والكمي حسب المسار',body:`<div class="tbl"><table><thead><tr><th>المسار</th><th>اللفظي</th><th>الكمي</th><th>ملاحظة</th></tr></thead><tbody>
-      <tr><td>علمي</td><td>٥٥٪ تقريبًا</td><td>٤٥٪ تقريبًا</td><td>يشمل الجبر والهندسة والتحليل</td></tr>
-      <tr><td>نظري</td><td>٧٥٪ تقريبًا</td><td>٢٥٪ تقريبًا</td><td>كمي أخف وبلا جبر متقدم</td></tr></tbody></table></div>
-      <p>توزيع الكمي في المسار العلمي كما تذكره مصادر تعليمية: حساب نحو ٤٠٪، هندسة نحو ٢٤٪، جبر نحو ٢٣٪، تحليل وإحصاء نحو ١٣٪. لذلك يبدأ الكمي في خطتك بالحساب.</p>`},
-    {id:'types',h:'أنواع الأسئلة',body:`<p><strong>اللفظي:</strong> التناظر اللفظي، إكمال الجمل، الخطأ السياقي، المفردة الشاذة، استيعاب المقروء.</p><p><strong>الكمي:</strong> الحساب، الجبر، الهندسة، التحليل والإحصاء، المقارنات الكمية.</p><p>لكل نوع درس كامل في صفحة <a href="#learn-lessons">الدروس</a>، يليه اختبار قصير.</p>`},
+      <tr><td>الفرص</td><td colspan="2">خمس فرص خلال ثلاث سنوات</td></tr>
+      <tr><td>الدرجة</td><td colspan="2">من ١٠٠، وصلاحية النتيجة خمس سنوات من تاريخ الاختبار</td></tr></tbody></table></div>
+      <p>هذه البيانات من الدليل الإرشادي الرسمي لهيئة تقويم التعليم والتدريب، ومن توضيحها لفئات الورقي والرقمي في سبتمبر ٢٠٢٦. في الاختبار الرقمي لكل قسم وقت محدد، ولا يمكن العودة إلى قسم بعد إنهائه. والمحاكاة في أكاديمية القدرات تتبع الصيغة نفسها: ٥ أقسام × ٢٤ سؤالًا × ٢٥ دقيقة، أي نحو دقيقة لكل سؤال، وكل قسم فيها لفظي أو كمي ليسهل عليك تحليل أدائك.</p>`},
+    {id:'weights',h:'وزن اللفظي والكمي حسب المسار',body:`<p>للاختبار نسختان بحسب مسارك في الثانوية:</p><div class="tbl"><table><thead><tr><th>النسخة</th><th>اللفظي</th><th>الكمي</th><th>المسارات</th></tr></thead><tbody>
+      <tr><td>التخصصات العلمية</td><td>٥٥٪</td><td>٤٥٪</td><td>العام، والصحة والحياة، وعلوم الحاسب والهندسة</td></tr>
+      <tr><td>التخصصات النظرية</td><td>٧٥٪</td><td>٢٥٪</td><td>الشرعي، وإدارة الأعمال (بلا جبر)</td></tr></tbody></table></div>
+      <div class="tbl"><table><thead><tr><th>نوع الأسئلة</th><th>العلمي</th><th>النظري</th></tr></thead><tbody>
+      <tr><td>استيعاب المقروء</td><td>٢١٪</td><td>٢٥٪</td></tr>
+      <tr><td>التناظر اللفظي</td><td>١٧٪</td><td>٢١٪</td></tr>
+      <tr><td>الخطأ السياقي</td><td>١٠٪</td><td>١٦٪</td></tr>
+      <tr><td>إكمال الجمل</td><td>٧٪</td><td>١٣٪</td></tr>
+      <tr><td>الحساب</td><td>٢٣٪</td><td>١٣٪</td></tr>
+      <tr><td>الهندسة</td><td>١٠٪</td><td>٨٪</td></tr>
+      <tr><td>التحليل والإحصاء</td><td>٨٪</td><td>٤٪</td></tr>
+      <tr><td>الجبر</td><td>٤٪</td><td>لا يوجد</td></tr></tbody></table></div>
+      <p>النسب من الدليل الإرشادي الرسمي، وهي من مجموع أسئلة الاختبار. الحساب أكبر أجزاء الكمي في النسختين، لذلك يبدأ الكمي في خطتك بالحساب.</p>`},
+    {id:'types',h:'أنواع الأسئلة',body:`<p><strong>اللفظي</strong> في الدليل الرسمي أربعة أنواع: التناظر اللفظي، إكمال الجمل، الخطأ السياقي، استيعاب المقروء. وتظهر في أمثلته أسئلة «الارتباط والاختلاف» (المفردة الشاذة) ضمن العلاقات اللفظية، ونفرد لها هنا مهارة مستقلة.</p><p><strong>الكمي</strong> أربعة مجالات: الحساب، الهندسة، الجبر (في نسخة التخصصات العلمية)، التحليل والإحصاء. وتأتي بعض أسئلته بصيغة «المقارنة» بين قيمتين بخيارات ثابتة، ونفرد لها مهارة مستقلة كذلك.</p><p>لكل نوع درس كامل في صفحة <a href="#learn-lessons">الدروس</a>، يليه اختبار قصير.</p>`},
     {id:'admission',h:'كيف تُستخدم الدرجة في القبول؟',body:`<p>تحسب الجامعات «النسبة الموزونة» من ثلاثة عناصر: المعدل التراكمي للثانوية، والقدرات، والتحصيلي. يختلف وزن القدرات بين الجامعات والتخصصات، وغالبًا ما يقع بين ٣٠٪ و٥٠٪. التخصصات الصحية والهندسية الأكثر تنافسًا تتطلب عادة درجات أعلى.</p><p>لذلك ترفع كل درجة تضيفها في القدرات نسبتك الموزونة مباشرة، والقدرات هي العنصر الذي تستطيع تحسينه أكثر من غيره في أقصر وقت.</p>`},
     {id:'register',h:'التسجيل ويوم الاختبار',body:`<ol class="steps">
-      <li>سجّل في بوابة قياس الإلكترونية عبر موقع هيئة تقويم التعليم والتدريب، واختر الاختبار واللغة ونوعه (ورقي أو محوسب).</li>
-      <li>اختر المدينة والمركز والموعد، وادفع الرسوم (نحو ١٥٠ ريالًا للمحوسب وفق مصادر ٢٠٢٥–٢٠٢٦، تحقق من القيمة الحالية).</li>
+      <li>سجّل عبر موقع هيئة تقويم التعليم والتدريب، واختر الاختبار ولغته ونوعه (ورقي أو رقمي).</li>
+      <li>اختر المدينة والمقر والموعد، وادفع الرسوم. الرسوم في الدليل الإرشادي الرسمي: ١٠٠ ريال للتسجيل المبكر في الورقي و١٥٠ للمتأخر، و١٥٠ للرقمي، و٢٠٠ خارج المملكة. قد تتغير، فتحقق من قيمتها عند التسجيل.</li>
       <li>احجز موعدك قبل ٦–٨ أسابيع على الأقل لتتسع خطتك لمرحلة المحاكاة.</li>
-      <li>يوم الاختبار: أحضر هويتك، وكن في المركز مبكرًا. لا آلة حاسبة ولا هاتف.</li>
-      <li>النتيجة: المحوسب خلال أيام عمل قليلة، والورقي خلال نحو شهر. يمكنك الإعادة ضمن عدد محاولات محدود، وتُحتسب الدرجة الأعلى عادة.</li></ol>`},
+      <li>يوم الاختبار: أحضر أصل هويتك السارية (الهوية الوطنية أو الإقامة أو جواز السفر أو رخصة القيادة السعودية)، واحضر قبل الموعد بـ ٣٠ دقيقة في الورقي و١٥ دقيقة في الرقمي. لا آلة حاسبة ولا هاتف.</li>
+      <li>النتيجة: الرقمي خلال ٣–٥ أيام عمل، والورقي بعد قرابة شهر، وتصلك برسالة نصية. للاختبار خمس فرص خلال ثلاث سنوات، وتُحتسب الدرجة الأعلى عادة.</li></ol>`},
     {id:'strategy',h:'استراتيجية الوقت داخل القاعة',body:`<ul class="bul"><li>لديك نحو ٦٢ ثانية لكل سؤال. السؤال الذي يتجاوز دقيقتين: علّمه وانتقل.</li><li>المعروف أن الإجابة الخاطئة لا تُخصم منها درجات، فلا تترك سؤالًا بلا إجابة.</li><li>في استيعاب المقروء: اقرأ السؤال قبل النص.</li><li>في المقارنات: جرّب ٠ و١ و−١ و½ قبل أن تحكم.</li><li>راجع المعلَّمات في آخر ٣ دقائق من القسم فقط.</li></ul>`},
     {id:'lessons-learned',h:'دروس من تجارب المتفوقين',body:`<p>خلاصة نصائح تتكرر عند الطلاب الذين تجاوزوا ٩٠، وفي أدلة التحضير المنشورة:</p><ul class="bul">
       <li><strong>مصدر واحد للتأسيس:</strong> التنقل بين المدرسين يضيّع وقتك، فأكمل مصدرًا واحدًا إلى آخره.</li>
@@ -1510,32 +1524,45 @@ const GUIDE = {
       <li><strong>النوم ليلة الاختبار</strong> أنفع من مراجعة أخيرة متعبة.</li></ul>`},
     {id:'faq',h:'أسئلة شائعة',body:`<details><summary>هل أسئلة «التجميعات» أسئلة حقيقية؟</summary><p>التجميعات أسئلة يتذكرها الطلاب بعد الاختبار ويعيد المعلمون صياغتها. مفيدة للتعرف على الأنماط، لكنها ليست رسمية وقد تحتوي أخطاء. الأسئلة الرسمية الوحيدة هي النماذج التي ينشرها قياس في أدلته.</p></details>
       <details><summary>كم أحتاج من الوقت للتحضير؟</summary><p>يوصي كثير من المختصين بثلاثة أشهر للمبتدئ، و٦–٨ أسابيع لمن لديه أساس جيد. وخطتك هنا تتكيف مع أي مدة من أسبوعين إلى ١٦ أسبوعًا.</p></details>
-      <details><summary>ورقي أم محوسب؟</summary><p>المحوسب أكثر مرونة في المواعيد ونتيجته أسرع عادةً، والورقي بموعد محدد. تختلف طريقة عرض نصوص الاستيعاب بين الصيغتين، فاطّلع على الدليل الإرشادي الرسمي. المهم أن تتدرب على الصيغة التي ستختبرها.</p></details>
+      <details><summary>ورقي أم رقمي (محوسب)؟</summary><p>مكونات الاختبار وعدد أسئلته واحدة في الصيغتين حسب الدليل الرسمي. الرقمي متاح طوال العام ونتيجته خلال ٣–٥ أيام عمل، وفيه مسودة إلكترونية ولا تعود إلى قسم أنهيته. والورقي في فترات محددة ونتيجته بعد قرابة شهر، وهو مخصص حاليًا لطلاب الصف الثالث الثانوي والخريجين حسب ما أوضحته الهيئة في سبتمبر ٢٠٢٦. المهم أن تتدرب على الصيغة التي ستختبرها.</p></details>
       <details><summary>هل الـ ١٠٠ ممكنة فعلًا؟</summary><p>نعم، الدرجة الكاملة ممكنة. الاختبار لا يقيس ذكاءً فطريًا ثابتًا، بل يأتي في عشرة أنماط محددة من الأسئلة. إذا أتقنت كل نمط بدقة ٩٥٪ فأكثر في أقل من دقيقة، وعالجت أخطاءك المتكررة، وتدربت على صيغة الاختبار حتى تألفها، صارت الـ ١٠٠ هدفًا واقعيًا. وتقيس صفحة «تقدّمي» جاهزيتك لها بمعايير واضحة.</p></details>`}
   ],
   en:[
     {id:'what',h:'What is the GAT?',body:`<p>A standardized test run by the National Center for Assessment (Qiyas) under the Education & Training Evaluation Commission for high school students. Saudi universities use it for admission as part of the "weighted percentage" alongside your GPA and the Achievement Test (Tahsili).</p><p>It does not test what you memorized from the curriculum. It measures your ability to <strong>understand, analyze and infer</strong> with language and numbers, so your score rises with skill practice, not by memorizing answers.</p>`},
-    {id:'format',h:'Format and sections',body:`<div class="tbl"><table><thead><tr><th>Item</th><th>Paper-based</th><th>Computer-based</th></tr></thead><tbody>
-      <tr><td>Questions</td><td>About 120</td><td>About 96 (per recent prep sources)</td></tr>
-      <tr><td>Sections</td><td>Five</td><td>Four</td></tr>
-      <tr><td>Time per section</td><td>25 minutes</td><td>25 minutes</td></tr>
+    {id:'format',h:'Format and sections',body:`<div class="tbl"><table><thead><tr><th>Item</th><th>Paper-based</th><th>Digital (computer-based)</th></tr></thead><tbody>
+      <tr><td>Questions</td><td colspan="2">120</td></tr>
+      <tr><td>Sections</td><td colspan="2">Five, with 24 questions each</td></tr>
+      <tr><td>Test time</td><td colspan="2">2 hours 5 minutes, an average of 25 minutes per section</td></tr>
+      <tr><td>Dates</td><td>Set windows announced by ETEC</td><td>Available all year</td></tr>
+      <tr><td>Currently open to</td><td>Third-year secondary students and graduates</td><td>Second- and third-year secondary students and graduates</td></tr>
+      <tr><td>Results</td><td>About a month later</td><td>Within 3–5 working days</td></tr>
       <tr><td>Question type</td><td colspan="2">Multiple choice with four options (A–D)</td></tr>
       <tr><td>Calculator</td><td colspan="2">Not allowed</td></tr>
       <tr><td>Language</td><td colspan="2">Arabic or English</td></tr>
-      <tr><td>Score</td><td colspan="2">Out of 100, valid for five years</td></tr></tbody></table></div>
-      <p>Sections alternate between verbal and quantitative, and you cannot return to a section once its time ends. Simulations in GAT Academy follow the computer-based format: 4 sections × 24 questions × 25 minutes, about one minute per question.</p>`},
-    {id:'weights',h:'Verbal vs. quantitative weight by track',body:`<div class="tbl"><table><thead><tr><th>Track</th><th>Verbal</th><th>Quant</th><th>Note</th></tr></thead><tbody>
-      <tr><td>Science</td><td>About 55%</td><td>About 45%</td><td>Includes algebra, geometry and analysis</td></tr>
-      <tr><td>Humanities</td><td>About 75%</td><td>About 25%</td><td>Lighter quant, no advanced algebra</td></tr></tbody></table></div>
-      <p>Prep sources report the science-track quant mix as roughly 40% arithmetic, 24% geometry, 23% algebra and 13% analysis & statistics, which is why your plan starts quant with arithmetic.</p>`},
-    {id:'types',h:'Question types',body:`<p><strong>Verbal:</strong> analogies, sentence completion, contextual error, odd word out, reading comprehension.</p><p><strong>Quantitative:</strong> arithmetic, algebra, geometry, analysis & statistics, quantitative comparison.</p><p>Each type has a full lesson on the <a href="#learn-lessons">Lessons</a> page, followed by a short quiz.</p>`},
+      <tr><td>Attempts</td><td colspan="2">Five within three years</td></tr>
+      <tr><td>Score</td><td colspan="2">Out of 100, valid for five years from the test date</td></tr></tbody></table></div>
+      <p>These facts come from the official candidate guide of the Education & Training Evaluation Commission (ETEC) and from its September 2026 clarification of who can sit the paper and digital tests. In the digital test each section has its own time, and you cannot return to a section once you finish it. Simulations in GAT Academy follow the same format: 5 sections × 24 questions × 25 minutes, about one minute per question. Each of our sections is all verbal or all quantitative, to make your results easier to analyze.</p>`},
+    {id:'weights',h:'Verbal vs. quantitative weight by track',body:`<p>The test has two versions, set by your secondary-school track:</p><div class="tbl"><table><thead><tr><th>Version</th><th>Verbal</th><th>Quant</th><th>Tracks</th></tr></thead><tbody>
+      <tr><td>Science</td><td>55%</td><td>45%</td><td>General, Health & Life Sciences, Computer Science & Engineering</td></tr>
+      <tr><td>Theoretical</td><td>75%</td><td>25%</td><td>Sharia, Business Administration (no algebra)</td></tr></tbody></table></div>
+      <div class="tbl"><table><thead><tr><th>Question type</th><th>Science</th><th>Theoretical</th></tr></thead><tbody>
+      <tr><td>Reading comprehension</td><td>21%</td><td>25%</td></tr>
+      <tr><td>Verbal analogy</td><td>17%</td><td>21%</td></tr>
+      <tr><td>Contextual error</td><td>10%</td><td>16%</td></tr>
+      <tr><td>Sentence completion</td><td>7%</td><td>13%</td></tr>
+      <tr><td>Arithmetic</td><td>23%</td><td>13%</td></tr>
+      <tr><td>Geometry</td><td>10%</td><td>8%</td></tr>
+      <tr><td>Analysis & statistics</td><td>8%</td><td>4%</td></tr>
+      <tr><td>Algebra</td><td>4%</td><td>None</td></tr></tbody></table></div>
+      <p>The percentages are from the official candidate guide and are shares of the whole test. Arithmetic is the largest part of quant in both versions, which is why your plan starts quant with arithmetic.</p>`},
+    {id:'types',h:'Question types',body:`<p><strong>Verbal</strong> has four types in the official guide: verbal analogy, sentence completion, contextual error and reading comprehension. Its examples also include "association and difference" (odd word out) items within verbal relationships, which we teach here as a skill of its own.</p><p><strong>Quantitative</strong> covers four areas: arithmetic, geometry, algebra (science version) and analysis & statistics. Some questions use the "comparison" format, two quantities with fixed options, which we also teach as a skill of its own.</p><p>Each type has a full lesson on the <a href="#learn-lessons">Lessons</a> page, followed by a short quiz.</p>`},
     {id:'admission',h:'How the score is used for admission',body:`<p>Universities compute a "weighted percentage" from your high school GPA, the GAT and the Tahsili. The GAT weight varies by university and program, commonly between 30% and 50%. Competitive health and engineering programs usually need higher scores.</p><p>Every point you add on the GAT lifts your weighted percentage directly, and it is the component you can improve most in the least time.</p>`},
     {id:'register',h:'Registration and test day',body:`<ol class="steps">
-      <li>Register on the Qiyas portal through the Education & Training Evaluation Commission website. Choose the test, language, and paper or computer format.</li>
-      <li>Choose city, center and date, and pay the fee (about 150 SAR for computer-based per 2025–2026 sources; check the current fee).</li>
+      <li>Register through the Education & Training Evaluation Commission (ETEC) website. Choose the test, its language, and the paper or digital format.</li>
+      <li>Choose city, center and date, and pay the fee. The official candidate guide lists 100 SAR for early paper registration, 150 SAR for late paper registration, 150 SAR for the digital test and 200 SAR outside the Kingdom. Fees can change, so check the amount when you register.</li>
       <li>Book at least 6–8 weeks ahead so your plan has room for the simulation phase.</li>
-      <li>On test day bring your ID and arrive early. No calculator, no phone.</li>
-      <li>Results: computer-based within a few working days, paper within about a month. Retakes are allowed within a limited number of attempts, and the higher score usually counts.</li></ol>`},
+      <li>On test day bring your original, valid ID (national ID, Iqama, passport or Saudi driving license) and arrive 30 minutes early for the paper test or 15 minutes early for the digital test. No calculator, no phone.</li>
+      <li>Results: digital within 3–5 working days, paper about a month later, sent to you by SMS. You have five attempts within three years, and the higher score usually counts.</li></ol>`},
     {id:'strategy',h:'Timing strategy in the hall',body:`<ul class="bul"><li>You have about 62 seconds per question. If one passes two minutes, mark it and move on.</li><li>Wrong answers are not known to cost you points, so never leave a question blank.</li><li>Reading: read the question before the passage.</li><li>Comparisons: test 0, 1, −1 and ½ before deciding.</li><li>Revisit marked questions only in the last 3 minutes of a section.</li></ul>`},
     {id:'lessons-learned',h:'Lessons from high scorers',body:`<p>Advice that comes up again and again from students who scored above 90, and in published prep guides:</p><ul class="bul">
       <li><strong>One foundation source:</strong> hopping between teachers wastes time. Pick one source and finish it.</li>
@@ -1546,15 +1573,16 @@ const GUIDE = {
       <li><strong>A good night’s sleep</strong> before the test beats a tired last-minute review.</li></ul>`},
     {id:'faq',h:'FAQ',body:`<details><summary>Are "compilation" (tajmeeat) questions real?</summary><p>Compilations are questions students recall after the test, reworded by teachers. They help you see patterns but are not official and can contain errors. The only official questions are the samples Qiyas publishes in its guides.</p></details>
       <details><summary>How long should I prepare?</summary><p>Many specialists recommend three months for beginners and 6–8 weeks for students with a solid base. Your plan here adapts to anything from 2 to 16 weeks.</p></details>
-      <details><summary>Paper or computer?</summary><p>Computer-based is usually more flexible and faster to score, while paper runs on fixed dates. Reading passages are displayed differently in each format, so check the official guide. Practice in the format you will sit.</p></details>
+      <details><summary>Paper or digital (computer-based)?</summary><p>The components and the number of questions are the same in both formats, per the official guide. The digital test is available all year, gives results within 3–5 working days, has an on-screen scratch pad and does not let you return to a finished section. The paper test runs in set windows with results about a month later, and is currently limited to third-year secondary students and graduates, as ETEC clarified in September 2026. Practice in the format you will sit.</p></details>
       <details><summary>Is 100 really achievable?</summary><p>Yes, a perfect score is possible. The test doesn’t measure fixed intelligence; its questions come in ten set types. Master each type at 95%+ accuracy in under a minute, fix your recurring mistakes, and practice the real format until it feels familiar, and 100 becomes a realistic target. The Progress page tracks your readiness for it against clear criteria.</p></details>`}
   ]
 };
 
 const GUIDE_SOURCES = [
-  ['هيئة تقويم التعليم والتدريب (الموقع الرسمي)','Education & Training Evaluation Commission (official)','https://www.etec.gov.sa'],
-  ['Dirasa Abroad: القدرات العامة','Dirasa Abroad: General Abilities Test','https://www.dirasaabroad.com/general-abilities-test/'],
-  ['درجات: دليل أقسام القدرات','Drjat: GAT sections guide','https://drjat.sa/qudrat'],
+  ['هيئة تقويم التعليم والتدريب (الموقع الرسمي)','Education & Training Evaluation Commission (official)','https://etec.gov.sa'],
+  ['الدليل الإرشادي لاختبار القدرات العامة (هيئة تقويم التعليم والتدريب)','Official GAT candidate guide (ETEC, Arabic PDF)','https://media.etec.gov.sa/media/1izihxlo/%D8%A7%D9%84%D8%AF%D9%84%D9%8A%D9%84-%D8%A7%D9%84%D8%A7-%D8%B1%D8%B4%D8%A7%D8%AF%D9%8A-%D9%84%D8%A7%D8%AE%D8%AA%D8%A8%D8%A7%D8%B1-%D8%A7%D9%84%D9%82%D8%AF%D8%B1%D8%A7%D8%AA-%D8%A7%D9%84%D8%B9%D8%A7%D9%85%D8%A9.pdf'],
+  ['صفحة اختبار القدرات العامة في موقع الهيئة','General Aptitude Test page (ETEC)','https://etec.gov.sa/en/eservices-catalogue/individual/p-7d1870ff-a881-4e9a-9f9d-8f2a2c4df032'],
+  ['عكاظ: فئات الاختبار الورقي والرقمي (سبتمبر ٢٠٢٦)','Okaz: who can sit the paper and digital tests (September 2026)','https://www.okaz.com.sa/local/na/2265965'],
   ['Keystone Tutors: GAT Guide','Keystone Tutors: GAT Guide','https://www.keystonetutors.com/news/general-aptitude-test-guide']
 ];
 
@@ -1821,8 +1849,10 @@ function takeQuant(skill,n,used){
   while(out.length<n) out.push(GENS[pick(GEN_BY_SKILL[skill])]());
   return shuffle(out);
 }
+/* the official guide: five sections of 24 questions (120 in 2 h 5 min); verbal is about 55% of the science version and 75% of the theoretical one */
+const mockOrder=()=>S.track==='sci'?['V','Q','V','Q','V']:['V','V','Q','V','V'];
 function modelSections(k,lang){
-  const ord=S.track==='sci'?['V','Q','V','Q']:['V','V','Q','V'];
+  const ord=mockOrder();
   ROT={k,c:{},vs:ord.filter(x=>x==='V').length,qs:ord.filter(x=>x==='Q').length}; const prev=rnd; rnd=mulberry(90001+k*7919+(S.track==='sci'?0:500)+(lang==='ar'?0:250));
   try{ const u=new Set(); return ord.map(a=>({a,qs:a==='V'?verbalSection(lang,u):quantSection(lang,u)})); } finally { rnd=prev; ROT=null; }
 }
@@ -1830,10 +1860,10 @@ function buildSkill(skill,n,lang,used=new Set()){
   let raws; if(SKILLS[skill].area==='V') raws= skill==='reading'? shuffle(takeReading(Math.ceil(n/4)+1,lang,used)).slice(0,n) : takeVerbal(skill,n,lang,used); else raws=takeQuant(skill,n,used);
   return raws.map(r=>materialize(r,lang));
 }
-function verbalSection(lang,used){ const rd=takeReading(2,lang,used); let qs=[]; [['analogy',6],['completion',5],['context',3],['odd',2]].forEach(([s,n])=>qs=qs.concat(takeVerbal(s,n,lang,used)));
+function verbalSection(lang,used){ const rd=takeReading(2,lang,used); let qs=[]; [['analogy',6],['completion',4],['context',4],['odd',2]].forEach(([s,n])=>qs=qs.concat(takeVerbal(s,n,lang,used)));
   let gap=24-qs.length-rd.length; while(gap>0){ qs.push(gap%2?genAnalogy(lang):genProverb(lang)); gap--; }
   return shuffle(qs).concat(rd).map(r=>materialize(r,lang)); }
-function quantSection(lang,used){ const mix=S.track==='sci'?[['arith',7],['algebra',5],['geometry',5],['stats',3],['comparison',4]]:[['arith',9],['algebra',2],['geometry',5],['stats',4],['comparison',4]]; let qs=[]; mix.forEach(([s,n])=>qs=qs.concat(takeQuant(s,n,used))); return shuffle(qs).map(r=>materialize(r,lang)); }
+function quantSection(lang,used){ const mix=S.track==='sci'?[['arith',9],['algebra',2],['geometry',5],['stats',4],['comparison',4]]:[['arith',10],['geometry',6],['stats',4],['comparison',4]]; let qs=[]; mix.forEach(([s,n])=>qs=qs.concat(takeQuant(s,n,used))); return shuffle(qs).map(r=>materialize(r,lang)); }
 /* diagnostic: 2 questions in each of the 10 skills (quant first, then verbal; reading = 2 questions on one passage) */
 function diagSet(lang){ const u=new Set(); let q=[]; Q_SKILLS.forEach(sk=>q=q.concat(takeQuant(sk,2,u))); let v=[]; V_SKILLS.filter(sk=>sk!=='reading').forEach(sk=>v=v.concat(takeVerbal(sk,2,lang,u)));
   const rd=takeReading(1,lang,u).slice(0,2); return shuffle(q).map(r=>materialize(r,lang)).concat(shuffle(v).concat(rd).map(r=>materialize(r,lang))); }
@@ -1866,7 +1896,7 @@ function startTest(kind,o={}){
   if(kind==='diag'){ title=t('pDiag'); sections=[sec(title,diagSet(lang),15)]; }
   else if(kind==='verbal'){ title=t('pVerbal'); sections=[sec(title,verbalSection(lang,used),25)]; }
   else if(kind==='quant'){ title=t('pQuant'); sections=[sec(title,quantSection(lang,used),25)]; }
-  else if(kind==='mock'){ title=t('pMock'); const ord=S.track==='sci'?['V','Q','V','Q']:['V','V','Q','V'];
+  else if(kind==='mock'){ title=t('pMock'); const ord=mockOrder();
     sections=ord.map((a,i)=>sec(`${t('sectionLabel')} ${numL(i+1)} · ${a==='V'?t('vShort'):t('qShort')}`,a==='V'?verbalSection(lang,used):quantSection(lang,used),25)); }
   else if(kind==='model'){ title=`${t('model')} ${numL(o.k+1)}`; sections=modelSections(o.k,lang).map((x,i)=>sec(`${t('sectionLabel')} ${numL(i+1)} · ${x.a==='V'?t('vShort'):t('qShort')}`,x.qs,25)); }
   else if(kind==='skill'){ mode='learn'; title=SKILLS[o.skill][lang]; sections=[sec(title,buildSkill(o.skill,10,lang,used),15)]; }
@@ -2295,7 +2325,7 @@ function pagePractice(){
     ${card('session',t('pSession'),t('pSessionD'),'feature',dmeta)}
     ${card('diag',t('pDiag'),t('pDiagD'),'',dt&&!pro?`<p class="small">✓ ${t('diagDone')}</p>`:'')}
     ${card('review',t('pReview'),t('pReviewD'),'',`${due?`<p class="due-n"><b class="num">${numL(due)}</b> ${t('due')}</p>`:''}${revHint}${!pro&&nMist>(+FREE.mistakesMax||0)?`<p class="small muted">${t('mistCap')(numL(FREE.mistakesMax))}</p>`:''}`)}
-    ${card('mock',t('pMock'),t('pMockD'),'dark',`<p class="small">${S.track==='sci'?(S.lang==='ar'?'علمي: لفظي، كمي، لفظي، كمي':'Science: V, Q, V, Q'):(S.lang==='ar'?'نظري: لفظي، لفظي، كمي، لفظي':'Humanities: V, V, Q, V')}</p>`)}
+    ${card('mock',t('pMock'),t('pMockD'),'dark',`<p class="small">${S.track==='sci'?(S.lang==='ar'?'علمي: لفظي، كمي، لفظي، كمي، لفظي':'Science: V, Q, V, Q, V'):(S.lang==='ar'?'نظري: لفظي، لفظي، كمي، لفظي، لفظي':'Theoretical: V, V, Q, V, V')}</p>`)}
     ${card('verbal',t('pVerbal'),t('pVerbalD'))}
     ${card('quant',t('pQuant'),t('pQuantD'))}
   </div>

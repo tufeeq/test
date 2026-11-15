@@ -60,9 +60,10 @@ async function push() {
     let S = A().getS(), p = JSON.stringify(S);
     if (p.length > 900000 || bytes(p) > 1500000) { if (A().shrink && A().shrink()) { S = A().getS(); p = JSON.stringify(S); } }
     if (p.length > 900000 || bytes(p) > 1500000) { status = "error"; A().cloudStatus(); return; }
-    await api("PUT", "/api/progress", { p, track: S.track, target: S.target, lang: S.lang, examDate: S.examDate || "", summary: A().summary() });
+    const { r: saved } = await call("PUT", "/api/progress", { p, track: S.track, target: S.target, lang: S.lang, examDate: S.examDate || "", summary: A().summary() });
     status = "ok"; lastSync = Date.now(); retry = 0;
-    try { etag = await head(); } catch (e) { etag = null; }
+    // the save's answer carries the new ETag of the cloud copy (exactly this save); only an older server needs to be asked
+    try { etag = saved.headers.get("ETag") || await head(); } catch (e) { etag = null; }
   } catch (e) {
     if (e.code === "unauthenticated") return expired();
     status = "error";

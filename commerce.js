@@ -210,12 +210,16 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
   app.post("/api/events", needUser, wrap(async (req, res) => {
     if (limited("ev:" + req.user.id, 600, 3600e3)) return fail(res, 429, "too-many-requests");
     const list = Array.isArray(req.body.events) ? req.body.events.slice(0, 50) : [];
+    // one statement for the whole batch (it used to be one round trip per event), rows in the order they were sent
+    // (ids ascending, and `at` a microsecond apart so sorting by time keeps that order).
+    // "open" is stored once per student per day and without k/v: the partial unique index events_open_once drops the repeats.
+    const ts = [], ks = [], vs = [];
     for (const e of list) {
       if (!e || !EVENT_TYPES.has(e.type)) continue;
-      const k = e.k == null ? null : String(e.k).slice(0, 64), v = typeof e.v === "number" && isFinite(e.v) ? e.v : null;
-      if (e.type === "open") await pool.query("INSERT INTO events(user_id,type) VALUES($1,'open') ON CONFLICT DO NOTHING", [req.user.id]);
-      else await pool.query("INSERT INTO events(user_id,type,k,v) VALUES($1,$2,$3,$4)", [req.user.id, e.type, k, v]);
+      const open = e.type === "open";
+      ts.push(e.type); ks.push(open || e.k == null ? null : String(e.k).slice(0, 64)); vs.push(!open && typeof e.v === "number" && isFinite(e.v) ? String(e.v) : null);
     }
+    if (ts.length) await pool.query(`INSERT INTO events(user_id,type,k,v,at) SELECT $1,x.t,x.k,x.v::numeric,now() + x.i * interval '1 microsecond' FROM unnest($2::text[],$3::text[],$4::text[]) WITH ORDINALITY AS x(t,k,v,i) ORDER BY x.i ON CONFLICT DO NOTHING`, [req.user.id, ts, ks, vs]);
     res.json({ ok: true });
   }));
 

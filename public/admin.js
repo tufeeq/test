@@ -151,7 +151,8 @@ const P = {
   gift: '<rect x="3" y="8" width="18" height="5" rx="1"/><path d="M5 13v7h14v-7M12 8v12M12 8c-1.5-3-5-3.5-5-1.5S10 8 12 8zM12 8c1.5-3 5-3.5 5-1.5S14 8 12 8z"/>',
   ban: '<circle cx="12" cy="12" r="9"/><path d="M5.6 5.6l12.8 12.8"/>',
   back: '<path d="M15 6l-6 6 6 6"/>',
-  undo: '<path d="M9 14L4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/>'
+  undo: '<path d="M9 14L4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/>',
+  bell: '<path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20.5a2.2 2.2 0 0 0 4 0"/>'
 };
 const ic = (n, cls = "") => `<svg viewBox="0 0 24 24" aria-hidden="true" class="${cls}">${P[n] || ""}</svg>`;
 
@@ -319,7 +320,8 @@ function shell() {
   app.removeAttribute("aria-busy");
   app.innerHTML = `<a class="sr" href="#adm-main" id="skip">${_("تخطَّ إلى المحتوى", "Skip to content")}</a><div class="shell">
   <aside class="side">
-    <a class="brand" href="#overview"><span class="logo">GAT</span><span><b>${_("أكاديمية القدرات", "GAT Academy")}</b><small>${_("لوحة التحكم", "Admin console")}</small></span></a>
+    <div class="brand-row"><a class="brand" href="#overview"><span class="logo">GAT</span><span><b>${_("أكاديمية القدرات", "GAT Academy")}</b><small>${_("لوحة التحكم", "Admin console")}</small></span></a>
+      <button class="btn ghost sm icon bell" id="b-bell" type="button" aria-haspopup="dialog" aria-expanded="false">${ic("bell")}<span class="bdg" id="bell-n" hidden></span></button></div>
     <nav aria-label="${_("أقسام لوحة التحكم", "Admin sections")}">${SECS.map(([id, a, e, i]) => `<a href="#${id}" data-sec="${id}">${ic(i)}<span>${_(a, e)}</span></a>`).join("")}</nav>
     <div class="side-acts">
       <div class="who"><span class="av" aria-hidden="true">${esc(initial)}</span><div><b>${esc(ME.name || _("مشرف", "Admin"))}</b><small dir="ltr">${esc(ME.email)}</small></div></div>
@@ -335,7 +337,9 @@ function shell() {
   $("#skip").addEventListener("click", e => { e.preventDefault(); MAIN.focus(); });
   $("#b-theme").addEventListener("click", () => { const m = toggleTheme(); shellButtons(); toast(m === "dark" ? _("تم تفعيل الوضع الداكن", "Dark mode on") : _("تم تفعيل الوضع الفاتح", "Light mode on"), "info"); });
   $("#b-lang").addEventListener("click", () => { LANG = LANG === "ar" ? "en" : "ar"; LS.set("masar100_admin_lang", LANG); applyLang(); closeDrawer(true); shell(); route(); toast(_("تم التبديل إلى العربية", "Switched to English"), "info"); });
-  $("#b-out").addEventListener("click", async () => { try { await api("POST", "/api/logout"); toast(_("تم تسجيل الخروج", "Signed out"), "info"); } catch (e) { fail(e, _("تعذّر تسجيل الخروج", "Couldn't sign out")); } ME = null; closeDrawer(true); loginView(); });
+  $("#b-bell").addEventListener("click", e => { e.stopPropagation(); NT.open ? closeNotif() : openNotif(); });
+  paintBell(); pollNotif();
+  $("#b-out").addEventListener("click", async () => { try { await api("POST", "/api/logout"); toast(_("تم تسجيل الخروج", "Signed out"), "info"); } catch (e) { fail(e, _("تعذّر تسجيل الخروج", "Couldn't sign out")); } ME = null; closeDrawer(true); closeNotif(true); clearTimeout(NT.timer); document.title = BASE_TITLE; loginView(); });
 }
 function shellButtons() { const b = $("#b-theme"); if (b) b.innerHTML = `${ic(isDark() ? "sun" : "moon")}<span class="lbl">${isDark() ? _("فاتح", "Light") : _("داكن", "Dark")}</span>`; }
 function markNav(sec) { $$(".side nav a").forEach(a => { const on = a.dataset.sec === sec; a.classList.toggle("on", on); if (on) { a.setAttribute("aria-current", "page"); a.scrollIntoView({ block: "nearest", inline: "nearest" }); } else a.removeAttribute("aria-current"); }); }
@@ -410,7 +414,7 @@ function notAdminView(u) {
   bindAuthTools(() => notAdminView(u));
   $("#so").addEventListener("click", async () => { await api("POST", "/api/logout").catch(() => {}); ME = null; toast(_("تم تسجيل الخروج", "Signed out"), "info"); loginView(); });
 }
-function sessionLost() { if (LOST) return; LOST = true; ME = null; closeDrawer(true); loginView("unauthenticated"); }
+function sessionLost() { if (LOST) return; LOST = true; ME = null; closeDrawer(true); closeNotif(true); clearTimeout(NT.timer); document.title = BASE_TITLE; loginView("unauthenticated"); }
 
 /* ================= 1. overview ================= */
 async function vOverview(tok) {
@@ -1100,6 +1104,85 @@ async function vAudit(tok) {
   $("#au-q").addEventListener("input", e => { S.auditQ = e.target.value.trim(); draw(); });
   onRefresh(route);
 }
+
+/* ================= notifications: new sign-ups ================= */
+// The bell polls the server every minute (and right away when the tab comes back). A sign-up that arrives while the
+// console is open raises a toast, and a system notification when the admin allowed them and the tab is in the background.
+const NT = { unread: 0, items: [], today: 0, top: null, open: false, timer: 0, busy: false };
+const BASE_TITLE = document.title;
+const provTag = u => (u.google ? "Google" : u.facebook ? "Facebook" : _("بريد", "Email"));
+function paintBell() {
+  const b = $("#b-bell"), n = $("#bell-n"); if (!b || !n) return;
+  n.hidden = !NT.unread; n.textContent = NT.unread > 99 ? "99+" : fmtN(NT.unread);
+  b.classList.toggle("has", NT.unread > 0);
+  const lbl = NT.unread ? _(`الإشعارات: ${fmtN(NT.unread)} مستخدم جديد`, `Notifications: ${NT.unread} new sign-up${NT.unread > 1 ? "s" : ""}`) : _("الإشعارات", "Notifications");
+  b.setAttribute("aria-label", lbl); b.title = lbl;
+  document.title = (NT.unread ? `(${NT.unread > 99 ? "99+" : NT.unread}) ` : "") + BASE_TITLE;
+}
+function sysNotify(u, more) {
+  if (!("Notification" in window) || Notification.permission !== "granted" || !document.hidden) return;
+  try {
+    const n = new Notification(_("مستخدم جديد في أكاديمية القدرات", "New sign-up on GAT Academy"), { body: (u.name ? u.name + " · " : "") + u.email + (more ? _(` و${more} آخرين`, ` and ${more} more`) : ""), tag: "gat-signup", icon: "/favicon.ico" });
+    n.onclick = () => { focus(); n.close(); openStudent(u.id); };
+  } catch (e) {}
+}
+async function pollNotif() {
+  clearTimeout(NT.timer);
+  if (!ME) return;
+  if (!NT.busy && !document.hidden) {
+    NT.busy = true;
+    try {
+      const r = await api("GET", "/api/admin/notifications");
+      const fresh = NT.top ? r.items.filter(u => u.created_at > NT.top) : [];
+      Object.assign(NT, { unread: r.unread, items: r.items, today: r.today, top: r.items[0] ? r.items[0].created_at : NT.top || "0" });
+      paintBell();
+      if (fresh.length) {
+        const u = fresh[0];
+        toast(fresh.length > 1 ? _(`${fmtN(fresh.length)} مستخدمين جدد سجّلوا`, `${fresh.length} new sign-ups`) : _("مستخدم جديد سجّل", "New sign-up"), "info", (u.name ? u.name + " · " : "") + u.email);
+        sysNotify(u, fresh.length - 1);
+      }
+      if (NT.open) drawNotif();
+    } catch (e) { if (e && e.code === "unauthenticated") return; } finally { NT.busy = false; }
+  }
+  NT.timer = setTimeout(pollNotif, 60e3);
+}
+document.addEventListener("visibilitychange", () => { if (!document.hidden && ME) pollNotif(); });
+function drawNotif() {
+  const box = $("#nt-pop"); if (!box) return;
+  const canAsk = "Notification" in window && Notification.permission === "default";
+  box.innerHTML = `<header class="nt-h"><b id="nt-t">${_("المسجّلون الجدد", "New sign-ups")}</b><small class="muted">${_(`اليوم: ${fmtN(NT.today)}`, `Today: ${NT.today}`)}</small>
+      <button class="btn ghost sm icon" type="button" data-nt-close aria-label="${_("إغلاق", "Close")}">${ic("x")}</button></header>
+    ${canAsk ? `<button class="btn ghost sm nt-perm" type="button" id="nt-perm">${ic("bell")}${_("نبّهني على الجهاز حتى لو كانت اللوحة في الخلفية", "Alert me on this device even when the console is in the background")}</button>` : ""}
+    ${NT.items.length ? `<ul class="nt-l">${NT.items.map(u => `<li><button type="button" class="nt-i${u.new ? " new" : ""}" data-nt-user="${esc(u.id)}">
+        <span class="av" aria-hidden="true">${esc((u.name || u.email || "?").trim().charAt(0).toUpperCase())}</span>
+        <span class="nt-x"><b>${esc(u.name || u.email)}</b>${u.name ? `<small dir="ltr">${esc(u.email)}</small>` : ""}<small class="muted">${esc(provTag(u))}</small></span>
+        <time datetime="${esc(u.created_at)}" title="${esc(fmtDT(u.created_at))}">${esc(rel(u.created_at))}</time>${u.new ? `<span class="sr">${_("جديد", "new")}</span>` : ""}</button></li>`).join("")}</ul>`
+      : `<p class="muted nt-empty">${_("لا يوجد مسجّلون بعد.", "No sign-ups yet.")}</p>`}
+    <footer class="nt-f"><a href="#students" data-nt-all>${_("كل الطلاب، الأحدث أولًا", "All students, newest first")}</a></footer>`;
+}
+async function openNotif() {
+  closeNotif(true);
+  const box = document.createElement("section"); box.id = "nt-pop"; box.className = "nt-pop"; box.setAttribute("role", "dialog"); box.setAttribute("aria-labelledby", "nt-t");
+  document.body.appendChild(box); NT.open = true; $("#b-bell").setAttribute("aria-expanded", "true");
+  drawNotif();
+  box.addEventListener("click", async e => {
+    const t = e.target;
+    if (t.closest("[data-nt-close]")) return closeNotif();
+    const u = t.closest("[data-nt-user]"); if (u) { closeNotif(true); return openStudent(u.dataset.ntUser, $("#b-bell")); }
+    if (t.closest("[data-nt-all]")) { S.st.sort = "new"; S.st.page = 0; closeNotif(true); if (curSec() === "students") route(); return; }
+    if (t.closest("#nt-perm")) { try { await Notification.requestPermission(); } catch (x) {} drawNotif(); if (Notification.permission === "granted") toast(_("ستصلك تنبيهات المسجّلين الجدد على هذا الجهاز", "You'll get sign-up alerts on this device"), "ok"); }
+  });
+  const f = box.querySelector(".nt-i, button"); if (f) f.focus();
+  // opening the bell marks everything as seen (the list keeps its "new" marks until it is closed)
+  if (NT.unread) { NT.unread = 0; paintBell(); try { await api("POST", "/api/admin/notifications/seen"); } catch (e) { fail(e); } }
+}
+function closeNotif(silent) {
+  const box = $("#nt-pop"); if (!box) return;
+  box.remove(); NT.open = false; NT.items.forEach(u => (u.new = false));
+  const b = $("#b-bell"); if (b) { b.setAttribute("aria-expanded", "false"); if (!silent) b.focus(); }
+}
+document.addEventListener("click", e => { if (NT.open && !e.target.closest("#nt-pop, #b-bell")) closeNotif(true); });
+document.addEventListener("keydown", e => { if (e.key === "Escape" && NT.open) closeNotif(); });
 
 const VIEWS = { overview: vOverview, funnel: vFunnel, students: vStudents, payments: vPayments, coupons: vCoupons, content: vContent, settings: vSettings, audit: vAudit };
 

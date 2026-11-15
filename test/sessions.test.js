@@ -13,7 +13,7 @@ run(async () => {
 
   section("cookie flags");
   let c = client();
-  const r0 = await fetch(BASE + "/api/signup", { method: "POST", headers: { "Content-Type": "application/json", "X-Masar": "1" }, body: JSON.stringify({ email, password: pw, name: "Sessions", consent: true }) });
+  const r0 = await fetch(BASE + "/api/signup", { method: "POST", headers: { "Content-Type": "application/json", "X-Masar": "1" }, body: JSON.stringify({ email, password: pw, name: "Sessions", phone: "0512345678", consent: true }) });
   const sc = r0.headers.get("set-cookie") || "";
   ok(/^m100=[\w-]{40,}; Path=\/; HttpOnly; SameSite=Lax; Max-Age=\d+$/.test(sc), "plain http: HttpOnly, SameSite=Lax, Path=/, Max-Age, no Secure", sc);
   ok(new RegExp(`Max-Age=${SESSION_DAYS * 86400}`).test(sc), `Max-Age is ${SESSION_DAYS} days`, sc);
@@ -98,7 +98,7 @@ run(async () => {
   // signup: 60 / hour per IP (checked before validation, so junk requests count too)
   for (let i = 0; i < 60; i++) last = await client()("POST", "/api/signup", { email: "bad" }, ip(600));
   ok(last.s === 400, "60 junk sign-ups are 400s");
-  last = await client()("POST", "/api/signup", { email: `ok_${runId}@t.com`, password: pw, name: "Late", consent: true }, ip(600));
+  last = await client()("POST", "/api/signup", { email: `ok_${runId}@t.com`, password: pw, name: "Late", phone: "0512345678", consent: true }, ip(600));
   ok(last.s === 429, "61st sign-up from one IP -> 429", last.s);
   // password change: 10 wrong attempts then 429, per account
   const pc = await signup(`pc_${runId}@t.com`, pw);

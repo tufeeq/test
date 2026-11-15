@@ -7,7 +7,7 @@ const { client, admin, sql, ok, section, run, uid, BASE } = require("./lib");
 // allowance the other suites share; the admin signs in (api.test.js has created the account) without a sign-up attempt
 const FWD = { "X-Forwarded-For": `10.251.${Math.floor(Math.random() * 250)}.${1 + Math.floor(Math.random() * 250)}` };
 async function signup(email) {
-  const c = client(); const r = await c("POST", "/api/signup", { email, password: "password123", name: "Delivery Test", consent: true }, FWD);
+  const c = client(); const r = await c("POST", "/api/signup", { email, password: "password123", name: "Delivery Test", phone: "0512345678", consent: true }, FWD);
   if (r.s !== 200) throw new Error("signup -> " + r.s + " " + JSON.stringify(r.j));
   c.user = r.j.user; return c;
 }

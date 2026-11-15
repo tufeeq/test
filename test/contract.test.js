@@ -223,7 +223,7 @@ run(async () => {
     if (s.up) {
       const f = (m, u, b) => fetch(s.base + u, { method: m, headers: { "Content-Type": "application/json", "X-Masar": "1" }, body: b ? JSON.stringify(b) : undefined });
       let x = await f("GET", "/api/config"); ok(x.status === 200, "fresh DB: /api/config uses the defaults");
-      x = await f("POST", "/api/signup", { email: "kid@fresh.test", password: "secretpass9", name: "Fresh Kid", consent: true }); ok(x.status === 200, "fresh DB: sign up works", x.status);
+      x = await f("POST", "/api/signup", { email: "kid@fresh.test", password: "secretpass9", name: "Fresh Kid", phone: "0512345678", consent: true }); ok(x.status === 200, "fresh DB: sign up works", x.status);
       x = await f("POST", "/api/login", { email: "kid@fresh.test", password: "wrong-password-77" }); ok(x.status === 401, "fresh DB: wrong password -> 401");
       x = await f("POST", "/api/login", "{oops");
       x = await fetch(s.base + "/api/login", { method: "POST", headers: { "Content-Type": "application/json", "X-Masar": "1" }, body: "{oops" }); ok(x.status === 400, "fresh DB: bad JSON -> 400");

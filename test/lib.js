@@ -27,7 +27,7 @@ function client() {
 }
 async function signup(email, pw = "password123", name = "Test User") {
   const c = client();
-  let r = await c("POST", "/api/signup", { email, password: pw, name, consent: true });
+  let r = await c("POST", "/api/signup", { email, password: pw, name, phone: "0512345678", consent: true });
   if (r.s === 409) r = await c("POST", "/api/login", { email, password: pw });
   if (r.s !== 200) throw new Error("signup " + email + " -> " + r.s + " " + JSON.stringify(r.j));
   c.user = r.j.user;

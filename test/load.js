@@ -29,7 +29,7 @@ async function req(k, ip, ck, method, url, body, hdr = {}) {
   let rounds = 0;
   await Promise.all([...Array(USERS)].map(async (_, u) => {
     const ip = `172.16.${u >> 8}.${u & 255}`, email = `load${u}_${run}@t.com`;
-    let ck = (await req("signup", ip, null, "POST", "/api/signup", { email, password: "password123", name: "Load User", consent: true })).ck;
+    let ck = (await req("signup", ip, null, "POST", "/api/signup", { email, password: "password123", name: "Load User", phone: "0512345678", consent: true })).ck;
     await new Promise(r => setTimeout(r, Math.random() * 1500));
     for (let i = 0; Date.now() < stop; i++) {
       if (i % 10 === 9) { const l = await req("login", ip, null, "POST", "/api/login", { email, password: "password123" }); if (l.ck) ck = l.ck; }

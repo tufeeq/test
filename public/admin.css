@@ -26,7 +26,8 @@ input[type=number]{font-variant-numeric:tabular-nums}
 /* ---------- shell ---------- */
 .shell{display:grid;grid-template-columns:252px minmax(0,1fr);min-block-size:100vh}
 .side{position:sticky;inset-block-start:0;block-size:100vh;background:var(--surface);border-inline-end:1.5px solid var(--line);display:grid;grid-template-rows:auto 1fr auto;grid-template-areas:"brand" "nav" "acts";gap:14px;padding:18px 14px;z-index:30}
-.side .brand{grid-area:brand;padding-inline:6px}
+.side .brand-row{grid-area:brand;display:flex;align-items:center;justify-content:space-between;gap:8px;min-width:0}
+.side .brand{padding-inline:6px;min-width:0}
 .side .brand b{font-size:1.05rem}
 .side nav{grid-area:nav;display:grid;gap:3px;align-content:start;overflow:auto}
 .side nav a{display:flex;align-items:center;gap:11px;padding:9px 12px;border-radius:12px;text-decoration:none;color:var(--ink2);font-weight:700;font-size:.92rem;position:relative}
@@ -463,3 +464,32 @@ dialog.dlg .row{justify-content:flex-end}
 /* period switch on narrow phones: labels stay on one line */
 .ph-acts .seg button{white-space:nowrap}
 @media (max-width:400px){.ph-acts .seg button{font-size:.76rem;padding-inline:4px}.ph-acts{gap:6px}}
+
+/* notifications bell + panel */
+.bell{position:relative;flex-shrink:0;inline-size:38px;min-block-size:38px}
+.bell svg{inline-size:20px;block-size:20px}
+.bell.has svg{color:var(--pri);animation:ring .9s ease-in-out 1}
+@keyframes ring{0%,100%{transform:rotate(0)}20%{transform:rotate(14deg)}40%{transform:rotate(-12deg)}60%{transform:rotate(8deg)}80%{transform:rotate(-4deg)}}
+@media (prefers-reduced-motion:reduce){.bell.has svg{animation:none}}
+.bell .bdg{position:absolute;inset-block-start:-3px;inset-inline-end:-3px;min-inline-size:19px;block-size:19px;padding:0 5px;border-radius:99px;background:var(--coral);color:#fff;font-size:.68rem;font-weight:800;line-height:19px;text-align:center;border:2px solid var(--surface)}
+.nt-pop{position:fixed;inset-block-start:70px;inset-inline-start:14px;inline-size:min(390px,calc(100% - 28px));max-block-size:min(560px,calc(100vh - 90px));display:grid;grid-template-rows:auto auto 1fr auto;background:var(--paper);border:2px solid var(--edge);border-radius:18px;box-shadow:var(--pop),0 24px 60px -20px rgba(0,0,0,.45);z-index:95;overflow:hidden;animation:fade .15s}
+.nt-h{display:flex;align-items:center;gap:10px;padding:12px 12px 10px 16px;border-bottom:1.5px solid var(--line)}
+[dir=rtl] .nt-h{padding:12px 16px 10px 12px}
+.nt-h b{font-family:var(--f-head);font-size:1rem}
+.nt-h small{margin-inline-end:auto;font-size:.78rem}
+.nt-perm{margin:10px 12px 0;justify-content:flex-start;text-align:start;white-space:normal;font-size:.8rem;line-height:1.4}
+.nt-perm svg{inline-size:16px;block-size:16px;flex-shrink:0}
+.nt-l{list-style:none;margin:0;padding:6px;overflow:auto}
+.nt-i{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:10px;inline-size:100%;padding:9px 10px;border:0;border-radius:12px;background:none;color:inherit;font:inherit;text-align:start;cursor:pointer;position:relative}
+.nt-i:hover,.nt-i:focus-visible{background:var(--surface2)}
+.nt-i.new{background:var(--pri-soft)}
+.nt-i.new::after{content:"";position:absolute;inset-inline-end:6px;inset-block-start:8px;inline-size:8px;block-size:8px;border-radius:50%;background:var(--coral)}
+.nt-i .av{inline-size:34px;block-size:34px;border-radius:50%;background:var(--n2);color:var(--note-ink);display:grid;place-items:center;font-weight:800;border:1.5px solid var(--edge)}
+.nt-x{display:grid;min-width:0;line-height:1.35}
+.nt-x b,.nt-x small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nt-x b{font-size:.88rem}.nt-x small{font-size:.74rem}
+.nt-i time{font-size:.74rem;color:var(--muted);white-space:nowrap}
+.nt-empty{padding:18px 16px;margin:0}
+.nt-f{border-top:1.5px solid var(--line);padding:10px 16px;font-size:.84rem;font-weight:700}
+@media (max-width:900px){.nt-pop{inset-block-start:58px;inset-inline:10px;inline-size:auto}}
+@media (pointer:coarse){.bell{inline-size:44px;min-block-size:44px}.nt-i{min-block-size:52px}}

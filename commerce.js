@@ -401,6 +401,26 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
   const SINCE = n => `(((now() AT TIME ZONE '${TZ}')::date - (${n})::int + 1)::timestamp AT TIME ZONE '${TZ}')`;
   const DAY = col => `to_char(${col} AT TIME ZONE '${TZ}','YYYY-MM-DD')`;
 
+  // ---------- notifications: new sign-ups since this admin last opened the bell ----------
+  // "seen" is kept per admin in settings (key adm_seen:<email>), so it follows the admin across devices.
+  // An admin who never opened the bell sees the last 24 hours as new.
+  const seenKey = req => "adm_seen:" + String(req.user.email || "").toLowerCase();
+  A("get", "/notifications", async (req, res) => {
+    const s = (await pool.query("SELECT value FROM settings WHERE key=$1", [seenKey(req)])).rows[0];
+    const seen = s && s.value && s.value.at ? new Date(s.value.at) : new Date(Date.now() - 864e5);
+    const [list, n] = await Promise.all([
+      pool.query(`SELECT id,email,name,created_at,(google_id IS NOT NULL) google,(facebook_id IS NOT NULL) facebook FROM users ORDER BY created_at DESC LIMIT 30`),
+      pool.query(`SELECT count(*) FILTER (WHERE created_at>$1)::int unread, count(*) FILTER (WHERE created_at>=${SINCE(1)})::int today FROM users`, [seen])
+    ]);
+    res.json({ seen_at: seen.toISOString(), unread: n.rows[0].unread, today: n.rows[0].today,
+      items: list.rows.map(u => ({ ...u, new: new Date(u.created_at) > seen })) });
+  });
+  A("post", "/notifications/seen", async (req, res) => {
+    const at = new Date().toISOString();
+    await pool.query("INSERT INTO settings(key,value,updated_at) VALUES($1,$2,now()) ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=now()", [seenKey(req), { at }]);
+    res.json({ ok: true, seen_at: at });
+  });
+
   A("get", "/overview", async (req, res) => {
     const days = Math.max(7, Math.min(365, Math.round(Number(req.query.days)) || 30));
     const q = (s, p) => pool.query(s, p).then(r => r.rows);

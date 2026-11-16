@@ -24,6 +24,16 @@ run(async () => {
   n0 = await count("dl");
   for (const ua of ["Googlebot/2.1 (+http://www.google.com/bot.html)", "WhatsApp/2.23", "facebookexternalhit/1.1", "Twitterbot/1.0"]) await (await fetch(BASE + "/dl/guide", { headers: { "User-Agent": ua, ...ip() } })).arrayBuffer();
   ok(await count("dl") === n0, "crawlers and link previews are not counted");
+  // the English edition is its own file, counted under its language
+  const en0 = +(await sql("SELECT count(*)::int n FROM guide_hits WHERE kind='dl' AND lang='en'"))[0].n;
+  r = await fetch(BASE + "/dl/guide?lang=en", { headers: { "User-Agent": "Mozilla/5.0 (iPhone) Safari", ...ip() } }); const enBuf = Buffer.from(await r.arrayBuffer());
+  ok(r.status === 200 && enBuf.slice(0, 5).toString() === "%PDF-" && enBuf.length !== buf.length && /filename="GAT-Academy-Guide-EN\.pdf"/.test(r.headers.get("content-disposition") || ""), "?lang=en serves the English edition", [r.status, enBuf.length, r.headers.get("content-disposition")]);
+  ok(+(await sql("SELECT count(*)::int n FROM guide_hits WHERE kind='dl' AND lang='en'"))[0].n === en0 + 1, "counted as an English download");
+  r = await fetch(BASE + "/dl/guide?lang=xx", { headers: { "User-Agent": "Mozilla/5.0 (iPhone) Safari", ...ip() } }); const xx = Buffer.from(await r.arrayBuffer());
+  ok(xx.length === buf.length, "any other language falls back to Arabic");
+  r = await fetch(BASE + "/?lang=en"); const enHtml = await r.text(); r = await fetch(BASE + "/"); const arHtml = await r.text();
+  ok(/href="\/dl\/guide\?lang=en"/.test(enHtml) && /guide-cover-en\.webp/.test(enHtml) && !/href="\/dl\/guide"/.test(enHtml), "the English landing page links the English edition");
+  ok(/href="\/dl\/guide"/.test(arHtml) && !/guide-cover-en/.test(arHtml), "the Arabic landing page links the Arabic edition");
   r = await fetch(BASE + "/guide.pdf"); ok(r.status === 404, "the file has no uncounted public address", r.status);
 
   section("anonymous hits");
@@ -43,6 +53,7 @@ run(async () => {
   // an existing student who downloaded it later is not a conversion
   const old = await join(`gd-old-${uid()}@test.local`); await old("POST", "/api/events", { events: [{ type: "guide_dl", v: Date.now() + 3600e3 }] });
   const g = (await A("GET", "/api/admin/guide")).j;
+  ok(g.downloads.en >= 1 && g.downloads.en < g.downloads.total, "downloads split by language", g.downloads);
   ok(g.downloads.total === await count("dl") && g.downloads.today >= 2 && g.series.length === 14 && g.series[13].n >= 2, "download totals and a 14-day series", [g.downloads, g.series.slice(-2)]);
   ok(g.tested.total === before.tested.total + 0 && g.tested.total >= 1 && g.visits.total >= 1, "test and visit counters", [g.tested, g.visits]);
   ok(g.signed_up === before.signed_up + 1 && g.students === before.students + 2, "only the sign-up after the download counts as a conversion", [before.signed_up, g.signed_up, g.students]);

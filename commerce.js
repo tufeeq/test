@@ -70,6 +70,7 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
       -- test = a test finished in a browser that downloaded the guide. Who signed up afterwards comes from the 'guide_dl' event.
       CREATE TABLE IF NOT EXISTS guide_hits (id BIGSERIAL PRIMARY KEY, kind TEXT NOT NULL, at TIMESTAMPTZ NOT NULL DEFAULT now());
       CREATE INDEX IF NOT EXISTS guide_hits_kind_idx ON guide_hits(kind, at);
+      ALTER TABLE guide_hits ADD COLUMN IF NOT EXISTS lang TEXT NOT NULL DEFAULT 'ar';
       CREATE TABLE IF NOT EXISTS events (
         id BIGSERIAL PRIMARY KEY, user_id TEXT REFERENCES users(id) ON DELETE CASCADE, type TEXT NOT NULL, k TEXT, v NUMERIC,
         day DATE NOT NULL DEFAULT CURRENT_DATE, at TIMESTAMPTZ NOT NULL DEFAULT now());
@@ -212,13 +213,14 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
 
   // ---------- the student guide (PDF) ----------
   // Always sent whole and never cached, so one request is one download; crawlers and link previews are not counted.
-  const GUIDE_FILE = require("path").join(__dirname, "data", "guide.pdf");
+  const GUIDES = { ar: { file: "guide.pdf", name: "GAT-Academy-Guide.pdf", title: "دليلك لاختبار القدرات - أكاديمية القدرات.pdf" }, en: { file: "guide-en.pdf", name: "GAT-Academy-Guide-EN.pdf", title: "Your guide to the GAT - GAT Academy.pdf" } };
   const BOT_UA = /bot|crawl|spider|slurp|preview|facebookexternalhit|whatsapp|telegram|twitter|discord|linkedin|monitor|curl|wget|python-requests|headless/i;
   app.get("/dl/guide", wrap(async (req, res) => {
+    const lang = req.query.lang === "en" ? "en" : "ar", G = GUIDES[lang], GUIDE_FILE = require("path").join(__dirname, "data", G.file); // ?lang=en is the English edition
     if (!require("fs").existsSync(GUIDE_FILE)) return res.status(404).type("text/plain").send("Not found");
-    if (!BOT_UA.test(req.get("User-Agent") || "") && !limited("gd:" + req.ip, 30, 3600e3)) await pool.query("INSERT INTO guide_hits(kind) VALUES('dl')");
+    if (!BOT_UA.test(req.get("User-Agent") || "") && !limited("gd:" + req.ip, 30, 3600e3)) await pool.query("INSERT INTO guide_hits(kind, lang) VALUES('dl', $1)", [lang]);
     res.set({ "Content-Type": "application/pdf", "Cache-Control": "no-store", "X-Robots-Tag": "noindex",
-      "Content-Disposition": "attachment; filename=\"GAT-Academy-Guide.pdf\"; filename*=UTF-8''" + encodeURIComponent("دليلك لاختبار القدرات - أكاديمية القدرات.pdf") });
+      "Content-Disposition": "attachment; filename=\"" + G.name + "\"; filename*=UTF-8''" + encodeURIComponent(G.title) });
     res.sendFile(GUIDE_FILE, { acceptRanges: false, cacheControl: false, lastModified: false, etag: false });
   }));
   app.post("/api/guide/hit", wrap(async (req, res) => {
@@ -484,7 +486,7 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
   // the download recorded in their browser (the 'guide_dl' event carries that time in v, in ms).
   A("get", "/guide", async (req, res) => {
     const [h, s, u, list] = await Promise.all([
-      pool.query(`SELECT kind, count(*)::int total, count(*) FILTER (WHERE at>=${SINCE(7)})::int week, count(*) FILTER (WHERE at>=${SINCE(1)})::int today FROM guide_hits GROUP BY kind`),
+      pool.query(`SELECT kind, count(*)::int total, count(*) FILTER (WHERE at>=${SINCE(7)})::int week, count(*) FILTER (WHERE at>=${SINCE(1)})::int today, count(*) FILTER (WHERE lang='en')::int en FROM guide_hits GROUP BY kind`),
       pool.query(`SELECT to_char(d,'YYYY-MM-DD') AS day, COALESCE(n,0)::int AS n FROM generate_series((now() AT TIME ZONE '${TZ}')::date - 13, (now() AT TIME ZONE '${TZ}')::date, '1 day') d
         LEFT JOIN (SELECT (at AT TIME ZONE '${TZ}')::date dd, count(*) n FROM guide_hits WHERE kind='dl' GROUP BY 1) x ON x.dd=d::date ORDER BY d`),
       pool.query(`WITH g AS (SELECT e.user_id, min(e.v) v FROM events e WHERE e.type='guide_dl' AND e.v BETWEEN 1760000000000 AND extract(epoch FROM now())*1000+86400000 GROUP BY e.user_id),
@@ -496,7 +498,7 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
         FROM (SELECT user_id, min(v) v FROM events WHERE type='guide_dl' AND v BETWEEN 1760000000000 AND extract(epoch FROM now())*1000+86400000 GROUP BY user_id) g JOIN users u ON u.id=g.user_id
         WHERE g.v IS NOT NULL AND u.created_at >= to_timestamp(g.v/1000.0) - interval '2 minutes' ORDER BY u.created_at DESC LIMIT 10`)
     ]);
-    const k = Object.fromEntries(h.rows.map(r => [r.kind, r])), z = { total: 0, week: 0, today: 0 };
+    const k = Object.fromEntries(h.rows.map(r => [r.kind, r])), z = { total: 0, week: 0, today: 0, en: 0 };
     res.json({ downloads: k.dl || z, visits: k.visit || z, tested: k.test || z, series: s.rows, ...u.rows[0], recent: list.rows });
   });
 

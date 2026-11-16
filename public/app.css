@@ -1075,3 +1075,31 @@ body.exam-open:has(#exam .rs) #toast{bottom:calc(20px + env(safe-area-inset-bott
 @media (max-width:600px){.dl-row{padding-inline:10px;column-gap:8px}.dl-n{font-size:.94rem}.dl-tag{font-size:.7rem;padding-inline:7px}}
 /* progress: the two locked figures carried the same sentence twice */
 .kpis .kpi-locked~.kpi-locked .ks{display:none}
+
+/* ---- first visit: one card and three steps ---- */
+.hero.hero-new{grid-template-columns:1fr;padding:clamp(18px,3.4vw,32px)}
+.hero.hero-new .hero-main{display:grid}
+.hero.hero-new h1{font-size:clamp(1.55rem,4vw,2.4rem)}
+.first-steps{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.first-steps li{display:flex;align-items:center;gap:12px;background:var(--surface);border:1.5px solid var(--line);border-radius:14px;padding:12px 14px}
+.first-steps .fs-n{flex:none;inline-size:36px;block-size:36px;border-radius:50%;display:grid;place-items:center;background:var(--pri-soft);color:var(--ink);font-family:var(--f-head);font-weight:800;border:1.5px solid var(--edge)}
+.first-steps b{display:block;font-family:var(--f-head);font-size:1rem;line-height:1.4}
+.first-steps li div span{font-size:.9rem;color:var(--muted);line-height:1.5}
+@media (min-width:760px){.first-steps{grid-template-columns:repeat(3,1fr)}.first-steps li{align-items:flex-start}}
+/* ---- result: save card for a guest, note under the first estimate ---- */
+.rs-save{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;background:var(--pri-soft);border-color:var(--pri)}
+.rs-save h3{margin:0 0 2px}.rs-save p{margin:0;font-size:.92rem;max-width:52ch}
+.rs-save .btn{flex:none}
+@media (max-width:560px){.rs-save .btn{inline-size:100%}}
+.rs-note{margin:10px 0 0;text-align:center}
+/* ---- one line that holds everything locked ---- */
+.pro-fold{margin-block:16px}
+.pro-fold>summary{list-style:none;display:flex;align-items:center;gap:10px;background:var(--butter-soft);color:var(--ink);border:1.5px dashed var(--warn);border-radius:12px;padding:10px 12px;cursor:pointer;line-height:1.5;font-size:.9rem;min-block-size:48px}
+.pro-fold>summary::-webkit-details-marker{display:none}
+.pro-fold>summary .lk{color:var(--warn-t);flex:none}
+.pro-fold>summary .pf-t{flex:1}
+.pro-fold>summary .pf-m{font-weight:800;font-size:.85rem;white-space:nowrap;color:color-mix(in srgb,var(--pri) 78%,var(--ink))}
+.pro-fold[open]>summary{border-style:solid}
+.pro-fold[open]>summary .o0,.pro-fold:not([open])>summary .o1{display:none}
+.pf-body{margin-block-start:14px;display:grid;gap:14px}
+.pf-body>.pf-cta{justify-self:start}

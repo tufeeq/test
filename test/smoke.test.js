@@ -68,6 +68,41 @@ const IGNORE = /fonts\.(googleapis|gstatic)\.com|ERR_TUNNEL_CONNECTION_FAILED|ER
   ok(shown && !/[<>‮]/.test(shown), "name shown as text with <> and RTL-override removed at sign-up", shown);
   const imgs = await page.evaluate(() => document.querySelectorAll("img[src='x']").length); ok(imgs === 0, "no <img> injected");
   await ctx.close();
+  section("first visit: the diagnostic runs without an account, then the result is saved by signing up");
+  {
+    const fwd = `10.253.${Math.floor(Math.random() * 250)}.${1 + Math.floor(Math.random() * 250)}`;
+    const c = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true, extraHTTPHeaders: { "X-Forwarded-For": fwd } });
+    const pg = await c.newPage(), errs = []; pg.on("pageerror", e => errs.push(String(e.message).slice(0, 160)));
+    await pg.goto(BASE + "/app", { waitUntil: "load" }); await pg.waitForTimeout(1200);
+    const first = await pg.evaluate(() => ({ starts: document.querySelectorAll("#main [data-start]").length, steps: document.querySelectorAll(".first-steps li").length, locks: document.querySelectorAll("#main [data-lock]").length }));
+    ok(first.starts === 1 && first.steps === 3 && first.locks === 0, "a new student sees one action and three steps, no locks", first);
+    await pg.click('[data-start="diag"]'); await pg.waitForTimeout(500);
+    ok(await pg.evaluate(() => document.querySelector("#acct").hidden) && !!(await pg.$(".opt")), "the first question shows with no sign-up form");
+    for (let i = 0; i < 40; i++) {
+      const o = await pg.$(".opt:not([disabled])"); if (!o) break; await o.click();
+      const nx = await pg.$("#ex-next"); if (nx) { await nx.click(); continue; }
+      await pg.click("#ex-end"); await pg.waitForTimeout(300);
+      await pg.evaluate(() => { const b = [...document.querySelectorAll("#exam button")].find(x => x.id !== "ex-end" && /^(إنهاء|Finish)/.test(x.innerText.trim())); if (b) b.click(); });
+      await pg.waitForTimeout(700); break;
+    }
+    const res = await pg.evaluate(() => ({ kpis: document.querySelectorAll(".rs-kpis > div").length, lock: !!document.querySelector(".rs-kpis .kpi-lock"), save: !!document.querySelector("#rs-save"), note: !!document.querySelector(".rs-note") }));
+    ok(res.kpis === 5 && !res.lock && res.note, "the diagnostic result shows the estimated score unlocked", res);
+    ok(res.save, "a guest is offered to save the result");
+    await pg.click("#rs-save"); await pg.waitForTimeout(300);
+    const em = `guest_${uid()}@t.com`;
+    await pg.fill("#ac-name", "Guest Journey"); await pg.fill("#ac-phone", "0512345678"); await pg.fill("#ac-email", em); await pg.fill("#ac-pass", "password123"); await pg.check("#ac-ok");
+    await pg.click("#ac-form button[type=submit]"); await pg.waitForTimeout(2500);
+    const aft = await pg.evaluate(() => ({ dialog: !document.querySelector("#acct").hidden, save: !!document.querySelector("#rs-save"), result: !!document.querySelector(".rs-head") }));
+    ok(!aft.dialog && !aft.save && aft.result, "after sign-up the result stays and the save card is gone", aft);
+    await pg.waitForTimeout(3500);
+    const srv = await pg.evaluate(async () => { const r = await fetch("/api/progress", { headers: { "X-Masar": "1" } }); const j = await r.json(); const st = JSON.parse(j.p || "{}"); return { kinds: (st.attempts || []).map(x => x.kind), diag: !!st.diag }; });
+    ok(srv.diag && srv.kinds.join() === "diag", "the guest's diagnostic is stored in the new account", srv);
+    await pg.click("#rs-close"); await pg.goto(BASE + "/app#practice"); await pg.waitForTimeout(900);
+    const pr = await pg.evaluate(() => { const f = document.querySelector('.pro-fold[data-fold="practice"]'); return { fold: !!f, open: f && f.open, free: document.querySelectorAll("#main > .pgrid .pcard").length, inFold: f ? f.querySelectorAll(".mbox").length : 0 }; });
+    ok(pr.fold && !pr.open && pr.free === 2 && pr.inFold === 30, "practice: free cards first, locked items folded behind one line", pr);
+    ok(!errs.length, "no page errors on the journey", errs);
+    await c.close();
+  }
   await browser.close();
   console.log(`  .    ${n} page loads`);
   await done();

@@ -344,6 +344,7 @@ module.exports = function site(app, { PUB, loadConfig, xpFreeVer }) {
       if (lang === "en") {
         html = translateHtml(html, { ...EN, ...(pay || {}) });
         html = html.replace(/<html lang="ar" dir="rtl"/, '<html lang="en" dir="ltr" data-ssr="en"');
+        html = html.replace(/href="\/dl\/guide"/g, 'href="/dl/guide?lang=en"').replace('src="/guide-cover.webp"', 'src="/guide-cover-en.webp"'); // the English edition of the student guide
         const t = META.en && META.en.title, d = META.en && META.en.desc;
         if (t) html = html.replace(/<title>[^<]*<\/title>/, `<title>${escText(t)}</title>`).replace(/(<meta property="og:title" content=")[^"]*/, "$1" + escAttr(t)).replace(/(<meta name="twitter:title" content=")[^"]*/, "$1" + escAttr(t));
         if (d) html = html.replace(/(<meta name="description" content=")[^"]*/, "$1" + escAttr(d)).replace(/(<meta property="og:description" content=")[^"]*/, "$1" + escAttr(d)).replace(/(<meta name="twitter:description" content=")[^"]*/, "$1" + escAttr(d));

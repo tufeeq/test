@@ -418,9 +418,32 @@ function notAdminView(u) {
 function sessionLost() { if (LOST) return; LOST = true; ME = null; closeDrawer(true); closeNotif(true); clearTimeout(NT.timer); document.title = BASE_TITLE; loginView("unauthenticated"); }
 
 /* ================= 1. overview ================= */
+/* the free student guide (PDF): downloads and what downloaders did next */
+function guideCard(G, kc) {
+  if (!G) return "";
+  const dl = G.downloads || {}, tot = num(dl.total), mx = Math.max(1, ...(G.series || []).map(x => num(x.n)));
+  const share = n => tot ? `${fmtPct(n / tot)} ${_("من التحميلات", "of downloads")}` : "";
+  const bars = (G.series || []).map(x => `<span class="gd-b${num(x.n) ? "" : " z"}" title="${esc(fmtDate(x.day))}: ${fmtN(x.n)}"><i style="block-size:${Math.max(4, Math.round(100 * num(x.n) / mx))}%"></i></span>`).join("");
+  const rec = G.recent || [];
+  return `<section class="card" id="guide-card"><div class="card-h"><h2>${_("دليل الطالب (PDF)", "Student guide (PDF)")}</h2><span class="sub">${_("التحميلات وما فعله من حمّلوه بعدها · كل الفترات", "downloads and what downloaders did next · all time")}</span></div>
+    <div class="kgrid">
+      ${kc("", "download", _("مرات التحميل", "Downloads"), fmtN(tot), `${_("اليوم", "Today")}: ${fmtN(dl.today)} · ${_("آخر ٧ أيام", "Last 7 days")}: ${fmtN(dl.week)}`, _("كل تحميل للملف من الموقع. لا تُحتسب زيارات محركات البحث ومعاينات الروابط.", "Every download of the file from the site. Search crawlers and link previews are not counted."))}
+      ${kc("sky", "check", _("جرّبوا اختبارًا بعد التحميل", "Took a test after downloading"), fmtN(num((G.tested || {}).total)), share(num((G.tested || {}).total)), _("أجهزة حمّلت الدليل ثم أُنهي عليها اختبار، سواء سجّل صاحبها أو بقي زائرًا.", "Devices that downloaded the guide and then finished a test, signed up or not."))}
+      ${kc("pink", "users", _("سجّلوا بعد التحميل", "Signed up after downloading"), fmtN(G.signed_up), `${share(num(G.signed_up))}${num(G.signed_up) ? ` · ${_("اختبر منهم", "tested")}: ${fmtN(G.signed_tested)}` : ""}`, _("حسابات أُنشئت بعد تحميل الدليل على الجهاز نفسه.", "Accounts created after the guide was downloaded on the same device."))}
+      ${kc("butter", "card", _("اشتركوا", "Subscribed"), fmtN(G.paid), num(G.signed_up) ? `${fmtPct(num(G.paid) / num(G.signed_up))} ${_("ممن سجّلوا", "of those sign-ups")}` : "", _("من سجّلوا بعد التحميل ثم فعّلوا اشتراكًا مدفوعًا.", "Students who signed up after downloading and then activated a paid plan."))}
+    </div>
+    <div class="gd-row">
+      <div class="gd-chart"><span class="small muted">${_("التحميل اليومي، آخر ١٤ يومًا", "Downloads per day, last 14 days")}</span><div class="gd-bars" role="img" aria-label="${esc(_("التحميل اليومي، آخر ١٤ يومًا", "Downloads per day, last 14 days"))}: ${esc((G.series || []).map(x => fmtN(x.n)).join(_("، ", ", ")))}">${bars}</div></div>
+      <div class="gd-list"><span class="small muted">${_("آخر من سجّلوا بعد التحميل", "Latest sign-ups after downloading")}</span>
+        ${rec.length ? `<ul>${rec.map(u => `<li><button class="btn link em" type="button" data-user="${esc(u.id)}">${esc(u.name || u.email)}</button><span class="small muted">${esc(rel(u.created_at))}${u.tested ? ` · ${_("اختبر", "tested")}` : ""}</span></li>`).join("")}</ul>` : `<p class="empty">${_("لا أحد بعد.", "No one yet.")}</p>`}</div>
+    </div>
+    <p class="small muted">${ic("info", "i16")} ${_(`زيارات عبر الروابط داخل الدليل: ${fmtN(num((G.visits || {}).total))}. التحويل يُحتسب على الجهاز الذي حُمّل عليه الدليل أو فُتح منه رابطه، فمن حمّله على جهاز وسجّل من جهاز آخر لا يظهر هنا.`, `Visits through links inside the guide: ${fmtN(num((G.visits || {}).total))}. Conversion is counted on the device that downloaded the guide or opened its link, so someone who downloads on one device and signs up on another is not shown here.`)}</p>
+  </section>`;
+}
+
 async function vOverview(tok) {
   const d = S.ovDays;
-  const [o] = await Promise.all([api("GET", `/api/admin/overview?days=${d}`), getSettings().catch(() => null)]);
+  const [o, , G] = await Promise.all([api("GET", `/api/admin/overview?days=${d}`), getSettings().catch(() => null), api("GET", "/api/admin/guide").catch(() => null)]);
   if (!live(tok)) return;
   const T = o.totals;
   const kc = (cls, icon, label, val, sub, tip) => `<div class="kcard ${cls}" ${tip ? `tabindex="0" data-tip-h="${esc(label)}" data-tip="${esc(tip)}"` : ""}><span class="kl muted"><i>${ic(icon)}</i>${esc(label)}</span><b class="kv">${val}</b>${sub ? `<span class="ks">${sub}</span>` : ""}</div>`;
@@ -441,6 +464,7 @@ async function vOverview(tok) {
     ${kc("", "cart", _("الطلبات", "Orders") + " · " + per, fmtN(T.orders), T.paidorders != null ? _(`${fmtN(T.paidorders)} مدفوعة · ${fmtN(T.orders - T.paidorders)} بقسيمة ١٠٠٪`, `${fmtN(T.paidorders)} paid · ${fmtN(T.orders - T.paidorders)} with a 100% coupon`) : _("دفعات مكتملة (تشمل قسائم ١٠٠٪)", "completed payments (incl. 100% coupons)"))}
     ${kc(T.expiring7 ? "pink" : "", "clock", _("تنتهي خلال ٧ أيام", "Expiring in 7 days"), fmtN(T.expiring7), _("طلاب ينتهي برو لديهم دون تجديد", "students whose pro ends, not renewed"))}
   </section>
+  ${guideCard(G, kc)}
   <section class="card"><div class="card-h"><h2>${_("التسجيلات اليومية", "Signups per day")}</h2><span class="sub">${d > 120 ? _("مجمّعة أسبوعيًا", "weekly totals") : _("لكل يوم", "per day")} · ${_("بتوقيت السعودية", "Saudi time")}</span></div>
     ${chartBox("signups", "", _("مخطط التسجيلات. استخدم الأسهم لقراءة القيم.", "Signups chart. Use arrow keys to read values."))}
     <div class="chart-foot"><span>${_("المجموع", "Total")}: <b>${fmtN(sum(sig))}</b></span>${dataTable(sig, v => fmtN(v))}</div></section>
@@ -457,6 +481,7 @@ async function vOverview(tok) {
   </section>`;
   onSeg("ov-p", v => { S.ovDays = +v; LS.set("adm_ovDays", S.ovDays); route(); });
   onRefresh(route);
+  MAIN.querySelectorAll("#guide-card [data-user]").forEach(b => b.addEventListener("click", () => openStudent(b.dataset.user, b)));
   drawChart("signups", { pts: sig, type: d > 30 ? "line" : "bar", int: true, fmt: v => fmtN(v) + " " + _("تسجيل", "signups"), axFmt: v => fmtN(v) });
   drawChart("active", { pts: act, type: "line", int: d <= 120, fmt: v => fmtN(v, 1) + " " + _("نشط", "active"), axFmt: v => fmtN(v, 1) });
   drawChart("revenue", { pts: rev, type: "bar", fmt: fmtMoney, axFmt: v => fmtN(v), empty: _("لا إيراد في هذه الفترة", "No revenue in this period") });

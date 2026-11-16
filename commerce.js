@@ -7,7 +7,7 @@ const MOY_API = process.env.MOYASAR_API_BASE || "https://api.moyasar.com/v1";
 // the gateway that takes new payments on the site itself, when its key is set (plans sold through the store never reach it)
 const PROVIDER = () => (process.env.MOYASAR_SECRET_KEY ? "moyasar" : null);
 const TZ = "Asia/Riyadh"; // day buckets, "today", DAU… are Saudi calendar days, not UTC
-const EVENT_TYPES = new Set(["open", "diag_start", "diag_done", "xp_start", "xp_done", "limit_hit", "upgrade_view", "checkout_start", "test_start", "test_done", "report_view"]);
+const EVENT_TYPES = new Set(["open", "diag_start", "diag_done", "xp_start", "xp_done", "limit_hit", "upgrade_view", "checkout_start", "test_start", "test_done", "report_view", "guide_dl"]);
 
 // Defaults: every value here can be changed from the admin dashboard (settings table).
 const FREE_XP = ["ar-order", "al-vars", "ge-angles", "st-mean", "cm-choices", "analogy", "co-signals", "re-main"];
@@ -66,6 +66,10 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
       CREATE TABLE IF NOT EXISTS coupons (
         code TEXT PRIMARY KEY, pct INT NOT NULL, max_uses INT, used INT NOT NULL DEFAULT 0, expires_at TIMESTAMPTZ,
         plan_ids TEXT[], active BOOLEAN NOT NULL DEFAULT true, note TEXT, created_at TIMESTAMPTZ NOT NULL DEFAULT now());
+      -- the free student guide (PDF): anonymous counters, no visitor id. kind: dl = file download, visit = arrived through a link inside the PDF,
+      -- test = a test finished in a browser that downloaded the guide. Who signed up afterwards comes from the 'guide_dl' event.
+      CREATE TABLE IF NOT EXISTS guide_hits (id BIGSERIAL PRIMARY KEY, kind TEXT NOT NULL, at TIMESTAMPTZ NOT NULL DEFAULT now());
+      CREATE INDEX IF NOT EXISTS guide_hits_kind_idx ON guide_hits(kind, at);
       CREATE TABLE IF NOT EXISTS events (
         id BIGSERIAL PRIMARY KEY, user_id TEXT REFERENCES users(id) ON DELETE CASCADE, type TEXT NOT NULL, k TEXT, v NUMERIC,
         day DATE NOT NULL DEFAULT CURRENT_DATE, at TIMESTAMPTZ NOT NULL DEFAULT now());
@@ -204,6 +208,25 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
     const p = await planOf(req.user);
     if (p.tier !== "pro") return res.status(402).set("Cache-Control", "private, no-store").end(); // never remembered: the student may subscribe a minute later
     res.set("X-Premium", "1"); next();
+  }));
+
+  // ---------- the student guide (PDF) ----------
+  // Always sent whole and never cached, so one request is one download; crawlers and link previews are not counted.
+  const GUIDE_FILE = require("path").join(__dirname, "data", "guide.pdf");
+  const BOT_UA = /bot|crawl|spider|slurp|preview|facebookexternalhit|whatsapp|telegram|twitter|discord|linkedin|monitor|curl|wget|python-requests|headless/i;
+  app.get("/dl/guide", wrap(async (req, res) => {
+    if (!require("fs").existsSync(GUIDE_FILE)) return res.status(404).type("text/plain").send("Not found");
+    if (!BOT_UA.test(req.get("User-Agent") || "") && !limited("gd:" + req.ip, 30, 3600e3)) await pool.query("INSERT INTO guide_hits(kind) VALUES('dl')");
+    res.set({ "Content-Type": "application/pdf", "Cache-Control": "no-store", "X-Robots-Tag": "noindex",
+      "Content-Disposition": "attachment; filename=\"GAT-Academy-Guide.pdf\"; filename*=UTF-8''" + encodeURIComponent("دليلك لاختبار القدرات - أكاديمية القدرات.pdf") });
+    res.sendFile(GUIDE_FILE, { acceptRanges: false, cacheControl: false, lastModified: false, etag: false });
+  }));
+  app.post("/api/guide/hit", wrap(async (req, res) => {
+    const kind = String(req.body && req.body.kind || "");
+    if (kind !== "test" && kind !== "visit") return fail(res, 400, "invalid");
+    if (limited("gh:" + req.ip, 20, 3600e3)) return fail(res, 429, "too-many-requests");
+    await pool.query("INSERT INTO guide_hits(kind) VALUES($1)", [kind]);
+    res.json({ ok: true });
   }));
 
   // ---------- usage events (for the conversion funnel and content analytics) ----------
@@ -455,6 +478,26 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
     const today = (await q(`SELECT to_char(now() AT TIME ZONE '${TZ}','YYYY-MM-DD') d`))[0].d;
     res.json({ days, today, tz: TZ, totals: { ...tot, revenueAll: tot.revenueall, free: tot.users - tot.pro, conversion: tot.users ? tot.pro / tot.users : 0 },
       series: { signups, active, revenue }, byPlan });
+  });
+
+  // the student guide: downloads, and what downloaders did next. Sign-ups are students whose account was created after
+  // the download recorded in their browser (the 'guide_dl' event carries that time in v, in ms).
+  A("get", "/guide", async (req, res) => {
+    const [h, s, u, list] = await Promise.all([
+      pool.query(`SELECT kind, count(*)::int total, count(*) FILTER (WHERE at>=${SINCE(7)})::int week, count(*) FILTER (WHERE at>=${SINCE(1)})::int today FROM guide_hits GROUP BY kind`),
+      pool.query(`SELECT to_char(d,'YYYY-MM-DD') AS day, COALESCE(n,0)::int AS n FROM generate_series((now() AT TIME ZONE '${TZ}')::date - 13, (now() AT TIME ZONE '${TZ}')::date, '1 day') d
+        LEFT JOIN (SELECT (at AT TIME ZONE '${TZ}')::date dd, count(*) n FROM guide_hits WHERE kind='dl' GROUP BY 1) x ON x.dd=d::date ORDER BY d`),
+      pool.query(`WITH g AS (SELECT e.user_id, min(e.v) v FROM events e WHERE e.type='guide_dl' AND e.v BETWEEN 1760000000000 AND extract(epoch FROM now())*1000+86400000 GROUP BY e.user_id),
+        j AS (SELECT u.id, (g.v IS NOT NULL AND u.created_at >= to_timestamp(g.v/1000.0) - interval '2 minutes') AS conv FROM g JOIN users u ON u.id=g.user_id)
+        SELECT count(*)::int students, count(*) FILTER (WHERE conv)::int signed_up,
+          (SELECT count(DISTINCT e.user_id) FROM events e JOIN j ON j.id=e.user_id WHERE j.conv AND e.type IN ('test_done','diag_done'))::int signed_tested,
+          (SELECT count(DISTINCT s.user_id) FROM subscriptions s JOIN j ON j.id=s.user_id WHERE j.conv AND s.source IN ('legacy','moyasar','coupon'))::int paid FROM j`),
+      pool.query(`SELECT u.id,u.email,u.name,u.created_at, EXISTS(SELECT 1 FROM events t WHERE t.user_id=u.id AND t.type IN ('test_done','diag_done')) AS tested
+        FROM (SELECT user_id, min(v) v FROM events WHERE type='guide_dl' AND v BETWEEN 1760000000000 AND extract(epoch FROM now())*1000+86400000 GROUP BY user_id) g JOIN users u ON u.id=g.user_id
+        WHERE g.v IS NOT NULL AND u.created_at >= to_timestamp(g.v/1000.0) - interval '2 minutes' ORDER BY u.created_at DESC LIMIT 10`)
+    ]);
+    const k = Object.fromEntries(h.rows.map(r => [r.kind, r])), z = { total: 0, week: 0, today: 0 };
+    res.json({ downloads: k.dl || z, visits: k.visit || z, tested: k.test || z, series: s.rows, ...u.rows[0], recent: list.rows });
   });
 
   A("get", "/funnel", async (req, res) => {

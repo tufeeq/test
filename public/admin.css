@@ -493,3 +493,17 @@ dialog.dlg .row{justify-content:flex-end}
 .nt-f{border-top:1.5px solid var(--line);padding:10px 16px;font-size:.84rem;font-weight:700}
 @media (max-width:900px){.nt-pop{inset-block-start:58px;inset-inline:10px;inline-size:auto}}
 @media (pointer:coarse){.bell{inline-size:44px;min-block-size:44px}.nt-i{min-block-size:52px}}
+
+/* student guide card */
+#guide-card .kgrid{margin-block-end:14px}
+#guide-card .kcard.sky{grid-column:auto}
+.gd-row{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:18px;margin-block-end:12px}
+@media (max-width:760px){.gd-row{grid-template-columns:1fr}}
+.gd-chart,.gd-list{display:grid;gap:8px;align-content:start}
+.gd-bars{display:flex;align-items:flex-end;gap:4px;block-size:84px;padding:6px 8px;background:var(--surface2);border-radius:12px}
+.gd-b{flex:1;block-size:100%;display:flex;align-items:flex-end}
+.gd-b i{display:block;inline-size:100%;background:var(--pri);border-radius:4px 4px 0 0;min-block-size:3px}
+.gd-b.z i{opacity:.25}
+.gd-list ul{list-style:none;margin:0;padding:0;display:grid;gap:4px}
+.gd-list li{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:4px 0;border-bottom:1px dashed var(--line)}
+.gd-list li:last-child{border-bottom:0}

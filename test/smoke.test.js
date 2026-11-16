@@ -4,7 +4,7 @@
 // and Chromium from PW_CHROMIUM (default /opt/pw-browsers/chromium). Without them the suite is skipped (exit code 3).
 "use strict";
 const path = require("path");
-const { signup, admin, ok, section, done, uid, BASE } = require("./lib");
+const { signup, admin, sql, ok, section, done, uid, BASE } = require("./lib");
 
 let chromium;
 try {
@@ -71,8 +71,15 @@ const IGNORE = /fonts\.(googleapis|gstatic)\.com|ERR_TUNNEL_CONNECTION_FAILED|ER
   section("first visit: the diagnostic runs without an account, then the result is saved by signing up");
   {
     const fwd = `10.253.${Math.floor(Math.random() * 250)}.${1 + Math.floor(Math.random() * 250)}`;
-    const c = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true, extraHTTPHeaders: { "X-Forwarded-For": fwd } });
+    const c = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true, extraHTTPHeaders: { "X-Forwarded-For": fwd },
+      userAgent: "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1" }); // headless browsers are not counted as downloads
     const pg = await c.newPage(), errs = []; pg.on("pageerror", e => errs.push(String(e.message).slice(0, 160)));
+    // the journey starts on the landing page with the free guide: the download is noted on this device only
+    const hits0 = await sql("SELECT kind, count(*)::int n FROM guide_hits GROUP BY kind"), hitN = (rows, k) => (rows.find(r => r.kind === k) || { n: 0 }).n;
+    await pg.goto(BASE + "/", { waitUntil: "load" }); await pg.waitForTimeout(600);
+    const [dl] = await Promise.all([pg.waitForEvent("download"), pg.click("#guide a.btn[data-guide]")]);
+    ok(/\/dl\/guide$/.test(dl.url()) && +(await pg.evaluate(() => localStorage.getItem("gat_guide"))) > 1.7e12, "landing: the guide button starts the download and the device remembers it", dl.url());
+    await dl.cancel().catch(() => {});
     await pg.goto(BASE + "/app", { waitUntil: "load" }); await pg.waitForTimeout(1200);
     const first = await pg.evaluate(() => ({ starts: document.querySelectorAll("#main [data-start]").length, steps: document.querySelectorAll(".first-steps li").length, locks: document.querySelectorAll("#main [data-lock]").length }));
     ok(first.starts === 1 && first.steps === 3 && first.locks === 0, "a new student sees one action and three steps, no locks", first);
@@ -111,6 +118,10 @@ const IGNORE = /fonts\.(googleapis|gstatic)\.com|ERR_TUNNEL_CONNECTION_FAILED|ER
       if (!r.n || r.split || r.chips || r.wide) badSteps.push([k, r]);
     }
     ok(!badSteps.length, `lesson steps keep numbers and formulas inside the sentence (${lessons.length} lessons)`, badSteps);
+    const hits1 = await sql("SELECT kind, count(*)::int n FROM guide_hits GROUP BY kind");
+    ok(hitN(hits1, "dl") === hitN(hits0, "dl") + 1 && hitN(hits1, "test") === hitN(hits0, "test") + 1, "guide: one download and one test-after-download counted", [hits0, hits1]);
+    const gev = await sql("SELECT e.v::float8 v, (u.created_at >= to_timestamp(e.v/1000.0)) AS conv FROM events e JOIN users u ON u.id=e.user_id WHERE u.email=$1 AND e.type='guide_dl'", [em]);
+    ok(gev.length === 1 && gev[0].conv === true, "guide: the new account carries the download, made before sign-up", gev);
     ok(!errs.length, "no page errors on the journey", errs);
     await c.close();
   }

@@ -1966,7 +1966,7 @@ function finishTest(){
   if(X.kind==='model'){ const m=S.models[X.mk]||{}; m.last=att.pct; m.est=est; m.best=Math.max(m.best||0,att.pct); m.date=d; m.aid=att.id; S.models[X.mk]=m; }
   saveDetail(att,all);
   save();
-  track('test_done',X.kind,att.pct); if(X.kind==='diag') track('diag_done',null,att.pct);
+  track('test_done',X.kind,att.pct); if(X.kind==='diag') track('diag_done',null,att.pct); guideTested();
   X.result={all,bySkill,correct,skipped,att,filter:'wrong'}; renderExam(); renderRoute(); { const st=calcStreak(); toast(STORE_OK?t('resultSaved')+(st>1?` · ${t('kStreak')}: ${numL(st)}`:''):tc('saveFail')); }
 }
 
@@ -2623,14 +2623,19 @@ function onEnter(h){
   if(h.startsWith('upgrade')){ track('upgrade_view','page');
     if(/(^|[?&])paid=1/.test(h)){ const go=(n=0)=>{ const C=window.CLOUD; if(C&&C.ready&&C.refresh) C.refresh(); else if(n<40) setTimeout(()=>go(n+1),250); }; go(); } }
   if(h==='report'){ track('report_view'); if(reportReady()&&!S.repSeen){ S.repSeen=1; save(); } } } /* seen once: the Today card steps aside; the Progress page keeps a link */
-function renderRoute(){
+/* the free guide: this device downloaded it (the landing page left a note). Once the student is signed in the download time
+   goes to their events, so a sign-up after it counts as coming from the guide; a finished test is reported once, anonymously. */
+const GUIDE_K='gat_guide';
+function guideMark(){ try{ const C=window.CLOUD, ts=+localStorage.getItem(GUIDE_K); if(!ts||!C||!C.user||localStorage.getItem(GUIDE_K+'_e')) return; C.track('guide_dl',null,ts); localStorage.setItem(GUIDE_K+'_e','1'); }catch(e){} }
+function guideTested(){ try{ if(!CLOUD_BUILD||!localStorage.getItem(GUIDE_K)||localStorage.getItem(GUIDE_K+'_t')) return; localStorage.setItem(GUIDE_K+'_t','1'); fetch('/api/guide/hit',{method:'POST',headers:{'Content-Type':'application/json','X-Masar':'1'},body:'{"kind":"test"}',keepalive:true}).catch(()=>{}); }catch(e){} }
+function renderRoute(){ guideMark();
   syncFree(); const r=route(), h=(location.hash||'#today').slice(1); if(h!==LAST_H){ LAST_H=h; onEnter(h); } document.documentElement.lang=S.lang; document.documentElement.dir=S.lang==='ar'?'rtl':'ltr';
   $('#brand-n').textContent=t('brand'); document.title=S.lang==='ar'?'أكاديمية القدرات | GAT Academy':'GAT Academy | أكاديمية القدرات'; { const L=S.lang==='ar'; $('#theme-btn').setAttribute('aria-label',L?'المظهر':'Theme'); $('#acct-btn')?.setAttribute('aria-label',L?'الحساب':'Account'); $('#nav').setAttribute('aria-label',L?'التنقل الرئيسي':'Main navigation'); $('#tabbar').setAttribute('aria-label',L?'التنقل السفلي':'Bottom navigation'); $('#lang-btn').setAttribute('lang',L?'en':'ar'); } $('#brand-t').textContent=t('tagline'); $('#lang-btn').textContent=t('switchLang');
   const links=NAV.map(k=>`<a href="#${k}" class="${r.p===k?'on':''}" ${r.p===k?'aria-current="page"':''}>${ICON[k]}<span>${t('nav.'+k)}</span></a>`).join('');
   $('#nav').innerHTML=links; $('#tabbar').innerHTML=links;
   const ab=$('#acct-btn'); if(ab){ const u=window.CLOUD?.user, nm=(u&&u.name)||''; ab.hidden=!window.CLOUD; ab.classList.toggle('on',!!u); ab.classList.toggle('has-name',!!nm); ab.title=u?(nm?nm+' · ':'')+(u.email||''):t('acctJoin');
     let sp=ab.querySelector('.acct-name'); if(nm){ if(!sp){ sp=document.createElement('span'); sp.className='acct-name'; ab.appendChild(sp); } sp.textContent=nm.split(' ')[0]; ab.setAttribute('aria-label',(S.lang==='ar'?'الحساب: ':'Account: ')+nm); } else if(sp) sp.remove(); }
-  let html; try{ html=r.v(); }catch(e){ console.error(e); html=errorCard(); } $('#main').innerHTML=notices()+html; $('#foot').innerHTML=esc(t('footer')).replace('info@gat.academy','<a class="mail-link" dir="ltr" href="mailto:info@gat.academy">info@gat.academy</a>')+` · <a class="foot-home" href="https://wa.me/966533522513" target="_blank" rel="noopener">${S.lang==='ar'?'واتساب':'WhatsApp'}</a> · <a class="foot-home" href="https://x.com/GATacademy1" target="_blank" rel="noopener">${S.lang==='ar'?'إكس':'X'}</a>`+(window.CLOUD?` · <a class="foot-home" href="/?home=1${S.lang==='en'?'&lang=en':''}">${t('aboutSite')}</a> · <a class="foot-home" href="/privacy${S.lang==='en'?'?lang=en':''}">${t('legalPrivacy')}</a> · <a class="foot-home" href="/terms${S.lang==='en'?'?lang=en':''}">${t('legalTerms')}</a>`:''); bindMain();
+  let html; try{ html=r.v(); }catch(e){ console.error(e); html=errorCard(); } $('#main').innerHTML=notices()+html; $('#foot').innerHTML=esc(t('footer')).replace('info@gat.academy','<a class="mail-link" dir="ltr" href="mailto:info@gat.academy">info@gat.academy</a>')+` · <a class="foot-home" href="https://wa.me/966533522513" target="_blank" rel="noopener">${S.lang==='ar'?'واتساب':'WhatsApp'}</a> · <a class="foot-home" href="https://x.com/GATacademy1" target="_blank" rel="noopener">${S.lang==='ar'?'إكس':'X'}</a> · <a class="foot-home" href="https://www.tiktok.com/@gat.academy1" target="_blank" rel="noopener">${S.lang==='ar'?'تيك توك':'TikTok'}</a>`+(window.CLOUD?` · <a class="foot-home" href="/?home=1${S.lang==='en'?'&lang=en':''}">${t('aboutSite')}</a> · <a class="foot-home" href="/privacy${S.lang==='en'?'?lang=en':''}">${t('legalPrivacy')}</a> · <a class="foot-home" href="/terms${S.lang==='en'?'?lang=en':''}">${t('legalTerms')}</a>`:''); bindMain();
   renderBanner(); renderProChip(); loadPremium(); if(NUDGE) renderNudge();
 }
 /* device/session notices shown above the page: a corrupt saved copy, a lost session, an unreachable server */

@@ -182,7 +182,7 @@
     finEyebrow: 'Five minutes is enough to start', finH: 'Find your level today. Start your plan tomorrow.',
     finP: 'Take the diagnostic for free, then watch the explainer for your weakest skill.',
     readGuide: 'Read the test guide',
-    footD: 'A complete kit to prepare for the General Aptitude Test, in Arabic and English.', footAria: 'Links', footApp: 'Open the app', footGuide: 'Test guide', footPrivacy: 'Privacy Policy', footTerms: 'Terms', footX: 'X: <bdi dir="ltr">@GATacademy1</bdi>', footWa: 'WhatsApp: <bdi dir="ltr">+966 53 352 2513</bdi>'
+    footD: 'A complete kit to prepare for the General Aptitude Test, in Arabic and English.', footAria: 'Links', footApp: 'Open the app', footGuide: 'Test guide', footPrivacy: 'Privacy Policy', footTerms: 'Terms', footX: 'X: <bdi dir="ltr">@GATacademy1</bdi>', footTt: 'TikTok: <bdi dir="ltr">@gat.academy1</bdi>', guideEyebrow: 'A free gift', guideH: 'The student guide to the GAT', guideP: 'Eight pages that sum up the test: its format and numbers, how the questions are weighted, how to prepare, and what to do on test day.', guideBtn: 'Download the free guide', guideNote: 'PDF in Arabic · 8 pages · no sign-up', footWa: 'WhatsApp: <bdi dir="ltr">+966 53 352 2513</bdi>'
   };
   /* payment wording follows the gateway that is live (the server marks it on <html data-pay="store|moyasar|none"> and
      renders the Arabic and English text from this table; site.js reads it, so keep it a plain literal) */
@@ -446,6 +446,23 @@
     });
   }
 
+  /* ---------- the free guide (PDF) ----------
+     A download, or arriving through a link inside the PDF, leaves a note on this device (no visitor id is sent). The app
+     reads it to tell the server, anonymously, that a guide reader took a test, and to mark a later sign-up as coming from the guide. */
+  function initGuide() {
+    var GK = 'gat_guide', mark = function () { try { if (!localStorage.getItem(GK)) localStorage.setItem(GK, String(Date.now())); } catch (e) {} };
+    $$('[data-guide]').forEach(function (a) { a.addEventListener('click', mark); });
+    try {
+      if (/[?&]utm_source=guide(&|$)/.test(location.search)) {
+        mark();
+        if (!localStorage.getItem(GK + '_v')) {
+          localStorage.setItem(GK + '_v', '1');
+          fetch('/api/guide/hit', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Masar': '1' }, body: '{"kind":"visit"}', keepalive: true }).catch(function () {});
+        }
+      }
+    } catch (e) {}
+  }
+
   /* ---------- gentle reveal for content below the fold ---------- */
   function initReveal() {
     if (!('IntersectionObserver' in window)) return;
@@ -480,6 +497,7 @@
     R.classList.remove('lp-pending');
     renderLive();
     initChrome();
+    initGuide();
     initDemo();
     initReveal();
     loadConfig();

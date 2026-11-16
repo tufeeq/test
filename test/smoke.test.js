@@ -100,6 +100,17 @@ const IGNORE = /fonts\.(googleapis|gstatic)\.com|ERR_TUNNEL_CONNECTION_FAILED|ER
     await pg.click("#rs-close"); await pg.goto(BASE + "/app#practice"); await pg.waitForTimeout(900);
     const pr = await pg.evaluate(() => { const f = document.querySelector('.pro-fold[data-fold="practice"]'); return { fold: !!f, open: f && f.open, free: document.querySelectorAll("#main > .pgrid .pcard").length, inFold: f ? f.querySelectorAll(".mbox").length : 0 }; });
     ok(pr.fold && !pr.open && pr.free === 2 && pr.inFold === 30, "practice: free cards first, locked items folded behind one line", pr);
+    await pg.goto(BASE + "/app#progress"); await pg.waitForTimeout(900);
+    const sv = await pg.evaluate(() => ({ card: !!document.querySelector("#save .save-auto.ok"), extra: ["bk-file", "bk-load", "bk-copy", "bk-in", "bk-imp"].filter(i => document.getElementById(i)) }));
+    ok(sv.card && !sv.extra.length, "progress: saving is shown as automatic, with no backup file or transfer code", sv);
+    const lessons = await pg.evaluate(() => ALL_SKILLS); let badSteps = [];
+    for (const k of lessons) {
+      await pg.goto(BASE + "/app#lesson-" + k); await pg.waitForTimeout(250);
+      const r = await pg.evaluate(() => ({ n: document.querySelectorAll("#main .nsteps li").length, split: [...document.querySelectorAll("#main .nsteps li")].filter(li => li.childNodes.length !== 1).length,
+        chips: [...document.querySelectorAll("#main .m")].filter(m => /grid|flex/.test(getComputedStyle(m.parentElement).display)).length, wide: document.documentElement.scrollWidth > innerWidth + 1 }));
+      if (!r.n || r.split || r.chips || r.wide) badSteps.push([k, r]);
+    }
+    ok(!badSteps.length, `lesson steps keep numbers and formulas inside the sentence (${lessons.length} lessons)`, badSteps);
     ok(!errs.length, "no page errors on the journey", errs);
     await c.close();
   }

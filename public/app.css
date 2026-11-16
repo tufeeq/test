@@ -1103,3 +1103,13 @@ body.exam-open:has(#exam .rs) #toast{bottom:calc(20px + env(safe-area-inset-bott
 .pro-fold[open]>summary .o0,.pro-fold:not([open])>summary .o1{display:none}
 .pf-body{margin-block-start:14px;display:grid;gap:14px}
 .pf-body>.pf-cta{justify-self:start}
+
+/* ---- saving is automatic: one status line instead of backup options ---- */
+.save-auto{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--surface2);border-radius:14px;padding:14px;border-inline-start:5px solid var(--pri)}
+.save-auto.ok{border-color:var(--ok)}.save-auto.bad{border-color:var(--coral)}
+.save-auto>div{flex:1;min-inline-size:200px;display:grid;gap:4px}
+.save-auto p{margin:0;color:var(--ink2);line-height:1.65}
+.save-auto .sa-ic{flex:none;inline-size:34px;block-size:34px;border-radius:50%;display:grid;place-items:center;background:var(--ok-soft);color:var(--ok-t)}
+.save-auto .sa-ic svg{inline-size:18px;block-size:18px}
+.save-card .save-auto+.row{margin-block-start:12px}
+.nsteps li>span{min-inline-size:0}

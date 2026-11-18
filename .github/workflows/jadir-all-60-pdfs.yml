@@ -1,0 +1,41 @@
+name: "Jadir - Download all 60 PDFs"
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "jadir-collector/collect_from_section.py"
+      - ".github/workflows/jadir-all-60-pdfs.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  download:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Download and verify all 60 PDFs from supplied source
+        run: python3 jadir-collector/collect_from_section.py --output output_60
+
+      - name: Publish one ZIP containing all 60 PDF files
+        uses: actions/upload-artifact@v4
+        with:
+          name: Jadir_60_PDFs
+          path: output_60/pdfs/*.pdf
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 6
+
+      - name: Upload diagnostics if something fails
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Jadir_60_Download_Report
+          path: output_60/download_report.json
+          if-no-files-found: ignore
+          retention-days: 7

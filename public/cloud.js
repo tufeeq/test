@@ -111,7 +111,10 @@ function resumeAction(email) {
     else if (a.t === "upgrade" && typeof openUpgrade === "function") openUpgrade(a.k);
   }), 0);
 }
+// a journey step for the anonymous visit statistics (v.js), once per visit
+const vstep = k => { try { if (window.GATV && !sessionStorage.getItem("gat_v_" + k)) { sessionStorage.setItem("gat_v_" + k, "1"); window.GATV.step(k); } } catch (e) {} };
 async function afterLogin(u) {
+  if (u && u.fresh) vstep("signup");
   const email = String(u.email || "").toLowerCase(), owner = ls.get(OWNER);
   // progress in this browser belongs to a different account (shared device): don't merge it into this one
   if (owner && owner !== email) {
@@ -132,7 +135,7 @@ window.CLOUD = {
   get user() { return user; }, get ready() { return checked; }, get offline() { return offline; }, get status() { return status; }, get lastSync() { return lastSync; }, google: false, resetByAdmin: true,
   queue() { if (!user) return; clearTimeout(timer); timer = setTimeout(push, 2500); },
   async pushNow() { if (!user) return; retry = 0; await push(); }, // never throws: callers read CLOUD.status ("error" = not synced)
-  async signUp(email, password, name, phone) { const r = await api("POST", "/api/signup", { email, password, name, phone, consent: true }); await afterLogin(r.user); },
+  async signUp(email, password, name, phone) { const r = await api("POST", "/api/signup", { email, password, name, phone, consent: true }); vstep("signup"); await afterLogin(r.user); },
   async setName(name) { const r = await api("POST", "/api/name", { name }); if (user) user.name = r.user.name; safe(() => A().render()); },
   async signIn(email, password) { const r = await api("POST", "/api/login", { email, password }); await afterLogin(r.user); },
   async signOut() {

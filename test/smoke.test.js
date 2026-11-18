@@ -122,6 +122,10 @@ const IGNORE = /fonts\.(googleapis|gstatic)\.com|ERR_TUNNEL_CONNECTION_FAILED|ER
     ok(hitN(hits1, "dl") === hitN(hits0, "dl") + 1 && hitN(hits1, "test") === hitN(hits0, "test") + 1, "guide: one download and one test-after-download counted", [hits0, hits1]);
     const gev = await sql("SELECT e.v::float8 v, (u.created_at >= to_timestamp(e.v/1000.0)) AS conv FROM events e JOIN users u ON u.id=e.user_id WHERE u.email=$1 AND e.type='guide_dl'", [em]);
     ok(gev.length === 1 && gev[0].conv === true, "guide: the new account carries the download, made before sign-up", gev);
+    // the anonymous visit statistics followed the same journey (one tab = one visit)
+    const vsid = await pg.evaluate(() => window.GATV && GATV.sid()); await pg.waitForTimeout(300);
+    const vrows = vsid ? await sql("SELECT path FROM visits WHERE sid=$1 ORDER BY n", [vsid]) : [], vp = vrows.map(r => r.path);
+    ok(vp[0] === "/" && vp.includes("/app#today") && vp.includes("/app#exam-diag") && vp.includes("/app#result-diag") && vp.includes("step:test_start") && vp.includes("step:test_done") && vp.includes("step:signup"), "visits: the journey is recorded page by page", vp);
     ok(!errs.length, "no page errors on the journey", errs);
     await c.close();
   }

@@ -71,6 +71,13 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
       CREATE TABLE IF NOT EXISTS guide_hits (id BIGSERIAL PRIMARY KEY, kind TEXT NOT NULL, at TIMESTAMPTZ NOT NULL DEFAULT now());
       CREATE INDEX IF NOT EXISTS guide_hits_kind_idx ON guide_hits(kind, at);
       ALTER TABLE guide_hits ADD COLUMN IF NOT EXISTS lang TEXT NOT NULL DEFAULT 'ar';
+      -- anonymous site visits, no cookies and no IP: sid is a random id kept in the tab's sessionStorage (gone when the tab closes,
+      -- renewed after 30 idle minutes). One row per page view (kind 'p') or journey step (kind 's'); n orders them within the visit.
+      -- dur = seconds the page was visible, depth = furthest scroll (%), sec = furthest landing section reached.
+      CREATE TABLE IF NOT EXISTS visits (id BIGSERIAL PRIMARY KEY, sid TEXT NOT NULL, n INT NOT NULL, kind TEXT NOT NULL DEFAULT 'p', path TEXT NOT NULL,
+        ref TEXT, src TEXT, dev TEXT, lang TEXT, at TIMESTAMPTZ NOT NULL DEFAULT now(), dur INT NOT NULL DEFAULT 0, depth INT NOT NULL DEFAULT 0, sec TEXT,
+        UNIQUE (sid, n));
+      CREATE INDEX IF NOT EXISTS visits_at_idx ON visits(at);
       CREATE TABLE IF NOT EXISTS events (
         id BIGSERIAL PRIMARY KEY, user_id TEXT REFERENCES users(id) ON DELETE CASCADE, type TEXT NOT NULL, k TEXT, v NUMERIC,
         day DATE NOT NULL DEFAULT CURRENT_DATE, at TIMESTAMPTZ NOT NULL DEFAULT now());
@@ -229,6 +236,28 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
     if (limited("gh:" + req.ip, 20, 3600e3)) return fail(res, 429, "too-many-requests");
     await pool.query("INSERT INTO guide_hits(kind) VALUES($1)", [kind]);
     res.json({ ok: true });
+  }));
+
+  // ---------- anonymous visits: page views, time on page, scroll depth, journey steps ----------
+  // POST /api/v {s, n, k:'p'|'s', p, r?, u?, d?, l?} records a page view or a step; {s, n, t?, y?, x?} later updates time, depth and section.
+  const V_SID = /^[a-z0-9]{8,24}$/, V_PATH = /^(\/|\/privacy|\/terms|\/app#[a-z][a-z0-9-]{0,30}|step:[a-z_]{2,20})$/, V_SEC = /^[a-z][a-z0-9-]{0,20}$/;
+  const vtxt = (v, n) => { const s = String(v == null ? "" : v).trim().toLowerCase().slice(0, n); return s ? s.replace(/[^\w.\-:/]/g, "") || null : null; };
+  app.post("/api/v", wrap(async (req, res) => {
+    const b = req.body || {}, sid = String(b.s || ""), n = Math.floor(Number(b.n));
+    if (!V_SID.test(sid) || !(n >= 1 && n <= 500)) return fail(res, 400, "invalid");
+    if (BOT_UA.test(req.get("User-Agent") || "")) return res.status(204).end();
+    if (limited("v:" + req.ip, 900, 3600e3)) return fail(res, 429, "too-many-requests");
+    if (b.p != null) {
+      const path = String(b.p), kind = b.k === "s" ? "s" : "p";
+      if (!V_PATH.test(path) || (kind === "s") !== path.startsWith("step:")) return fail(res, 400, "invalid");
+      await pool.query(`INSERT INTO visits(sid,n,kind,path,ref,src,dev,lang) VALUES($1,$2,$3,$4,$5,$6,$7,$8) ON CONFLICT (sid,n) DO NOTHING`,
+        [sid, n, kind, path, vtxt(b.r, 80), vtxt(b.u, 40), b.d === "m" ? "m" : b.d === "d" ? "d" : null, b.l === "en" ? "en" : b.l === "ar" ? "ar" : null]);
+    } else {
+      const t = Math.max(0, Math.min(7200, Math.round(Number(b.t)) || 0)), y = Math.max(0, Math.min(100, Math.round(Number(b.y)) || 0));
+      const x = b.x != null && V_SEC.test(String(b.x)) ? String(b.x) : null;
+      await pool.query(`UPDATE visits SET dur=GREATEST(dur,$3), depth=GREATEST(depth,$4), sec=COALESCE($5,sec) WHERE sid=$1 AND n=$2 AND kind='p' AND at>now()-interval '1 day'`, [sid, n, t, y, x]);
+    }
+    res.status(204).end();
   }));
 
   // ---------- usage events (for the conversion funnel and content analytics) ----------
@@ -500,6 +529,36 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
     ]);
     const k = Object.fromEntries(h.rows.map(r => [r.kind, r])), z = { total: 0, week: 0, today: 0, en: 0 };
     res.json({ downloads: k.dl || z, visits: k.visit || z, tested: k.test || z, series: s.rows, ...u.rows[0], recent: list.rows });
+  });
+
+  // visits: sessions per day, pages, where visitors leave, how far down the landing page they read, the visitor journey
+  A("get", "/visits", async (req, res) => {
+    const days = Math.max(1, Math.min(365, Math.round(Number(req.query.days)) || 30)), P = [days];
+    const W = `at>=${SINCE("$1")}`;
+    const [tot, ser, pages, secs, depth, steps, src, dev] = await Promise.all([
+      pool.query(`WITH s AS (SELECT sid, count(*) FILTER (WHERE kind='p') pv, sum(dur) dur, min(at) at FROM visits WHERE ${W} GROUP BY sid)
+        SELECT count(*)::int sessions, COALESCE(sum(pv),0)::int views, COALESCE(round(avg(dur)),0)::int avg_dur,
+          count(*) FILTER (WHERE pv<=1 AND dur<10)::int bounces, count(*) FILTER (WHERE at>=${SINCE(1)})::int today FROM s WHERE pv>0`, P),
+      pool.query(`SELECT ${DAY("at")} d, count(DISTINCT sid)::int n FROM visits WHERE ${W} AND kind='p' GROUP BY 1 ORDER BY 1`, P),
+      pool.query(`WITH v AS (SELECT sid, n, path, dur, max(n) OVER (PARTITION BY sid) last FROM visits WHERE ${W} AND kind='p'),
+          f AS (SELECT DISTINCT ON (sid) sid, path FROM visits WHERE ${W} AND kind='p' ORDER BY sid, n)
+        SELECT v.path, count(*)::int views, count(DISTINCT v.sid)::int sessions, COALESCE(round(avg(NULLIF(v.dur,0))),0)::int avg_dur,
+          count(*) FILTER (WHERE v.n=v.last)::int exits, (SELECT count(*) FROM f WHERE f.path=v.path)::int entries
+        FROM v GROUP BY v.path ORDER BY views DESC LIMIT 40`, P),
+      pool.query(`SELECT COALESCE(sec,'top') sec, count(*)::int n FROM visits WHERE ${W} AND kind='p' AND path='/' GROUP BY 1`, P),
+      pool.query(`SELECT width_bucket(depth,0,101,4) b, count(*)::int n FROM visits WHERE ${W} AND kind='p' AND path='/' GROUP BY 1`, P),
+      pool.query(`SELECT count(DISTINCT sid) FILTER (WHERE kind='p' AND path='/')::int landing,
+          count(DISTINCT sid) FILTER (WHERE kind='p' AND path LIKE '/app%')::int app,
+          count(DISTINCT sid) FILTER (WHERE path='step:test_start')::int test_start,
+          count(DISTINCT sid) FILTER (WHERE path='step:test_done')::int test_done,
+          count(DISTINCT sid) FILTER (WHERE path='step:signup')::int signup,
+          count(DISTINCT sid) FILTER (WHERE path='step:upgrade')::int upgrade FROM visits WHERE ${W}`, P),
+      pool.query(`SELECT COALESCE(src, ref, '') s, count(*)::int n FROM (SELECT DISTINCT ON (sid) sid, src, ref FROM visits WHERE ${W} AND kind='p' ORDER BY sid, n) f GROUP BY 1 ORDER BY n DESC LIMIT 12`, P),
+      pool.query(`SELECT COALESCE(dev,'') dev, count(DISTINCT sid)::int n FROM visits WHERE ${W} AND kind='p' GROUP BY 1`, P)
+    ]);
+    const today = (await pool.query(`SELECT ${DAY("now()")} d`)).rows[0].d;
+    res.json({ days, today, totals: tot.rows[0], series: ser.rows, pages: pages.rows, sections: secs.rows,
+      depth: depth.rows, steps: steps.rows[0], sources: src.rows, devices: dev.rows });
   });
 
   A("get", "/funnel", async (req, res) => {

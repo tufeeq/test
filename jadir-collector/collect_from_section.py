@@ -82,8 +82,8 @@ def anchors(html_bytes: bytes) -> list[tuple[str, str]]:
 
 
 def safe_filename(name: str) -> str:
-    cleaned = re.sub(r'[/\\:*?"<>|\\x00-\\x1f]', "_", name)
-    cleaned = re.sub(r"\\s+", "_", cleaned).strip(" ._-")
+    cleaned = re.sub(r'[^\w\- ]', "_", name, flags=re.UNICODE)
+    cleaned = re.sub(r"\s+", "_", cleaned).strip(" ._-")
     return cleaned[:95] or "untitled"
 
 
@@ -92,9 +92,9 @@ def discover_lessons(html_bytes: bytes) -> list[dict]:
     for href, label in anchors(html_bytes):
         resolved = urljoin(SECTION_URL, href)
         parsed = urlparse(resolved)
-        if parsed.hostname != "jadir-ksa.com" or not re.fullmatch(r"/learn/lesson/\\d+/?", parsed.path):
+        if parsed.hostname != "jadir-ksa.com" or not re.fullmatch(r"/learn/lesson/\d+/?", parsed.path):
             continue
-        match = re.match(r"^\\s*(\\d+)\\s*[-–—]\\s*(.*?)\\s*$", label)
+        match = re.match(r"^\s*(\d+)\s*[-–—]\s*(.*?)\s*$", label)
         if not match:
             continue
         number = int(match.group(1))
@@ -114,7 +114,7 @@ def discover_pdf(lesson_html: bytes, lesson_url: str) -> str:
         url = urljoin(lesson_url, href)
         parsed = urlparse(url)
         if (parsed.hostname == "jadir-ksa.com" and
-                re.fullmatch(r"/api/v1/lesson-blocks/\\d+/document/?", parsed.path)):
+                re.fullmatch(r"/api/v1/lesson-blocks/\d+/document/?", parsed.path)):
             if url not in urls:
                 urls.append(url)
     if len(urls) != 1:

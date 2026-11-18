@@ -1113,3 +1113,6 @@ body.exam-open:has(#exam .rs) #toast{bottom:calc(20px + env(safe-area-inset-bott
 .save-auto .sa-ic svg{inline-size:18px;block-size:18px}
 .save-card .save-auto+.row{margin-block-start:12px}
 .nsteps li>span{min-inline-size:0}
+/* figures inside questions (recurring sections) */
+.qfig{display:block;inline-size:100%;max-inline-size:260px;block-size:auto;margin:.2rem auto .6rem;color:inherit;overflow:visible}
+.qfig text{font-weight:600}

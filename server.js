@@ -216,7 +216,7 @@ async function createSession(req, res, userId) {
 async function auth(req, res, next) {
   const tok = parseCookies(req)[COOKIE];
   if (tok && tok.length <= 200) {
-    const r = await pool.query("SELECT u.id,u.email,u.name,s.expires_at FROM sessions s JOIN users u ON u.id=s.user_id WHERE s.token_hash=$1 AND s.expires_at>now()", [sha(tok)]);
+    const r = await pool.query("SELECT u.id,u.email,u.name,u.created_at,s.expires_at FROM sessions s JOIN users u ON u.id=s.user_id WHERE s.token_hash=$1 AND s.expires_at>now()", [sha(tok)]);
     const row = r.rows[0];
     if (row) {
       req.user = { id: row.id, email: row.email, name: row.name };
@@ -235,7 +235,8 @@ const needAdmin = (req, res, next) => !req.user ? fail(res, 401, "unauthenticate
 // CSRF guard: state-changing API calls must carry our header (browsers block it cross-site without CORS)
 // (payment-provider webhooks are server-to-server and verified by signature instead)
 const WEBHOOKS = new Set(["/billing/moyasar/callback"]);
-app.use("/api", (req, res, next) => (req.method === "GET" || req.get("X-Masar") === "1" || WEBHOOKS.has(req.path)) ? next() : fail(res, 403, "bad-origin"));
+// /api/v (anonymous visit statistics) also takes navigator.sendBeacon, which cannot set headers; it changes nothing but its own counters
+app.use("/api", (req, res, next) => (req.method === "GET" || req.get("X-Masar") === "1" || WEBHOOKS.has(req.path) || (req.path === "/v" && req.method === "POST")) ? next() : fail(res, 403, "bad-origin"));
 const wrap = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 app.use("/api", (req, res, next) => { res.set("Cache-Control", "no-store"); next(); }); // per-user data: never cache
 app.use("/api", wrap(auth));
@@ -246,7 +247,8 @@ const O = oauth(app, { pool, wrap, createSession: (...a) => createSession(...a),
 // ---------- account ----------
 app.get("/api/me", wrap(async (req, res) => {
   const c = await C.loadCfg();
-  res.json({ user: req.user ? { ...pub(req.user), plan: await C.planOf(req.user) } : null, config: C.publicCfg(c) });
+  // fresh: the account was created in the last 15 minutes (the visit statistics count a Google/Facebook sign-up from it)
+  res.json({ user: req.user ? { ...pub(req.user), plan: await C.planOf(req.user), ...(req.user.created_at && Date.now() - new Date(req.user.created_at) < 15 * 60e3 ? { fresh: true } : {}) } : null, config: C.publicCfg(c) });
 }));
 
 app.post("/api/name", needUser, wrap(async (req, res) => {

@@ -1916,6 +1916,7 @@ function startTest(kind,o={}){
   else if(kind==='skill'){ mode='learn'; title=SKILLS[o.skill][lang]; sections=[sec(title,buildSkill(o.skill,10,lang,used),15)]; }
   else if(kind==='session'){ mode='learn'; title=t('sessionTitle'); let qs=sessionSet(lang); const left=dailyLeft(); if(qs.length>left) qs=qs.slice(0,left); sections=[sec(title,qs,Math.max(5,Math.round(qs.length*1.3)))]; }
   else if(kind==='review'){ const d=dueList(lang).slice(0,Math.min(20,dailyLeft())); if(!d.length){ toast(t('noDue')); return; } mode='learn'; title=t('pReview'); sections=[sec(title,d.map(m=>({...m})),Math.max(5,d.length*1.5))]; }
+  vpage('exam-'+kind); vstep('test_start');
   X={kind,title,mode,sections,si:0,qi:0,lang,task:o.task||null,skill:o.skill||null,mk:o.k,qStart:Date.now(),tickAt:Date.now(),confirm:null,showMap:false};
   try{ document.activeElement?.blur?.(); }catch(e){}
   examShow(true);
@@ -1941,7 +1942,7 @@ function closeSection(){ logTime(); X.confirm=null; if(X.si<X.sections.length-1)
 function answeredN(){ return X.sections.reduce((a,s)=>a+s.ans.filter(x=>x!=null).length,0); }
 function quitTest(){ takePending(); if(X&&!X.result&&!X.reviewOnly&&(X.kind==='session'||X.kind==='review')){ addDaily(answeredN()); save(); }
   const nudge=X&&X.result&&!X.reviewOnly&&(X.kind==='session'||X.kind==='review')&&!PRO()&&dailyLeft()<=0;
-  clearInterval(timer); clearLive(); X=null; examShow(false); if(nudge) maybeNudge('daily'); }
+  clearInterval(timer); clearLive(); const wasX=!!X; X=null; examShow(false); if(wasX) vpage((location.hash||'#today').slice(1).split(/[?-]/)[0]||'today'); if(nudge) maybeNudge('daily'); }
 function finishTest(){
   if(!X||X.result||X.reviewOnly) return;
   clearInterval(timer); clearLive(); takePending(); const d=todayStr(); const INT=[1,3,7,14];
@@ -1966,7 +1967,7 @@ function finishTest(){
   if(X.kind==='model'){ const m=S.models[X.mk]||{}; m.last=att.pct; m.est=est; m.best=Math.max(m.best||0,att.pct); m.date=d; m.aid=att.id; S.models[X.mk]=m; }
   saveDetail(att,all);
   save();
-  track('test_done',X.kind,att.pct); if(X.kind==='diag') track('diag_done',null,att.pct); guideTested();
+  track('test_done',X.kind,att.pct); if(X.kind==='diag') track('diag_done',null,att.pct); guideTested(); vstep('test_done'); vpage('result-'+X.kind);
   X.result={all,bySkill,correct,skipped,att,filter:'wrong'}; renderExam(); renderRoute(); { const st=calcStreak(); toast(STORE_OK?t('resultSaved')+(st>1?` · ${t('kStreak')}: ${numL(st)}`:''):tc('saveFail')); }
 }
 
@@ -2512,7 +2513,7 @@ async function doCheckout(){ const C=window.CLOUD; if(!C) return; const p=curPla
   catch(e){ if(e.code==='payments-not-configured') UP.note=t('payOffD'); else if(e.code==='bad-coupon'){ UP.qerr=t('couponBad'); UP.quote=null; } else if(e.code==='unauthenticated') UP.err=t('errAuth'); else UP.err=e.code==='network-request-failed'?t('errNet'):t('errGeneric'); }
   UP.busy=false; rerenderUp(); }
 function rerenderUp(){ const sh=$('#upsheet'); if(sh&&!sh.hidden) renderUpsheet(); if(route().p==='upgrade') renderRoute(); }
-function openUpgrade(k){ if(!window.CLOUD) return; UP.k=k||null; UP.err=''; UP.note='';
+function openUpgrade(k){ if(!window.CLOUD) return; vstep('upgrade'); UP.k=k||null; UP.err=''; UP.note='';
   let el=$('#upsheet'); const was=!!(el&&!el.hidden); if(!el){ el=document.createElement('div'); el.id='upsheet'; document.body.appendChild(el); el.addEventListener('pointerdown',e=>{ if(e.target===el) closeUpgrade(); }); }
   if(!was){ const a=document.activeElement; UP_RET={el:a,sel:a&&a.dataset&&a.dataset.lock?`[data-lock="${a.dataset.lock}"]`:a&&a.id?'#'+a.id:null}; } el.hidden=false; document.body.classList.add('sheet-open'); overlayInert(); renderUpsheet(); track('upgrade_view',k||'sheet');
   setTimeout(()=>el.querySelector('.up-plan.on,#up-x')?.focus(),0); }
@@ -2628,8 +2629,11 @@ function onEnter(h){
 const GUIDE_K='gat_guide';
 function guideMark(){ try{ const C=window.CLOUD, ts=+localStorage.getItem(GUIDE_K); if(!ts||!C||!C.user||localStorage.getItem(GUIDE_K+'_e')) return; C.track('guide_dl',null,ts); localStorage.setItem(GUIDE_K+'_e','1'); }catch(e){} }
 function guideTested(){ try{ if(!CLOUD_BUILD||!localStorage.getItem(GUIDE_K)||localStorage.getItem(GUIDE_K+'_t')) return; localStorage.setItem(GUIDE_K+'_t','1'); fetch('/api/guide/hit',{method:'POST',headers:{'Content-Type':'application/json','X-Masar':'1'},body:'{"kind":"test"}',keepalive:true}).catch(()=>{}); }catch(e){} }
+/* anonymous visit statistics (v.js): one page view per route, the exam and its result count as pages of their own */
+function vpage(p){ try{ if(window.GATV) GATV.page('/app#'+(/^[a-z][a-z0-9-]{0,30}$/.test(p)?p:'other'),false); }catch(e){} }
+function vstep(k){ try{ if(window.GATV) GATV.step(k); }catch(e){} }
 function renderRoute(){ guideMark();
-  syncFree(); const r=route(), h=(location.hash||'#today').slice(1); if(h!==LAST_H){ LAST_H=h; onEnter(h); } document.documentElement.lang=S.lang; document.documentElement.dir=S.lang==='ar'?'rtl':'ltr';
+  syncFree(); const r=route(), h=(location.hash||'#today').slice(1); if(h!==LAST_H){ LAST_H=h; onEnter(h); vpage(h.split(/[?-]/)[0]||'today'); } document.documentElement.lang=S.lang; document.documentElement.dir=S.lang==='ar'?'rtl':'ltr';
   $('#brand-n').textContent=t('brand'); document.title=S.lang==='ar'?'أكاديمية القدرات | GAT Academy':'GAT Academy | أكاديمية القدرات'; { const L=S.lang==='ar'; $('#theme-btn').setAttribute('aria-label',L?'المظهر':'Theme'); $('#acct-btn')?.setAttribute('aria-label',L?'الحساب':'Account'); $('#nav').setAttribute('aria-label',L?'التنقل الرئيسي':'Main navigation'); $('#tabbar').setAttribute('aria-label',L?'التنقل السفلي':'Bottom navigation'); $('#lang-btn').setAttribute('lang',L?'en':'ar'); } $('#brand-t').textContent=t('tagline'); $('#lang-btn').textContent=t('switchLang');
   const links=NAV.map(k=>`<a href="#${k}" class="${r.p===k?'on':''}" ${r.p===k?'aria-current="page"':''}>${ICON[k]}<span>${t('nav.'+k)}</span></a>`).join('');
   $('#nav').innerHTML=links; $('#tabbar').innerHTML=links;

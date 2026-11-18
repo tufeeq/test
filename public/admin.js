@@ -146,6 +146,9 @@ const P = {
   cart: '<path d="M3 4h2.5l2.2 10.5h10.6L20.5 7H7"/><circle cx="9.5" cy="19" r="1.5"/><circle cx="17" cy="19" r="1.5"/>',
   bolt: '<path d="M13 2.5L4.5 13.5H12l-1 8 8.5-11H12z"/>',
   pulse: '<path d="M3 12h4l2.5-6 5 12 2.5-6h4"/>',
+  eye: '<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+  phone: '<rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/>',
+  doorOut: '<path d="M14 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8"/><path d="M17 8l4 4-4 4M21 12H10"/>',
   percent: '<path d="M19 5L5 19"/><circle cx="7" cy="7" r="2.5"/><circle cx="17" cy="17" r="2.5"/>',
   key: '<circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M16 7l3 3"/>',
   edit: '<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/>',
@@ -295,7 +298,7 @@ function hbars(rows, opts = {}) {
 let ME = null, SETTINGS = null, setP = null;
 const USERS_BY_ID = new Map();
 const S = {
-  ovDays: LS.get("adm_ovDays", 30), fnDays: LS.get("adm_fnDays", 90), ctDays: LS.get("adm_ctDays", 90),
+  ovDays: LS.get("adm_ovDays", 30), viDays: LS.get("adm_viDays", 30), fnDays: LS.get("adm_fnDays", 90), ctDays: LS.get("adm_ctDays", 90),
   st: { q: "", plan: "", sort: "active", page: 0, size: 25 }, payStatus: "", xpSort: { k: "starts", asc: false }, auditQ: "",
   draft: null, dirty: false, errs: {}
 };
@@ -308,7 +311,7 @@ const planName = id => { const p = SETTINGS && SETTINGS.config.plans.find(x => x
 
 /* ================= sections / shell ================= */
 const SECS = [
-  ["overview", "نظرة عامة", "Overview", "overview"], ["funnel", "مسار التحويل", "Conversion funnel", "funnel"], ["students", "الطلاب", "Students", "users"],
+  ["overview", "نظرة عامة", "Overview", "overview"], ["visits", "الزيارات", "Visits", "eye"], ["funnel", "مسار التحويل", "Conversion funnel", "funnel"], ["students", "الطلاب", "Students", "users"],
   ["payments", "المدفوعات", "Payments", "card"], ["coupons", "القسائم", "Coupons", "ticket"], ["content", "تحليلات المحتوى", "Content analytics", "book"],
   ["settings", "الإعدادات", "Settings", "gear"], ["audit", "سجل العمليات", "Audit log", "list"]
 ];
@@ -485,6 +488,74 @@ async function vOverview(tok) {
   drawChart("signups", { pts: sig, type: d > 30 ? "line" : "bar", int: true, fmt: v => fmtN(v) + " " + _("تسجيل", "signups"), axFmt: v => fmtN(v) });
   drawChart("active", { pts: act, type: "line", int: d <= 120, fmt: v => fmtN(v, 1) + " " + _("نشط", "active"), axFmt: v => fmtN(v, 1) });
   drawChart("revenue", { pts: rev, type: "bar", fmt: fmtMoney, axFmt: v => fmtN(v), empty: _("لا إيراد في هذه الفترة", "No revenue in this period") });
+}
+
+/* ================= visits ================= */
+const APP_PAGES = { today: ["اليوم", "Today"], learn: ["الحقيبة", "Learn"], lesson: ["درس", "Lesson"], practice: ["تدرّب", "Practice"], progress: ["تقدّمي", "Progress"], guide: ["الدليل", "Guide"], plan: ["الخطة", "Plan"], upgrade: ["الاشتراك", "Upgrade"] };
+const TEST_KINDS = { diag: ["التشخيصي", "diagnostic"], mock: ["المحاكاة", "full mock"], model: ["نموذج", "model test"], verbal: ["قسم لفظي", "verbal section"], quant: ["قسم كمي", "quant section"], skill: ["تدريب مهارة", "skill practice"], session: ["جلسة اليوم", "daily session"], review: ["المراجعة", "review"] };
+function pageName(p) {
+  if (p === "/") return _("الصفحة الرئيسية", "Home page");
+  if (p === "/privacy") return _("سياسة الخصوصية", "Privacy policy");
+  if (p === "/terms") return _("الشروط والأحكام", "Terms");
+  const m = /^\/app#([a-z0-9-]+)$/.exec(p || ""); if (!m) return p || "—";
+  const k = m[1], t = /^(exam|result)-(\w+)$/.exec(k);
+  if (t) { const kn = TEST_KINDS[t[2]] || [t[2], t[2]]; return t[1] === "exam" ? _(`التطبيق: يحل ${kn[0]}`, `App: taking a ${kn[1]}`) : _(`التطبيق: نتيجة ${kn[0]}`, `App: ${kn[1]} result`); }
+  const a = APP_PAGES[k]; return a ? _("التطبيق: " + a[0], "App: " + a[1]) : _("التطبيق: ", "App: ") + k;
+}
+const LP_SECS = [["top", "الواجهة الأولى", "Hero"], ["demo", "تجربة سؤال", "Try a question"], ["how", "كيف تعمل", "How it works"], ["guide", "دليل الطالب", "Student guide"], ["features", "المزايا", "Features"], ["skills", "المهارات العشر", "The ten skills"], ["voices", "آراء الطلاب", "Voices"], ["pricing", "الأسعار", "Pricing"], ["faq", "الأسئلة الشائعة", "FAQ"], ["final", "الدعوة الأخيرة", "Final call"], ["end", "التذييل", "Footer"]];
+const srcName = s => !s ? _("مباشر أو غير معروف", "Direct or unknown") : /(^|\.)google\./.test(s) ? "Google" : /(^|\.)(t\.co|x\.com|twitter\.com)$/.test(s) ? "X" : /tiktok/.test(s) ? "TikTok" : /(^|\.)(instagram|l\.instagram)\.com$/.test(s) ? "Instagram" : /snapchat/.test(s) ? "Snapchat" : /(^|\.)bing\.com$/.test(s) ? "Bing" : s === "guide" ? _("روابط دليل الطالب", "Student guide links") : s;
+
+async function vVisits(tok) {
+  const d = S.viDays, v = await api("GET", `/api/admin/visits?days=${d}`); if (!live(tok)) return;
+  const T = v.totals || {}, sessions = num(T.sessions), per = _(PERIODS.find(p => p[0] === d)[1], PERIODS.find(p => p[0] === d)[2]);
+  const kc = (cls, icon, label, val, sub, tip) => `<div class="kcard ${cls}" ${tip ? `tabindex="0" data-tip-h="${esc(label)}" data-tip="${esc(tip)}"` : ""}><span class="kl muted"><i>${ic(icon)}</i>${esc(label)}</span><b class="kv">${val}</b>${sub ? `<span class="ks">${sub}</span>` : ""}</div>`;
+  const ser = bucket(seriesDays(v.series, d, v.today), "sum"), tot = ser.reduce((s, p) => s + p.n, 0);
+  // where landing visitors stop: share of home-page views that reached each section (sections in page order)
+  const secN = new Map((v.sections || []).map(r => [r.sec, num(r.n)])), lpViews = [...secN.values()].reduce((a, b) => a + b, 0);
+  const shown = LP_SECS.filter(([k]) => k !== "voices" || secN.has("voices"));
+  let left = lpViews; const reach = shown.map(([k, a, e]) => { const r = { k, label: _(a, e), reached: left, stop: secN.get(k) || 0 }; left -= r.stop; return r; });
+  const worst = reach.slice(0, -1).reduce((w, r) => r.stop > (w ? w.stop : 0) ? r : w, null);
+  // the visitor journey (visits, not students)
+  const st = v.steps || {}, J = [["landing", "زار الصفحة الرئيسية", "Visited the home page"], ["app", "فتح التطبيق", "Opened the app"], ["test_start", "بدأ اختبارًا", "Started a test"], ["test_done", "أنهى اختبارًا", "Finished a test"], ["signup", "أنشأ حسابًا", "Created an account"], ["upgrade", "فتح صفحة الاشتراك", "Opened the plans"]];
+  const j0 = Math.max(1, ...J.map(([k]) => num(st[k])));
+  const pages = (v.pages || []).map(p => ({ ...p, views: num(p.views), exits: num(p.exits), entries: num(p.entries) }));
+  const exitsTop = pages.filter(p => p.exits).sort((a, b) => b.exits - a.exits).slice(0, 8), exTot = pages.reduce((s, p) => s + p.exits, 0);
+  const src = (v.sources || []).map(s => ({ ...s, n: num(s.n) })), dev = new Map((v.devices || []).map(x => [x.dev, num(x.n)])), devTot = [...dev.values()].reduce((a, b) => a + b, 0);
+  const depthN = new Map((v.depth || []).map(r => [num(r.b), num(r.n)])), dq = [1, 2, 3, 4].map(b => depthN.get(b) || 0), dqT = dq.reduce((a, b) => a + b, 0);
+  MAIN.innerHTML = ph("الزوار", "Visitors", "الزيارات", "Visits", "كم زائرًا جاء، وأي الصفحات فتح، وأين توقّف. الأرقام مجهولة الهوية، بلا كوكيز.", "How many visitors came, which pages they opened and where they stopped. Anonymous, no cookies.", periodSeg("vi-p", d) + refreshBtn()) + `
+  <section class="kgrid" aria-label="${_("مؤشرات الزيارات", "Visit metrics")}">
+    ${kc("feat", "eye", _("الزيارات", "Visits") + " · " + per, fmtN(sessions), _(`اليوم: ${fmtN(T.today)}`, `Today: ${fmtN(T.today)}`), _("الزيارة جلسة تصفّح واحدة: تبدأ عند فتح الموقع وتنتهي بإغلاق التبويب أو بعد ٣٠ دقيقة بلا نشاط. الشخص نفسه في يومين = زيارتان.", "A visit is one browsing session: it starts when the site opens and ends when the tab closes or after 30 idle minutes. The same person on two days = two visits."))}
+    ${kc("", "list", _("مشاهدات الصفحات", "Page views"), fmtN(T.views), sessions ? _(`${fmtN(num(T.views) / sessions, 1)} صفحة لكل زيارة`, `${fmtN(num(T.views) / sessions, 1)} pages per visit`) : "")}
+    ${kc("sky", "clock", _("متوسط مدة الزيارة", "Average visit time"), fmtDur(T.avg_dur), _("وقت ظهور الصفحات على الشاشة", "time the pages were on screen"))}
+    ${kc("pink", "doorOut", _("نسبة الارتداد", "Bounce rate"), sessions ? fmtPct(num(T.bounces) / sessions) : "—", _(`${fmtN(T.bounces)} زيارة غادرت سريعًا`, `${fmtN(T.bounces)} visits left quickly`), _("زيارات فتحت صفحة واحدة وغادرت خلال أقل من ١٠ ثوانٍ.", "Visits that opened one page and left within 10 seconds."))}
+  </section>
+  <section class="card"><div class="card-h"><h2>${_("الزيارات اليومية", "Visits per day")}</h2><span class="sub">${d > 120 ? _("مجمّعة أسبوعيًا", "weekly totals") : _("لكل يوم", "per day")} · ${_("بتوقيت السعودية", "Saudi time")}</span></div>
+    ${chartBox("visits", "", _("مخطط الزيارات. استخدم الأسهم لقراءة القيم.", "Visits chart. Use arrow keys to read values."))}
+    <div class="chart-foot"><span>${_("المجموع", "Total")}: <b>${fmtN(tot)}</b></span>${dataTable(ser, v => fmtN(v))}</div></section>
+  <div class="g2">
+    <section class="card" id="vi-journey"><div class="card-h"><h2>${_("رحلة الزائر", "Visitor journey")}</h2><span class="sub">${_("عدد الزيارات التي وصلت كل خطوة", "visits reaching each step")}</span></div>
+      ${sessions ? hbars(J.map(([k, a, e], i) => { const n = num(st[k]), prev = i ? num(st[J[i - 1][0]]) : n; return { label: _(a, e), v: n, vlabel: fmtN(n), vsub: _(`${fmtPct(n / sessions)} من الزيارات`, `${fmtPct(n / sessions)} of visits`), tipH: _(a, e), tip: `${fmtN(n)} ${_("زيارة", "visits")}${i && prev ? ` · ${fmtPct(Math.min(1, n / prev))} ${_("ممن وصلوا الخطوة السابقة", "of the step before")}` : ""}` }; }), { max: j0 }) : `<p class="empty">${_("لا زيارات في هذه الفترة.", "No visits in this period.")}</p>`}
+      <p class="small muted">${ic("info", "i16")} ${_("النسب من كل الزيارات. بعض الزوار يفتحون التطبيق مباشرة دون الصفحة الرئيسية.", "Shares are of all visits. Some visitors open the app directly, without the home page.")}</p></section>
+    <section class="card" id="vi-reach"><div class="card-h"><h2>${_("أين يتوقف زوار الصفحة الرئيسية", "Where home-page visitors stop")}</h2><span class="sub">${_("نسبة من وصلوا إلى كل قسم وهم ينزلون في الصفحة", "share that scrolled down to each section")}</span></div>
+      ${lpViews ? hbars(reach.map(r => ({ label: r.label, v: r.reached, vlabel: fmtPct(r.reached / lpViews), vsub: r.stop ? _(`توقف هنا ${fmtN(r.stop)}`, `${fmtN(r.stop)} stopped here`) : "", tipH: r.label, tip: `${fmtN(r.reached)} ${_("وصلوا", "reached")} · ${fmtN(r.stop)} ${_("كان آخر ما رأوه", "saw it last")}` })), { max: lpViews, cls: "sky" }) + (worst && worst.stop ? `<p class="small"><b>${_("أكبر نقطة توقف", "Biggest drop-off")}:</b> ${esc(worst.label)} · ${fmtPct(worst.stop / lpViews)} ${_("من الزيارات توقفت عنده", "of visits stopped there")}</p>` : "") + `<div class="vi-depth" role="list" aria-label="${_("عمق التمرير في الصفحة الرئيسية", "Home-page scroll depth")}"><span class="small muted">${_("أقصى تمرير في الصفحة", "Furthest scroll")}</span>${[["أقل من ربعها", "Under a quarter"], ["حتى نصفها", "Up to half"], ["حتى ثلاثة أرباعها", "Up to three quarters"], ["إلى آخرها", "To the end"]].map(([a, e], i) => `<div role="listitem"><b>${dqT ? fmtPct(dq[i] / dqT) : "—"}</b><small>${_(a, e)}</small></div>`).join("")}</div>` : `<p class="empty">${_("لا مشاهدات للصفحة الرئيسية في هذه الفترة.", "No home-page views in this period.")}</p>`}
+    </section>
+  </div>
+  <section class="card" id="vi-pages"><div class="card-h"><h2>${_("الصفحات", "Pages")}</h2><span class="sub">${_("المشاهدات، والوقت، ومن أين دخل الزوار وأين غادروا", "views, time, and where visitors came in and left")}</span></div>
+    ${pages.length ? `<div class="tbl"><table><thead><tr><th scope="col">${_("الصفحة", "Page")}</th><th scope="col" class="num">${_("المشاهدات", "Views")}</th><th scope="col" class="num hide-sm">${_("الزيارات", "Visits")}</th><th scope="col" class="num">${_("متوسط الوقت", "Avg. time")}</th><th scope="col" class="num hide-sm">${_("دخول منها", "Entries")}</th><th scope="col" class="num">${_("خروج منها", "Exits")}</th><th scope="col" class="num">${_("نسبة الخروج", "Exit rate")}</th></tr></thead><tbody>
+    ${pages.map(p => `<tr><td><b>${esc(pageName(p.path))}</b> <span class="mono muted hide-sm" dir="ltr">${esc(p.path)}</span></td><td class="num">${fmtN(p.views)}</td><td class="num hide-sm">${fmtN(p.sessions)}</td><td class="num">${fmtDur(p.avg_dur)}</td><td class="num hide-sm">${fmtN(p.entries)}</td><td class="num">${fmtN(p.exits)}</td><td class="num">${p.views ? fmtPct(p.exits / p.views) : "—"}</td></tr>`).join("")}
+    </tbody></table></div>` : `<p class="empty">${_("لا مشاهدات في هذه الفترة.", "No page views in this period.")}</p>`}
+  </section>
+  <div class="g3">
+    <section class="card" id="vi-exits"><div class="card-h"><h2>${_("آخر صفحة قبل المغادرة", "Last page before leaving")}</h2><span class="sub">${_("أين انتهت الزيارات", "where visits ended")}</span></div>
+      ${exitsTop.length ? hbars(exitsTop.map(p => ({ label: pageName(p.path), v: p.exits, vlabel: fmtPct(p.exits / (exTot || 1)), vsub: _(`${fmtN(p.exits)} زيارة`, `${fmtN(p.exits)} visits`), tipH: pageName(p.path), tip: `${fmtN(p.exits)} ${_("زيارة انتهت هنا", "visits ended here")}` })), { cls: "pink" }) : `<p class="empty">${_("لا بيانات بعد.", "No data yet.")}</p>`}</section>
+    <section class="card"><div class="card-h"><h2>${_("مصادر الزيارات", "Where visits come from")}</h2><span class="sub">${_("الموقع الذي جاء منه الزائر أو مصدر الرابط", "referring site or link source")}</span></div>
+      ${src.length ? hbars(src.map(s => ({ label: srcName(s.s), v: s.n, vlabel: fmtN(s.n), vsub: fmtPct(s.n / (sessions || 1)) })), { cls: "butter" }) : `<p class="empty">${_("لا بيانات بعد.", "No data yet.")}</p>`}
+      ${devTot ? `<p class="small muted">${ic("phone", "i16")} ${_("جوال", "Phone")} <b>${fmtPct((dev.get("m") || 0) / devTot)}</b> · ${_("كمبيوتر", "Desktop")} <b>${fmtPct((dev.get("d") || 0) / devTot)}</b></p>` : ""}</section>
+  </div>
+  <p class="small muted">${ic("info", "i16")} ${_("تُحسب الزيارات بمعرّف عشوائي يبقى في التبويب نفسه فقط ويُحذف عند إغلاقه، دون كوكيز ودون حفظ عنوان IP. لا تُحسب محركات البحث، ولا المتصفحات التي تطلب عدم التتبع.", "Visits are counted with a random id that lives in the tab only and is gone when it closes, with no cookies and no IP address stored. Search crawlers and browsers that ask not to be tracked are not counted.")}</p>`;
+  drawChart("visits", { pts: ser, type: d > 30 ? "line" : "bar", int: true, fmt: v => fmtN(v) + " " + _("زيارة", "visits"), axFmt: v => fmtN(v) });
+  onSeg("vi-p", v => { S.viDays = +v; LS.set("adm_viDays", S.viDays); route(); });
+  onRefresh(route);
 }
 
 /* ================= 2. funnel ================= */
@@ -1210,7 +1281,7 @@ function closeNotif(silent) {
 document.addEventListener("click", e => { if (NT.open && !e.target.closest("#nt-pop, #b-bell")) closeNotif(true); });
 document.addEventListener("keydown", e => { if (e.key === "Escape" && NT.open) closeNotif(); });
 
-const VIEWS = { overview: vOverview, funnel: vFunnel, students: vStudents, payments: vPayments, coupons: vCoupons, content: vContent, settings: vSettings, audit: vAudit };
+const VIEWS = { overview: vOverview, visits: vVisits, funnel: vFunnel, students: vStudents, payments: vPayments, coupons: vCoupons, content: vContent, settings: vSettings, audit: vAudit };
 
 /* ================= boot ================= */
 async function boot() {

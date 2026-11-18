@@ -272,6 +272,170 @@ function genUnique(fn,name,raw){
   _gh.push(genKey(r)); const ok2=oddKey(r); if(ok2) _gh.push(ok2); if(_gh.length>150) _gh.splice(0,_gh.length-150); return r;
 }
 const GEN_BY_SKILL = {arith:['percent','discount','ratio','speed','fracAdd'],algebra:['linear','exponent','seqArith','seqGeo','evaluate'],geometry:['rect','triangle','pyth','circle'],stats:['avgMissing','median','pctChange'],comparison:['compare']};
+/* ============ Recurring sections (الأقسام المتكررة) ============
+   Each section follows the blueprint of a real computer-based quantitative block of 11 questions, in its usual order:
+   4 word problems, 2 comparisons, 2 geometry, 2 questions on one table, 1 closing algebra item.
+   All wording and numbers are original; every item is generated from a seed, so a section is fixed for a given number. */
+const RS_N=20, RS_FREE=2;
+const rsTbl=(head,rows)=>`<div class="tbl"><table><thead><tr>${head.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+const rsCmp=(a,b)=>a>b?0:a<b?1:2;
+const fx=(n,d)=>{ const g=gcd(n,d); return `${n/g}/${d/g}`; };
+const rsSAR=n=>n===1?'ريال واحد':n===2?'ريالين':arSAR(n);
+const RS_A={
+  discountTotal(){ const n=R(4,12), p=pick([2,3,4,5,8,10]), d=pick([5,10,20,25]); const tot=n*p, ans=tot*(100-d)/100;
+    return {s:'arith',q:bi(`اشترى سعد ${n} علب عصير، سعر العلبة ${rsSAR(p)}، ثم حصل على خصم ${d}% على المبلغ الإجمالي. كم دفع؟`,`Saad bought ${n} juice boxes at ${p} SAR each, then got a ${d}% discount on the total. How much did he pay?`),o:mkOpts(ans,[tot,tot-d,tot*d/100,ans+p]),e:bi(`الإجمالي ⟦${n} × ${p} = ${tot}⟧، وبعد الخصم ⟦${tot} × ${(100-d)/100} = ${N(ans)}⟧`,`Total ⟦${n} × ${p} = ${tot}⟧; after the discount ⟦${tot} × ${(100-d)/100} = ${N(ans)}⟧`)}; },
+  profitReverse(){ const p=pick([20,25,50]), q=pick([5,10,15,30,40]); const cost=pick([800,1200,1600,2000,2400,4000]); const sold=cost*(100+p)/100, ans=cost*(100+q)/100;
+    return {s:'arith',q:bi(`باع متجر غسالة بمبلغ ${arSAR(sold)} فربح ${p}%. كم سيكون ثمن بيعها لو كان ربحه ${q}%؟`,`A shop sold a washing machine for ${sold} SAR at a ${p}% profit. What would its price be at a ${q}% profit?`),o:mkOpts(ans,[sold*(100-p+q)/100,sold-cost*(p-q)/100+cost/20,sold*(100+q)/100,cost]),e:bi(`ثمن الشراء ⟦${sold} ÷ ${(100+p)/100} = ${cost}⟧، ثم ⟦${cost} × ${(100+q)/100} = ${N(ans)}⟧`,`Cost ⟦${sold} ÷ ${(100+p)/100} = ${cost}⟧, then ⟦${cost} × ${(100+q)/100} = ${N(ans)}⟧`)}; },
+  joinLeave(){ const a=R(3,7), k=pick([2,3]), b=R(1,a); const ans=a+k*a-b;
+    return {s:'arith',q:bi(`في قاعة ${a} طلاب، ثم انضم إليهم ${k===2?'مثلاهم':'ثلاثة أمثالهم'}، وخرج ${b} منهم. كم طالبًا بقي في القاعة؟`,`There are ${a} students in a hall. Then ${k===2?'twice':'three times'} as many join them, and ${b} leave. How many students are left?`),o:mkOpts(ans,[a*k-b,a+k-b,ans+a,ans+b]),e:bi(`⟦${a} + ${k} × ${a} − ${b} = ${ans}⟧`,`⟦${a} + ${k} × ${a} − ${b} = ${ans}⟧`)}; },
+  legs(){ const c=pick([2,4,6]), lt=pick([1,4]), lc=pick([3,4]); const per=lt+c*lc, g=R(3,8), legs=per*g, ans=c*g;
+    return {s:'arith',q:bi(`في مطعم، للطاولة ${lt===1?'رِجل واحدة':'أربع أرجل'} وللكرسي ${lc===3?'ثلاث أرجل':'أربع أرجل'}، وحول كل طاولة ${c} كراسٍ. إذا كان مجموع الأرجل ${legs}، فكم عدد الكراسي؟`,`In a restaurant a table has ${lt} leg${lt>1?'s':''} and a chair has ${lc} legs, with ${c} chairs around each table. If there are ${legs} legs in all, how many chairs are there?`),o:mkOpts(ans,[g,Math.round(legs/lc),ans+c,legs/(lt+lc)|0]),e:bi(`كل مجموعة: ⟦${lt} + ${c} × ${lc} = ${per}⟧ رِجلًا، وعدد المجموعات ⟦${legs} ÷ ${per} = ${g}⟧، والكراسي ⟦${g} × ${c} = ${ans}⟧`,`Each group: ⟦${lt} + ${c} × ${lc} = ${per}⟧ legs; groups ⟦${legs} ÷ ${per} = ${g}⟧; chairs ⟦${g} × ${c} = ${ans}⟧`)}; },
+  debtShares(){ const p=pick([20,25,30]); const rest=50-p; const third=1000*R(2,9); const tot=third*100/rest;
+    if(!Number.isInteger(tot)) return RS_A.debtShares();
+    return {s:'arith',q:bi(`تقاسم ثلاثة إخوة سداد دين: دفع الأول نصفه، ودفع الثاني ${p}% منه، ودفع الثالث الباقي وهو ${arSAR(third)}. كم مبلغ الدين؟`,`Three brothers paid off a debt: the first paid half, the second paid ${p}%, and the third paid the remaining ${third} SAR. What was the debt?`),o:mkOpts(tot,[third*2,third*100/p,tot/2,third*3]),e:bi(`نصيب الثالث ⟦100% − 50% − ${p}% = ${rest}%⟧، فالدين ⟦${third} ÷ ${rest/100} = ${tot}⟧`,`The third share is ⟦100% − 50% − ${p}% = ${rest}%⟧, so the debt is ⟦${third} ÷ ${rest/100} = ${tot}⟧`)}; },
+  parking(){ const h1=R(1,4), m1=pick([5,10,20,35]), dur=R(3,6)*60+pick([10,25,40]); const t2=h1*60+m1+dur, h2=Math.floor(t2/60), m2=t2%60; const fee=pick([2,3,5]); const hrs=Math.ceil(dur/60), ans=hrs*fee;
+    const tm=(h,m)=>`${h}:${String(m).padStart(2,'0')}`;
+    return {s:'arith',q:bi(`أوقف ماجد سيارته في موقف المطار الساعة ${tm(h1,m1)} مساءً، وأخرجها الساعة ${tm(h2,m2)} مساءً. إذا كانت أجرة الساعة أو جزء منها ${rsSAR(fee)}، فكم يدفع؟`,`Majed parked at the airport at ${tm(h1,m1)} pm and left at ${tm(h2,m2)} pm. If each hour or part of an hour costs ${fee} SAR, how much does he pay?`),o:mkOpts(ans,[(hrs-1)*fee,ans+fee,Math.round(dur/60)*fee===ans?ans+2*fee:Math.round(dur/60)*fee,fee*h2]),e:bi(`المدة ⟦${Math.floor(dur/60)}⟧ ساعات و⟦${dur%60}⟧ دقيقة، فتُحسب ⟦${hrs}⟧ ساعات: ⟦${hrs} × ${fee} = ${ans}⟧`,`The stay is ⟦${Math.floor(dur/60)}⟧ h ⟦${dur%60}⟧ min, charged as ⟦${hrs}⟧ hours: ⟦${hrs} × ${fee} = ${ans}⟧`)}; },
+  setsOverlap(){ const both=R(4,15), a=both+R(8,20), b=both+R(5,15), none=R(2,9); const tot=a+b-both+none;
+    return {s:'arith',q:bi(`في نادٍ ${tot} مشتركًا، منهم ${a} في كرة القدم و${b} في السباحة، و${none} لا يشتركون في أيٍّ منهما. كم مشتركًا في النشاطين معًا؟`,`A club has ${tot} members: ${a} play football, ${b} swim, and ${none} do neither. How many do both?`),o:mkOpts(both,[a+b-tot,tot-a-b+none,both+none,both*2]),e:bi(`⟦${a} + ${b} + ${none} − ${tot} = ${both}⟧`,`⟦${a} + ${b} + ${none} − ${tot} = ${both}⟧`)}; },
+  consecutive(){ const n=pick([3,5]), m=R(6,40); const S=n*m; const big=rnd()<.5; const ans=big?m+(n-1)/2:m-(n-1)/2;
+    return {s:'arith',q:bi(`مجموع ${n===3?'ثلاثة':'خمسة'} أعداد صحيحة متتالية ${S}. ما ${big?'أكبرها':'أصغرها'}؟`,`The sum of ${n} consecutive integers is ${S}. What is the ${big?'largest':'smallest'}?`),o:mkOpts(ans,[m,big?ans-(n-1):ans+(n-1),ans+1,ans-1]),e:bi(`الأوسط ⟦${S} ÷ ${n} = ${m}⟧، ${big?'والأكبر':'والأصغر'} ⟦${ans}⟧`,`Middle ⟦${S} ÷ ${n} = ${m}⟧; the ${big?'largest':'smallest'} is ⟦${ans}⟧`)}; },
+  ageDouble(){ const son=R(8,30), yrs=R(3,15); const fa=2*(son+yrs)-yrs;
+    return {s:'arith',q:bi(`عمر أب ${fa} سنة وعمر ابنه ${son} سنة. بعد كم سنة يصبح عمر الأب مثلي عمر ابنه؟`,`A father is ${fa} and his son is ${son}. In how many years will the father be twice his son's age?`),o:mkOpts(yrs,[fa-2*son,yrs+son-yrs*2>0?yrs+2:yrs+3,fa-son,yrs*2]),e:bi(`⟦${fa} + س = 2(${son} + س)⟧ ⟵ ⟦س = ${fa} − ${2*son} = ${yrs}⟧`,`⟦${fa} + x = 2(${son} + x)⟧ → ⟦x = ${fa} − ${2*son} = ${yrs}⟧`)}; },
+  tankFraction(){ const [f1,f2]=pick([[[1,3],[1,2]],[[1,4],[1,2]],[[1,3],[3,4]],[[1,4],[2,3]],[[2,5],[3,5]]]); const den=f1[1]*f2[1]/gcd(f1[1],f2[1]); const diff=f2[0]*den/f2[1]-f1[0]*den/f1[1]; const cap=den*R(2,8)*5; const add=cap*diff/den;
+    return {s:'arith',q:bi(`خزان ممتلئ إلى ⟦${f1[0]}/${f1[1]}⟧ سعته، وبعد إضافة ${add} لترًا صار ممتلئًا إلى ⟦${f2[0]}/${f2[1]}⟧ سعته. كم سعة الخزان باللتر؟`,`A tank is ⟦${f1[0]}/${f1[1]}⟧ full. After adding ${add} liters it is ⟦${f2[0]}/${f2[1]}⟧ full. What is its capacity in liters?`),o:mkOpts(cap,[add*2,add*den,cap/2,cap+add]),e:bi(`الفرق ⟦${f2[0]}/${f2[1]} − ${f1[0]}/${f1[1]} = ${fx(diff,den)}⟧ من السعة يساوي ${add}، فالسعة ⟦${add} ÷ ${fx(diff,den)} = ${cap}⟧`,`The difference ⟦${f2[0]}/${f2[1]} − ${f1[0]}/${f1[1]} = ${fx(diff,den)}⟧ of the tank is ${add} L, so capacity ⟦= ${add} ÷ ${fx(diff,den)} = ${cap}⟧`)}; },
+  unitRate(){ const [m,s]=pick([[1,20],[1,30],[2,0],[1,15],[2,30],[0,40],[0,45]]); const sec=m*60+s; const ans=3600/sec;
+    if(!Number.isInteger(ans)) return RS_A.unitRate();
+    const ta=`${m?arC(m,['دقيقة','دقيقتين','دقائق','دقيقة']):''}${m&&s?' و':''}${s?s+' ثانية':''}`, te=`${m?m+' min':''}${m&&s?' ':''}${s?s+' s':''}`;
+    return {s:'arith',q:bi(`يقطع قطار كيلومترًا واحدًا في ${ta}. كم كيلومترًا يقطع في الساعة؟`,`A train covers 1 km in ${te}. How many kilometers does it cover in an hour?`),o:mkOpts(ans,[60/(m||1),ans+5,ans-5,ans*1.5]),e:bi(`الكيلومتر في ⟦${sec}⟧ ثانية، والساعة ⟦3600⟧ ثانية: ⟦3600 ÷ ${sec} = ${ans}⟧`,`1 km takes ⟦${sec}⟧ s; an hour is ⟦3600⟧ s: ⟦3600 ÷ ${sec} = ${ans}⟧`)}; },
+  saveYear(){ const sal=1000*R(4,15), p=pick([5,10,15,20,25]); const ans=sal*p/100*12;
+    return {s:'arith',q:bi(`راتب موظف الشهري ${arSAR(sal)}، ويدّخر منه ${p}%. كم يدّخر في السنة؟`,`An employee earns ${sal} SAR a month and saves ${p}% of it. How much does he save in a year?`),o:mkOpts(ans,[sal*p/100,ans/2,sal*12-ans,ans+sal]),e:bi(`⟦${sal} × ${p/100} × 12 = ${N(ans)}⟧`,`⟦${sal} × ${p/100} × 12 = ${N(ans)}⟧`)}; },
+  weightsChain(){ const x=R(2,9), k1=pick([2,3]), k2=pick([2,3]); const b=k1*x, c=k2*b, tot=x+b+c;
+    return {s:'arith',q:bi(`مجموع أوزان التمر والقهوة والهيل ${tot} كجم. وزن القهوة ${k1===2?'مثلا':'ثلاثة أمثال'} وزن الهيل، ووزن التمر ${k2===2?'مثلا':'ثلاثة أمثال'} وزن القهوة. كم وزن الهيل؟`,`Dates, coffee and cardamom weigh ${tot} kg in all. Coffee weighs ${k1} times the cardamom, and dates weigh ${k2} times the coffee. How much does the cardamom weigh?`),o:mkOpts(x,[b,c,tot/3|0,x+1]),e:bi(`الهيل س، والقهوة ⟦${k1}س⟧، والتمر ⟦${k1*k2}س⟧: ⟦${1+k1+k1*k2}س = ${tot} → س = ${x}⟧`,`Cardamom x, coffee ⟦${k1}x⟧, dates ⟦${k1*k2}x⟧: ⟦${1+k1+k1*k2}x = ${tot} → x = ${x}⟧`)}; },
+  partOfDay(){ const p=pick([20,25,40,50]); const d1=100*R(1,6)*(p===40?1:1); const d2=d1*p/100; const ans=d1+d2;
+    return {s:'arith',q:bi(`أنتج مخبز ${d2} رغيفًا في اليوم الثاني، وهذا يمثل ${p}% من إنتاجه في اليوم الأول. كم مجموع إنتاج اليومين؟`,`A bakery made ${d2} loaves on day two, which is ${p}% of what it made on day one. How many loaves did it make on the two days?`),o:mkOpts(ans,[d1,d2*2,d2+d2*p/100,ans+d2]),e:bi(`اليوم الأول ⟦${d2} ÷ ${p/100} = ${d1}⟧، والمجموع ⟦${d1} + ${d2} = ${ans}⟧`,`Day one ⟦${d2} ÷ ${p/100} = ${d1}⟧; total ⟦${d1} + ${d2} = ${ans}⟧`)}; },
+  workersWeek(){ const per=pick([10,12,15,20]), w=R(3,12), days=pick([5,6,7]); const tot=per*w*days;
+    return {s:'arith',q:bi(`يصنع العامل ${per} قطعة في اليوم. كم عاملًا يلزم لصنع ${tot} قطعة في ${arC(days,['يوم','يومين','أيام','يومًا'])}؟`,`One worker makes ${per} pieces a day. How many workers are needed to make ${tot} pieces in ${days} days?`),o:mkOpts(w,[tot/per,w+2,w*days,tot/(per*7)|0]),e:bi(`⟦${tot} ÷ (${per} × ${days}) = ${w}⟧`,`⟦${tot} ÷ (${per} × ${days}) = ${w}⟧`)}; },
+  pageDigits(){ const pages=R(40,180); const dig=pages<10?pages:pages<100?9+2*(pages-9):9+180+3*(pages-99);
+    return {s:'arith',q:bi(`رُقّمت صفحات كتاب بدءًا من الصفحة ١، فاستُخدم في الترقيم ${dig} رقمًا. كم عدد صفحات الكتاب؟`,`A book's pages are numbered from 1, using ${dig} digits in all. How many pages does it have?`),o:mkOpts(pages,[Math.round(dig/2),Math.round(dig/3),pages+9,pages-9]),e:bi(pages<100?`الصفحات ١–٩ تستهلك ⟦9⟧ أرقام، والباقي ⟦(${dig} − 9) ÷ 2 = ${pages-9}⟧ صفحة: ⟦9 + ${pages-9} = ${pages}⟧`:`١–٩: ⟦9⟧ أرقام، ١٠–٩٩: ⟦180⟧ رقمًا، والباقي ⟦(${dig} − 189) ÷ 3 = ${pages-99}⟧: ⟦99 + ${pages-99} = ${pages}⟧`,pages<100?`Pages 1–9 use ⟦9⟧ digits; the rest ⟦(${dig} − 9) ÷ 2 = ${pages-9}⟧ pages: ⟦9 + ${pages-9} = ${pages}⟧`:`1–9: ⟦9⟧ digits, 10–99: ⟦180⟧; the rest ⟦(${dig} − 189) ÷ 3 = ${pages-99}⟧: ⟦99 + ${pages-99} = ${pages}⟧`)}; },
+  notesRatio(){ const r=pick([[1,3,4],[2,3,5],[1,2,5],[3,4,5]]); const k=R(3,9); const cnt=k*(r[0]+r[1]+r[2]); const ans=500*r[0]*k;
+    return {s:'arith',q:bi(`${cnt} ورقة نقدية من فئات ٥٠٠ و٢٠٠ و١٠٠ ريال، أعدادها بنسبة ${r.join(' : ')} على الترتيب. كم قيمة أوراق فئة ٥٠٠ ريال؟`,`${cnt} banknotes of 500, 200 and 100 SAR are in the ratio ${r.join(' : ')} respectively. What is the total value of the 500 SAR notes?`),o:mkOpts(ans,[500*r[0],ans*2,200*r[1]*k,ans+500]),e:bi(`الجزء ⟦${cnt} ÷ ${r[0]+r[1]+r[2]} = ${k}⟧، أوراق ٥٠٠: ⟦${r[0]} × ${k} = ${r[0]*k}⟧، قيمتها ⟦${ans}⟧`,`One part ⟦${cnt} ÷ ${r[0]+r[1]+r[2]} = ${k}⟧; 500-notes ⟦${r[0]} × ${k} = ${r[0]*k}⟧, worth ⟦${ans}⟧`)}; },
+  upDown(){ const [u,d]=pick([[50,20],[50,25],[20,20],[25,20],[100,50],[10,10],[40,25]]); const ans=(100+u)*(100-d)/100;
+    return {s:'arith',q:bi(`ارتفع سعر سلعة ${u}% ثم انخفض ${d}%. كم يمثل السعر الجديد من السعر الأصلي؟`,`An item's price rose ${u}% then fell ${d}%. The new price is what percent of the original?`),o:mkOpts(ans,[100+u-d,100,ans+5,ans-5],x=>N(x)+'%'),e:bi(`⟦${(100+u)/100} × ${(100-d)/100} = ${ans/100}⟧ أي ⟦${N(ans)}%⟧`,`⟦${(100+u)/100} × ${(100-d)/100} = ${ans/100}⟧, i.e. ⟦${N(ans)}%⟧`)}; }
+};
+const RS_C={
+  pctSwap(){ const a=pick([20,30,40,60,70]), b=pick([30,40,50,80,90]); const swap=rnd()<.6; const b2=swap?b:b+10; const A=a*b2/100, B=b*a/100;
+    return {s:'comparison',cmp:1,q:bi(`القيمة الأولى: ${a}% من ${b2}<br>القيمة الثانية: ${b}% من ${a}`,`Quantity A: ${a}% of ${b2}<br>Quantity B: ${b}% of ${a}`),a:rsCmp(A,B),e:bi(`⟦${N(A)}⟧ مقابل ⟦${N(B)}⟧`,`⟦${N(A)}⟧ vs ⟦${N(B)}⟧`)}; },
+  timeUnits(){ const d=R(2,4); const h=24*d+pick([-24,0,0,12]); const A=d*24;
+    return {s:'comparison',cmp:1,q:bi(`القيمة الأولى: ${arC(d,['يوم','يومان','أيام','يومًا'])}<br>القيمة الثانية: ${h} ساعة`,`Quantity A: ${d} days<br>Quantity B: ${h} hours`),a:rsCmp(A,h),e:bi(`⟦${d} × 24 = ${A}⟧ ساعة`,`⟦${d} × 24 = ${A}⟧ hours`)}; },
+  polyVsCircle(){ const n=pick([4,5,6,7,8]), s=R(1,6), r=R(1,6); const A=n*s, B=2*Math.PI*r; const nm={4:['مربع','square'],5:['خماسي منتظم','regular pentagon'],6:['سداسي منتظم','regular hexagon'],7:['سباعي منتظم','regular heptagon'],8:['ثماني منتظم','regular octagon']}[n];
+    return {s:'comparison',cmp:1,q:bi(`القيمة الأولى: محيط ${nm[0]} طول ضلعه ${s} سم<br>القيمة الثانية: محيط دائرة نصف قطرها ${r} سم`,`Quantity A: perimeter of a ${nm[1]} with side ${s} cm<br>Quantity B: circumference of a circle with radius ${r} cm`),a:rsCmp(A,B),e:bi(`⟦${n} × ${s} = ${A}⟧ مقابل ⟦2π × ${r} ≈ ${N(B)}⟧`,`⟦${n} × ${s} = ${A}⟧ vs ⟦2π × ${r} ≈ ${N(B)}⟧`)}; },
+  sameP(){ const s=R(4,12), d=R(1,s-1); const l=s+d, w=s-d;
+    return {s:'comparison',cmp:1,q:bi(`مربع ومستطيل لهما المحيط نفسه ⟦${4*s}⟧ سم، وطول المستطيل ⟦${l}⟧ سم.<br>القيمة الأولى: مساحة المربع<br>القيمة الثانية: مساحة المستطيل`,`A square and a rectangle both have perimeter ⟦${4*s}⟧ cm; the rectangle is ⟦${l}⟧ cm long.<br>Quantity A: area of the square<br>Quantity B: area of the rectangle`),a:0,e:bi(`المربع ⟦${s}^2 = ${s*s}⟧، والمستطيل ⟦${l} × ${w} = ${l*w}⟧`,`Square ⟦${s}^2 = ${s*s}⟧; rectangle ⟦${l} × ${w} = ${l*w}⟧`)}; },
+  ratioChain(){ const [a,b]=pick([[2,5],[3,4],[1,3],[2,3]]); const [c,d]=pick([[7,3],[5,2],[4,3],[3,1]]); const k=R(2,6)*c; const W=a*k, M=b*k, C=M*d/c; if(!Number.isInteger(C)) return RS_C.ratioChain(); const v=C+pick([-5,0,5]);
+    return {s:'comparison',cmp:1,q:bi(`نسبة النساء إلى الرجال في حفل ${a} : ${b}، وعدد النساء ${W}، ونسبة الرجال إلى الأطفال ${c} : ${d}.<br>القيمة الأولى: عدد الأطفال<br>القيمة الثانية: ${v}`,`At an event, women to men is ${a} : ${b}, there are ${W} women, and men to children is ${c} : ${d}.<br>Quantity A: number of children<br>Quantity B: ${v}`),a:rsCmp(C,v),e:bi(`الرجال ⟦${W} × ${b}/${a} = ${M}⟧، والأطفال ⟦${M} × ${d}/${c} = ${C}⟧`,`Men ⟦${W} × ${b}/${a} = ${M}⟧; children ⟦${M} × ${d}/${c} = ${C}⟧`)}; },
+  fracPower(){ const t=R(0,4);
+    if(t===3){ const a=pick([2,3,4,5]), b=pick([2,3,4]); return {s:'comparison',cmp:1,q:bi(`⟦س > 1⟧<br>القيمة الأولى: ⟦س^${a+b}⟧<br>القيمة الثانية: ⟦س^${a} × س^${b}⟧`,`⟦x > 1⟧<br>Quantity A: ⟦x^${a+b}⟧<br>Quantity B: ⟦x^${a} × x^${b}⟧`),a:2,e:bi(`⟦س^${a} × س^${b} = س^${a+b}⟧`,`⟦x^${a} × x^${b} = x^${a+b}⟧`)}; }
+    if(t===4){ const m=pick([2,3,4,5,6]); return {s:'comparison',cmp:1,q:bi(`⟦س⟧ عدد صحيح موجب<br>القيمة الأولى: ⟦${m}س⟧<br>القيمة الثانية: ⟦س + ${m}⟧`,`⟦x⟧ is a positive integer<br>Quantity A: ⟦${m}x⟧<br>Quantity B: ⟦x + ${m}⟧`),a:3,e:bi(`عند ⟦س = 1⟧ الثانية أكبر، وعند ⟦س = ${m+2}⟧ الأولى أكبر`,`At ⟦x = 1⟧ B is greater; at ⟦x = ${m+2}⟧ A is greater`)}; }
+    if(t===0) return {s:'comparison',cmp:1,q:bi(`⟦0 < س < 1⟧<br>القيمة الأولى: ⟦س^2⟧<br>القيمة الثانية: ⟦س^3⟧`,`⟦0 < x < 1⟧<br>Quantity A: ⟦x^2⟧<br>Quantity B: ⟦x^3⟧`),a:0,e:bi(`العدد بين ⟦0⟧ و⟦1⟧ يصغر كلما رفعناه لأس أكبر: عند ⟦س = 1/2⟧: ⟦1/4 > 1/8⟧`,`A number between ⟦0⟧ and ⟦1⟧ shrinks with higher powers: at ⟦x = 1/2⟧, ⟦1/4 > 1/8⟧`)};
+    if(t===1) return {s:'comparison',cmp:1,q:bi(`⟦س > 0⟧<br>القيمة الأولى: ⟦(0.3)^س⟧<br>القيمة الثانية: ⟦0.3⟧`,`⟦x > 0⟧<br>Quantity A: ⟦(0.3)^x⟧<br>Quantity B: ⟦0.3⟧`),a:3,e:bi(`عند ⟦س = 1⟧ تتساويان، وعند ⟦س = 2⟧ الثانية أكبر`,`At ⟦x = 1⟧ they are equal; at ⟦x = 2⟧ B is greater`)};
+    return {s:'comparison',cmp:1,q:bi(`⟦س < 0 < ص⟧<br>القيمة الأولى: ⟦س × ص⟧<br>القيمة الثانية: ⟦0⟧`,`⟦x < 0 < y⟧<br>Quantity A: ⟦x × y⟧<br>Quantity B: ⟦0⟧`),a:1,e:bi(`سالب × موجب = سالب`,`Negative × positive = negative`)}; },
+  offers(){ const d1=100*R(5,12), m1=50*R(4,8), d2=d1+100*R(3,8), m2=m1-50*R(1,3); const n=pick([6,10,12]); const A=d1+m1*n, B=d2+m2*n;
+    return {s:'comparison',cmp:1,q:bi(`عرضان لشراء جهاز بالتقسيط على ${n} أشهر:<br>العرض الأول: دفعة أولى ${d1} ريال و${m1} ريالًا شهريًا<br>العرض الثاني: دفعة أولى ${d2} ريال و${m2} ريالًا شهريًا<br>القيمة الأولى: إجمالي العرض الأول<br>القيمة الثانية: إجمالي العرض الثاني`,`Two ${n}-month installment offers:<br>Offer 1: ${d1} SAR down and ${m1} SAR a month<br>Offer 2: ${d2} SAR down and ${m2} SAR a month<br>Quantity A: total of offer 1<br>Quantity B: total of offer 2`),a:rsCmp(A,B),e:bi(`⟦${d1} + ${m1} × ${n} = ${A}⟧ ، ⟦${d2} + ${m2} × ${n} = ${B}⟧`,`⟦${d1} + ${m1} × ${n} = ${A}⟧, ⟦${d2} + ${m2} × ${n} = ${B}⟧`)}; }
+};
+const RS_G={
+  wire(){ const s=3*R(2,12); const ans=4*s/3;
+    return {s:'geometry',q:bi(`سلك شُكّل مربعًا طول ضلعه ${s} سم، ثم أعيد تشكيله مثلثًا متطابق الأضلاع. ما طول ضلع المثلث؟`,`A wire forms a square with side ${s} cm, then is reshaped into an equilateral triangle. What is the triangle's side?`),o:mkOpts(ans,[s,s*3/4,4*s,ans+2]),e:bi(`طول السلك ⟦4 × ${s} = ${4*s}⟧، والضلع ⟦${4*s} ÷ 3 = ${N(ans)}⟧`,`Wire ⟦4 × ${s} = ${4*s}⟧; side ⟦${4*s} ÷ 3 = ${N(ans)}⟧`)}; },
+  rectWidth(){ const l=R(5,15), w=R(2,l-1); const P=2*(l+w);
+    return {s:'geometry',q:bi(`مستطيل محيطه ${P} سم وطوله ${l} سم. ما عرضه؟`,`A rectangle has perimeter ${P} cm and length ${l} cm. What is its width?`),o:mkOpts(w,[P-l,P/2,P/2-l+1,l-w]),e:bi(`⟦${P} ÷ 2 − ${l} = ${w}⟧`,`⟦${P} ÷ 2 − ${l} = ${w}⟧`)}; },
+  polyAngles(){ const n=pick([5,6,8,9,10,12]); const sum=(n-2)*180, each=sum/n; const nm={5:'خماسي',6:'سداسي',8:'ثماني',9:'تساعي',10:'عشاري',12:'مضلع منتظم له ١٢ ضلعًا'}[n]; const reg=rnd()<.5;
+    if(reg) return {s:'geometry',q:bi(`ما قياس الزاوية الداخلية في ${n===12?nm:nm+' منتظم'}؟`,`What is each interior angle of a regular ${n}-sided polygon?`),o:mkOpts(each,[360/n,180-each,sum,each+10],x=>N(x)+'°'),e:bi(`⟦(${n} − 2) × 180 ÷ ${n} = ${N(each)}°⟧`,`⟦(${n} − 2) × 180 ÷ ${n} = ${N(each)}°⟧`)};
+    return {s:'geometry',q:bi(`ما مجموع قياسات الزوايا الداخلية ${n===12?'لمضلع له ١٢ ضلعًا':'لشكل '+nm}؟`,`What is the sum of the interior angles of a ${n}-sided polygon?`),o:mkOpts(sum,[n*180,360,sum+180,sum-180],x=>N(x)+'°'),e:bi(`⟦(${n} − 2) × 180 = ${sum}°⟧`,`⟦(${n} − 2) × 180 = ${sum}°⟧`)}; },
+  cubeHole(){ const a=pick([2,3,4,5]), b=R(1,a-1); const ans=a**3-b**3;
+    return {s:'geometry',q:bi(`صندوق مكعب طول حرفه ${a} سم، وُضع داخله مكعب طول حرفه ${b} سم. ما الحجم المتبقي من الصندوق بالسنتيمتر المكعب؟`,`A cube box has edge ${a} cm; a cube of edge ${b} cm is placed inside. What volume is left in cm³?`),o:mkOpts(ans,[(a-b)**3,a**3,a*a-b*b,ans+b]),e:bi(`⟦${a}^3 − ${b}^3 = ${a**3} − ${b**3} = ${ans}⟧`,`⟦${a}^3 − ${b}^3 = ${a**3} − ${b**3} = ${ans}⟧`)}; },
+  squareCircle(){ const s=2*R(2,10); const r=s/2; const A=s*s, B=r*r; const corners=rnd()<.5;
+    const opt=(a,b)=>`⟦${a} − ${b}π⟧`; const o=[opt(A,B),opt(A,2*B),opt(A,4*B),`⟦${B}π − ${A}⟧`];
+    return {s:'geometry',q:corners?bi(`مربع طول ضلعه ${s} سم، رُسم عند كل رأس من رؤوسه ربع دائرة مركزها الرأس ونصف قطرها ${r} سم. ما مساحة الجزء من المربع خارج الأرباع الأربعة؟`,`A square has side ${s} cm. At each corner a quarter circle is drawn, centred at the corner, with radius ${r} cm. What is the area of the square outside the four quarters?`):bi(`دائرة مرسومة داخل مربع طول ضلعه ${s} سم وتمس أضلاعه الأربعة. ما مساحة الجزء من المربع خارج الدائرة؟`,`A circle is drawn inside a square of side ${s} cm, touching all four sides. What is the area of the square outside the circle?`),o,e:bi(`نصف القطر ⟦${r}⟧: ⟦${s}^2 − π × ${r}^2 = ${A} − ${B}π⟧`,`Radius ⟦${r}⟧: ⟦${s}^2 − π × ${r}^2 = ${A} − ${B}π⟧`)}; },
+  triBase(){ const k=pick([2,3,4]), h=R(2,6); const b=k*h, A=b*h/2;
+    return {s:'geometry',q:bi(`قاعدة مثلث ${k===2?'مثلا':k===3?'ثلاثة أمثال':'أربعة أمثال'} ارتفاعه، ومساحته ${A} سم². ما طول قاعدته؟`,`A triangle's base is ${k} times its height, and its area is ${A} cm². What is the base?`),o:mkOpts(b,[h,A/k,2*A/h|0===b?b+k:2*A/h,b*2]),e:bi(`⟦(${k}ع × ع) ÷ 2 = ${A} → ع^2 = ${h*h} → ع = ${h}⟧، والقاعدة ⟦${b}⟧`,`⟦(${k}h × h) ÷ 2 = ${A} → h^2 = ${h*h} → h = ${h}⟧, base ⟦${b}⟧`)}; },
+  chords(){ const [a,b,c]=pick([[6,8,10],[10,24,26],[12,16,20],[16,30,34],[18,24,30]]); const ans=c/2;
+    return {s:'geometry',q:bi(`وتران في دائرة يبدآن من نقطة واحدة عليها والزاوية بينهما قائمة، طولاهما ${a} سم و${b} سم. ما طول نصف قطر الدائرة؟`,`Two chords start at the same point of a circle at a right angle, with lengths ${a} cm and ${b} cm. What is the radius?`),o:mkOpts(ans,[c,(a+b)/2,ans+1,b/2]),e:bi(`الزاوية المحيطية القائمة تقابل قطرًا: ⟦√(${a*a} + ${b*b}) = ${c}⟧، ونصف القطر ⟦${ans}⟧`,`A right inscribed angle stands on a diameter: ⟦√(${a*a} + ${b*b}) = ${c}⟧, radius ⟦${ans}⟧`)}; },
+  rugs(){ const r=pick([1,1.5,2]), a=R(3,6)*2*r+pick([0,r]), b=R(2,4)*2*r+pick([0,r]); const ans=Math.floor(a/(2*r))*Math.floor(b/(2*r));
+    return {s:'geometry',q:bi(`غرفة أبعادها ${N(a)} م × ${N(b)} م. ما أكبر عدد من السجاجيد الدائرية نصف قطر كل منها ${N(r)} م يمكن فرشها دون تداخل؟`,`A room measures ${N(a)} m × ${N(b)} m. What is the largest number of round rugs of radius ${N(r)} m that fit without overlapping?`),o:mkOpts(ans,[Math.floor(a*b/(Math.PI*r*r)),Math.floor(a*b/(4*r*r))===ans?ans+2:Math.floor(a*b/(4*r*r)),ans-1,ans+1]),e:bi(`القطر ⟦${N(2*r)}⟧ م: ⟦${Math.floor(a/(2*r))} × ${Math.floor(b/(2*r))} = ${ans}⟧`,`Diameter ⟦${N(2*r)}⟧ m: ⟦${Math.floor(a/(2*r))} × ${Math.floor(b/(2*r))} = ${ans}⟧`)}; },
+  sector(){ const r=pick([2,3,4,6]), th=pick([45,90,120,135,270]); const ans=th*r*r/360;
+    return {s:'geometry',q:bi(`دائرة نصف قطرها ${r} سم، والزاوية المركزية لقطاع منها ${th}°. ما مساحة القطاع؟`,`A circle has radius ${r} cm. A sector has a central angle of ${th}°. What is the sector's area?`),o:mkOpts(ans,[r*r,ans*2,th*2*r/360,ans+1],x=>`⟦${N(x)}π⟧`),e:bi(`⟦${th}/360 × π × ${r}^2 = ${N(ans)}π⟧`,`⟦${th}/360 × π × ${r}^2 = ${N(ans)}π⟧`)}; }
+};
+/* one table, two questions; the section takes its name from the table */
+const RS_D={
+  budget(o){ const th=[['معهد تدريب','a training institute'],['مستشفى','a hospital'],['نادٍ رياضي','a sports club'],['مكتبة عامة','a public library']][o%4];
+    const yrs=[1441,1442,1443,1444,1445]; let v=[R(4,8)*100]; for(let i=1;i<5;i++) v.push(v[i-1]+pick([-100,100,100,200,200,300]));
+    let i=R(0,3), j=i+1; while(v[j]<=v[i]&&j<4){ i=R(0,3); j=i+1; } if(v[j]<=v[i]){ v[j]=v[i]+100; }
+    const pct=Math.round((v[j]-v[i])/v[i]*1000)/10, avg=(v[0]+v[1]+v[2])/3;
+    const tA=rsTbl(['العام','الميزانية (ألف ريال)'],yrs.map((y,k)=>[y,v[k]])), tE=rsTbl(['Year','Budget (thousand SAR)'],yrs.map((y,k)=>[y,v[k]]));
+    return {name:bi(`ميزانية ${th[0]}`,`The budget of ${th[1]}`),qs:[
+      {s:'stats',q:bi(`يبيّن الجدول ميزانية ${th[0]} في خمسة أعوام.<br>${tA}ما نسبة الزيادة في الميزانية من عام ${yrs[i]} إلى عام ${yrs[j]}؟`,`The table shows the budget of ${th[1]} over five years.<br>${tE}What is the percent increase from ${yrs[i]} to ${yrs[j]}?`),o:mkOpts(pct,[Math.round((v[j]-v[i])/v[j]*1000)/10,(v[j]-v[i])/10,pct*2,Math.round(pct/2*10)/10],x=>N(x)+'%'),e:bi(`⟦(${v[j]} − ${v[i]}) ÷ ${v[i]} × 100 ≈ ${pct}%⟧`,`⟦(${v[j]} − ${v[i]}) ÷ ${v[i]} × 100 ≈ ${pct}%⟧`)},
+      {s:'stats',q:bi(`يبيّن الجدول ميزانية ${th[0]} في خمسة أعوام.<br>${tA}ما متوسط الميزانية في الأعوام الثلاثة الأولى؟`,`The table shows the budget of ${th[1]} over five years.<br>${tE}What is the mean budget over the first three years?`),o:mkOpts(Math.round(avg*10)/10,[(v[0]+v[1]+v[2]+v[3]+v[4])/5,v[1],v[0]+v[1]+v[2],avg+50]),e:bi(`⟦(${v[0]} + ${v[1]} + ${v[2]}) ÷ 3 ≈ ${N(avg)}⟧`,`⟦(${v[0]} + ${v[1]} + ${v[2]}) ÷ 3 ≈ ${N(avg)}⟧`)}]}; },
+  factory(o){ const th=[['قوارير الماء','water bottles'],['علب العصير','juice cans'],['أكياس القهوة','coffee bags'],['أطباق البيض','egg trays']][o%4]; const m=[R(4,9)*10]; for(let i=1;i<4;i++) m.push(m[i-1]+pick([10,20,30,-10]));
+    const bad=pick([10,20,25]), price=pick([2,3,5]); const k=R(0,3); const good=m[k]*(100-bad)/100, rev=good*price*1000;
+    let best=1; for(let i=2;i<4;i++) if(m[i]-m[i-1]>m[best]-m[best-1]) best=i; if(m.filter((x,i)=>i&&x-m[i-1]===m[best]-m[best-1]).length>1){ m[3]=m[2]+40; best=3; }
+    const MA=['الأول','الثاني','الثالث','الرابع'], ME=['1st','2nd','3rd','4th'];
+    const tA=rsTbl(['الشهر','الإنتاج (بالآلاف)'],m.map((x,i)=>[MA[i],x])), tE=rsTbl(['Month','Output (thousands)'],m.map((x,i)=>[ME[i],x]));
+    return {name:bi(`مصنع ${th[0]}`,`The ${th[1]} factory`),qs:[
+      {s:'stats',q:bi(`يبيّن الجدول إنتاج مصنع من ${th[0]} في أربعة أشهر. ${bad}% من الإنتاج تالف، وتُباع الوحدة السليمة بـ ${rsSAR(price)}.<br>${tA}كم ريالًا يبلغ ثمن الإنتاج السليم في الشهر ${MA[k]}؟`,`The table shows a factory's output of ${th[1]} over four months. ${bad}% of the output is damaged; each good unit sells for ${price} SAR.<br>${tE}What is the value of the good output in the ${ME[k]} month?`),o:mkOpts(rev,[m[k]*price*1000,rev/1000,m[k]*bad/100*price*1000,rev+price*1000]),e:bi(`السليم ⟦${m[k]} × ${(100-bad)/100} = ${N(good)}⟧ ألفًا، وثمنه ⟦${N(good)} × 1000 × ${price} = ${N(rev)}⟧`,`Good units ⟦${m[k]} × ${(100-bad)/100} = ${N(good)}⟧ thousand, worth ⟦${N(good)} × 1000 × ${price} = ${N(rev)}⟧`)},
+      {s:'stats',q:bi(`يبيّن الجدول إنتاج مصنع من ${th[0]} في أربعة أشهر.<br>${tA}في أي شهر كانت الزيادة عن الشهر الذي قبله أكبر؟`,`The table shows a factory's output of ${th[1]} over four months.<br>${tE}In which month was the rise over the previous month largest?`),o:[MA[best],...MA.filter((_,i)=>i!==best)].map((x,i)=>bi(x,[ME[best],...ME.filter((_,j)=>j!==best)][i])),e:bi(`الفروق: ${m.slice(1).map((x,i)=>`⟦${x-m[i]}⟧`).join('، ')}`,`Differences: ${m.slice(1).map((x,i)=>`⟦${x-m[i]}⟧`).join(', ')}`)}]}; },
+  fuel(o){ const cars=['أ','ب','ج','د','هـ'], carsE=['A','B','C','D','E']; const kml=shuffle([8,10,12,14,16,9,11,15]).slice(0,5); const lo=kml.indexOf(Math.min(...kml)); const k=R(0,4); const dist=kml[k]*pick([20,25,30,40]); const lit=dist/kml[k];
+    const tA=rsTbl(['السيارة','كم لكل لتر'],cars.map((c,i)=>[c,kml[i]])), tE=rsTbl(['Car','km per liter'],carsE.map((c,i)=>[c,kml[i]]));
+    const ord=[lo,...[0,1,2,3,4].filter(i=>i!==lo)].slice(0,4);
+    const th=[['استهلاك الوقود','Fuel use'],['سيارات الأجرة','The taxi fleet'],['حافلات المدارس','School buses'],['سيارات الشركة','Company cars']][o%4];
+    return {name:bi(th[0],th[1]),qs:[
+      {s:'stats',q:bi(`يبيّن الجدول عدد الكيلومترات التي تقطعها كل سيارة باللتر الواحد.<br>${tA}أي السيارات أقل توفيرًا في استهلاك الوقود؟`,`The table shows how many kilometers each car covers per liter.<br>${tE}Which car is the least fuel-efficient?`),o:ord.map(i=>bi(`السيارة ${cars[i]}`,`Car ${carsE[i]}`)),e:bi(`الأقل كيلومترات لكل لتر هي الأقل توفيرًا: ⟦${kml[lo]}⟧`,`Fewest km per liter is least efficient: ⟦${kml[lo]}⟧`)},
+      {s:'stats',q:bi(`يبيّن الجدول عدد الكيلومترات التي تقطعها كل سيارة باللتر الواحد.<br>${tA}كم لترًا تحتاج السيارة ${cars[k]} لقطع ${dist} كم؟`,`The table shows how many kilometers each car covers per liter.<br>${tE}How many liters does car ${carsE[k]} need for ${dist} km?`),o:mkOpts(lit,[dist/10,lit+5,lit*2,lit-5]),e:bi(`⟦${dist} ÷ ${kml[k]} = ${lit}⟧`,`⟦${dist} ÷ ${kml[k]} = ${lit}⟧`)}]}; },
+  expenses(o){ const who=[['سلمان','Salman'],['فيصل','Faisal'],['عبدالله','Abdullah'],['تركي','Turki']][o%4]; let p=[30,20,15,10,10,15]; p=shuffle(p); const catA=['الإيجار','الطعام','المواصلات','الفواتير','الترفيه','التعليم'], catE=['Rent','Food','Transport','Bills','Leisure','Education'];
+    const inc=1000*pick([6,8,10,12]); const k=R(0,5); const amt=inc*p[k]/100; const j=(k+R(1,5))%6; const ratio=p[j]/p[k];
+    const tA=rsTbl(['البند','النسبة'],catA.map((c,i)=>[c,p[i]+'%'])), tE=rsTbl(['Item','Share'],catE.map((c,i)=>[c,p[i]+'%']));
+    return {name:bi(`مصروفات ${who[0]}`,`${who[1]}'s spending`),qs:[
+      {s:'stats',q:bi(`يبيّن الجدول توزيع مصروفات ${who[0]} الشهرية، ومجموعها ${arSAR(inc)}.<br>${tA}كم ريالًا يصرف على ${catA[k]}؟`,`The table shows how ${who[1]} splits a monthly spending of ${inc} SAR.<br>${tE}How much goes to ${catE[k].toLowerCase()}?`),o:mkOpts(amt,[p[k]*10,inc/6,amt*2,amt+500]),e:bi(`⟦${inc} × ${p[k]/100} = ${N(amt)}⟧`,`⟦${inc} × ${p[k]/100} = ${N(amt)}⟧`)},
+      {s:'stats',q:bi(`يبيّن الجدول توزيع مصروفات ${who[0]} الشهرية.<br>${tA}ما نسبة ما يصرفه على ${catA[j]} إلى ما يصرفه على ${catA[k]}؟`,`The table shows how ${who[1]} splits his monthly spending.<br>${tE}What is the ratio of ${catE[j].toLowerCase()} to ${catE[k].toLowerCase()}?`),o:[fx(p[j],p[k]),fx(p[k],p[j]),fx(p[j],100),fx(p[j]+5,p[k])].filter((x,i,a)=>a.indexOf(x)===i).concat(['1/2','3/4','2/3']).filter((x,i,a)=>a.indexOf(x)===i).slice(0,4).map(x=>`⟦${x}⟧`),e:bi(`⟦${p[j]} : ${p[k]} = ${fx(p[j],p[k])}⟧`,`⟦${p[j]} : ${p[k]} = ${fx(p[j],p[k])}⟧`)}]}; },
+  grades(o){ const th=[['درجات الفصل','Class scores'],['اختبار الرياضيات','The math test'],['اختبار الفيزياء','The physics test'],['مسابقة القراءة','The reading contest']][o%4]; const bands=['٥٠–٦٠','٦١–٧٠','٧١–٨٠','٨١–٩٠','٩١–١٠٠'], bandsE=['50–60','61–70','71–80','81–90','91–100']; const c=[R(2,6),R(4,9),R(6,12),R(5,10),R(2,6)]; const tot=c.reduce((a,b)=>a+b,0); const above=c[3]+c[4]; const k=R(0,4); const pct=Math.round(c[k]/tot*1000)/10;
+    const tA=rsTbl(['فئة الدرجات','عدد الطلاب'],bands.map((b,i)=>[b,c[i]])), tE=rsTbl(['Score band','Students'],bandsE.map((b,i)=>[b,c[i]]));
+    return {name:bi(th[0],th[1]),qs:[
+      {s:'stats',q:bi(`يبيّن الجدول توزيع درجات طلاب فصل في اختبار.<br>${tA}كم طالبًا تجاوزت درجته ٨٠؟`,`The table shows the scores of a class on a test.<br>${tE}How many students scored above 80?`),o:mkOpts(above,[c[4],c[2]+c[3]+c[4],tot-above,above+1]),e:bi(`⟦${c[3]} + ${c[4]} = ${above}⟧`,`⟦${c[3]} + ${c[4]} = ${above}⟧`)},
+      {s:'stats',q:bi(`يبيّن الجدول توزيع درجات طلاب فصل في اختبار.<br>${tA}ما نسبة الطلاب في الفئة ${bands[k]} تقريبًا؟`,`The table shows the scores of a class on a test.<br>${tE}About what percent of the students are in the ${bandsE[k]} band?`),o:mkOpts(pct,[c[k],Math.round(c[k]/(tot-c[k])*1000)/10,pct+10,Math.round(pct/2*10)/10],x=>N(x)+'%'),e:bi(`المجموع ⟦${tot}⟧: ⟦${c[k]} ÷ ${tot} × 100 ≈ ${pct}%⟧`,`Total ⟦${tot}⟧: ⟦${c[k]} ÷ ${tot} × 100 ≈ ${pct}%⟧`)}]}; },
+  twoSeries(o){ const MA=['رجب','شعبان','رمضان','شوال','ذو القعدة'], ME=['Rajab','Shaban','Ramadan','Shawwal','Dhu al-Qadah']; const th=[['فرعين لمتجر','two branches of a shop'],['مكتبتين','two bookshops'],['مخبزين','two bakeries'],['معرضين','two showrooms']][o%4];
+    const b=[0,0,0,0,0].map(()=>R(2,8)*10); const a=b.map(x=>x+pick([-10,10,20,30])); const iD=R(0,4), iE=(iD+R(1,4))%5; a[iD]=2*b[iD]; a[iE]=b[iE]; for(let i=0;i<5;i++) if(i!==iD&&i!==iE&&(a[i]===2*b[i]||a[i]===b[i])) a[i]+=5;
+    const tA=rsTbl(['الشهر','أ','ب'],MA.map((m,i)=>[m,a[i],b[i]])), tE=rsTbl(['Month','A','B'],ME.map((m,i)=>[m,a[i],b[i]]));
+    const opt=(i0)=>[i0,...[0,1,2,3,4].filter(i=>i!==i0)].slice(0,4);
+    return {name:bi(`مبيعات ${th[0]}`,`Sales of ${th[1]}`),qs:[
+      {s:'stats',q:bi(`يبيّن الجدول مبيعات ${th[0]} (أ، ب) بالآلاف.<br>${tA}في أي شهر كانت مبيعات أ ضعف مبيعات ب؟`,`The table shows the sales (thousands) of ${th[1]}, A and B.<br>${tE}In which month were A's sales double B's?`),o:opt(iD).map(i=>bi(MA[i],ME[i])),e:bi(`⟦${a[iD]} = 2 × ${b[iD]}⟧`,`⟦${a[iD]} = 2 × ${b[iD]}⟧`)},
+      {s:'stats',q:bi(`يبيّن الجدول مبيعات ${th[0]} (أ، ب) بالآلاف.<br>${tA}في أي شهر تساوت مبيعات أ وب؟`,`The table shows the sales (thousands) of ${th[1]}, A and B.<br>${tE}In which month were A and B equal?`),o:opt(iE).map(i=>bi(MA[i],ME[i])),e:bi(`⟦${a[iE]} = ${b[iE]}⟧`,`⟦${a[iE]} = ${b[iE]}⟧`)}]}; }
+};
+const RS_L={
+  pctOf(){ const p=pick([20,25,40,60,70,75]), x=20*R(3,25); const v=p*x/100;
+    return {s:'algebra',q:bi(`إذا كان ${p}% من س يساوي ${N(v)}، فما قيمة س؟`,`If ${p}% of x is ${N(v)}, what is x?`),o:mkOpts(x,[v*p/100,v+p,x/2,x+20]),e:bi(`⟦س = ${N(v)} ÷ ${p/100} = ${x}⟧`,`⟦x = ${N(v)} ÷ ${p/100} = ${x}⟧`)}; },
+  powSum(){ const k=pick([2,4]), n=R(3,9); const b=2; const tot=k===2?n+1:n+2;
+    return {s:'algebra',q:bi(`إذا كان ⟦${Array(k).fill(`2^ن`).join(' + ')} = 2^${tot}⟧ فما قيمة ن؟`,`If ⟦${Array(k).fill(`2^n`).join(' + ')} = 2^${tot}⟧, what is n?`),o:mkOpts(n,[tot,tot/k|0,n+1,n-1]),e:bi(`⟦${k} × 2^ن = 2^${k===2?1:2} × 2^ن = 2^${tot}⟧ ⟵ ⟦ن = ${n}⟧`,`⟦${k} × 2^n = 2^${k===2?1:2} × 2^n = 2^${tot}⟧ → ⟦n = ${n}⟧`)}; },
+  chain(){ const p=R(2,9), q=R(1,7), r=R(-3,4); const ans=p+q+r;
+    return {s:'algebra',q:bi(`إذا كان ⟦أ − ب = ${p}⟧ و⟦ب − ج = ${q}⟧ و⟦ج + د = ${N(r)}⟧ فما قيمة ⟦أ + د⟧؟`,`If ⟦a − b = ${p}⟧, ⟦b − c = ${q}⟧ and ⟦c + d = ${N(r)}⟧, what is ⟦a + d⟧?`),o:mkOpts(ans,[p-q+r,p+q-r,p*q+r,ans+2],N,true),e:bi(`بالجمع: ⟦أ + د = ${p} + ${q} + ${r<0?'('+N(r)+')':r} = ${ans}⟧`,`Add them: ⟦a + d = ${p} + ${q} + ${r<0?'('+N(r)+')':r} = ${ans}⟧`)}; },
+  root(){ const t=R(0,1); if(t===0){ const x=R(3,9); return {s:'algebra',q:bi(`إذا كان ⟦س^3 = ${x**3}⟧ فما قيمة س؟`,`If ⟦x^3 = ${x**3}⟧, what is x?`),o:mkOpts(x,[x+1,x-1,x*3,x*x]),e:bi(`⟦${x} × ${x} × ${x} = ${x**3}⟧`,`⟦${x} × ${x} × ${x} = ${x**3}⟧`)}; }
+    const b=pick([2,3,4]), n=R(3,b===2?9:5); return {s:'algebra',q:bi(`إذا كان ⟦${b}^س = ${b**n}⟧ فما قيمة س؟`,`If ⟦${b}^x = ${b**n}⟧, what is x?`),o:mkOpts(n,[n+1,n-1,b**n/b,n*2]),e:bi(`⟦${b}^${n} = ${b**n}⟧`,`⟦${b}^${n} = ${b**n}⟧`)}; },
+  sumDiff(){ const x=R(3,12), y=R(1,x-1); const s=x+y, d=x-y; const ans=x*x-y*y;
+    return {s:'algebra',q:bi(`إذا كان ⟦س + ص = ${s}⟧ و⟦س − ص = ${d}⟧ فما قيمة ⟦س^2 − ص^2⟧؟`,`If ⟦x + y = ${s}⟧ and ⟦x − y = ${d}⟧, what is ⟦x^2 − y^2⟧?`),o:mkOpts(ans,[s+d,s*s-d*d,ans+s,x*y]),e:bi(`⟦(س + ص)(س − ص) = ${s} × ${d} = ${ans}⟧`,`⟦(x + y)(x − y) = ${s} × ${d} = ${ans}⟧`)}; }
+};
+/* a fixed section k: its own seed, four word problems, two comparisons, two geometry items, one table with two questions, one algebra item */
+function rsBuild(k,seen){
+  const prev=rnd; rnd=mulberry(77003+k*104729);
+  try{
+    /* no question text repeats in any earlier section: a generator retries with new numbers (still seeded) */
+    const one=f=>{ let r; for(let i=0;i<25;i++){ r=f(); if(!seen.has(r.q.ar)) break; } seen.add(r.q.ar); return r; };
+    const take=(obj,n)=>shuffle(Object.keys(obj)).slice(0,n).map(nm=>one(obj[nm]));
+    const dNames=Object.keys(RS_D), d=RS_D[dNames[k%dNames.length]](Math.floor(k/dNames.length));
+    const qs=[...take(RS_A,4),...take(RS_C,2),...take(RS_G,2),...d.qs,...take(RS_L,1)];
+    return {name:d.name,qs};
+  } finally { rnd=prev; }
+}
+let _rsAll=null; const rsSection=k=>{ if(!_rsAll){ const seen=new Set(); _rsAll=[...Array(RS_N)].map((_,i)=>rsBuild(i,seen)); } return _rsAll[k]; };
+/* raw items are materialized with the options shuffled by a seed of their own, so an answer letter is the same on every visit */
+function rsQuestions(k,lang){ const prev=rnd; rnd=mulberry(55001+k*7907+(lang==='ar'?0:3)); try{ return rsSection(k).qs.map(r=>materialize(r,lang)); } finally { rnd=prev; } }
 /* ============ Verbal bank expansion (AR + EN) ============ */
 Object.assign(PASSAGES.ar,{
   P4:'الوقف في الحضارة الإسلامية هو حبس أصل المال وتسبيل منفعته، أي أن يبقى الأصل ثابتًا لا يُباع ولا يُورث، وتُصرف غلّته في وجوه الخير. وقد أسهمت الأوقاف عبر القرون في بناء المدارس والمستشفيات وحفر الآبار، حتى إن بعض المدن كانت تعتمد عليها في تعليم أبنائها وعلاج مرضاها. ويرى الباحثون أن سرّ استمرار الوقف قرونًا طويلة يكمن في فكرته الأساسية: الأصل باقٍ والنفع متجدد.',
@@ -1250,7 +1414,7 @@ const T = {
   pDiag:'الاختبار التشخيصي', pDiagD:'سؤالان من كل مهارة · ٢٠ سؤالًا في ١٥ دقيقة.',
   pVerbal:'قسم لفظي', pVerbalD:'٢٤ سؤالًا · ٢٥ دقيقة بتوقيت الاختبار.',
   pQuant:'قسم كمي', pQuantD:'٢٤ سؤالًا · ٢٥ دقيقة بلا آلة حاسبة.',
-  pMock:'محاكاة كاملة', pMockD:'٥ أقسام × ٢٤ سؤالًا × ٢٥ دقيقة، بأسئلة جديدة في كل مرة.', modelsTitle:'النماذج الكاملة', modelsIntro:'٣٠ نموذجًا ثابتًا بصيغة الاختبار (٥ أقسام × ٢٤ سؤالًا × ٢٥ دقيقة)، تتبع توزيع أسئلة الاختبار وأنماطه المتكررة. أعد أي نموذج وقارن درجتك.', model:'نموذج', best:'أفضل', notTaken:'لم يُحل', modelsDone:'نماذج محلولة',
+  pMock:'محاكاة كاملة', pMockD:'٥ أقسام × ٢٤ سؤالًا × ٢٥ دقيقة، بأسئلة جديدة في كل مرة.', rsTitle:'الأقسام المتكررة', rsIntro:'٢٠ قسمًا كميًا بتركيبة القسم كما يأتي في الاختبار المحوسب وبترتيبه: ٤ مسائل، ثم مقارنتان، ثم سؤالا هندسة، ثم سؤالان على جدول، ثم سؤال جبر. الأسئلة أصلية وثابتة لكل قسم، فأعد القسم وقارن درجتك.', rsOne:'قسم', rsDone:'أقسام محلولة', rsFreeNote:'أول قسمين مجانيان.', modelsTitle:'النماذج الكاملة', modelsIntro:'٣٠ نموذجًا ثابتًا بصيغة الاختبار (٥ أقسام × ٢٤ سؤالًا × ٢٥ دقيقة)، تتبع توزيع أسئلة الاختبار وأنماطه المتكررة. أعد أي نموذج وقارن درجتك.', model:'نموذج', best:'أفضل', notTaken:'لم يُحل', modelsDone:'نماذج محلولة',
   bySkillTitle:'تدريب حسب المهارة', start:'ابدأ', questions:'سؤالًا', min:'دقيقة', sec:'ث', q:'سؤال', of:'من',
   due:'مستحقة', noDue:'لا مراجعات مستحقة اليوم',
   sectionLabel:'القسم', finishSection:'إنهاء القسم', finishTest:'إنهاء', prev:'السابق', next:'التالي', check:'تحقق', flag:'علّم للمراجعة', flagged:'معلَّم', map:'خريطة الأسئلة',
@@ -1277,7 +1441,7 @@ const T = {
   methodTitle:'كيف تعمل الطريقة', methodIntro:'كل ما في أكاديمية القدرات مبني على مبادئ تعلّم أثبتت أبحاث علم النفس التربوي فعاليتها، ويعتمدها المتفوقون في الاختبارات المعيارية.',
   footer:'أكاديمية القدرات · info@gat.academy',
   none:'لا يوجد', mistakesEmpty:'لا أخطاء مسجلة بعد.', items:'سؤال',
-  kinds:{model:'نموذج',diag:'تشخيصي',verbal:'قسم لفظي',quant:'قسم كمي',mock:'محاكاة كاملة',skill:'مهارة',review:'مراجعة',session:'جلسة اليوم'},
+  kinds:{rs:'قسم متكرر',model:'نموذج',diag:'تشخيصي',verbal:'قسم لفظي',quant:'قسم كمي',mock:'محاكاة كاملة',skill:'مهارة',review:'مراجعة',session:'جلسة اليوم'},
   timeUp:'انتهى الوقت', letters:['أ','ب','ج','د'], back:'رجوع', close:'إغلاق'
  },
  en:{
@@ -1317,7 +1481,7 @@ const T = {
   pDiag:'Diagnostic test', pDiagD:'Two questions from each skill · 20 questions in 15 minutes.',
   pVerbal:'Verbal section', pVerbalD:'24 questions · 25 minutes, on test timing.',
   pQuant:'Quant section', pQuantD:'24 questions · 25 minutes, no calculator.',
-  pMock:'Full simulation', pMockD:'5 sections × 24 questions × 25 minutes, with new questions every time.', modelsTitle:'Full model tests', modelsIntro:'30 fixed tests in the test format (5 sections × 24 questions × 25 minutes) that follow the test’s question mix and recurring patterns. Retake any test and compare your scores.', model:'Test', best:'best', notTaken:'not taken', modelsDone:'tests completed',
+  pMock:'Full simulation', pMockD:'5 sections × 24 questions × 25 minutes, with new questions every time.', rsTitle:'Recurring sections', rsIntro:'20 quantitative sections built like a section of the computer-based test, in its order: 4 word problems, 2 comparisons, 2 geometry items, 2 questions on a table, then 1 algebra item. The questions are original and fixed for each section, so you can retake one and compare.', rsOne:'Section', rsDone:'sections done', rsFreeNote:'The first two sections are free.', modelsTitle:'Full model tests', modelsIntro:'30 fixed tests in the test format (5 sections × 24 questions × 25 minutes) that follow the test’s question mix and recurring patterns. Retake any test and compare your scores.', model:'Test', best:'best', notTaken:'not taken', modelsDone:'tests completed',
   bySkillTitle:'Practice by skill', start:'Start', questions:'questions', min:'min', sec:'s', q:'Question', of:'of',
   due:'due', noDue:'No reviews due today',
   sectionLabel:'Section', finishSection:'End section', finishTest:'Finish', prev:'Previous', next:'Next', check:'Check', flag:'Mark for review', flagged:'Marked', map:'Question map',
@@ -1344,7 +1508,7 @@ const T = {
   methodTitle:'How the method works', methodIntro:'Everything in GAT Academy is built on learning principles backed by educational psychology research and used by top scorers on standardized tests.',
   footer:'GAT Academy · info@gat.academy',
   none:'None', mistakesEmpty:'No mistakes logged yet.', items:'questions',
-  kinds:{model:'Model test',diag:'Diagnostic',verbal:'Verbal section',quant:'Quant section',mock:'Full simulation',skill:'Skill',review:'Review',session:'Session'},
+  kinds:{rs:'Recurring section',model:'Model test',diag:'Diagnostic',verbal:'Verbal section',quant:'Quant section',mock:'Full simulation',skill:'Skill',review:'Review',session:'Session'},
   timeUp:'Time is up', letters:['A','B','C','D'], back:'Back', close:'Close'
  }
 };
@@ -1601,15 +1765,15 @@ const ymd=x=>x.getFullYear()+'-'+pad2(x.getMonth()+1)+'-'+pad2(x.getDate());
 const todayStr=()=>ymd(new Date());
 const addDays=(d,n)=>{ const x=new Date(String(d).slice(0,10)+'T12:00:00'); x.setDate(x.getDate()+n); return ymd(x); };
 const isDay=v=>typeof v==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(v)&&!isNaN(new Date(v+'T12:00:00'));
-const DEF=()=>({lang:'ar',track:'sci',target:100,examDate:'',weeks:8,planStart:todayStr(),done:{},stats:{},recent:[],attempts:[],mistakes:[],days:[],sessionDays:[],vocab:{ar:{},en:{}},cards:{},models:{},xp:{},causes:{concept:0,careless:0,time:0,trap:0}});
+const DEF=()=>({lang:'ar',track:'sci',target:100,examDate:'',weeks:8,planStart:todayStr(),done:{},stats:{},recent:[],attempts:[],mistakes:[],days:[],sessionDays:[],vocab:{ar:{},en:{}},cards:{},models:{},rs:{},xp:{},causes:{concept:0,careless:0,time:0,trap:0}});
 /* any stored or imported state (old shapes, missing fields, wrong types) becomes a valid state with defaults; never throws */
 function normalize(o){
   if(!o||typeof o!=='object'||Array.isArray(o)) o={};
   const s=Object.assign(DEF(),o);
   const isObj=v=>!!v&&typeof v==='object'&&!Array.isArray(v);
   ['recent','attempts','mistakes','days','sessionDays'].forEach(k=>{ if(!Array.isArray(s[k])) s[k]=[]; });
-  ['done','stats','cards','models','xp','causes','vocab','dq','diag','rst'].forEach(k=>{ if(s[k]!=null&&!isObj(s[k])) delete s[k]; });
-  ['done','stats','cards','models','xp','causes','vocab'].forEach(k=>{ if(!isObj(s[k])) s[k]={}; });
+  ['done','stats','cards','models','rs','xp','causes','vocab','dq','diag','rst'].forEach(k=>{ if(s[k]!=null&&!isObj(s[k])) delete s[k]; });
+  ['done','stats','cards','models','rs','xp','causes','vocab'].forEach(k=>{ if(!isObj(s[k])) s[k]={}; });
   if(!isObj(s.vocab.ar)) s.vocab.ar={}; if(!isObj(s.vocab.en)) s.vocab.en={};
   for(const c of ['concept','careless','time','trap']) s.causes[c]=Math.max(0,+s.causes[c]||0);
   s.lang=s.lang==='en'?'en':'ar'; s.track=s.track==='lit'?'lit':'sci'; s.target=Math.max(60,Math.min(100,Math.round(+s.target)||100)); s.weeks=[4,6,8,10,12].includes(+s.weeks)?+s.weeks:8;
@@ -1619,7 +1783,7 @@ function normalize(o){
   const days=a=>[...new Set(a.filter(isDay))].sort(); s.days=days(s.days); s.sessionDays=days(s.sessionDays);
   if(s.diag&&(!isObj(s.diag.skills)||!isDay(s.diag.date))) delete s.diag;
   if(s.dq&&!isDay(s.dq.d)) delete s.dq;
-  for(const k of ['cards','xp','models','stats']) for(const [id,v] of Object.entries(s[k])) if(!isObj(v)) delete s[k][id];
+  for(const k of ['cards','xp','models','rs','stats']) for(const [id,v] of Object.entries(s[k])) if(!isObj(v)) delete s[k][id];
   for(const l of ['ar','en']) for(const [w,v] of Object.entries(s.vocab[l])) if(!isObj(v)) delete s.vocab[l][w];
   return s;
 }
@@ -1913,6 +2077,7 @@ function startTest(kind,o={}){
   else if(kind==='mock'){ title=t('pMock'); const ord=mockOrder();
     sections=ord.map((a,i)=>sec(`${t('sectionLabel')} ${numL(i+1)} · ${a==='V'?t('vShort'):t('qShort')}`,a==='V'?verbalSection(lang,used):quantSection(lang,used),25)); }
   else if(kind==='model'){ title=`${t('model')} ${numL(o.k+1)}`; sections=modelSections(o.k,lang).map((x,i)=>sec(`${t('sectionLabel')} ${numL(i+1)} · ${x.a==='V'?t('vShort'):t('qShort')}`,x.qs,25)); }
+  else if(kind==='rs'){ if(!PRO()&&o.k>=RS_FREE){ hitLimit('test'); return; } const r=rsSection(o.k); title=`${t('rsOne')} ${numL(o.k+1)} · ${r.name[lang]}`; sections=[sec(title,rsQuestions(o.k,lang),13)]; }
   else if(kind==='skill'){ mode='learn'; title=SKILLS[o.skill][lang]; sections=[sec(title,buildSkill(o.skill,10,lang,used),15)]; }
   else if(kind==='session'){ mode='learn'; title=t('sessionTitle'); let qs=sessionSet(lang); const left=dailyLeft(); if(qs.length>left) qs=qs.slice(0,left); sections=[sec(title,qs,Math.max(5,Math.round(qs.length*1.3)))]; }
   else if(kind==='review'){ const d=dueList(lang).slice(0,Math.min(20,dailyLeft())); if(!d.length){ toast(t('noDue')); return; } mode='learn'; title=t('pReview'); sections=[sec(title,d.map(m=>({...m})),Math.max(5,d.length*1.5))]; }
@@ -1958,12 +2123,13 @@ function finishTest(){
   if(S.recent.length>1500) S.recent=S.recent.slice(-1500); capMistakes();
   const correct=all.filter(x=>x.your===x.q.ans).length, skipped=all.filter(x=>x.your==null).length;
   const est=['diag','mock','model','verbal','quant'].includes(X.kind)?estimate(all.map(x=>({s:x.q.s,ok:x.your===x.q.ans}))):null;
-  const att={id:Date.now().toString(36),date:d,kind:X.kind,skill:X.skill,mk:X.kind==='model'?X.mk+1:undefined,correct,total:all.length,pct:Math.round(100*correct/Math.max(1,all.length)),est,time:Math.round(all.reduce((a,x)=>a+x.time,0))};
+  const att={id:Date.now().toString(36),date:d,kind:X.kind,skill:X.skill,mk:X.kind==='model'||X.kind==='rs'?X.mk+1:undefined,correct,total:all.length,pct:Math.round(100*correct/Math.max(1,all.length)),est,time:Math.round(all.reduce((a,x)=>a+x.time,0))};
   S.attempts.push(att); if(S.attempts.length>300) S.attempts=S.attempts.slice(-300);
   if(!S.days.includes(d)) S.days.push(d); if(X.kind==='session'&&!S.sessionDays.includes(d)) S.sessionDays.push(d);
   if(X.task) S.done[X.task]=true;
   if(X.kind==='session'||X.kind==='review') addDaily(all.filter(x=>x.your!=null).length);
   if(X.kind==='diag'&&!S.diag){ const sk={}; for(const [k,b] of Object.entries(bySkill)) sk[k]={c:b.c,t:b.t}; S.diag={date:d,pct:att.pct,skills:sk}; }
+  if(X.kind==='rs'){ const m=S.rs[X.mk]||{}; m.last=att.pct; m.best=Math.max(m.best||0,att.pct); m.date=d; m.aid=att.id; S.rs[X.mk]=m; }
   if(X.kind==='model'){ const m=S.models[X.mk]||{}; m.last=att.pct; m.est=est; m.best=Math.max(m.best||0,att.pct); m.date=d; m.aid=att.id; S.models[X.mk]=m; }
   saveDetail(att,all);
   save();
@@ -2037,7 +2203,7 @@ function renderResult(el){
   const list=r.all.map((x,i)=>({...x,i})).filter(x=>r.filter==='all'||x.your!==x.q.ans);
   const nWrong=a.total-a.correct, tier=a.pct>=90?3:a.pct>=75?2:a.pct>=50?1:0;
   el.innerHTML=`
-  <div class="ex-top"><div class="ex-title"><strong>${esc(X.title)}</strong><span>${X.reviewOnly?tt.reviewOf+' '+dateLong(a.date):tt.resultTitle}</span></div>${X.reviewOnly&&X.kind==='model'?`<button class="btn ghost sm" id="rs-retake">${tt.retake}</button>`:''}<button class="btn primary sm" id="rs-close">${tt.done}</button></div>
+  <div class="ex-top"><div class="ex-title"><strong>${esc(X.title)}</strong><span>${X.reviewOnly?tt.reviewOf+' '+dateLong(a.date):tt.resultTitle}</span></div>${X.reviewOnly&&(X.kind==='model'||X.kind==='rs')&&X.mk!=null?`<button class="btn ghost sm" id="rs-retake">${tt.retake}</button>`:''}<button class="btn primary sm" id="rs-close">${tt.done}</button></div>
   <div class="rs">
     <div class="rs-head card t${tier}"><div class="rs-top">${ring(a.pct,'%',120)}<div class="rs-verdict"><div class="eyebrow">${tt.resultE}</div><h2>${tt.verdict[tier]}</h2>${nWrong&&!r.noDetail?`<button class="btn primary sm" id="rs-go-rev">${tt.seeMistakes(numL(nWrong))}</button>`:''}</div></div><div class="rs-kpis">
       <div><b class="num">${numL(a.correct)}</b><span>${tt.correct}</span></div><div><b class="num">${r.skipped==null?'—':numL(a.total-a.correct-r.skipped)}</b><span>${tt.wrong}</span></div>
@@ -2063,7 +2229,7 @@ function renderResult(el){
   const rx=el.querySelector('#rs-xp'); if(rx) rx.onclick=()=>{ const k=rx.dataset.k; quitTest(); XP_BACK=k; track('xp_start',k); XP.open(k); };
   { const g=el.querySelector('#rs-go-rev'); if(g) g.onclick=()=>{ r.filter='wrong'; renderResult(el); el.querySelector('.rs-rev-head')?.scrollIntoView({behavior:SMOOTH(),block:'start'}); }; }
   { const sv=el.querySelector('#rs-save'); if(sv) sv.onclick=()=>{ AC.tab='signup'; AC.gate=true; AC.gateSave=true; openAcct(); }; }
-  el.querySelector('#rs-close').onclick=quitTest; const rt=el.querySelector('#rs-retake'); if(rt) rt.onclick=()=>{ const k=X.mk; quitTest(); startTest('model',{k}); };
+  el.querySelector('#rs-close').onclick=quitTest; const rt=el.querySelector('#rs-retake'); if(rt) rt.onclick=()=>{ const k=X.mk, kd=X.kind; quitTest(); startTest(kd==='rs'?'rs':'model',{k}); };
   el.querySelectorAll('.seg button').forEach(b=>b.onclick=()=>{ r.filter=b.dataset.f; renderResult(el); });
   el.querySelectorAll('.ai-btn').forEach(b=>b.onclick=()=>explainAI(r.all[+b.dataset.i],+b.dataset.i,b));
   el.querySelectorAll('.cchip').forEach(b=>b.onclick=()=>{ const key=r.all[+b.dataset.i].q.key; const m=S.mistakes.find(z=>z.key===key); if(!m) return; if(m.cause) S.causes[m.cause]=Math.max(0,(S.causes[m.cause]||0)-1); m.cause=b.dataset.c; S.causes[m.cause]=(S.causes[m.cause]||0)+1; save(); b.parentNode.querySelectorAll('.cchip').forEach(z=>z.classList.toggle('on',z===b)); });
@@ -2353,13 +2519,16 @@ function pagePractice(){
     mock:card('mock',t('pMock'),t('pMockD'),'dark',`<p class="small">${S.track==='sci'?(S.lang==='ar'?'علمي: لفظي، كمي، لفظي، كمي، لفظي':'Science: V, Q, V, Q, V'):(S.lang==='ar'?'نظري: لفظي، لفظي، كمي، لفظي، لفظي':'Theoretical: V, V, Q, V, V')}</p>`),verbal:card('verbal',t('pVerbal'),t('pVerbalD')),quant:card('quant',t('pQuant'),t('pQuantD'))};
   const head=`<header class="page-h"><h1>${t('practiceTitle')}</h1><p>${t('practiceIntro')}</p></header>
 `;
+  const rsBlock=`  <section class="models rs-block"><div class="block-head"><h2 class="hl">${t('rsTitle')}</h2><span class="muted small">${numL(Object.keys(S.rs||{}).length)} / ${numL(RS_N)} ${t('rsDone')}</span></div><p class="muted">${t('rsIntro')}${pro?'':' '+t('rsFreeNote')}</p>
+    <div class="mgrid">${[...Array(RS_N)].map((_,k)=>{ const m=(S.rs||{})[k], open=pro||k<RS_FREE, nm=rsSection(k).name[S.lang]; return `<div class="mcell"><button class="mbox ${m?'done':''} ${m&&m.best>=95?'star':''} ${open?'':'locked'}" data-rs="${k}" aria-label="${t('rsOne')} ${k+1} · ${esc(nm)}${open?'':' · '+t('lockT')}"><span class="mb-n">${t('rsOne')}</span><b class="num">${numL(k+1)}</b><span class="mb-s">${m?`<span class="num">${numL(m.best)}%</span>`:open?esc(nm):LOCKSVG}</span></button></div>`; }).join('')}</div></section>
+`;
   const more=`  <section class="models"><div class="block-head"><h2 class="hl">${t('modelsTitle')}</h2><span class="muted small">${numL(Object.keys(S.models).length)} / ${numL(30)} ${t('modelsDone')}</span></div><p class="muted">${t('modelsIntro')}</p>${pro?'':lockLine('test',t('ben').models)}
     <div class="mgrid">${[...Array(30)].map((_,k)=>{ const m=S.models[k], has=m&&m.aid&&(getDetail(m.aid)||S.attempts.some(a=>a.id===m.aid)); return `<div class="mcell"><button class="mbox ${m?'done':''} ${m&&m.best>=95?'star':''} ${pro?'':'locked'}" data-model="${k}" aria-label="${t('model')} ${k+1}${pro?'':' · '+t('lockT')}"><span class="mb-n">${t('model')}</span><b class="num">${numL(k+1)}</b><span class="mb-s num">${m?numL(m.best)+'%':pro?t('notTaken'):LOCKSVG}</span></button>${has?`<button class="mb-rev" data-review="${m.aid}">${pro?'':LOCKSVG}${t('reviewBtn')}</button>`:''}</div>`; }).join('')}</div></section>
   <h2 class="sec-h hl">${t('bySkillTitle')}</h2>${pro?'':lockLine('skill')}
   <div class="skgrid">${ALL_SKILLS.map(s=>{ const i=skillInfo(s); return `<button class="skbtn ${pro?'':'locked'}" data-start="skill" data-skill="${s}"><span class="sk-n">${SKILLS[s][S.lang]}${pro?'':LOCKSVG}</span>${pips(i.level)}<small>${t('levels')[i.level]}${i.acc!=null?' · '+numL(Math.round(i.acc*100))+'%':''}</small></button>`; }).join('')}</div>`;
-  if(pro) return head+`<h2 class="sr-only">${t('practiceKinds')}</h2><div class="pgrid">${C_.session}${C_.diag}${C_.review}${C_.mock}${C_.verbal}${C_.quant}</div>`+more;
+  if(pro) return head+`<h2 class="sr-only">${t('practiceKinds')}</h2><div class="pgrid">${C_.session}${C_.diag}${C_.review}${C_.mock}${C_.verbal}${C_.quant}</div>`+rsBlock+more;
   /* free: what can be started now, then one line for everything that needs a subscription */
-  return head+`<h2 class="sr-only">${t('practiceKinds')}</h2><div class="pgrid">${C_.session}${dt?'':C_.diag}${C_.review}</div>`
+  return head+`<h2 class="sr-only">${t('practiceKinds')}</h2><div class="pgrid">${C_.session}${dt?'':C_.diag}${C_.review}</div>`+rsBlock
     +proFold('practice',t('foldPractice'),`<div class="pgrid">${dt?C_.diag:''}${C_.mock}${C_.verbal}${C_.quant}</div>`+more,'test',Object.keys(S.models).length>0);
 }
 function pageProgress(){
@@ -2679,6 +2848,7 @@ function bindMain(){
   on('#fc-card',()=>{ FCV.flip=!FCV.flip; renderRoute(); if(FCV.flip) showBtns(); }); on('#fc-know',()=>cardAct(true)); on('#fc-again',()=>cardAct(false));
   m.querySelectorAll('[data-deck]').forEach(b=>b.onclick=()=>{ FCV.deck=b.dataset.deck; FCV.flip=false; renderRoute(); });
   m.querySelectorAll('[data-model]').forEach(b=>b.onclick=()=>startTest('model',{k:+b.dataset.model}));
+  m.querySelectorAll('[data-rs]').forEach(b=>b.onclick=()=>startTest('rs',{k:+b.dataset.rs}));
   on('#v-know',()=>vocabAct(true)); on('#v-again',()=>vocabAct(false));
   on('#bk-copy',()=>{ const code=btoa(unescape(encodeURIComponent(JSON.stringify(S)))), ta=$('#bk-in'); const fb=()=>{ ta.value=code; ta.select(); };
     const fb2=()=>{ fb(); toast(t('copyManual')); }; if(navigator.clipboard) navigator.clipboard.writeText(code).then(()=>{ ta.value=code; toast(t('copied')); }).catch(fb2); else fb2(); });
@@ -2885,7 +3055,7 @@ let DET=loadDetails();
 function getDetail(id){ return DET[id]||null; }
 function saveDetail(att,all){
   const qs=all.map(({q,your,time,flag})=>({s:q.s,q:q.q,pkey:q.pkey||null,passage:q.pkey?null:(q.passage||null),opts:q.opts,ans:q.ans,exp:q.exp,cmp:!!q.cmp,key:q.key||null,your,t:Math.round(time),f:flag?1:undefined}));
-  DET[att.id]={id:att.id,kind:X.kind,title:X.title,lang:X.lang,mk:X.kind==='model'?X.mk:null,skill:X.skill||null,att,qs};
+  DET[att.id]={id:att.id,kind:X.kind,title:X.title,lang:X.lang,mk:X.kind==='model'||X.kind==='rs'?X.mk:null,skill:X.skill||null,att,qs};
   // keep: the latest attempt of each model + the 20 most recent other attempts
   const modelIds=new Set(Object.values(S.models||{}).map(m=>m.aid).filter(Boolean));
   const others=Object.values(DET).filter(x=>!modelIds.has(x.id)).sort((a,b)=>a.id<b.id?1:-1);

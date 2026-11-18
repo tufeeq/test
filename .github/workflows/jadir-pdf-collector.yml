@@ -1,0 +1,44 @@
+name: "Jadir - Collect 20 PDF files"
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "jadir-collector/**"
+      - ".github/workflows/jadir-pdf-collector.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Test collector
+        run: python3 -m unittest discover -s jadir-collector/tests -v
+
+      - name: Download all 20 original PDFs
+        run: python3 jadir-collector/collect.py --output output
+
+      - name: Upload one ZIP with 20 PDF files
+        uses: actions/upload-artifact@v4
+        with:
+          name: Jadir_20_PDFs
+          path: output/pdfs/*.pdf
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 6
+
+      - name: Upload failure report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Jadir_Download_Report
+          path: output/download_report.json
+          if-no-files-found: ignore
+          retention-days: 7

@@ -591,6 +591,871 @@ function rsBuild(k,seen){
 let _rsAll=null; const rsSection=k=>{ if(!_rsAll){ const seen=new Set(); _rsAll=[...Array(RS_N)].map((_,i)=>rsBuild(i,seen)); } return _rsAll[k]; };
 /* raw items are materialized with the options shuffled by a seed of their own, so an answer letter is the same on every visit */
 function rsQuestions(k,lang){ const prev=rnd; rnd=mulberry(55001+k*7907+(lang==='ar'?0:3)); try{ return rsSection(k).qs.map(r=>materialize(r,lang)); } finally { rnd=prev; } }
+/* ============ Foundation track (مسار التأسيس) ============
+   30 short quantitative lessons that build each topic from zero, in five units. Each lesson has a short explanation, the rules,
+   worked examples with every step shown, common traps and a 10-question drill graded from easy to harder
+   (each lesson's generators g[] are ordered by difficulty; the drill keeps that order). Original items. */
+const FD_FREE=5;
+const FDU=[['num',bi('الأعداد','Numbers')],['ar',bi('الحساب','Arithmetic')],['al',bi('الجبر','Algebra')],['geo',bi('الهندسة','Geometry')],['st',bi('الإحصاء والمقارنة','Statistics and comparison')]];
+const FD=[];
+function FDL(id,u,sk,ill,ar,en,g,fig){ FD.push({id,u,sk,ill,ar,en,g,fig:fig||null}); }
+const fdS=(n,d)=>{ const s=(n<0)!==(d<0)&&n!==0?'−':''; n=Math.abs(n); d=Math.abs(d); const g=gcd(n,d)||1; n/=g; d/=g; return s+(d===1?String(n):`${n}/${d}`); };
+const F=(n,d)=>`⟦${fdS(n,d)}⟧`;
+const dS=v=>{ const r=+(+v).toFixed(8); return (r<0?'−':'')+String(Math.abs(r)); };
+const fo=(ans,c,fill)=>{ const o=[ans]; const add=x=>{ if(o.length<4&&x!=null&&x!==''&&!o.includes(x)) o.push(x); }; c.forEach(add); for(let i=1;o.length<4&&i<60;i++) add(fill?fill(i):String(i)); return o; };
+const UF={ar:{2:'نصف',3:'ثلث',4:'ربع',5:'خمس',6:'سدس',8:'ثمن'},en:{2:'half',3:'a third',4:'a quarter',5:'a fifth',6:'a sixth',8:'an eighth'}};
+const cf=(c,s)=>c===1?s:c===-1?'−'+s:`${N(c)}${s}`; /* coefficient before a symbol */
+function fdLesson(id){ return FD.find(x=>x.id===id)||null; }
+function fdQuestions(id,lang){ const l=fdLesson(id); if(!l) return []; const out=[],seen=new Set();
+  for(let i=0;i<10;i++){ const f=l.g[Math.min(l.g.length-1,Math.floor(i*l.g.length/10))]; let r; for(let k=0;k<40;k++){ r=f(); if(!seen.has(r.q.ar+JSON.stringify(r.o||''))) break; } seen.add(r.q.ar+JSON.stringify(r.o||'')); out.push(materialize(r,lang)); }
+  return out; }
+const AN={day:['يوم واحد','يومين','أيام','يومًا'],hour:['ساعة واحدة','ساعتين','ساعات','ساعة'],year:['سنة واحدة','سنتين','سنوات','سنة'],worker:['عامل واحد','عاملين','عمال','عاملًا'],nb:['دفتر واحد','دفترين','دفاتر','دفترًا'],min:['دقيقة واحدة','دقيقتين','دقائق','دقيقة'],cm:['سنتيمتر واحد','سنتيمترين','سنتيمترات','سنتيمترًا'],m:['متر واحد','مترين','أمتار','مترًا']};
+
+/* ---- unit 1: numbers ---- */
+FDL('n-ops','num','arith','numline',
+{t:'العمليات على الأعداد وترتيبها',d:'الأعداد السالبة، وترتيب العمليات، والحساب الذهني السريع.',
+ intro:['كل سؤال كمي يمر بعملية حسابية، وخطأ صغير في ترتيب العمليات أو في إشارة سالبة يضيّع السؤال كله مهما كان فهمك للفكرة. هذا الدرس يثبّت الأساس الذي تُبنى عليه بقية الدروس.','لا آلة حاسبة في الاختبار، لذلك نتعلم هنا أيضًا حيلًا تختصر الحساب الذهني إلى ثوانٍ.'],
+ rules:['ترتيب العمليات: الأقواس، ثم الأسس، ثم الضرب والقسمة حسب ورودهما، ثم الجمع والطرح حسب ورودهما: ⟦8 − 2 × 3 = 8 − 6 = 2⟧','ضرب إشارتين متشابهتين أو قسمتهما يعطي موجبًا، والمختلفتان تعطيان سالبًا: ⟦(−4) × (−3) = 12⟧ ، ⟦(−12) ÷ 3 = −4⟧','طرح العدد السالب يعني جمعه: ⟦5 − (−3) = 5 + 3 = 8⟧','الأس الزوجي للعدد السالب يعطي موجبًا، والأس الفردي يعطي سالبًا: ⟦(−2)^4 = 16⟧ ، ⟦(−2)^3 = −8⟧','الضرب في 5: اضرب في 10 ثم اقسم على 2. والضرب في 25: اضرب في 100 ثم اقسم على 4: ⟦36 × 25 = 3600 ÷ 4 = 900⟧','خاصية التوزيع تختصر كثيرًا: ⟦17 × 6 + 17 × 4 = 17 × 10 = 170⟧ ، ⟦99 × 7 = 700 − 7 = 693⟧'],
+ ex:[['احسب: ⟦12 + 18 ÷ 3 × 2 − 4⟧',['القسمة أولًا لأنها وردت قبل الضرب: ⟦18 ÷ 3 = 6⟧','ثم الضرب: ⟦6 × 2 = 12⟧','ثم الجمع والطرح: ⟦12 + 12 − 4 = 20⟧'],'20'],
+  ['احسب: ⟦(−3)^2 − 2 × (−5)⟧',['الأس أولًا: ⟦(−3)^2 = 9⟧','ثم الضرب: ⟦2 × (−5) = −10⟧','طرح السالب جمع: ⟦9 + 10 = 19⟧'],'19'],
+  ['احسب ذهنيًا: ⟦48 × 25⟧',['الضرب في 25 = الضرب في 100 ثم القسمة على 4','⟦4800 ÷ 4 = 1200⟧'],'1200']],
+ traps:['تنفيذ الجمع قبل الضرب لأنه جاء أولًا: ⟦2 + 3 × 4 = 14⟧ وليست 20.','⟦−3^2 = −9⟧ لأن الأس للعدد 3 وحده، أما ⟦(−3)^2 = 9⟧.','نسيان قلب الإشارة عند طرح عدد سالب.']},
+{t:'Operations and their order',d:'Negative numbers, order of operations and fast mental math.',
+ intro:['Every quantitative question runs through arithmetic, and one slip in the order of operations or a negative sign costs the whole question, however well you understand the idea. This lesson sets the base the other lessons build on.','There is no calculator in the test, so this lesson also teaches shortcuts that cut mental math down to seconds.'],
+ rules:['Order of operations: brackets, then exponents, then multiplication and division from left to right, then addition and subtraction from left to right: ⟦8 − 2 × 3 = 8 − 6 = 2⟧','Two equal signs multiplied or divided give a positive, different signs give a negative: ⟦(−4) × (−3) = 12⟧, ⟦(−12) ÷ 3 = −4⟧','Subtracting a negative means adding: ⟦5 − (−3) = 5 + 3 = 8⟧','An even power of a negative is positive, an odd power is negative: ⟦(−2)^4 = 16⟧, ⟦(−2)^3 = −8⟧','Times 5: multiply by 10, then halve. Times 25: multiply by 100, then divide by 4: ⟦36 × 25 = 3600 ÷ 4 = 900⟧','The distributive property saves time: ⟦17 × 6 + 17 × 4 = 17 × 10 = 170⟧, ⟦99 × 7 = 700 − 7 = 693⟧'],
+ ex:[['Work out ⟦12 + 18 ÷ 3 × 2 − 4⟧',['Divide first, since it comes before the multiplication: ⟦18 ÷ 3 = 6⟧','Then multiply: ⟦6 × 2 = 12⟧','Then add and subtract: ⟦12 + 12 − 4 = 20⟧'],'20'],
+  ['Work out ⟦(−3)^2 − 2 × (−5)⟧',['Exponent first: ⟦(−3)^2 = 9⟧','Then multiply: ⟦2 × (−5) = −10⟧','Subtracting a negative is adding: ⟦9 + 10 = 19⟧'],'19'],
+  ['Work out mentally: ⟦48 × 25⟧',['Times 25 = times 100, then divide by 4','⟦4800 ÷ 4 = 1200⟧'],'1200']],
+ traps:['Adding before multiplying because the addition comes first: ⟦2 + 3 × 4 = 14⟧, not 20.','⟦−3^2 = −9⟧ because the power applies to 3 only, while ⟦(−3)^2 = 9⟧.','Forgetting to flip the sign when subtracting a negative.']},
+[()=>{ const a=R(2,20),b=R(2,9),c=R(2,9),d=R(1,9),ans=a+b*c-d;
+   return {s:'arith',q:bi(`ما قيمة ⟦${a} + ${b} × ${c} − ${d}⟧؟`,`What is ⟦${a} + ${b} × ${c} − ${d}⟧?`),o:mkOpts(ans,[(a+b)*c-d,a+b*(c-d),(a+b)*(c-d)],N,true),e:bi(`الضرب أولًا: ⟦${b} × ${c} = ${b*c}⟧، ثم ⟦${a} + ${b*c} − ${d} = ${ans}⟧`,`Multiply first: ⟦${b} × ${c} = ${b*c}⟧, then ⟦${a} + ${b*c} − ${d} = ${ans}⟧`)}; },
+ ()=>{ const a=R(2,9),b=R(2,9),c=R(2,15),ans=a*b-c;
+   return {s:'arith',q:bi(`ما قيمة ⟦(−${a}) × (−${b}) − ${c}⟧؟`,`What is ⟦(−${a}) × (−${b}) − ${c}⟧?`),o:mkOpts(ans,[-a*b-c,a*b+c,c-a*b],N,true),e:bi(`سالب × سالب = موجب: ⟦${a*b} − ${c} = ${N(ans)}⟧`,`Negative × negative = positive: ⟦${a*b} − ${c} = ${N(ans)}⟧`)}; },
+ ()=>{ const a=R(2,6),b=R(2,9),c=R(2,9),ans=a*a+b*c;
+   return {s:'arith',q:bi(`ما قيمة ⟦(−${a})^2 − ${b} × (−${c})⟧؟`,`What is ⟦(−${a})^2 − ${b} × (−${c})⟧?`),o:mkOpts(ans,[b*c-a*a,a*a-b*c,-a*a-b*c],N,true),e:bi(`⟦(−${a})^2 = ${a*a}⟧ و⟦${b} × (−${c}) = −${b*c}⟧، وطرح السالب جمع: ⟦${a*a} + ${b*c} = ${ans}⟧`,`⟦(−${a})^2 = ${a*a}⟧ and ⟦${b} × (−${c}) = −${b*c}⟧; subtracting a negative is adding: ⟦${a*a} + ${b*c} = ${ans}⟧`)}; },
+ ()=>{ const t=R(0,2);
+   if(t===0){ const n=4*R(3,30),ans=n*25; return {s:'arith',q:bi(`ما ناتج ⟦${n} × 25⟧؟`,`What is ⟦${n} × 25⟧?`),o:mkOpts(ans,[ans+100,ans-100,ans*10]),e:bi(`⟦${n} × 100 ÷ 4 = ${n*100} ÷ 4 = ${ans}⟧`,`⟦${n} × 100 ÷ 4 = ${n*100} ÷ 4 = ${ans}⟧`)}; }
+   if(t===1){ const m=R(12,89),ans=m*99; return {s:'arith',q:bi(`ما ناتج ⟦${m} × 99⟧؟`,`What is ⟦${m} × 99⟧?`),o:mkOpts(ans,[m*100,m*101,ans+10]),e:bi(`⟦${m} × 100 − ${m} = ${m*100} − ${m} = ${ans}⟧`,`⟦${m} × 100 − ${m} = ${m*100} − ${m} = ${ans}⟧`)}; }
+   const n=R(11,49),k=R(2,8),j=10-k,ans=10*n; return {s:'arith',q:bi(`ما قيمة ⟦${n} × ${k} + ${n} × ${j}⟧؟`,`What is ⟦${n} × ${k} + ${n} × ${j}⟧?`),o:mkOpts(ans,[n*k*j,n*k+j,ans+10]),e:bi(`بالتوزيع: ⟦${n} × (${k} + ${j}) = ${n} × 10 = ${ans}⟧`,`Distribute: ⟦${n} × (${k} + ${j}) = ${n} × 10 = ${ans}⟧`)}; }]);
+
+const fdFr=(lo=3,hi=12)=>{ for(;;){ const d=R(lo,hi),n=R(1,d-1); if(gcd(n,d)===1) return [n,d]; } };
+FDL('n-frac1','num','arith','fractions',
+{t:'الكسور (١): المعنى والتبسيط والمقارنة',d:'الكسر جزء من كل، وكيف تبسّطه وتقارن بين كسرين في ثوانٍ.',
+ intro:['الكسر جزء من كل: المقام عدد الأجزاء المتساوية التي قُسّم إليها الكل، والبسط عدد الأجزاء التي نأخذها. في ⟦3/4⟧ قسمنا الكل إلى 4 أجزاء وأخذنا 3.','الكسور تدخل في النسب والنسب المئوية والاحتمال والهندسة، لذلك يستحق هذا الدرس أن تتقنه قبل غيره.'],
+ rules:['التبسيط: اقسم البسط والمقام على أكبر قاسم مشترك بينهما: ⟦18/24 = 3/4⟧ (القسمة على 6)','الكسور المتكافئة: اضرب البسط والمقام في العدد نفسه: ⟦2/3 = 8/12⟧','المقارنة بالضرب التبادلي: ⟦a/b⟧ أكبر من ⟦c/d⟧ إذا كان ⟦a × d > c × b⟧','إذا تساوى البسطان فالكسر صاحب المقام الأصغر هو الأكبر: ⟦3/7 > 3/8⟧','الكسر من عدد: اقسم العدد على المقام ثم اضرب في البسط: ⟦3/4 × 20 = 15⟧','الكسر الأكبر من 1 بسطه أكبر من مقامه: ⟦7/3 = 2 + 1/3⟧'],
+ ex:[['بسّط الكسر ⟦36/48⟧',['أكبر قاسم مشترك للعددين 36 و48 هو 12','⟦36 ÷ 12 = 3⟧ و⟦48 ÷ 12 = 4⟧'],'⟦3/4⟧'],
+  ['أيهما أكبر: ⟦5/8⟧ أم ⟦7/11⟧؟',['اضرب تبادليًا: ⟦5 × 11 = 55⟧ و⟦7 × 8 = 56⟧','الناتج الأكبر في جهة ⟦7/11⟧'],'⟦7/11⟧'],
+  ['ما ⟦2/5⟧ من 45؟',['اقسم على المقام: ⟦45 ÷ 5 = 9⟧','اضرب في البسط: ⟦9 × 2 = 18⟧'],'18']],
+ traps:['الحكم بالمقام وحده: ⟦3/4⟧ أكبر من ⟦2/3⟧ مع أن مقامه أكبر.','التبسيط الناقص: ⟦12/18 = 6/9⟧ صحيح، لكن أبسط صورة ⟦2/3⟧، والخيارات تأتي بأبسط صورة.','الظن أن الكسر يكبر إذا أضفنا العدد نفسه إلى بسطه ومقامه دون تحقق: ⟦1/2 → 2/3⟧ كبر، لكن ⟦3/2 → 4/3⟧ صغر.']},
+{t:'Fractions (1): meaning, simplifying, comparing',d:'A fraction is part of a whole; how to simplify it and compare two fractions in seconds.',
+ intro:['A fraction is part of a whole: the denominator is how many equal parts the whole is cut into, and the numerator is how many of them we take. In ⟦3/4⟧ the whole is cut into 4 parts and we take 3.','Fractions run through ratios, percents, probability and geometry, so this lesson is worth mastering before the others.'],
+ rules:['Simplify: divide the numerator and denominator by their greatest common factor: ⟦18/24 = 3/4⟧ (divide by 6)','Equivalent fractions: multiply the top and bottom by the same number: ⟦2/3 = 8/12⟧','Compare by cross-multiplying: ⟦a/b⟧ is larger than ⟦c/d⟧ when ⟦a × d > c × b⟧','With equal numerators, the smaller denominator gives the larger fraction: ⟦3/7 > 3/8⟧','A fraction of a number: divide by the denominator, then multiply by the numerator: ⟦3/4 × 20 = 15⟧','A fraction greater than 1 has a numerator larger than its denominator: ⟦7/3 = 2 + 1/3⟧'],
+ ex:[['Simplify ⟦36/48⟧',['The greatest common factor of 36 and 48 is 12','⟦36 ÷ 12 = 3⟧ and ⟦48 ÷ 12 = 4⟧'],'⟦3/4⟧'],
+  ['Which is larger: ⟦5/8⟧ or ⟦7/11⟧?',['Cross-multiply: ⟦5 × 11 = 55⟧ and ⟦7 × 8 = 56⟧','The larger product is on the side of ⟦7/11⟧'],'⟦7/11⟧'],
+  ['What is ⟦2/5⟧ of 45?',['Divide by the denominator: ⟦45 ÷ 5 = 9⟧','Multiply by the numerator: ⟦9 × 2 = 18⟧'],'18']],
+ traps:['Judging by the denominator alone: ⟦3/4⟧ is larger than ⟦2/3⟧ although its denominator is larger.','Stopping halfway: ⟦12/18 = 6/9⟧ is true, but the simplest form is ⟦2/3⟧, and choices come in simplest form.','Assuming a fraction grows when you add the same number to top and bottom: ⟦1/2 → 2/3⟧ grows, but ⟦3/2 → 4/3⟧ shrinks.']},
+[()=>{ const [n,d]=fdFr(),k=R(2,9),ans=F(n,d);
+   return {s:'arith',q:bi(`ما أبسط صورة للكسر ⟦${n*k}/${d*k}⟧؟`,`What is ⟦${n*k}/${d*k}⟧ in simplest form?`),o:fo(ans,[F(n+1,d),F(n,d+1),F(d,n),F(d-n,d)],i=>F(n+i,d+i)),e:bi(`اقسم البسط والمقام على ${k}: ⟦${fdS(n,d)}⟧`,`Divide the top and bottom by ${k}: ⟦${fdS(n,d)}⟧`)}; },
+ ()=>{ const [p,q]=fdFr(2,9),Nn=q*R(2,15),ans=p*Nn/q;
+   return {s:'arith',q:bi(`ما قيمة ⟦${p}/${q}⟧ من ${Nn}؟`,`What is ⟦${p}/${q}⟧ of ${Nn}?`),o:mkOpts(ans,[Nn/q,Nn-ans,ans+Nn/q,p*Nn]),e:bi(`⟦${Nn} ÷ ${q} = ${Nn/q}⟧، ثم ⟦${Nn/q} × ${p} = ${ans}⟧`,`⟦${Nn} ÷ ${q} = ${Nn/q}⟧, then ⟦${Nn/q} × ${p} = ${ans}⟧`)}; },
+ ()=>{ const [n,d]=fdFr(2,9),k=R(2,6),ans=n*k,v=xv;
+   return {s:'arith',q:bi(`إذا كان ⟦${n}/${d} = س/${d*k}⟧ فما قيمة س؟`,`If ⟦${n}/${d} = x/${d*k}⟧, what is x?`),o:mkOpts(ans,[n+k,d*k-n*k,ans+k]),e:bi(`المقام ضُرب في ${k}، فيُضرب البسط في ${k}: ⟦${n} × ${k} = ${ans}⟧`,`The denominator was multiplied by ${k}, so the numerator is too: ⟦${n} × ${k} = ${ans}⟧`)}; },
+ ()=>{ const fr=[]; while(fr.length<4){ const [n,d]=fdFr(4,13); const v=n/d; if(v<.3||v>.95) continue; if(fr.some(x=>Math.abs(x[2]-v)<.015)) continue; fr.push([n,d,v]); }
+   const big=R(0,1)===1; fr.sort((a,b)=>big?b[2]-a[2]:a[2]-b[2]);
+   return {s:'arith',q:bi(big?'أي الكسور الآتية هو الأكبر؟':'أي الكسور الآتية هو الأصغر؟',big?'Which fraction is the largest?':'Which fraction is the smallest?'),o:fr.map(x=>F(x[0],x[1])),e:bi(`قيمها التقريبية: ${fr.map(x=>`⟦${x[0]}/${x[1]} ≈ ${dS(Math.round(x[2]*100)/100)}⟧`).join('، ')}`,`Approximate values: ${fr.map(x=>`⟦${x[0]}/${x[1]} ≈ ${dS(Math.round(x[2]*100)/100)}⟧`).join(', ')}`)}; }]);
+
+FDL('n-frac2','num','arith','fractions',
+{t:'الكسور (٢): العمليات على الكسور',d:'الجمع والطرح والضرب والقسمة، ومسائل «الباقي» الشهيرة.',
+ intro:['بعد أن عرفت معنى الكسر، نتعلم الآن الحساب به. لكل عملية قاعدة واحدة واضحة، والخطأ الأشهر هو خلط قاعدة عملية بأخرى.','نختم بمسائل «أنفق جزءًا ثم جزءًا من الباقي»، وهي من أكثر المسائل تكرارًا في الحساب.'],
+ rules:['الجمع والطرح: وحّد المقامين أولًا ثم اجمع البسطين: ⟦1/4 + 2/3 = 3/12 + 8/12 = 11/12⟧','الضرب: بسط في بسط ومقام في مقام، وبسّط قبل الضرب: ⟦3/4 × 8/9 = 2/3⟧','القسمة: اقلب الكسر الثاني ثم اضرب: ⟦2/3 ÷ 4/9 = 2/3 × 9/4 = 3/2⟧','القسمة على كسر أقل من 1 تكبّر العدد: ⟦6 ÷ 1/2 = 12⟧','«جزء من الباقي»: إذا أُنفق ⟦1/3⟧ ثم ⟦1/4⟧ الباقي، فالمتبقي ⟦2/3 × 3/4 = 1/2⟧ من الأصل.'],
+ ex:[['احسب ⟦5/6 − 3/8⟧',['المقام المشترك 24','⟦20/24 − 9/24 = 11/24⟧'],'⟦11/24⟧'],
+  ['احسب ⟦(1/2 + 1/3) ÷ 5/6⟧',['داخل القوسين: ⟦3/6 + 2/6 = 5/6⟧','⟦5/6 ÷ 5/6 = 1⟧'],'1'],
+  ['أنفق خالد ربع ماله، ثم أنفق ثلث ما بقي، فبقي معه 60 ريالًا. كم كان ماله؟',['بعد الربع يبقى ⟦3/4⟧','بعد ثلث الباقي يبقى ⟦3/4 × 2/3 = 1/2⟧ من المال','نصف المال 60، فالمال 120'],'120']],
+ traps:['جمع البسطين والمقامين: ⟦1/2 + 1/3⟧ ليست ⟦2/5⟧ بل ⟦5/6⟧.','في «ثلث الباقي» يؤخذ الثلث من الباقي لا من المال كله.','في القسمة يُقلب الكسر الثاني فقط، لا الأول.']},
+{t:'Fractions (2): operations',d:'Adding, subtracting, multiplying and dividing, and the classic "remainder" problems.',
+ intro:['Now that you know what a fraction means, we learn to calculate with fractions. Each operation has one clear rule, and the most common mistake is mixing up the rules.','We finish with "spent a part, then a part of the rest" problems, which come up again and again in arithmetic.'],
+ rules:['Add and subtract: make the denominators equal first, then add the numerators: ⟦1/4 + 2/3 = 3/12 + 8/12 = 11/12⟧','Multiply: top times top and bottom times bottom, simplifying first: ⟦3/4 × 8/9 = 2/3⟧','Divide: flip the second fraction, then multiply: ⟦2/3 ÷ 4/9 = 2/3 × 9/4 = 3/2⟧','Dividing by a fraction less than 1 makes the number larger: ⟦6 ÷ 1/2 = 12⟧','"Part of the rest": if ⟦1/3⟧ is spent, then ⟦1/4⟧ of what is left, the remainder is ⟦2/3 × 3/4 = 1/2⟧ of the original.'],
+ ex:[['Work out ⟦5/6 − 3/8⟧',['The common denominator is 24','⟦20/24 − 9/24 = 11/24⟧'],'⟦11/24⟧'],
+  ['Work out ⟦(1/2 + 1/3) ÷ 5/6⟧',['Inside the brackets: ⟦3/6 + 2/6 = 5/6⟧','⟦5/6 ÷ 5/6 = 1⟧'],'1'],
+  ['Khalid spent a quarter of his money, then a third of what was left, and had 60 SAR left. How much did he have?',['After the quarter, ⟦3/4⟧ is left','After a third of the rest, ⟦3/4 × 2/3 = 1/2⟧ of the money is left','Half the money is 60, so the money was 120'],'120']],
+ traps:['Adding tops and bottoms: ⟦1/2 + 1/3⟧ is not ⟦2/5⟧ but ⟦5/6⟧.','In "a third of the rest", the third is taken from what is left, not from the whole.','When dividing, flip only the second fraction, not the first.']},
+[()=>{ let b=R(2,9),d=R(2,9); while(d===b) d=R(2,9); const a=R(1,b-1),c=R(1,d-1),ans=F(a*d+c*b,b*d);
+   return {s:'arith',q:bi(`ما ناتج ⟦${a}/${b} + ${c}/${d}⟧؟`,`What is ⟦${a}/${b} + ${c}/${d}⟧?`),o:fo(ans,[F(a+c,b+d),F(a*c,b*d),F(a+c,b*d)],i=>F(a*d+c*b+i,b*d)),e:bi(`وحّد المقامين: ⟦${a*d}/${b*d} + ${c*b}/${b*d} = ${fdS(a*d+c*b,b*d)}⟧`,`Common denominator: ⟦${a*d}/${b*d} + ${c*b}/${b*d} = ${fdS(a*d+c*b,b*d)}⟧`)}; },
+ ()=>{ const [a,b]=fdFr(2,9),[c,d]=fdFr(2,9),div=R(0,1)===1;
+   if(div) return {s:'arith',q:bi(`ما ناتج ⟦${a}/${b} ÷ ${c}/${d}⟧؟`,`What is ⟦${a}/${b} ÷ ${c}/${d}⟧?`),o:fo(F(a*d,b*c),[F(a*c,b*d),F(b*c,a*d),F(a+c,b+d)],i=>F(a*d+i,b*c)),e:bi(`اقلب الثاني واضرب: ⟦${a}/${b} × ${d}/${c} = ${fdS(a*d,b*c)}⟧`,`Flip the second and multiply: ⟦${a}/${b} × ${d}/${c} = ${fdS(a*d,b*c)}⟧`)};
+   return {s:'arith',q:bi(`ما ناتج ⟦${a}/${b} × ${c}/${d}⟧؟`,`What is ⟦${a}/${b} × ${c}/${d}⟧?`),o:fo(F(a*c,b*d),[F(a*d,b*c),F(a+c,b+d),F(a*c,b+d)],i=>F(a*c+i,b*d)),e:bi(`⟦(${a} × ${c})/(${b} × ${d}) = ${fdS(a*c,b*d)}⟧`,`⟦(${a} × ${c})/(${b} × ${d}) = ${fdS(a*c,b*d)}⟧`)}; },
+ ()=>{ const a=pick([2,3,4,5]),b=pick([2,3,4,5]),m=10*R(1,12),T=a*b*m,Lf=(a-1)*(b-1)*m,w=Math.round(T*(1-1/a-1/b));
+   return {s:'arith',q:bi(`أنفق سالم ${UF.ar[a]} راتبه، ثم أنفق ${UF.ar[b]} ما تبقى، فبقي معه ${arSAR(Lf)}. كم راتبه؟`,`Salem spent ${UF.en[a]} of his salary, then ${UF.en[b]} of what was left, and had ${Lf} SAR left. What is his salary?`),o:mkOpts(T,[Lf*a,Lf*b,w>0?Lf*T/w:Lf*2,T+Lf]),e:bi(`يبقى ⟦${a-1}/${a} × ${b-1}/${b} = ${fdS((a-1)*(b-1),a*b)}⟧ من الراتب، فالراتب ⟦${Lf} ÷ ${fdS((a-1)*(b-1),a*b)} = ${T}⟧`,`The rest is ⟦${a-1}/${a} × ${b-1}/${b} = ${fdS((a-1)*(b-1),a*b)}⟧ of the salary, so the salary is ⟦${Lf} ÷ ${fdS((a-1)*(b-1),a*b)} = ${T}⟧`)}; },
+ ()=>{ const [a,b]=pick([[2,3],[3,4],[2,5],[4,5],[3,5],[2,4],[3,6]]),l=a*b/gcd(a,b),n=l*R(1,6),df=n/a-n/b;
+   return {s:'arith',q:bi(`${UF.ar[a]} عدد يزيد على ${UF.ar[b]}ه بمقدار ${df}. ما العدد؟`,`${UF.en[a][0].toUpperCase()+UF.en[a].slice(1)} of a number is ${df} more than ${UF.en[b]} of it. What is the number?`),o:mkOpts(n,[df*(a+b),df*a,df*b]),e:bi(`⟦س/${a} − س/${b} = ${df}⟧، و⟦1/${a} − 1/${b} = ${fdS(b-a,a*b)}⟧، فالعدد ⟦${df} ÷ ${fdS(b-a,a*b)} = ${n}⟧`,`⟦x/${a} − x/${b} = ${df}⟧, and ⟦1/${a} − 1/${b} = ${fdS(b-a,a*b)}⟧, so the number is ⟦${df} ÷ ${fdS(b-a,a*b)} = ${n}⟧`)}; }]);
+
+FDL('n-dec','num','arith','percent',
+{t:'الأعداد العشرية والتحويلات',d:'الضرب والقسمة بالفاصلة، والتحويل بين الكسر والعشري والنسبة المئوية.',
+ intro:['العدد العشري طريقة أخرى لكتابة الكسر: ⟦0.25⟧ هو ⟦25/100⟧ أي ⟦1/4⟧. وكثير من أسئلة الاختبار تخلط بين الصيغ الثلاث: كسر وعشري ونسبة مئوية.','إذا حفظت جدول التحويل الصغير في هذا الدرس، ستحل نصف هذه الأسئلة دون حساب.'],
+ rules:['احفظ: ⟦1/2 = 0.5 = 50%⟧، ⟦1/4 = 0.25 = 25%⟧، ⟦3/4 = 0.75⟧، ⟦1/5 = 0.2⟧، ⟦1/8 = 0.125⟧، ⟦1/3 ≈ 0.33⟧','الضرب: اضرب الأرقام كأنها صحيحة، ثم اجعل منازل الناتج العشرية بعدد منازل العددين معًا: ⟦0.3 × 0.02 = 0.006⟧','القسمة: اضرب العددين في 10 أو 100 حتى يصبح المقسوم عليه صحيحًا: ⟦1.2 ÷ 0.04 = 120 ÷ 4 = 30⟧','الضرب في 100 يكبّر العدد منزلتين: ⟦3.75 × 100 = 375⟧، والقسمة على 100 تصغّره منزلتين.','المقارنة: ساوِ عدد المنازل ثم قارن: ⟦0.5 = 0.50 > 0.45⟧','النسبة المئوية إلى عشري: اقسم على 100: ⟦7% = 0.07⟧ ، ⟦0.5% = 0.005⟧'],
+ ex:[['احسب ⟦0.25 × 0.8⟧',['⟦0.25 = 1/4⟧','⟦0.8 ÷ 4 = 0.2⟧'],'0.2'],
+  ['احسب ⟦0.36 ÷ 0.012⟧',['اضرب العددين في 1000: ⟦360 ÷ 12⟧','⟦360 ÷ 12 = 30⟧'],'30'],
+  ['رتّب تصاعديًا: ⟦0.4⟧ ، ⟦3/8⟧ ، ⟦0.38⟧',['⟦3/8 = 0.375⟧','⟦0.375 < 0.38 < 0.4⟧'],'⟦3/8 ، 0.38 ، 0.4⟧']],
+ traps:['⟦0.5 × 0.5 = 0.25⟧ وليست ⟦2.5⟧: ضرب عددين أقل من 1 يعطي عددًا أصغر منهما.','الظن أن ⟦0.125⟧ أكبر من ⟦0.2⟧ لأن أرقامه أكثر.','⟦0.5%⟧ تساوي ⟦0.005⟧ لا ⟦0.5⟧.']},
+{t:'Decimals and conversions',d:'Multiplying and dividing decimals, and converting between fractions, decimals and percents.',
+ intro:['A decimal is another way to write a fraction: ⟦0.25⟧ is ⟦25/100⟧, or ⟦1/4⟧. Many test questions mix the three forms: fraction, decimal and percent.','Learn the small conversion table in this lesson and you will solve half of these questions without calculating.'],
+ rules:['Memorize: ⟦1/2 = 0.5 = 50%⟧, ⟦1/4 = 0.25 = 25%⟧, ⟦3/4 = 0.75⟧, ⟦1/5 = 0.2⟧, ⟦1/8 = 0.125⟧, ⟦1/3 ≈ 0.33⟧','Multiply: multiply the digits as whole numbers, then give the result as many decimal places as both numbers together: ⟦0.3 × 0.02 = 0.006⟧','Divide: multiply both numbers by 10 or 100 until the divisor is whole: ⟦1.2 ÷ 0.04 = 120 ÷ 4 = 30⟧','Multiplying by 100 shifts the number two places up: ⟦3.75 × 100 = 375⟧; dividing by 100 shifts it two places down.','Compare: give both the same number of places, then compare: ⟦0.5 = 0.50 > 0.45⟧','Percent to decimal: divide by 100: ⟦7% = 0.07⟧, ⟦0.5% = 0.005⟧'],
+ ex:[['Work out ⟦0.25 × 0.8⟧',['⟦0.25 = 1/4⟧','⟦0.8 ÷ 4 = 0.2⟧'],'0.2'],
+  ['Work out ⟦0.36 ÷ 0.012⟧',['Multiply both by 1000: ⟦360 ÷ 12⟧','⟦360 ÷ 12 = 30⟧'],'30'],
+  ['Order from smallest: ⟦0.4⟧, ⟦3/8⟧, ⟦0.38⟧',['⟦3/8 = 0.375⟧','⟦0.375 < 0.38 < 0.4⟧'],'⟦3/8, 0.38, 0.4⟧']],
+ traps:['⟦0.5 × 0.5 = 0.25⟧, not ⟦2.5⟧: multiplying two numbers below 1 gives something smaller than both.','Thinking ⟦0.125⟧ is larger than ⟦0.2⟧ because it has more digits.','⟦0.5%⟧ is ⟦0.005⟧, not ⟦0.5⟧.']},
+[()=>{ const a=pick([0.2,0.3,0.4,0.5,0.6,0.25,0.15,0.12,0.8]),b=pick([0.02,0.03,0.4,0.05,0.6,0.007,0.9,1.5,0.04]),ans=+(a*b).toFixed(8);
+   return {s:'arith',q:bi(`ما ناتج ⟦${dS(a)} × ${dS(b)}⟧؟`,`What is ⟦${dS(a)} × ${dS(b)}⟧?`),o:mkOpts(ans,[+(ans*10).toFixed(8),+(ans/10).toFixed(8),+(ans*100).toFixed(8)],dS),e:bi(`اضرب بلا فاصلة ثم ضع منازل العددين معًا: ⟦${dS(a)} × ${dS(b)} = ${dS(ans)}⟧`,`Multiply without the points, then count both numbers' places: ⟦${dS(a)} × ${dS(b)} = ${dS(ans)}⟧`)}; },
+ ()=>{ const d=pick([0.2,0.4,0.05,0.03,0.12,0.6,0.004,0.25,0.08]),q=R(2,40),x=+(d*q).toFixed(8);
+   return {s:'arith',q:bi(`ما ناتج ⟦${dS(x)} ÷ ${dS(d)}⟧؟`,`What is ⟦${dS(x)} ÷ ${dS(d)}⟧?`),o:mkOpts(q,[q*10,+(q/10).toFixed(8),q*100],dS),e:bi(`اضرب العددين في العدد نفسه حتى يصبح المقسوم عليه صحيحًا، فالناتج ${q}. تحقق: ⟦${dS(d)} × ${q} = ${dS(x)}⟧`,`Scale both numbers until the divisor is whole; the result is ${q}. Check: ⟦${dS(d)} × ${q} = ${dS(x)}⟧`)}; },
+ ()=>{ const [n,d]=pick([[1,8],[3,8],[5,8],[7,8],[3,5],[2,5],[1,20],[3,20],[7,20],[9,25],[3,4],[1,40],[3,40],[7,25],[4,5],[11,20]]),v=n/d*100;
+   return {s:'arith',q:bi(`الكسر ⟦${n}/${d}⟧ يساوي:`,`The fraction ⟦${n}/${d}⟧ equals:`),o:fo(`${dS(v)}%`,[`${dS(v/10)}%`,`${dS(v*10)}%`,`${dS(n/d)}%`],i=>`${dS(v+i)}%`),e:bi(`⟦${n} ÷ ${d} = ${dS(n/d)}⟧، والضرب في 100 يعطي ⟦${dS(v)}%⟧`,`⟦${n} ÷ ${d} = ${dS(n/d)}⟧; times 100 gives ⟦${dS(v)}%⟧`)}; },
+ ()=>{ const pool=[[1,4],[1,5],[3,8],[2,5],[3,5],[5,8],[3,4],[7,10],[1,8],[9,20],[11,20],[13,20],[7,8],[1,2]]; for(;;){
+   const fr=shuffle(pool).slice(0,2).map(([n,d])=>({s:F(n,d),v:n/d,t:`⟦${n}/${d} = ${dS(n/d)}⟧`})); const d1=R(1,9)/10,d2=R(100,900)/1000;
+   const all=[...fr,{s:dS(d1),v:d1},{s:dS(d2),v:d2}]; if(new Set(all.map(x=>x.v)).size<4||all.some((x,i)=>all.some((y,j)=>i!==j&&Math.abs(x.v-y.v)<.01))) continue;
+   const big=R(0,1)===1; all.sort((a,b)=>big?b.v-a.v:a.v-b.v);
+   return {s:'arith',q:bi(big?'أي الأعداد الآتية هو الأكبر؟':'أي الأعداد الآتية هو الأصغر؟',big?'Which number is the largest?':'Which number is the smallest?'),o:all.map(x=>x.s),e:bi(`حوّل الكسرين: ${fr.map(x=>x.t).join('، ')}، ثم قارن المنازل العشرية.`,`Convert the fractions: ${fr.map(x=>x.t).join(', ')}, then compare the decimal places.`)}; } }]);
+
+FDL('n-exp','num','algebra','exponent',
+{t:'الأسس وقوانينها',d:'سبعة قوانين تحل كل أسئلة الأسس، وفكرة توحيد الأساس.',
+ intro:['الأس يخبرك كم مرة يُضرب العدد في نفسه: ⟦2^5 = 2 × 2 × 2 × 2 × 2 = 32⟧. العدد المضروب يسمى الأساس، وعدد المرات هو الأس.','كل أسئلة الأسس في الاختبار تُحل بسبعة قوانين، وأهم مهارة فيها أن تكتب الأعداد بأساس واحد قبل أي شيء.'],
+ rules:['ضرب أساسين متساويين: تُجمع الأسس: ⟦a^m × a^n = a^(m+n)⟧','قسمة أساسين متساويين: تُطرح الأسس: ⟦a^m ÷ a^n = a^(m−n)⟧','أس الأس: تُضرب الأسس: ⟦(a^m)^n = a^(mn)⟧','أي عدد غير الصفر أسه صفر يساوي 1: ⟦7^0 = 1⟧','الأس السالب مقلوب: ⟦a^(−n) = 1/a^n⟧ ، ⟦2^(−3) = 1/8⟧','وحّد الأساس: ⟦4 = 2^2⟧ ، ⟦8 = 2^3⟧ ، ⟦27 = 3^3⟧ ، فمثلًا ⟦4^3 = 2^6⟧','جمع حدود متساوية: ⟦2^n + 2^n = 2 × 2^n = 2^(n+1)⟧'],
+ ex:[['احسب ⟦2^5 × 2^3 ÷ 2^6⟧',['اجمع ثم اطرح الأسس: ⟦5 + 3 − 6 = 2⟧','⟦2^2 = 4⟧'],'4'],
+  ['إذا كان ⟦9^س = 27⟧ فما قيمة س؟',['وحّد الأساس: ⟦3^(2س) = 3^3⟧','⟦2س = 3⟧'],'⟦3/2⟧'],
+  ['احسب ⟦3^4 + 3^4 + 3^4⟧',['ثلاثة حدود متساوية: ⟦3 × 3^4⟧','⟦3^1 × 3^4 = 3^5 = 243⟧'],'243']],
+ traps:['ضرب الأسس بدل جمعها: ⟦2^3 × 2^4 = 2^7⟧ وليست ⟦2^12⟧.','⟦2^3 + 2^3⟧ لا تساوي ⟦2^6⟧ بل ⟦2^4⟧.','⟦5^0 = 1⟧ وليست صفرًا.']},
+{t:'Exponents and their laws',d:'Seven laws that solve every exponent question, and the idea of a common base.',
+ intro:['An exponent tells you how many times a number is multiplied by itself: ⟦2^5 = 2 × 2 × 2 × 2 × 2 = 32⟧. The number being multiplied is the base; the count is the exponent.','Every exponent question in the test is solved with seven laws, and the key skill is rewriting numbers with one base before anything else.'],
+ rules:['Multiplying equal bases: add the exponents: ⟦a^m × a^n = a^(m+n)⟧','Dividing equal bases: subtract the exponents: ⟦a^m ÷ a^n = a^(m−n)⟧','Power of a power: multiply the exponents: ⟦(a^m)^n = a^(mn)⟧','Any nonzero number to the power 0 is 1: ⟦7^0 = 1⟧','A negative exponent means the reciprocal: ⟦a^(−n) = 1/a^n⟧, ⟦2^(−3) = 1/8⟧','Use one base: ⟦4 = 2^2⟧, ⟦8 = 2^3⟧, ⟦27 = 3^3⟧, so ⟦4^3 = 2^6⟧','Adding equal terms: ⟦2^n + 2^n = 2 × 2^n = 2^(n+1)⟧'],
+ ex:[['Work out ⟦2^5 × 2^3 ÷ 2^6⟧',['Add, then subtract the exponents: ⟦5 + 3 − 6 = 2⟧','⟦2^2 = 4⟧'],'4'],
+  ['If ⟦9^x = 27⟧, what is x?',['Use one base: ⟦3^(2x) = 3^3⟧','⟦2x = 3⟧'],'⟦3/2⟧'],
+  ['Work out ⟦3^4 + 3^4 + 3^4⟧',['Three equal terms: ⟦3 × 3^4⟧','⟦3^1 × 3^4 = 3^5 = 243⟧'],'243']],
+ traps:['Multiplying exponents instead of adding: ⟦2^3 × 2^4 = 2^7⟧, not ⟦2^12⟧.','⟦2^3 + 2^3⟧ is not ⟦2^6⟧ but ⟦2^4⟧.','⟦5^0 = 1⟧, not zero.']},
+[()=>{ const a=pick([2,3]),r=a===2?R(1,5):R(1,3); const m=R(3,8),n=R(2,7),k=m+n-r,ans=a**r;
+   return {s:'algebra',q:bi(`ما قيمة ⟦${a}^${m} × ${a}^${n} ÷ ${a}^${k}⟧؟`,`What is ⟦${a}^${m} × ${a}^${n} ÷ ${a}^${k}⟧?`),o:mkOpts(ans,[a**(r+1),a**Math.max(0,r-1),a*r]),e:bi(`⟦${m} + ${n} − ${k} = ${r}⟧، و⟦${a}^${r} = ${ans}⟧`,`⟦${m} + ${n} − ${k} = ${r}⟧, and ⟦${a}^${r} = ${ans}⟧`)}; },
+ ()=>{ const [B,b,p]=pick([[4,2,2],[8,2,3],[9,3,2],[27,3,3],[16,2,4],[25,5,2]]),x=R(2,6),t=p*x;
+   return {s:'algebra',q:bi(`إذا كان ⟦${B}^س = ${b}^${t}⟧ فما قيمة س؟`,`If ⟦${B}^x = ${b}^${t}⟧, what is x?`),o:mkOpts(x,[t,x+p,x*p]),e:bi(`⟦${B} = ${b}^${p}⟧، فـ⟦${b}^(${p}س) = ${b}^${t}⟧، و⟦س = ${t} ÷ ${p} = ${x}⟧`,`⟦${B} = ${b}^${p}⟧, so ⟦${b}^(${p}x) = ${b}^${t}⟧ and ⟦x = ${t} ÷ ${p} = ${x}⟧`)}; },
+ ()=>{ const b=pick([2,3,4,5]),n=R(2,8),ex=Array(b).fill(`${b}^${n}`).join(' + ');
+   return {s:'algebra',q:bi(`⟦${ex}⟧ تساوي:`,`⟦${ex}⟧ equals:`),o:fo(`⟦${b}^${n+1}⟧`,[`⟦${b}^${b*n}⟧`,b===2?`⟦2^${n+2}⟧`:`⟦${b*b}^${n}⟧`,`⟦${b}^${n+b}⟧`],i=>`⟦${b}^${n+1+i}⟧`),e:bi(`${b} حدود متساوية: ⟦${b} × ${b}^${n} = ${b}^1 × ${b}^${n} = ${b}^${n+1}⟧`,`${b} equal terms: ⟦${b} × ${b}^${n} = ${b}^1 × ${b}^${n} = ${b}^${n+1}⟧`)}; },
+ ()=>{ const [b,k]=pick([[2,1],[2,2],[2,3],[3,1],[3,2],[4,1],[4,2],[5,1],[5,2],[10,1],[10,2],[2,4],[3,3]]),v=b**k;
+   if(R(0,1)) return {s:'algebra',q:bi(`ما قيمة ⟦${b}^(−${k})⟧؟`,`What is ⟦${b}^(−${k})⟧?`),o:[`⟦1/${v}⟧`,`⟦−${v}⟧`,`⟦${v}⟧`,`⟦−1/${v}⟧`],e:bi(`الأس السالب مقلوب: ⟦1/${b}^${k} = 1/${v}⟧`,`A negative exponent is a reciprocal: ⟦1/${b}^${k} = 1/${v}⟧`)};
+   return {s:'algebra',q:bi(`ما قيمة ⟦(1/${b})^(−${k})⟧؟`,`What is ⟦(1/${b})^(−${k})⟧?`),o:[`⟦${v}⟧`,`⟦1/${v}⟧`,`⟦−${v}⟧`,`⟦−1/${v}⟧`],e:bi(`مقلوب ⟦1/${b}⟧ هو ${b}: ⟦${b}^${k} = ${v}⟧`,`The reciprocal of ⟦1/${b}⟧ is ${b}: ⟦${b}^${k} = ${v}⟧`)}; }]);
+
+const rt=(c,m)=>m===1?String(c):`${c===1?'':c}√${m}`;
+FDL('n-root','num','algebra','squares',
+{t:'الجذور',d:'تبسيط الجذر، والجمع والضرب، وتقدير الجذر بين عددين.',
+ intro:['الجذر التربيعي عكس التربيع: ⟦√49 = 7⟧ لأن ⟦7^2 = 49⟧. أسئلة الجذور في الاختبار تدور حول التبسيط وجمع الجذور المتشابهة والتقدير.','احفظ مربعات الأعداد حتى 20 ومكعباتها حتى 10، فهي مفتاح السرعة هنا وفي الهندسة أيضًا.'],
+ rules:['جذر حاصل الضرب: ⟦√(ab) = √a × √b⟧، فاستخرج أكبر مربع: ⟦√50 = √25 × √2 = 5√2⟧','⟦√a × √a = a⟧ ، و⟦√2 × √8 = √16 = 4⟧','تُجمع الجذور المتشابهة فقط: ⟦3√2 + 5√2 = 8√2⟧، أما ⟦√2 + √3⟧ فلا تُختصر.','جذر الكسر: ⟦√(a/b) = √a / √b⟧، وجذر العشري: ⟦√0.09 = 0.3⟧','إنطاق المقام: اضرب في الجذر نفسه: ⟦6/√3 = 6√3/3 = 2√3⟧','التقدير: ⟦√50⟧ بين 7 و8 لأن ⟦49 < 50 < 64⟧، وهو أقرب إلى 7.'],
+ ex:[['بسّط ⟦√72⟧',['أكبر مربع يقسم 72 هو 36','⟦√36 × √2 = 6√2⟧'],'⟦6√2⟧'],
+  ['احسب ⟦√18 + √8⟧',['⟦√18 = 3√2⟧ و⟦√8 = 2√2⟧','⟦3√2 + 2√2 = 5√2⟧'],'⟦5√2⟧'],
+  ['احسب ⟦√0.0049⟧',['⟦√49 = 7⟧','للناتج نصف عدد منازل ⟦0.0049⟧ العشرية: منزلتان'],'0.07']],
+ traps:['⟦√(9 + 16) = √25 = 5⟧ وليست ⟦3 + 4 = 7⟧: الجذر لا يتوزع على الجمع.','⟦√0.4⟧ ليست ⟦0.2⟧؛ الصحيح ⟦√0.04 = 0.2⟧.','جمع جذرين مختلفين تحت جذر واحد: ⟦√2 + √3 ≠ √5⟧.']},
+{t:'Roots',d:'Simplifying roots, adding and multiplying them, and estimating a root between two numbers.',
+ intro:['The square root undoes squaring: ⟦√49 = 7⟧ because ⟦7^2 = 49⟧. Root questions in the test are about simplifying, adding like roots and estimating.','Learn the squares up to 20 and the cubes up to 10; they are the key to speed here and in geometry.'],
+ rules:['Root of a product: ⟦√(ab) = √a × √b⟧, so take out the largest square: ⟦√50 = √25 × √2 = 5√2⟧','⟦√a × √a = a⟧, and ⟦√2 × √8 = √16 = 4⟧','Only like roots add: ⟦3√2 + 5√2 = 8√2⟧, while ⟦√2 + √3⟧ does not simplify.','Root of a fraction: ⟦√(a/b) = √a / √b⟧; root of a decimal: ⟦√0.09 = 0.3⟧','Rationalize: multiply by the same root: ⟦6/√3 = 6√3/3 = 2√3⟧','Estimate: ⟦√50⟧ is between 7 and 8 because ⟦49 < 50 < 64⟧, and closer to 7.'],
+ ex:[['Simplify ⟦√72⟧',['The largest square that divides 72 is 36','⟦√36 × √2 = 6√2⟧'],'⟦6√2⟧'],
+  ['Work out ⟦√18 + √8⟧',['⟦√18 = 3√2⟧ and ⟦√8 = 2√2⟧','⟦3√2 + 2√2 = 5√2⟧'],'⟦5√2⟧'],
+  ['Work out ⟦√0.0049⟧',['⟦√49 = 7⟧','The result has half as many decimal places as ⟦0.0049⟧: two'],'0.07']],
+ traps:['⟦√(9 + 16) = √25 = 5⟧, not ⟦3 + 4 = 7⟧: a root does not split over addition.','⟦√0.4⟧ is not ⟦0.2⟧; it is ⟦√0.04 = 0.2⟧.','Putting two different roots under one root: ⟦√2 + √3 ≠ √5⟧.']},
+[()=>{ const k=R(2,7),m=pick([2,3,5,6,7]),n=k*k*m;
+   return {s:'algebra',q:bi(`أبسط صورة لـ ⟦√${n}⟧ هي:`,`⟦√${n}⟧ in simplest form is:`),o:fo(`⟦${rt(k,m)}⟧`,[`⟦${rt(m,k)}⟧`,`⟦${rt(k*k,m)}⟧`,`⟦${rt(k,m*k)}⟧`],i=>`⟦${rt(k+i,m)}⟧`),e:bi(`⟦√${n} = √${k*k} × √${m} = ${rt(k,m)}⟧`,`⟦√${n} = √${k*k} × √${m} = ${rt(k,m)}⟧`)}; },
+ ()=>{ const m=pick([2,3,5]); let a=R(1,5),b=R(2,5); while(b===a) b=R(2,5);
+   return {s:'algebra',q:bi(`ما ناتج ⟦√${a*a*m} + √${b*b*m}⟧؟`,`What is ⟦√${a*a*m} + √${b*b*m}⟧?`),o:fo(`⟦${rt(a+b,m)}⟧`,[`⟦√${a*a*m+b*b*m}⟧`,`⟦${rt(a*b,m)}⟧`,`⟦${rt(a+b,2*m)}⟧`],i=>`⟦${rt(a+b+i,m)}⟧`),e:bi(`⟦${rt(a,m)} + ${rt(b,m)} = ${rt(a+b,m)}⟧`,`⟦${rt(a,m)} + ${rt(b,m)} = ${rt(a+b,m)}⟧`)}; },
+ ()=>{ if(R(0,1)){ const r=pick([0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,0.03,0.04,0.05,0.07,0.09,0.12,0.11,1.1,1.2]),s=+(r*r).toFixed(8);
+     return {s:'algebra',q:bi(`ما قيمة ⟦√${dS(s)}⟧؟`,`What is ⟦√${dS(s)}⟧?`),o:mkOpts(r,[+(r*10).toFixed(8),+(r/10).toFixed(8),s],dS),e:bi(`⟦${dS(r)} × ${dS(r)} = ${dS(s)}⟧`,`⟦${dS(r)} × ${dS(r)} = ${dS(s)}⟧`)}; }
+   const [a,b]=fdFr(2,12);
+   return {s:'algebra',q:bi(`ما قيمة ⟦√(${a*a}/${b*b})⟧؟`,`What is ⟦√(${a*a}/${b*b})⟧?`),o:fo(F(a,b),[F(a*a,b),F(a,b*b),F(b,a)],i=>F(a+i,b)),e:bi(`⟦√${a*a} / √${b*b} = ${a}/${b}⟧`,`⟦√${a*a} / √${b*b} = ${a}/${b}⟧`)}; },
+ ()=>{ if(R(0,1)){ const b=pick([2,3,5,6,7]),c=R(1,5),a=b*c;
+     return {s:'algebra',q:bi(`ما قيمة ⟦${a}/√${b}⟧؟`,`What is ⟦${a}/√${b}⟧?`),o:fo(`⟦${rt(c,b)}⟧`,[`⟦${rt(a,b)}⟧`,`⟦${fdS(a,b)}⟧`,`⟦${rt(c*b,b)}⟧`],i=>`⟦${rt(c+i,b)}⟧`),e:bi(`اضرب في ⟦√${b}/√${b}⟧: ⟦${a}√${b}/${b} = ${rt(c,b)}⟧`,`Multiply by ⟦√${b}/√${b}⟧: ⟦${a}√${b}/${b} = ${rt(c,b)}⟧`)}; }
+   let n; do n=R(10,150); while(Math.sqrt(n)%1===0); const lo=Math.floor(Math.sqrt(n));
+   const pr=(a,b)=>bi(`بين ${a} و${b}`,`between ${a} and ${b}`), o=[pr(lo,lo+1),pr(lo+1,lo+2),pr(lo-1,lo),pr(Math.floor(n/2)-1,Math.floor(n/2))];
+   if(o[3].ar===o[0].ar||o[3].ar===o[1].ar||o[3].ar===o[2].ar) o[3]=pr(lo+2,lo+3);
+   return {s:'algebra',q:bi(`⟦√${n}⟧ يقع:`,`⟦√${n}⟧ lies:`),o,e:bi(`⟦${lo}^2 = ${lo*lo}⟧ و⟦${lo+1}^2 = ${(lo+1)**2}⟧، و${n} بينهما`,`⟦${lo}^2 = ${lo*lo}⟧ and ⟦${lo+1}^2 = ${(lo+1)**2}⟧, and ${n} is between them`)}; }]);
+
+const fdFac=n=>{ for(let p=2;p*p<=n;p++) if(n%p===0) return [p,n/p]; return null; };
+FDL('n-div','num','arith','numline',
+{t:'قابلية القسمة والأعداد الأولية',d:'قواعد القسمة السريعة، والعدد الأولي، والقاسم والمضاعف المشترك.',
+ intro:['قواعد قابلية القسمة تخبرك هل يقبل العدد القسمة دون أن تقسم فعلًا، وهي توفر وقتًا كبيرًا في التبسيط وفي أسئلة «أي الأعداد».','العدد الأولي عدد أكبر من 1 لا يقبل القسمة إلا على نفسه وعلى 1. والقاسم المشترك الأكبر والمضاعف المشترك الأصغر يحلان مسائل التقطيع والتكرار.'],
+ rules:['القسمة على 3 أو 9: مجموع الأرقام يقبل القسمة على 3 أو 9: ⟦5832 → 5 + 8 + 3 + 2 = 18⟧','على 4: آخر رقمين يقبلان القسمة على 4 (⟦1316 → 16⟧)، وعلى 8: آخر ثلاثة أرقام.','على 6: يقبل القسمة على 2 و3 معًا. وعلى 5: آحاده 0 أو 5.','الأعداد الأولية الأولى: ⟦2، 3، 5، 7، 11، 13، 17، 19، 23، 29، 31⟧. العدد 1 ليس أوليًا، و2 هو الأولي الزوجي الوحيد.','التحليل إلى عوامل أولية: ⟦60 = 2^2 × 3 × 5⟧. ولعدد القواسم: أضف 1 لكل أس واضرب: ⟦(2+1)(1+1)(1+1) = 12⟧','القاسم المشترك الأكبر لأكبر قطعة متساوية، والمضاعف المشترك الأصغر لموعد التكرار معًا.'],
+ ex:[['هل العدد 5832 يقبل القسمة على 9؟',['مجموع الأرقام ⟦5 + 8 + 3 + 2 = 18⟧','18 يقبل القسمة على 9'],'نعم'],
+  ['أوجد القاسم المشترك الأكبر والمضاعف المشترك الأصغر للعددين 18 و24',['⟦18 = 2 × 3^2⟧ و⟦24 = 2^3 × 3⟧','القاسم: أصغر الأسس المشتركة ⟦2 × 3 = 6⟧','المضاعف: أكبر الأسس ⟦2^3 × 3^2 = 72⟧'],'6 و72'],
+  ['كم قاسمًا للعدد 72؟',['⟦72 = 2^3 × 3^2⟧','⟦(3 + 1)(2 + 1) = 12⟧'],'12']],
+ traps:['العدد 1 ليس أوليًا.','أعداد تبدو أولية وليست كذلك: ⟦51 = 3 × 17⟧، ⟦91 = 7 × 13⟧، ⟦57 = 3 × 19⟧.','قابلية القسمة على 3 لا تعني القسمة على 9: ⟦12⟧ يقبل الأولى فقط.']},
+{t:'Divisibility and primes',d:'Quick divisibility rules, primes, and the greatest common factor and least common multiple.',
+ intro:['Divisibility rules tell you whether a number divides without actually dividing, which saves a lot of time when simplifying and in "which number" questions.','A prime is a number greater than 1 whose only divisors are 1 and itself. The GCF and LCM solve cutting and repeating problems.'],
+ rules:['By 3 or 9: the digit sum is divisible by 3 or 9: ⟦5832 → 5 + 8 + 3 + 2 = 18⟧','By 4: the last two digits are divisible by 4 (⟦1316 → 16⟧); by 8: the last three digits.','By 6: divisible by both 2 and 3. By 5: ends in 0 or 5.','The first primes: ⟦2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31⟧. 1 is not prime, and 2 is the only even prime.','Prime factorization: ⟦60 = 2^2 × 3 × 5⟧. Number of divisors: add 1 to each exponent and multiply: ⟦(2+1)(1+1)(1+1) = 12⟧','The GCF gives the largest equal piece; the LCM gives when things repeat together.'],
+ ex:[['Is 5832 divisible by 9?',['Digit sum ⟦5 + 8 + 3 + 2 = 18⟧','18 is divisible by 9'],'Yes'],
+  ['Find the GCF and LCM of 18 and 24',['⟦18 = 2 × 3^2⟧ and ⟦24 = 2^3 × 3⟧','GCF: smallest shared powers ⟦2 × 3 = 6⟧','LCM: largest powers ⟦2^3 × 3^2 = 72⟧'],'6 and 72'],
+  ['How many divisors does 72 have?',['⟦72 = 2^3 × 3^2⟧','⟦(3 + 1)(2 + 1) = 12⟧'],'12']],
+ traps:['1 is not prime.','Numbers that look prime but are not: ⟦51 = 3 × 17⟧, ⟦91 = 7 × 13⟧, ⟦57 = 3 × 19⟧.','Divisible by 3 does not mean divisible by 9: ⟦12⟧ passes only the first.']},
+[()=>{ const dv=pick([3,4,6,9]); const ok=x=>x%dv===0; const near={3:x=>x%3!==0,4:x=>x%2===0&&x%4!==0,6:x=>(x%3===0)!==(x%2===0),9:x=>x%3===0&&x%9!==0};
+   let good; do good=R(102,9990); while(!ok(good)); const o=[String(good)]; let tr=0; while(o.length<4&&tr<500){ tr++; const x=R(102,9990); if(ok(x)||o.includes(String(x))) continue; if(o.length<3&&!near[dv](x)) continue; o.push(String(x)); }
+   const rule={3:bi('مجموع أرقامه يقبل القسمة على 3','its digit sum is divisible by 3'),4:bi('آخر رقمين فيه يقبلان القسمة على 4','its last two digits are divisible by 4'),6:bi('يقبل القسمة على 2 و3 معًا','it is divisible by both 2 and 3'),9:bi('مجموع أرقامه يقبل القسمة على 9','its digit sum is divisible by 9')}[dv];
+   return {s:'arith',q:bi(`أي الأعداد الآتية يقبل القسمة على ${dv}؟`,`Which number is divisible by ${dv}?`),o,e:bi(`${good}، لأن ${rule.ar}.`,`${good}, because ${rule.en}.`)}; },
+ ()=>{ if(R(0,1)){ let a,b,l; do{ a=R(3,15); b=R(4,20); l=a*b/gcd(a,b); }while(a===b||l>180||a%b===0||b%a===0);
+     return {s:'arith',q:bi(`إشارة تومض كل ${a} ثوانٍ، وأخرى كل ${b} ثانية. إذا ومضتا معًا الآن، فبعد كم ثانية تومضان معًا مرة أخرى؟`,`One light flashes every ${a} seconds and another every ${b} seconds. If they flash together now, after how many seconds will they flash together again?`),o:mkOpts(l,[a*b,a+b,gcd(a,b)]),e:bi(`المضاعف المشترك الأصغر للعددين ${a} و${b} هو ${l}`,`The LCM of ${a} and ${b} is ${l}`)}; }
+   let a,b,g; do{ g=pick([4,5,6,8,9,12,15]); a=g*R(2,7); b=g*R(2,7); }while(a===b||gcd(a,b)!==g);
+   return {s:'arith',q:bi(`حبلان طولاهما ${a} مترًا و${b} مترًا، يُقطعان إلى قطع متساوية بأكبر طول ممكن دون زيادة. كم طول القطعة؟`,`Two ropes, ${a} m and ${b} m long, are cut into equal pieces of the greatest possible length with nothing left over. How long is each piece?`),o:mkOpts(g,[g/2|0||g+3,a*b/g,g*2]),e:bi(`القاسم المشترك الأكبر للعددين ${a} و${b} هو ${g}`,`The GCF of ${a} and ${b} is ${g}`)}; },
+ ()=>{ const p=pick([23,29,31,37,41,43,47,53,59,61,67,71,73,79,83,89,97]),tr=shuffle([51,57,87,91,49,77,93,39,69,27,63,81,33,21,119,111,133,143]).slice(0,3);
+   return {s:'arith',q:bi('أي الأعداد الآتية عدد أولي؟','Which number is prime?'),o:[String(p),...tr.map(String)],e:bi(`${p} لا يقبل القسمة إلا على نفسه وعلى 1، أما ${tr.map(x=>{ const f=fdFac(x); return `⟦${x} = ${f[0]} × ${f[1]}⟧`; }).join(' و')}`,`${p} has no divisors other than 1 and itself, while ${tr.map(x=>{ const f=fdFac(x); return `⟦${x} = ${f[0]} × ${f[1]}⟧`; }).join(', ')}`)}; },
+ ()=>{ const [a,b,c]=pick([[2,1,0],[3,1,0],[2,2,0],[3,2,0],[4,1,0],[1,1,1],[2,1,1],[4,2,0],[1,3,0],[2,0,2],[3,0,1],[5,1,0]]),n=2**a*3**b*5**c,ans=(a+1)*(b+1)*(c+1);
+   const fac=[[2,a],[3,b],[5,c]].filter(x=>x[1]).map(x=>x[1]===1?`${x[0]}`:`${x[0]}^${x[1]}`).join(' × ');
+   return {s:'arith',q:bi(`كم عدد القواسم الموجبة للعدد ${n}؟`,`How many positive divisors does ${n} have?`),o:mkOpts(ans,[a+b+c,ans-2,ans+2,ans/2|0]),e:bi(`⟦${n} = ${fac}⟧، وعدد القواسم ⟦${[a,b,c].filter(x=>x).map(x=>`(${x} + 1)`).join('')} = ${ans}⟧`,`⟦${n} = ${fac}⟧, so the number of divisors is ⟦${[a,b,c].filter(x=>x).map(x=>`(${x} + 1)`).join('')} = ${ans}⟧`)}; }]);
+
+/* ---- unit 2: arithmetic ---- */
+FDL('a-ratio','ar','arith','ratio',
+{t:'النسبة والتناسب',d:'تقسيم مبلغ بنسبة، والتناسب الطردي والعكسي، وربط نسبتين.',
+ intro:['النسبة مقارنة بين كميتين بالقسمة: إذا كان في الفصل 12 طالبًا و18 طالبة فالنسبة ⟦12 : 18 = 2 : 3⟧. والنسبة لا تخبرك بالعدد الحقيقي، بل بعدد الأجزاء.','أهم سؤال تسأله لنفسك في هذا الباب: هل الكميتان تكبران معًا (طردي)، أم تكبر إحداهما حين تصغر الأخرى (عكسي)؟'],
+ rules:['النسبة ⟦أ : ب⟧ تعني ⟦أ + ب⟧ جزءًا متساويًا، وقيمة الجزء = المجموع ÷ عدد الأجزاء.','التناسب الطردي: ناتج القسمة ثابت، فاضرب تبادليًا: ⟦3/12 = 7/س → س = 28⟧','التناسب العكسي: حاصل الضرب ثابت: 12 عاملًا في 10 أيام = ⟦12 × 10 = 120⟧ يوم عمل.','ربط نسبتين: وحّد الحد المشترك: ⟦أ : ب = 2 : 3⟧ و⟦ب : ج = 4 : 5⟧ ← ⟦أ : ب : ج = 8 : 12 : 15⟧','الفرق بين جزأين معلوم؟ اقسمه على الفرق في عدد الأجزاء: في ⟦3 : 5⟧ الفرق جزءان.'],
+ ex:[['وُزّع 72 ريالًا بين أخوين بنسبة ⟦4 : 5⟧. كم نصيب الأكبر؟',['عدد الأجزاء ⟦4 + 5 = 9⟧','الجزء ⟦72 ÷ 9 = 8⟧','الأكبر ⟦5 × 8 = 40⟧'],'40'],
+  ['6 عمال ينهون عملًا في 15 يومًا. في كم يومًا ينهيه 9 عمال؟',['عدد العمال زاد فالأيام تقل: تناسب عكسي','⟦6 × 15 = 90⟧','⟦90 ÷ 9 = 10⟧'],'10 أيام'],
+  ['إذا كان ⟦أ : ب = 2 : 3⟧ و⟦ب : ج = 4 : 5⟧ فما ⟦أ : ج⟧؟',['اجعل ب واحدًا في النسبتين: 12','⟦أ : ب = 8 : 12⟧ و⟦ب : ج = 12 : 15⟧'],'⟦8 : 15⟧']],
+ traps:['استعمال الطرد في موقف عكسي: زيادة العمال لا تزيد الأيام.','قسمة المجموع على أحد حدّي النسبة بدل مجموعهما.','الخلط بين ⟦أ : ب⟧ و⟦ب : أ⟧ حين يسأل عن «نسبة البنات إلى الأولاد».']},
+{t:'Ratio and proportion',d:'Splitting an amount in a ratio, direct and inverse proportion, and linking two ratios.',
+ intro:['A ratio compares two quantities by division: with 12 boys and 18 girls, the ratio is ⟦12 : 18 = 2 : 3⟧. A ratio does not give the actual count, only the number of parts.','The key question here: do the two quantities grow together (direct), or does one grow as the other shrinks (inverse)?'],
+ rules:['The ratio ⟦a : b⟧ means ⟦a + b⟧ equal parts; one part = total ÷ number of parts.','Direct proportion: the quotient is constant, so cross-multiply: ⟦3/12 = 7/x → x = 28⟧','Inverse proportion: the product is constant: 12 workers for 10 days = ⟦12 × 10 = 120⟧ worker-days.','Linking two ratios: make the shared term equal: ⟦a : b = 2 : 3⟧ and ⟦b : c = 4 : 5⟧ → ⟦a : b : c = 8 : 12 : 15⟧','Given the difference between two shares? Divide it by the difference in parts: in ⟦3 : 5⟧ the difference is two parts.'],
+ ex:[['72 SAR is split between two brothers in the ratio ⟦4 : 5⟧. What is the larger share?',['Parts: ⟦4 + 5 = 9⟧','One part: ⟦72 ÷ 9 = 8⟧','Larger share: ⟦5 × 8 = 40⟧'],'40'],
+  ['6 workers finish a job in 15 days. How many days do 9 workers need?',['More workers means fewer days: inverse','⟦6 × 15 = 90⟧','⟦90 ÷ 9 = 10⟧'],'10 days'],
+  ['If ⟦a : b = 2 : 3⟧ and ⟦b : c = 4 : 5⟧, what is ⟦a : c⟧?',['Make b the same in both: 12','⟦a : b = 8 : 12⟧ and ⟦b : c = 12 : 15⟧'],'⟦8 : 15⟧']],
+ traps:['Treating an inverse situation as direct: more workers do not mean more days.','Dividing the total by one term of the ratio instead of their sum.','Mixing up ⟦a : b⟧ and ⟦b : a⟧ when asked for "girls to boys".']},
+[()=>{ let a=R(1,7),b=R(2,9); while(a===b||gcd(a,b)!==1) b=R(2,9); const p=R(3,15),T=(a+b)*p,big=Math.max(a,b)*p,sm=Math.min(a,b)*p;
+   return {s:'arith',q:bi(`وُزّع ${arSAR(T)} بين شخصين بنسبة ⟦${a} : ${b}⟧. كم نصيب الأكبر؟`,`${T} SAR is split between two people in the ratio ⟦${a} : ${b}⟧. What is the larger share?`),o:mkOpts(big,[sm,T/Math.max(a,b)|0,big+p]),e:bi(`الجزء ⟦${T} ÷ ${a+b} = ${p}⟧، والأكبر ⟦${Math.max(a,b)} × ${p} = ${big}⟧`,`One part ⟦${T} ÷ ${a+b} = ${p}⟧; the larger share is ⟦${Math.max(a,b)} × ${p} = ${big}⟧`)}; },
+ ()=>{ const n1=R(2,6),pr=R(2,9),n2=R(n1+1,15),ans=n2*pr;
+   return {s:'arith',q:bi(`ثمن ${arC(n1,AN.nb)} ${arSAR(n1*pr)}. كم ثمن ${arC(n2,AN.nb)} من النوع نفسه؟`,`${n1} notebooks cost ${n1*pr} SAR. How much do ${n2} of the same notebooks cost?`),o:mkOpts(ans,[n1*pr+n2,ans-pr,ans+pr]),e:bi(`تناسب طردي: ثمن الدفتر ⟦${n1*pr} ÷ ${n1} = ${pr}⟧، و⟦${n2} × ${pr} = ${ans}⟧`,`Direct: one notebook ⟦${n1*pr} ÷ ${n1} = ${pr}⟧, and ⟦${n2} × ${pr} = ${ans}⟧`)}; },
+ ()=>{ for(;;){ const w1=R(3,12),d1=R(4,20),tot=w1*d1,w2=pick([2,3,4,5,6,8,10,12,15,16,20,24]); if(w2===w1||tot%w2) continue; const ans=tot/w2;
+   return {s:'arith',q:bi(`فريق من ${arC(w1,AN.worker)} ينهي عملًا في ${arC(d1,AN.day)}. في كم يومًا ينهي العمل نفسه فريق من ${arC(w2,AN.worker)} بالسرعة نفسها؟`,`${w1} workers finish a job in ${d1} days. How many days do ${w2} workers need for the same job at the same rate?`),o:mkOpts(ans,[Math.round(d1*w2/w1)||d1+1,d1+w2-w1>0?d1+w2-w1:d1+2,ans+2]),e:bi(`تناسب عكسي: ⟦${w1} × ${d1} = ${tot}⟧، و⟦${tot} ÷ ${w2} = ${ans}⟧`,`Inverse: ⟦${w1} × ${d1} = ${tot}⟧, and ⟦${tot} ÷ ${w2} = ${ans}⟧`)}; } },
+ ()=>{ for(;;){ const a=R(1,5),b=R(2,6),c=R(2,6),d=R(2,7); if(gcd(a,b)!==1||gcd(c,d)!==1) continue; const l=b*c/gcd(b,c),A=a*l/b,C=d*l/c,g=gcd(A,C);
+   const s=(x,y)=>`⟦${x} : ${y}⟧`; const ans=s(A/g,C/g); const o=fo(ans,[s(a,d),s(a*c,b*d),s(C/g,A/g)],i=>s(A/g+i,C/g)); if(o.length<4) continue;
+   return {s:'arith',q:bi(`إذا كان ⟦أ : ب = ${a} : ${b}⟧ و⟦ب : ج = ${c} : ${d}⟧ فما ⟦أ : ج⟧؟`,`If ⟦a : b = ${a} : ${b}⟧ and ⟦b : c = ${c} : ${d}⟧, what is ⟦a : c⟧?`),o,e:bi(`اجعل ب ${l} في النسبتين: ⟦أ : ب : ج = ${A} : ${l} : ${C}⟧، فالنسبة ⟦${A/g} : ${C/g}⟧`,`Make b equal to ${l} in both: ⟦a : b : c = ${A} : ${l} : ${C}⟧, so the ratio is ⟦${A/g} : ${C/g}⟧`)}; } }]);
+
+FDL('a-pct','ar','arith','percent',
+{t:'النسبة المئوية',d:'إيجاد نسبة من عدد، ونسبة التغير، وإيجاد الكل من الجزء.',
+ intro:['النسبة المئوية كسر مقامه 100: ⟦35% = 35/100⟧. وهي أكثر موضوع يتكرر في الكمي، في المسائل المباشرة وفي الجداول والرسوم أيضًا.','السر في السرعة أن تعامل النسبة ككسر مألوف أو أن تبنيها من ⟦10%⟧.'],
+ rules:['⟦x%⟧ من عدد = ⟦x/100 × العدد⟧، والأسرع بالكسور: ⟦25% = 1/4⟧، ⟦20% = 1/5⟧، ⟦12.5% = 1/8⟧','ابنِ من ⟦10%⟧: ⟦10%⟧ من 360 هي 36، فـ⟦15% = 36 + 18 = 54⟧','قلب النسبة: ⟦x%⟧ من y = ⟦y%⟧ من x: ⟦8%⟧ من 50 = ⟦50%⟧ من 8 = 4','نسبة التغير = ⟦(الجديد − القديم) ÷ القديم × 100⟧','إيجاد الكل: إذا كان ⟦30%⟧ من عدد يساوي 12 فالعدد ⟦12 ÷ 0.3 = 40⟧','الزيادة ⟦20%⟧ ضرب في ⟦1.2⟧، والنقص ⟦20%⟧ ضرب في ⟦0.8⟧'],
+ ex:[['ما ⟦35%⟧ من 80؟',['⟦10%⟧ = 8، فـ⟦30%⟧ = 24','⟦5%⟧ = 4','⟦24 + 4 = 28⟧'],'28'],
+  ['ارتفع سعر من 40 إلى 50 ريالًا. ما نسبة الزيادة؟',['الفرق 10','القسمة على القديم: ⟦10 ÷ 40 = 0.25⟧'],'⟦25%⟧'],
+  ['⟦40%⟧ من عدد تساوي 18. ما العدد؟',['⟦40% = 2/5⟧','⟦18 ÷ 2/5 = 18 × 5/2 = 45⟧'],'45']],
+ traps:['القسمة على القيمة الجديدة في نسبة التغير: من 50 إلى 40 نقص ⟦20%⟧ لا ⟦25%⟧.','زيادة ⟦10%⟧ ثم نقص ⟦10%⟧ لا تعيد العدد كما كان: ⟦1.1 × 0.9 = 0.99⟧.','الخلط بين «⟦x%⟧ من» و«⟦x%⟧ أكثر من»: ⟦20%⟧ أكثر من 50 تساوي 60 لا 10.']},
+{t:'Percent',d:'Finding a percent of a number, percent change, and finding the whole from a part.',
+ intro:['A percent is a fraction out of 100: ⟦35% = 35/100⟧. It is the most repeated topic in the quantitative part, in word problems and in tables and charts.','The secret to speed is treating the percent as a familiar fraction, or building it from ⟦10%⟧.'],
+ rules:['⟦x%⟧ of a number = ⟦x/100 × number⟧; faster with fractions: ⟦25% = 1/4⟧, ⟦20% = 1/5⟧, ⟦12.5% = 1/8⟧','Build from ⟦10%⟧: ⟦10%⟧ of 360 is 36, so ⟦15% = 36 + 18 = 54⟧','Swap: ⟦x%⟧ of y = ⟦y%⟧ of x: ⟦8%⟧ of 50 = ⟦50%⟧ of 8 = 4','Percent change = ⟦(new − old) ÷ old × 100⟧','Finding the whole: if ⟦30%⟧ of a number is 12, the number is ⟦12 ÷ 0.3 = 40⟧','A ⟦20%⟧ increase means ×⟦1.2⟧; a ⟦20%⟧ decrease means ×⟦0.8⟧'],
+ ex:[['What is ⟦35%⟧ of 80?',['⟦10%⟧ = 8, so ⟦30%⟧ = 24','⟦5%⟧ = 4','⟦24 + 4 = 28⟧'],'28'],
+  ['A price rose from 40 to 50 SAR. What is the percent increase?',['The difference is 10','Divide by the old value: ⟦10 ÷ 40 = 0.25⟧'],'⟦25%⟧'],
+  ['⟦40%⟧ of a number is 18. What is the number?',['⟦40% = 2/5⟧','⟦18 ÷ 2/5 = 18 × 5/2 = 45⟧'],'45']],
+ traps:['Dividing by the new value in percent change: 50 to 40 is a ⟦20%⟧ decrease, not ⟦25%⟧.','Up ⟦10%⟧ then down ⟦10%⟧ does not return to the start: ⟦1.1 × 0.9 = 0.99⟧.','Mixing "⟦x%⟧ of" with "⟦x%⟧ more than": ⟦20%⟧ more than 50 is 60, not 10.']},
+[()=>{ const p=pick([5,15,35,45,60,65,75,85,12.5,30,70,90]),n=pick([40,80,120,160,200,240,360,400,60,20]),ans=p*n/100;
+   if(!Number.isInteger(ans*2)) return FD_PCT0();
+   return {s:'arith',q:bi(`ما ⟦${p}%⟧ من ${n}؟`,`What is ⟦${p}%⟧ of ${n}?`),o:mkOpts(ans,[n-ans,ans*10,ans/10,ans+n/10]),e:bi(`⟦${n} × ${p}/100 = ${N(ans)}⟧`,`⟦${n} × ${p}/100 = ${N(ans)}⟧`)}; },
+ ()=>{ const [o,pc]=pick([[40,25],[50,20],[80,25],[20,15],[60,5],[25,40],[120,25],[200,15],[150,20],[80,75],[50,30],[90,10]]),up=R(0,1)===1,nw=up?o*(100+pc)/100:o*(100-pc)/100,df=Math.abs(nw-o),wrong=Math.round(df/nw*1000)/10;
+   return {s:'arith',q:bi(`${up?'ارتفع':'انخفض'} سعر سلعة من ${arSAR(o)} إلى ${arSAR(nw)}. ما نسبة ${up?'الزيادة':'النقص'}؟`,`A price ${up?'rose':'fell'} from ${o} SAR to ${nw} SAR. What is the percent ${up?'increase':'decrease'}?`),o:fo(`${pc}%`,[`${wrong}%`,`${df}%`,`${pc+5}%`],i=>`${pc+5*i+5}%`),e:bi(`الفرق ${df}، والقسمة على القديم: ⟦${df} ÷ ${o} = ${pc}%⟧`,`The difference is ${df}; divide by the old price: ⟦${df} ÷ ${o} = ${pc}%⟧`)}; },
+ ()=>{ const p=pick([10,20,25,30,40,60,75,15,35,45]),n=20*R(2,20),part=p*n/100;
+   return {s:'arith',q:bi(`⟦${p}%⟧ من عدد تساوي ${N(part)}. ما العدد؟`,`⟦${p}%⟧ of a number is ${N(part)}. What is the number?`),o:mkOpts(n,[part*p/100,part+p,n/2,n*2]),e:bi(`⟦${N(part)} ÷ ${p/100} = ${n}⟧`,`⟦${N(part)} ÷ ${p/100} = ${n}⟧`)}; },
+ ()=>{ if(R(0,1)){ const a=pick([4,8,12,16,24,36,48,44]),b=pick([25,50,75]),ans=a*b/100;
+     return {s:'arith',q:bi(`ما ⟦${a}%⟧ من ${b}؟`,`What is ⟦${a}%⟧ of ${b}?`),o:mkOpts(ans,[ans*10,a,b-ans]),e:bi(`اقلب: ⟦${b}%⟧ من ${a} أسهل: ⟦${N(ans)}⟧`,`Swap: ⟦${b}%⟧ of ${a} is easier: ⟦${N(ans)}⟧`)}; }
+   const p=pick([10,20,25,50]),up=R(0,1)===1,net=up?p*p/100:-p*p/100,f1=up?`زيد ${p}% ثم خُفّض ${p}%`:`خُفّض ${p}% ثم زيد ${p}%`;
+   return {s:'arith',q:bi(`سعر سلعة ${f1}. ما التغير النهائي في سعرها؟`,`An item's price was ${up?`raised ${p}% and then cut ${p}%`:`cut ${p}% and then raised ${p}%`}. What is the overall change in its price?`),o:[bi(`نقص ${N(p*p/100)}%`,`a ${N(p*p/100)}% decrease`),bi('لا تغير','no change'),bi(`زيادة ${N(p*p/100)}%`,`a ${N(p*p/100)}% increase`),bi(`نقص ${2*p}%`,`a ${2*p}% decrease`)],e:bi(`⟦${(100+p)/100} × ${(100-p)/100} = ${dS((100+p)*(100-p)/10000)}⟧ أي نقص ⟦${N(p*p/100)}%⟧ في الحالتين`,`⟦${(100+p)/100} × ${(100-p)/100} = ${dS((100+p)*(100-p)/10000)}⟧, a ⟦${N(p*p/100)}%⟧ decrease either way`)}; }]);
+function FD_PCT0(){ return FD.find(x=>x.id==='a-pct').g[0](); }
+
+FDL('a-profit','ar','arith','percent',
+{t:'الربح والخسارة والخصم',d:'نسبة الربح، والسعر بعد الخصم، والسعر الأصلي، والخصم المتتالي.',
+ intro:['مسائل البيع والشراء تطبيق مباشر للنسبة المئوية، لكن لها لغة خاصة: التكلفة (ثمن الشراء) والبيع والربح والخصم.','القاعدة الذهبية: نسبة الربح أو الخسارة تُحسب من التكلفة، ونسبة الخصم تُحسب من السعر قبل الخصم، ما لم يقل السؤال غير ذلك.'],
+ rules:['الربح = سعر البيع − التكلفة، ونسبة الربح = ⟦الربح ÷ التكلفة × 100⟧','البيع بربح ⟦p%⟧: التكلفة × ⟦(1 + p/100)⟧ ، والبيع بخسارة ⟦p%⟧: التكلفة × ⟦(1 − p/100)⟧','السعر بعد خصم ⟦d%⟧ = السعر × ⟦(1 − d/100)⟧: بعد خصم ⟦25%⟧ تدفع ⟦0.75⟧ من السعر.','السعر الأصلي = السعر بعد الخصم ÷ المعامل: ⟦160 ÷ 0.8 = 200⟧','الخصمان المتتاليان يُضربان ولا يُجمعان: ⟦0.8 × 0.9 = 0.72⟧ أي خصم ⟦28%⟧ لا ⟦30%⟧'],
+ ex:[['اشترى تاجر سلعة بـ250 ريالًا وباعها بـ300. ما نسبة ربحه؟',['الربح ⟦300 − 250 = 50⟧','⟦50 ÷ 250 = 20%⟧'],'⟦20%⟧'],
+  ['سعر حقيبة بعد خصم ⟦25%⟧ هو 180 ريالًا. كم سعرها الأصلي؟',['تدفع ⟦0.75⟧ من السعر','⟦180 ÷ 0.75 = 240⟧'],'240'],
+  ['خصم ⟦20%⟧ ثم خصم ⟦10%⟧ على السعر الجديد. كم الخصم الكلي؟',['⟦0.8 × 0.9 = 0.72⟧','تدفع ⟦72%⟧ فالخصم ⟦28%⟧'],'⟦28%⟧']],
+ traps:['حساب نسبة الربح من سعر البيع بدل التكلفة.','جمع الخصمين المتتاليين.','إيجاد السعر الأصلي بإضافة ⟦25%⟧ إلى السعر بعد الخصم: ⟦180 × 1.25 = 225⟧ خطأ، والصحيح 240.']},
+{t:'Profit, loss and discount',d:'Profit percent, price after a discount, original price and successive discounts.',
+ intro:['Buying and selling problems apply percents directly, but they have their own words: cost (purchase price), selling price, profit and discount.','The golden rule: profit or loss percent is taken from the cost, and a discount percent from the price before the discount, unless the question says otherwise.'],
+ rules:['Profit = selling price − cost; profit percent = ⟦profit ÷ cost × 100⟧','Selling at a ⟦p%⟧ profit: cost × ⟦(1 + p/100)⟧; at a ⟦p%⟧ loss: cost × ⟦(1 − p/100)⟧','Price after a ⟦d%⟧ discount = price × ⟦(1 − d/100)⟧: after ⟦25%⟧ off you pay ⟦0.75⟧ of the price.','Original price = discounted price ÷ the factor: ⟦160 ÷ 0.8 = 200⟧','Successive discounts multiply, they do not add: ⟦0.8 × 0.9 = 0.72⟧, a ⟦28%⟧ discount, not ⟦30%⟧'],
+ ex:[['A trader bought an item for 250 SAR and sold it for 300. What is his profit percent?',['Profit ⟦300 − 250 = 50⟧','⟦50 ÷ 250 = 20%⟧'],'⟦20%⟧'],
+  ['After a ⟦25%⟧ discount a bag costs 180 SAR. What was its original price?',['You pay ⟦0.75⟧ of the price','⟦180 ÷ 0.75 = 240⟧'],'240'],
+  ['A ⟦20%⟧ discount, then ⟦10%⟧ off the new price. What is the total discount?',['⟦0.8 × 0.9 = 0.72⟧','You pay ⟦72%⟧, so the discount is ⟦28%⟧'],'⟦28%⟧']],
+ traps:['Taking the profit percent from the selling price instead of the cost.','Adding successive discounts.','Finding the original price by adding ⟦25%⟧ to the discounted price: ⟦180 × 1.25 = 225⟧ is wrong; the answer is 240.']},
+[()=>{ const c=pick([80,120,150,200,240,250,400,500,600,800]),p=pick([10,20,25,30,40,50,15,5]),loss=R(0,3)===0&&p<50,s=loss?c*(100-p)/100:c*(100+p)/100,df=Math.abs(s-c),wrong=Math.round(df/s*1000)/10;
+   return {s:'arith',q:bi(`اشترى تاجر سلعة بـ${arSAR(c)} وباعها بـ${arSAR(s)}. ما نسبة ${loss?'خسارته':'ربحه'}؟`,`A trader bought an item for ${c} SAR and sold it for ${s} SAR. What is his percent ${loss?'loss':'profit'}?`),o:fo(`${p}%`,[`${wrong}%`,`${df}%`,`${p+10}%`],i=>`${p+5*i+5}%`),e:bi(`${loss?'الخسارة':'الربح'} ${df}، والقسمة على التكلفة: ⟦${df} ÷ ${c} = ${p}%⟧`,`The ${loss?'loss':'profit'} is ${df}; divide by the cost: ⟦${df} ÷ ${c} = ${p}%⟧`)}; },
+ ()=>{ const P=pick([80,120,150,200,240,300,360,400,450,500]),d=pick([10,15,20,25,30,40]),ans=P*(100-d)/100;
+   return {s:'arith',q:bi(`سعر جهاز ${arSAR(P)}، وعليه خصم ⟦${d}%⟧. كم سعره بعد الخصم؟`,`A device costs ${P} SAR with a ⟦${d}%⟧ discount. What is its price after the discount?`),o:mkOpts(ans,[P*d/100,P-d,ans-10]),e:bi(`⟦${P} × ${(100-d)/100} = ${N(ans)}⟧`,`⟦${P} × ${(100-d)/100} = ${N(ans)}⟧`)}; },
+ ()=>{ const [d,f]=pick([[20,.8],[25,.75],[40,.6],[10,.9],[50,.5],[30,.7],[15,.85]]),P=pick([20,40,60,80,100,120,200,240,300,400]),after=+(P*f).toFixed(4);
+   return {s:'arith',q:bi(`سعر سلعة بعد خصم ⟦${d}%⟧ هو ${arSAR(after)}. كم سعرها قبل الخصم؟`,`After a ⟦${d}%⟧ discount an item costs ${after} SAR. What was its price before the discount?`),o:mkOpts(P,[Math.round(after*(100+d)/100),after+d,Math.round(after/(d/100))]),e:bi(`تدفع ⟦${f}⟧ من السعر: ⟦${after} ÷ ${f} = ${P}⟧`,`You pay ⟦${f}⟧ of the price: ⟦${after} ÷ ${f} = ${P}⟧`)}; },
+ ()=>{ const [a,b]=pick([[20,10],[20,20],[10,10],[30,10],[25,20],[50,20],[40,10],[20,25],[10,20],[30,20]]),pay=(100-a)*(100-b)/100,tot=100-pay;
+   return {s:'arith',q:bi(`خُفّض سعر سلعة ⟦${a}%⟧، ثم خُفّض السعر الجديد ⟦${b}%⟧. كم نسبة الخصم الكلية؟`,`An item's price was cut ⟦${a}%⟧, then the new price was cut ⟦${b}%⟧. What is the total discount?`),o:fo(`${N(tot)}%`,[`${a+b}%`,`${N(pay)}%`,`${N(a*b/100)}%`],i=>`${N(tot+i)}%`),e:bi(`⟦${(100-a)/100} × ${(100-b)/100} = ${dS(pay/100)}⟧، فالخصم ⟦${N(tot)}%⟧`,`⟦${(100-a)/100} × ${(100-b)/100} = ${dS(pay/100)}⟧, so the discount is ⟦${N(tot)}%⟧`)}; }]);
+
+FDL('a-speed','ar','arith','speed',
+{t:'السرعة والمسافة والزمن',d:'العلاقة الثلاثية، وتوحيد الوحدات، والسرعة المتوسطة، والالتقاء.',
+ intro:['كل مسائل الحركة تقوم على علاقة واحدة: ⟦المسافة = السرعة × الزمن⟧. غطِّ المجهول في المثلث تظهر العلاقة التي تحتاجها.','معظم الأخطاء هنا ليست في الفكرة، بل في الوحدات: دقائق مع ساعات، أو أمتار مع كيلومترات.'],
+ rules:['⟦المسافة = السرعة × الزمن⟧، ⟦السرعة = المسافة ÷ الزمن⟧، ⟦الزمن = المسافة ÷ السرعة⟧','حوّل الدقائق إلى ساعات بالقسمة على 60: ⟦45 دقيقة = 3/4 ساعة⟧، ⟦20 دقيقة = 1/3 ساعة⟧','من كم/س إلى م/ث: اضرب في ⟦5/18⟧: ⟦72 كم/س = 20 م/ث⟧','السرعة المتوسطة = المسافة الكلية ÷ الزمن الكلي، وليست متوسط السرعتين.','جسمان متقابلان: اجمع السرعتين. جسمان في الاتجاه نفسه (ملاحقة): اطرح الصغرى من الكبرى.'],
+ ex:[['قطعت سيارة 180 كم في ساعتين وربع. ما سرعتها؟',['⟦2 ساعة و15 دقيقة = 2.25 ساعة⟧','⟦180 ÷ 2.25 = 80⟧'],'80 كم/س'],
+  ['ذهب شخص إلى مدينة بسرعة 60 كم/س وعاد بسرعة 40 كم/س على الطريق نفسه. ما سرعته المتوسطة؟',['لتكن المسافة 120 كم: الذهاب ساعتان، والعودة 3 ساعات','المسافة الكلية 240 في 5 ساعات','⟦240 ÷ 5 = 48⟧'],'48 كم/س'],
+  ['سيارتان متقابلتان المسافة بينهما 300 كم، سرعتاهما 70 و80 كم/س. متى تلتقيان؟',['تقتربان بسرعة ⟦70 + 80 = 150⟧','⟦300 ÷ 150 = 2⟧'],'بعد ساعتين']],
+ traps:['قسمة المسافة على الدقائق مباشرة دون تحويلها إلى ساعات.','حساب السرعة المتوسطة بمتوسط السرعتين: ⟦(60 + 40) ÷ 2 = 50⟧ خطأ.','جمع السرعتين في الملاحقة بدل طرحهما.']},
+{t:'Speed, distance and time',d:'The three-way relation, consistent units, average speed and meeting problems.',
+ intro:['Every motion problem rests on one relation: ⟦distance = speed × time⟧. Cover the unknown in the triangle and the formula you need appears.','Most mistakes here are not about the idea but about units: minutes with hours, or meters with kilometers.'],
+ rules:['⟦distance = speed × time⟧, ⟦speed = distance ÷ time⟧, ⟦time = distance ÷ speed⟧','Minutes to hours: divide by 60: ⟦45 min = 3/4 h⟧, ⟦20 min = 1/3 h⟧','km/h to m/s: multiply by ⟦5/18⟧: ⟦72 km/h = 20 m/s⟧','Average speed = total distance ÷ total time, not the average of the speeds.','Moving toward each other: add the speeds. Same direction (chasing): subtract the smaller from the larger.'],
+ ex:[['A car covers 180 km in 2 hours 15 minutes. What is its speed?',['⟦2 h 15 min = 2.25 h⟧','⟦180 ÷ 2.25 = 80⟧'],'80 km/h'],
+  ['Someone drives to a city at 60 km/h and back on the same road at 40 km/h. What is the average speed?',['Say the distance is 120 km: 2 hours there, 3 hours back','Total 240 km in 5 hours','⟦240 ÷ 5 = 48⟧'],'48 km/h'],
+  ['Two cars 300 km apart drive toward each other at 70 and 80 km/h. When do they meet?',['They close in at ⟦70 + 80 = 150⟧','⟦300 ÷ 150 = 2⟧'],'After 2 hours']],
+ traps:['Dividing the distance by minutes without converting to hours.','Averaging the two speeds: ⟦(60 + 40) ÷ 2 = 50⟧ is wrong.','Adding the speeds in a chase instead of subtracting.']},
+[()=>{ const [m,fr]=pick([[15,.25],[30,.5],[45,.75],[20,1/3],[40,2/3],[12,.2],[36,.6]]),h=R(1,3),v=pick([40,60,80,90,120,30,45,75]),t=h+fr,D=v*t;
+   if(!Number.isInteger(D)) return FD.find(x=>x.id==='a-speed').g[0]();
+   return {s:'arith',q:bi(`قطعت سيارة ${D} كم في ${h===1?'ساعة':h===2?'ساعتين':h+' ساعات'} و${m} دقيقة. ما سرعتها بالكيلومتر في الساعة؟`,`A car covers ${D} km in ${h} h ${m} min. What is its speed in km/h?`),o:mkOpts(v,[Math.round(D/(h+m/100)),Math.round(D/h),v+10]),e:bi(`⟦${m} دقيقة = ${fdS(m,60)} ساعة⟧، فالزمن ⟦${dS(+t.toFixed(4))}⟧ ساعة، والسرعة ⟦${D} ÷ ${dS(+t.toFixed(4))} = ${v}⟧`,`⟦${m} min = ${fdS(m,60)} h⟧, so the time is ⟦${dS(+t.toFixed(4))}⟧ h and the speed is ⟦${D} ÷ ${dS(+t.toFixed(4))} = ${v}⟧`)}; },
+ ()=>{ const [a,b]=pick([[60,40],[30,60],[40,60],[20,30],[60,90],[30,20],[90,60],[80,120],[40,10],[60,120]]),ans=2*a*b/(a+b),d=a*b/gcd(a,b);
+   return {s:'arith',q:bi(`ذهب شخص إلى قرية بسرعة ${a} كم/س، وعاد على الطريق نفسه بسرعة ${b} كم/س. ما سرعته المتوسطة في الرحلة كلها؟`,`Someone went to a village at ${a} km/h and came back on the same road at ${b} km/h. What was the average speed for the whole trip?`),o:mkOpts(ans,[(a+b)/2,Math.max(a,b)-5,ans+4]),e:bi(`لتكن المسافة ${d} كم: الزمن ⟦${d/a} + ${d/b} = ${d/a+d/b}⟧، والمتوسط ⟦${2*d} ÷ ${d/a+d/b} = ${N(ans)}⟧`,`Say the distance is ${d} km: time ⟦${d/a} + ${d/b} = ${d/a+d/b}⟧ h, average ⟦${2*d} ÷ ${d/a+d/b} = ${N(ans)}⟧`)}; },
+ ()=>{ const v1=10*R(4,9),v2=10*R(4,10),t=R(2,5),opp=R(0,1)===1||v1===v2;
+   if(opp){ const D=(v1+v2)*t; return {s:'arith',q:bi(`سيارتان المسافة بينهما ${D} كم، تتحركان نحو بعضهما بسرعتي ${v1} و${v2} كم/س. بعد كم ساعة تلتقيان؟`,`Two cars ${D} km apart drive toward each other at ${v1} and ${v2} km/h. After how many hours do they meet?`),o:mkOpts(t,[Math.round(D/Math.max(v1,v2)),t+1,t*2]),e:bi(`تقتربان بسرعة ⟦${v1} + ${v2} = ${v1+v2}⟧، و⟦${D} ÷ ${v1+v2} = ${t}⟧`,`They close in at ⟦${v1} + ${v2} = ${v1+v2}⟧, and ⟦${D} ÷ ${v1+v2} = ${t}⟧`)}; }
+   const f=Math.max(v1,v2),s=Math.min(v1,v2),D=(f-s)*t;
+   return {s:'arith',q:bi(`تسير شاحنة بسرعة ${s} كم/س، وخلفها على بُعد ${D} كم سيارة تسير في الاتجاه نفسه بسرعة ${f} كم/س. بعد كم ساعة تلحق بها؟`,`A truck drives at ${s} km/h, and ${D} km behind it a car drives the same way at ${f} km/h. After how many hours does the car catch up?`),o:mkOpts(t,[Math.round(D/(f+s))||t+2,t+1,t*2]),e:bi(`في الملاحقة نطرح: ⟦${f} − ${s} = ${f-s}⟧، و⟦${D} ÷ ${f-s} = ${t}⟧`,`In a chase, subtract: ⟦${f} − ${s} = ${f-s}⟧, and ⟦${D} ÷ ${f-s} = ${t}⟧`)}; },
+ ()=>{ const k=pick([18,36,54,72,90,108,126,144]),ms=k*5/18;
+   if(R(0,1)) return {s:'arith',q:bi(`سرعة قطار ${k} كم/س. كم سرعته بالمتر في الثانية؟`,`A train travels at ${k} km/h. What is its speed in m/s?`),o:mkOpts(ms,[k/3.6*10,k*1000/60|0,ms+5]),e:bi(`⟦${k} × 5/18 = ${ms}⟧`,`⟦${k} × 5/18 = ${ms}⟧`)};
+   const tt=pick([10,20,30,15,40]),Lm=ms*tt;
+   return {s:'arith',q:bi(`يسير عدّاء بسرعة ثابتة فيقطع ${Lm} مترًا في ${tt} ثانية. كم سرعته بالكيلومتر في الساعة؟`,`A runner at a steady pace covers ${Lm} m in ${tt} s. What is the speed in km/h?`),o:mkOpts(k,[ms,k/2,k+18]),e:bi(`⟦${Lm} ÷ ${tt} = ${ms}⟧ م/ث، و⟦${ms} × 18/5 = ${k}⟧ كم/س`,`⟦${Lm} ÷ ${tt} = ${ms}⟧ m/s, and ⟦${ms} × 18/5 = ${k}⟧ km/h`)}; }]);
+
+FDL('a-work','ar','arith','work',
+{t:'العمل المشترك والأنابيب',d:'معدل الإنجاز، والعمل معًا، والأنبوب الذي يملأ والآخر الذي يفرّغ.',
+ intro:['الفكرة كلها في «المعدل»: من ينهي العمل في 6 أيام ينجز ⟦1/6⟧ منه كل يوم. حين يعمل اثنان معًا نجمع ما ينجزه كل واحد في اليوم.','الأنابيب مسائل عمل أيضًا: أنبوب الملء ينجز موجبًا، وأنبوب التفريغ ينجز سالبًا.'],
+ rules:['المعدل = ⟦1 ÷ الزمن⟧','العمل معًا: ⟦1/a + 1/b = 1/t⟧، واختصارها لشخصين: ⟦t = ab ÷ (a + b)⟧','الملء والتفريغ معًا: ⟦1/الملء − 1/التفريغ⟧','العمل المنجز + العمل الباقي = 1 (العمل كله).','عدد العمال × عدد الأيام = حجم العمل، وهو تناسب عكسي.'],
+ ex:[['ينهي أحمد عملًا في 6 ساعات، وينهيه خالد في 3 ساعات. في كم ساعة ينهيانه معًا؟',['⟦1/6 + 1/3 = 1/6 + 2/6 = 1/2⟧','ينجزان نصف العمل كل ساعة'],'ساعتان'],
+  ['صنبور يملأ حوضًا في 4 ساعات، وتصريف يفرّغه في 12 ساعة. إذا فُتحا معًا، ففي كم ساعة يمتلئ؟',['⟦1/4 − 1/12 = 3/12 − 1/12 = 2/12 = 1/6⟧'],'6 ساعات'],
+  ['عمل يحتاج 6 أيام من سعد وحده. عمل سعد يومين، ثم انضم إليه فهد الذي ينهي العمل وحده في 12 يومًا. كم يومًا يحتاجان لإكمال الباقي؟',['أنجز سعد ⟦2/6 = 1/3⟧، والباقي ⟦2/3⟧','معدلهما معًا ⟦1/6 + 1/12 = 1/4⟧','⟦2/3 ÷ 1/4 = 8/3⟧'],'⟦8/3⟧ يوم (يومان وثلثا يوم)']],
+ traps:['جمع الزمنين: ⟦6 + 3 = 9⟧ ساعات، مع أن العمل معًا أسرع من أسرعهما.','حساب متوسط الزمنين بدل جمع المعدلين.','نسيان أن التفريغ يُطرح.']},
+{t:'Combined work and pipes',d:'Work rates, working together, and one pipe filling while another drains.',
+ intro:['The whole idea is the rate: someone who finishes a job in 6 days does ⟦1/6⟧ of it each day. When two work together, add what each does per day.','Pipes are work problems too: a filling pipe does positive work, a draining pipe negative work.'],
+ rules:['Rate = ⟦1 ÷ time⟧','Together: ⟦1/a + 1/b = 1/t⟧, and for two people: ⟦t = ab ÷ (a + b)⟧','Filling and draining together: ⟦1/fill − 1/drain⟧','Work done + work left = 1 (the whole job).','Workers × days = the size of the job, an inverse proportion.'],
+ ex:[['Ahmed finishes a job in 6 hours and Khalid in 3 hours. How long do they take together?',['⟦1/6 + 1/3 = 1/6 + 2/6 = 1/2⟧','They do half the job each hour'],'2 hours'],
+  ['A tap fills a tank in 4 hours and a drain empties it in 12 hours. With both open, how long until it is full?',['⟦1/4 − 1/12 = 3/12 − 1/12 = 2/12 = 1/6⟧'],'6 hours'],
+  ['Saad alone needs 6 days for a job. He worked 2 days, then Fahd, who needs 12 days alone, joined him. How many days do they need for the rest?',['Saad did ⟦2/6 = 1/3⟧; ⟦2/3⟧ is left','Together their rate is ⟦1/6 + 1/12 = 1/4⟧','⟦2/3 ÷ 1/4 = 8/3⟧'],'⟦8/3⟧ days (2⅔ days)']],
+ traps:['Adding the times: ⟦6 + 3 = 9⟧ hours, though working together is faster than the faster one.','Averaging the times instead of adding the rates.','Forgetting to subtract the drain.']},
+[()=>{ const [a,b]=pick([[6,3],[4,12],[10,15],[12,6],[3,6],[20,30],[6,12],[8,24],[5,20],[2,6],[12,4],[9,18],[15,10],[30,20],[36,12]]),t=a*b/(a+b);
+   return {s:'arith',q:bi(`ينهي عامل عملًا في ${arC(a,AN.hour)}، وينهيه آخر في ${arC(b,AN.hour)}. في كم ساعة ينهيانه معًا؟`,`One worker finishes a job in ${a} hours and another in ${b} hours. How many hours do they take together?`),o:mkOpts(t,[a+b,(a+b)/2,Math.min(a,b)+1]),e:bi(`⟦1/${a} + 1/${b} = ${fdS(a+b,a*b)}⟧، فالزمن ⟦${a*b} ÷ ${a+b} = ${N(t)}⟧`,`⟦1/${a} + 1/${b} = ${fdS(a+b,a*b)}⟧, so the time is ⟦${a*b} ÷ ${a+b} = ${N(t)}⟧`)}; },
+ ()=>{ const [f,d]=pick([[4,12],[3,6],[6,12],[2,6],[5,20],[6,10],[3,12],[4,6],[10,15],[8,24],[2,3]]),t=f*d/(d-f);
+   return {s:'arith',q:bi(`صنبور يملأ حوضًا في ${arC(f,AN.hour)}، وتصريف يفرّغه في ${arC(d,AN.hour)}. إذا فُتحا معًا والحوض فارغ، ففي كم ساعة يمتلئ؟`,`A tap fills a tank in ${f} hours and a drain empties it in ${d} hours. Both are opened with the tank empty. How many hours until it is full?`),o:mkOpts(t,[f*d/(f+d),d-f,f+d]),e:bi(`⟦1/${f} − 1/${d} = ${fdS(d-f,f*d)}⟧، فالزمن ⟦${N(t)}⟧ ساعة`,`⟦1/${f} − 1/${d} = ${fdS(d-f,f*d)}⟧, so it takes ⟦${N(t)}⟧ hours`)}; },
+ ()=>{ const [a,b]=pick([[6,3],[12,4],[10,15],[20,30],[6,12],[24,8],[12,6],[18,9],[15,10],[30,20],[40,10],[60,20]]),t=a*b/(a+b);
+   return {s:'arith',q:bi(`ينهي عاملان معًا عملًا في ${arC(t,AN.day)}. إذا كان أحدهما ينهيه وحده في ${arC(a,AN.day)}، ففي كم يومًا ينهيه الآخر وحده؟`,`Two workers together finish a job in ${N(t)} days. One of them alone needs ${a} days. How many days does the other need alone?`),o:mkOpts(b,[a-t>0?a-t:a+2,a*t/(a+t),b+t]),e:bi(`⟦1/${N(t)} − 1/${a} = ${fdS(1,b)}⟧، فالآخر ينهيه في ${arC(b,AN.day)}`,`⟦1/${N(t)} − 1/${a} = ${fdS(1,b)}⟧, so the other needs ${b} days`)}; },
+ ()=>{ for(;;){ const w=R(4,12),d=R(6,24),done=R(2,d-2),add=R(3,8),tot=w*d,left=tot-w*done; if(left%(w+add)) continue; const ans=left/(w+add);
+   return {s:'arith',q:bi(`فريق من ${arC(w,AN.worker)} يُنهي بناء سور في ${arC(d,AN.day)}. بعد ${arC(done,AN.day)} من العمل انضم إليهم ${add} عمال بالكفاءة نفسها. كم يومًا يحتاجون لإكمال العمل؟`,`${w} workers can build a wall in ${d} days. After ${done} days, ${add} more workers with the same skill join them. How many more days do they need?`),o:mkOpts(ans,[d-done,tot/(w+add)|0,ans+2]),e:bi(`العمل ⟦${w} × ${d} = ${tot}⟧، المنجز ⟦${w} × ${done} = ${w*done}⟧، الباقي ${left}، و⟦${left} ÷ ${w+add} = ${ans}⟧`,`The job is ⟦${w} × ${d} = ${tot}⟧ worker-days; done ⟦${w} × ${done} = ${w*done}⟧; left ${left}; ⟦${left} ÷ ${w+add} = ${ans}⟧`)}; } }]);
+
+FDL('a-age','ar','arith','balance',
+{t:'الأعمار والمسائل اللفظية',d:'تحويل الجملة إلى معادلة، وثبات فرق العمرين.',
+ intro:['المسألة اللفظية جملة عربية تخفي معادلة. مهمتك أن تترجمها كلمة بكلمة: «ضعف» ضرب في 2، و«يزيد على» جمع، و«أصغر بـ» طرح.','مسائل الأعمار أشهر هذا النوع، ولها حقيقتان تحلان معظمها: الفرق بين عمري شخصين لا يتغير أبدًا، وبعد n سنة يزيد عمر كل شخص n.'],
+ rules:['اجعل المجهول الأصغر رمزًا (عمر الابن ⟦س⟧) وعبّر عن الباقي به.','بعد n سنة: كل عمر يزيد n. وقبل n سنة: كل عمر ينقص n.','الفرق بين عمرين ثابت في كل زمن.','مجموع أعمار k أشخاص يزيد بعد n سنة بمقدار ⟦k × n⟧.','جرّب الخيارات في الشروط: أسرع كثيرًا في أسئلة الأعمار.'],
+ ex:[['عمر الأب أربعة أمثال عمر ابنه، ومجموع عمريهما 50. كم عمر الابن؟',['الابن ⟦س⟧ والأب ⟦4س⟧','⟦5س = 50⟧'],'10'],
+  ['عمر الأب الآن 36 سنة وعمر ابنه 8. بعد كم سنة يصبح عمر الأب ثلاثة أمثال عمر ابنه؟',['⟦36 + n = 3(8 + n)⟧','⟦36 + n = 24 + 3n⟧','⟦2n = 12⟧'],'بعد 6 سنوات'],
+  ['مجموع أعمار 4 إخوة الآن 40 سنة. كم مجموعها بعد 5 سنوات؟',['كل أخ يزيد 5','⟦40 + 4 × 5 = 60⟧'],'60']],
+ traps:['إضافة n مرة واحدة إلى مجموع الأعمار بدل إضافتها لكل شخص.','نسيان إضافة السنوات للطرفين في المعادلة.','الإجابة بعمر الأب حين يسأل عن عمر الابن: أعد قراءة المطلوب.']},
+{t:'Ages and word problems',d:'Turning sentences into equations, and the constant age gap.',
+ intro:['A word problem is a sentence hiding an equation. Translate it word by word: "twice" is ×2, "more than" is addition, "younger by" is subtraction.','Age problems are the best-known type, and two facts solve most of them: the gap between two ages never changes, and after n years everyone is n years older.'],
+ rules:['Let the smallest unknown be the variable (son\'s age ⟦x⟧) and write the rest in terms of it.','After n years every age grows by n; n years ago every age was n less.','The difference between two ages is the same at every time.','The sum of k people\'s ages grows by ⟦k × n⟧ after n years.','Test the choices against the conditions: often much faster for ages.'],
+ ex:[['A father is four times as old as his son, and their ages add up to 50. How old is the son?',['Son ⟦x⟧, father ⟦4x⟧','⟦5x = 50⟧'],'10'],
+  ['A father is 36 and his son is 8. In how many years will the father be three times as old as the son?',['⟦36 + n = 3(8 + n)⟧','⟦36 + n = 24 + 3n⟧','⟦2n = 12⟧'],'In 6 years'],
+  ['Four brothers\' ages add up to 40 now. What will the total be in 5 years?',['Each brother gains 5','⟦40 + 4 × 5 = 60⟧'],'60']],
+ traps:['Adding n once to a sum of ages instead of once per person.','Forgetting to add the years to both people in the equation.','Answering with the father\'s age when the question asks for the son\'s: reread what is asked.']},
+[()=>{ const k=R(2,6),s=R(4,14),T=(k+1)*s;
+   return {s:'arith',q:bi(`عمر الأم ${['','','مثلا','ثلاثة أمثال','أربعة أمثال','خمسة أمثال','ستة أمثال'][k]} عمر ابنتها، ومجموع عمريهما ${arC(T,AN.year)}. كم عمر البنت؟`,`A mother is ${['','','twice','three times','four times','five times','six times'][k]} as old as her daughter, and their ages add up to ${T}. How old is the daughter?`),o:mkOpts(s,[k*s,T/k|0,s+2]),e:bi(`⟦س + ${k}س = ${T}⟧، ⟦${k+1}س = ${T}⟧، فعمر البنت ${s}`,`⟦x + ${k}x = ${T}⟧, ⟦${k+1}x = ${T}⟧, so the daughter is ${s}`)}; },
+ ()=>{ for(;;){ const k=pick([2,3]),n=R(2,12),s=R(3,15),f=k*(s+n)-n; if(f<s+18||f>60) continue;
+   return {s:'arith',q:bi(`عمر الأب الآن ${arC(f,AN.year)}، وعمر ابنه ${arC(s,AN.year)}. بعد كم سنة يصبح عمر الأب ${k===2?'مثلي':'ثلاثة أمثال'} عمر ابنه؟`,`A father is ${f} and his son is ${s}. In how many years will the father be ${k===2?'twice':'three times'} as old as his son?`),o:mkOpts(n,[f-k*s>0?f-k*s:n+3,(f-s)/k|0,n+2]),e:bi(`⟦${f} + n = ${k}(${s} + n)⟧ ⟵ ⟦${f} − ${k*s} = ${k-1===1?'':k-1}n⟧، ⟦n = ${n}⟧`,`⟦${f} + n = ${k}(${s} + n)⟧ → ⟦${f} − ${k*s} = ${k-1===1?'':k-1}n⟧, ⟦n = ${n}⟧`)}; } },
+ ()=>{ const k=R(3,6),S=R(30,90),n=R(2,8),ans=S+k*n;
+   return {s:'arith',q:bi(`مجموع أعمار ${k===3?'ثلاثة':k===4?'أربعة':k===5?'خمسة':'ستة'} أصدقاء الآن ${arC(S,AN.year)}. كم يكون مجموع أعمارهم بعد ${arC(n,AN.year)}؟`,`The ages of ${k} friends add up to ${S} now. What will their total be in ${n} years?`),o:mkOpts(ans,[S+n,S+n*(k-1),ans+k]),e:bi(`كل واحد يزيد ${n}: ⟦${S} + ${k} × ${n} = ${ans}⟧`,`Each gains ${n}: ⟦${S} + ${k} × ${n} = ${ans}⟧`)}; },
+ ()=>{ for(;;){ const d=R(2,9),n=R(2,7),y=R(4,16),T=2*y+d+2*n; if(T>70) continue;
+   return {s:'arith',q:bi(`أخوان يكبر أحدهما الآخر بـ${arC(d,AN.year)}، وبعد ${arC(n,AN.year)} يصبح مجموع عمريهما ${arC(T,AN.year)}. كم عمر الأكبر الآن؟`,`Two brothers are ${d} years apart. In ${n} years their ages will add up to ${T}. How old is the older one now?`),o:mkOpts(y+d,[y,y+d+n,(T-d)/2|0]),e:bi(`الأصغر ⟦س⟧: ⟦(س + ${n}) + (س + ${d} + ${n}) = ${T}⟧، ⟦2س = ${2*y}⟧، فالأصغر ${y} والأكبر ${y+d}`,`Younger ⟦x⟧: ⟦(x + ${n}) + (x + ${d} + ${n}) = ${T}⟧, ⟦2x = ${2*y}⟧, so the younger is ${y} and the older ${y+d}`)}; } }]);
+
+const fct=n=>n<=1?1:n*fct(n-1);
+FDL('a-count','ar','arith','prob',
+{t:'العد والاحتمال',d:'مبدأ العد، والترتيب والاختيار، واحتمال الحادثة.',
+ intro:['أسئلة العد تسأل: «بكم طريقة؟». وأسئلة الاحتمال تسأل: «ما فرصة أن يحدث؟». والثانية مبنية على الأولى.','القاعدة الأساسية بسيطة: إذا كان للاختيار الأول m طرق وللثاني n طرق، فلهما معًا ⟦m × n⟧ طريقة.'],
+ rules:['مبدأ العد: اضرب عدد طرق كل مرحلة: 3 قمصان و4 بناطيل = ⟦3 × 4 = 12⟧ زيًّا.','الترتيب يهم (صفوف، أرقام، مراكز): ترتيب n أشياء ⟦n! = n × (n − 1) × … × 1⟧، و⟦4! = 24⟧','الترتيب لا يهم (لجنة، مصافحات، مباريات): لاختيار اثنين من n: ⟦n(n − 1) ÷ 2⟧','الاحتمال = عدد النواتج المطلوبة ÷ عدد النواتج الممكنة، وقيمته بين 0 و1.','حدثان مستقلان معًا: اضرب الاحتمالين. واحتمال ألا يقع الحدث ⟦= 1 − P⟧'],
+ ex:[['تصافح 6 أشخاص كلٌّ مع الآخر مرة واحدة. كم مصافحة حدثت؟',['اختيار اثنين والترتيب لا يهم','⟦6 × 5 ÷ 2 = 15⟧'],'15'],
+  ['بكم طريقة يجلس 4 طلاب على 4 كراسٍ في صف؟',['الكرسي الأول 4 خيارات، ثم 3، ثم 2، ثم 1','⟦4! = 24⟧'],'24'],
+  ['كيس فيه 3 كرات حمراء و5 زرقاء. سُحبت كرة عشوائيًا. ما احتمال أن تكون حمراء؟',['الممكن 8، والمطلوب 3'],'⟦3/8⟧']],
+ traps:['عدّ المصافحة مرتين: مصافحة أحمد لخالد هي مصافحة خالد لأحمد.','جمع الطرق بدل ضربها حين تكون المراحل متتالية.','نسيان الكرات الأخرى في المقام: الاحتمال ⟦3/8⟧ لا ⟦3/5⟧.']},
+{t:'Counting and probability',d:'The counting principle, arrangements and selections, and the probability of an event.',
+ intro:['Counting questions ask "in how many ways?". Probability questions ask "what are the chances it happens?". The second builds on the first.','The basic rule is simple: if the first choice has m ways and the second has n, together they have ⟦m × n⟧ ways.'],
+ rules:['Counting principle: multiply the ways at each stage: 3 shirts and 4 trousers = ⟦3 × 4 = 12⟧ outfits.','Order matters (lines, digits, places): arranging n things is ⟦n! = n × (n − 1) × … × 1⟧, and ⟦4! = 24⟧','Order does not matter (committees, handshakes, matches): choosing two from n is ⟦n(n − 1) ÷ 2⟧','Probability = favorable outcomes ÷ possible outcomes, a value between 0 and 1.','Two independent events both happening: multiply. The chance an event does not happen ⟦= 1 − P⟧'],
+ ex:[['6 people each shake hands once with everyone else. How many handshakes?',['Choose two; order does not matter','⟦6 × 5 ÷ 2 = 15⟧'],'15'],
+  ['In how many ways can 4 students sit on 4 chairs in a row?',['4 choices for the first chair, then 3, then 2, then 1','⟦4! = 24⟧'],'24'],
+  ['A bag has 3 red and 5 blue balls. One is drawn at random. What is the probability it is red?',['8 possible, 3 favorable'],'⟦3/8⟧']],
+ traps:['Counting each handshake twice: Ahmed with Khalid is the same as Khalid with Ahmed.','Adding the ways instead of multiplying when the stages come one after another.','Leaving out the other balls in the denominator: the probability is ⟦3/8⟧, not ⟦3/5⟧.']},
+[()=>{ const a=R(3,7),b=R(3,6),c=R(0,1)?R(3,4):0,ans=a*b*(c||1);
+   return {s:'arith',q:bi(`لدى سارة ${a} فساتين و${b} أحذية${c?` و${c} حقائب`:''}. بكم طريقة يمكنها اختيار ${c?'فستان وحذاء وحقيبة':'فستان وحذاء'}؟`,`Sara has ${a} dresses, ${b} pairs of shoes${c?` and ${c} bags`:''}. In how many ways can she choose ${c?'a dress, shoes and a bag':'a dress and shoes'}?`),o:mkOpts(ans,[a+b+c,ans/2|0||ans+3,ans+a]),e:bi(`مبدأ العد: ⟦${a} × ${b}${c?` × ${c}`:''} = ${ans}⟧`,`Counting principle: ⟦${a} × ${b}${c?` × ${c}`:''} = ${ans}⟧`)}; },
+ ()=>{ const n=R(4,12),ans=n*(n-1)/2,m=R(0,1);
+   return {s:'arith',q:bi(m?`في دوري ${n} فرق، يلعب كل فريق مع كل فريق آخر مباراة واحدة. كم مباراة في الدوري؟`:`تصافح ${n} أشخاص، كلٌّ مع الآخرين مرة واحدة. كم مصافحة حدثت؟`,m?`In a league of ${n} teams, each team plays every other team once. How many matches are there?`:`${n} people each shake hands once with everyone else. How many handshakes are there?`),o:mkOpts(ans,[n*(n-1),n*n,ans+n]),e:bi(`اختيار اثنين والترتيب لا يهم: ⟦${n} × ${n-1} ÷ 2 = ${ans}⟧`,`Choose two, order does not matter: ⟦${n} × ${n-1} ÷ 2 = ${ans}⟧`)}; },
+ ()=>{ const r=R(2,7),b=R(2,8),g=R(0,1)?R(1,5):0,T=r+b+g,ask=pick(['r','b']),k=ask==='r'?r:b;
+   const cs=bi(`${r} كرات حمراء و${b} زرقاء${g?` و${g} خضراء`:''}`,`${r} red, ${b} blue${g?` and ${g} green`:''} balls`);
+   return {s:'arith',q:bi(`كيس فيه ${cs.ar}. سُحبت كرة عشوائيًا. ما احتمال أن تكون ${ask==='r'?'حمراء':'زرقاء'}؟`,`A bag has ${cs.en}. One ball is drawn at random. What is the probability that it is ${ask==='r'?'red':'blue'}?`),o:fo(F(k,T),[F(k,T-k),F(T-k,T),F(1,T)],i=>F(k+i,T+i)),e:bi(`المطلوب ${k} من أصل ${T}: ⟦${fdS(k,T)}⟧`,`${k} favorable out of ${T}: ⟦${fdS(k,T)}⟧`)}; },
+ ()=>{ const t=R(0,2);
+   if(t===0){ const n=R(3,6),ans=fct(n); return {s:'arith',q:bi(`بكم طريقة يمكن ترتيب ${n} كتب مختلفة على رف في صف واحد؟`,`In how many ways can ${n} different books be arranged in a row on a shelf?`),o:mkOpts(ans,[n*n,n*(n-1),ans/2]),e:bi(`⟦${n}! = ${[...Array(n)].map((_,i)=>n-i).join(' × ')} = ${ans}⟧`,`⟦${n}! = ${[...Array(n)].map((_,i)=>n-i).join(' × ')} = ${ans}⟧`)}; }
+   if(t===1){ const s=pick([4,5,6,7,8,9,10,11,12]),w=[...Array(6)].flatMap((_,i)=>[...Array(6)].map((_,j)=>i+j+2)).filter(x=>x===s).length;
+     return {s:'arith',q:bi(`أُلقي حجرا نرد معًا. ما احتمال أن يكون مجموع العددين الظاهرين ${s}؟`,`Two dice are rolled. What is the probability that the two numbers add up to ${s}?`),o:fo(F(w,36),[F(1,s),F(w,12),F(w+1,36)],i=>F(w+1+i,36)),e:bi(`النواتج الممكنة ⟦6 × 6 = 36⟧، والتي مجموعها ${s} عددها ${w}: ⟦${fdS(w,36)}⟧`,`There are ⟦6 × 6 = 36⟧ outcomes, and ${w} of them add up to ${s}: ⟦${fdS(w,36)}⟧`)}; }
+   const k=R(2,4),h=R(0,1); return {s:'arith',q:bi(`أُلقيت قطعة نقد ${k===2?'مرتين':k===3?'ثلاث مرات':'أربع مرات'}. ما احتمال ${h?'ظهور الصورة في كل مرة':'ألا تظهر الكتابة في أي مرة'}؟`,`A coin is tossed ${k} times. What is the probability of ${h?'heads every time':'never getting tails'}?`),o:fo(F(1,2**k),[F(1,2*k),F(1,k),F(k,2**k)],i=>F(1,2**k+i)),e:bi(`رميات مستقلة: ⟦${Array(k).fill('1/2').join(' × ')} = ${fdS(1,2**k)}⟧`,`Independent tosses: ⟦${Array(k).fill('1/2').join(' × ')} = ${fdS(1,2**k)}⟧`)}; }]);
+
+/* ---- unit 3: algebra ---- */
+const lin=(a,b,v)=>{ const x=a===0?'':cf(a,v); if(b===0) return x||'0'; return x?`${x} ${b<0?'−':'+'} ${Math.abs(b)}`:N(b); }; /* ax + b */
+FDL('l-expr','al','algebra','balance',
+{t:'العبارات الجبرية والتعويض',d:'جمع الحدود المتشابهة، وفك الأقواس، والتعويض بقيم سالبة.',
+ intro:['العبارة الجبرية حساب فيه حروف تمثل أعدادًا مجهولة أو متغيرة، مثل ⟦3س + 5⟧. قبل أن تحل أي معادلة، يجب أن تجيد تبسيط العبارة والتعويض فيها.','وفي الاختبار سؤال متكرر يطلب قيمة عبارة كاملة دون أن يطلب قيمة المتغير نفسه، وله حيلة نتعلمها هنا.'],
+ rules:['تُجمع الحدود المتشابهة فقط: ⟦3س + 5س = 8س⟧، ولا يُجمع ⟦س⟧ مع ⟦س^2⟧ ولا مع عدد.','فك القوس بالتوزيع: ⟦3(س − 4) = 3س − 12⟧، والسالب قبل القوس يقلب كل إشارة داخله: ⟦−(س − 2) = −س + 2⟧','عند التعويض ضع القيمة بين قوسين: إذا ⟦س = −2⟧ فإن ⟦س^2 = (−2)^2 = 4⟧ و⟦−س = 2⟧','ضرب الحدود: اضرب المعاملات واجمع الأسس: ⟦2س × 3س = 6س^2⟧','اطلب العبارة كلها: إذا ⟦س + ص = 7⟧ فإن ⟦3س + 3ص = 3 × 7 = 21⟧ دون معرفة س وص.'],
+ ex:[['بسّط ⟦4(س + 2) − 2(س − 3)⟧',['⟦4س + 8 − 2س + 6⟧','⟦2س + 14⟧'],'⟦2س + 14⟧'],
+  ['إذا كان ⟦س = −3⟧ فما قيمة ⟦2س^2 − س⟧؟',['⟦2 × (−3)^2 = 2 × 9 = 18⟧','⟦−س = 3⟧','⟦18 + 3 = 21⟧'],'21'],
+  ['إذا كان ⟦2أ − ب = 5⟧ فما قيمة ⟦6أ − 3ب + 1⟧؟',['⟦6أ − 3ب = 3(2أ − ب) = 15⟧','⟦15 + 1 = 16⟧'],'16']],
+ traps:['نسيان قلب إشارة الحد الثاني داخل القوس بعد السالب: ⟦−2(س − 3) = −2س + 6⟧ لا ⟦−2س − 6⟧.','⟦−س^2⟧ عند ⟦س = −3⟧ تساوي ⟦−9⟧ لا ⟦9⟧.','جمع حدود غير متشابهة: ⟦2س + 3 ≠ 5س⟧.']},
+{t:'Algebraic expressions and substitution',d:'Combining like terms, expanding brackets, and substituting negative values.',
+ intro:['An algebraic expression is arithmetic with letters standing for unknown or changing numbers, like ⟦3x + 5⟧. Before solving any equation you must be able to simplify an expression and substitute into it.','A frequent test question asks for the value of a whole expression without asking for the variable itself, and there is a trick for it.'],
+ rules:['Only like terms combine: ⟦3x + 5x = 8x⟧, but ⟦x⟧ does not combine with ⟦x^2⟧ or with a number.','Expand by distributing: ⟦3(x − 4) = 3x − 12⟧; a minus before a bracket flips every sign inside: ⟦−(x − 2) = −x + 2⟧','When substituting, put the value in brackets: if ⟦x = −2⟧ then ⟦x^2 = (−2)^2 = 4⟧ and ⟦−x = 2⟧','Multiplying terms: multiply coefficients and add exponents: ⟦2x × 3x = 6x^2⟧','Aim for the whole expression: if ⟦x + y = 7⟧ then ⟦3x + 3y = 3 × 7 = 21⟧ without knowing x and y.'],
+ ex:[['Simplify ⟦4(x + 2) − 2(x − 3)⟧',['⟦4x + 8 − 2x + 6⟧','⟦2x + 14⟧'],'⟦2x + 14⟧'],
+  ['If ⟦x = −3⟧, what is ⟦2x^2 − x⟧?',['⟦2 × (−3)^2 = 2 × 9 = 18⟧','⟦−x = 3⟧','⟦18 + 3 = 21⟧'],'21'],
+  ['If ⟦2a − b = 5⟧, what is ⟦6a − 3b + 1⟧?',['⟦6a − 3b = 3(2a − b) = 15⟧','⟦15 + 1 = 16⟧'],'16']],
+ traps:['Not flipping the second sign inside a bracket after a minus: ⟦−2(x − 3) = −2x + 6⟧, not ⟦−2x − 6⟧.','⟦−x^2⟧ at ⟦x = −3⟧ is ⟦−9⟧, not ⟦9⟧.','Combining unlike terms: ⟦2x + 3 ≠ 5x⟧.']},
+[()=>{ const a=R(2,6),b=R(1,6),c=R(2,5),d=R(1,6),A=a-c,B=a*b+c*d; const ex=v=>`${a}(${v} + ${b}) − ${c}(${v} − ${d})`,o=v=>[`⟦${lin(A,B,v)}⟧`,`⟦${lin(A,a*b-c*d,v)}⟧`,`⟦${lin(a+c,B,v)}⟧`,`⟦${lin(A,b+d,v)}⟧`];
+   const oa=o('س'),oe=o('x'); if(new Set(oa).size<4) return FD.find(x=>x.id==='l-expr').g[0]();
+   return {s:'algebra',q:bi(`أبسط صورة للعبارة ⟦${ex('س')}⟧ هي:`,`⟦${ex('x')}⟧ simplifies to:`),o:oa.map((x,i)=>bi(x,oe[i])),e:bi(`⟦${a}س + ${a*b} − ${c}س + ${c*d} = ${lin(A,B,'س')}⟧`,`⟦${a}x + ${a*b} − ${c}x + ${c*d} = ${lin(A,B,'x')}⟧`)}; },
+ ()=>{ const x=-R(1,5),a=R(2,4),b=R(1,6),ans=a*x*x-b*x;
+   return {s:'algebra',q:bi(`إذا كان ⟦س = ${N(x)}⟧ فما قيمة ⟦${a}س^2 − ${b}س⟧؟`,`If ⟦x = ${N(x)}⟧, what is ⟦${a}x^2 − ${b}x⟧?`),o:mkOpts(ans,[a*x*x+b*x,-a*x*x-b*x,a*x*x],N,true),e:bi(`⟦${a} × (${N(x)})^2 = ${a*x*x}⟧ و⟦−${b} × (${N(x)}) = ${-b*x}⟧، والمجموع ${ans}`,`⟦${a} × (${N(x)})^2 = ${a*x*x}⟧ and ⟦−${b} × (${N(x)}) = ${-b*x}⟧; the total is ${ans}`)}; },
+ ()=>{ const p=R(2,5),k=R(2,9),c=R(1,9),m=R(2,4),ans=m*k+c,pl=R(0,1);
+   return {s:'algebra',q:bi(`إذا كان ⟦${p}أ ${pl?'+':'−'} ب = ${k}⟧ فما قيمة ⟦${m*p}أ ${pl?'+':'−'} ${m}ب + ${c}⟧؟`,`If ⟦${p}a ${pl?'+':'−'} b = ${k}⟧, what is ⟦${m*p}a ${pl?'+':'−'} ${m}b + ${c}⟧?`),o:mkOpts(ans,[m*k,k+c,m*(k+c)]),e:bi(`⟦${m*p}أ ${pl?'+':'−'} ${m}ب = ${m}(${p}أ ${pl?'+':'−'} ب) = ${m*k}⟧، ثم ⟦${m*k} + ${c} = ${ans}⟧`,`⟦${m*p}a ${pl?'+':'−'} ${m}b = ${m}(${p}a ${pl?'+':'−'} b) = ${m*k}⟧, then ⟦${m*k} + ${c} = ${ans}⟧`)}; },
+ ()=>{ const x=R(-4,4)||2,y=R(-4,4)||-1,ans=x*x-2*x*y+y*y;
+   return {s:'algebra',q:bi(`إذا كان ⟦س = ${N(x)}⟧ و⟦ص = ${N(y)}⟧ فما قيمة ⟦س^2 − 2س ص + ص^2⟧؟`,`If ⟦x = ${N(x)}⟧ and ⟦y = ${N(y)}⟧, what is ⟦x^2 − 2xy + y^2⟧?`),o:mkOpts(ans,[x*x+2*x*y+y*y,x*x+y*y,(x+y)**2+1],N,true),e:bi(`العبارة تساوي ⟦(س − ص)^2 = (${N(x)} − (${N(y)}))^2 = ${N(x-y)}^2 = ${ans}⟧`,`The expression is ⟦(x − y)^2 = (${N(x)} − (${N(y)}))^2 = ${N(x-y)}^2 = ${ans}⟧`)}; }]);
+
+FDL('l-eq','al','algebra','balance',
+{t:'المعادلات الخطية',d:'حل المعادلة بخطوات الميزان، ومع الكسور، وبالضرب التبادلي.',
+ intro:['المعادلة ميزان متوازن: ما تفعله في كفة تفعله في الأخرى حتى يبقى المجهول وحده. ⟦3س − 7 = 11⟧ تصبح ⟦3س = 18⟧ ثم ⟦س = 6⟧.','وفي الاختيار من متعدد تملك طريقًا ثانيًا دائمًا: عوّض الخيارات في المعادلة، فالذي يحققها هو الجواب.'],
+ rules:['انقل الحدود: اجمع المجهول في طرف والأعداد في الطرف الآخر، والحد ينتقل بإشارة معاكسة.','اقسم الطرفين على معامل المجهول في الخطوة الأخيرة.','مع الكسور: اضرب الطرفين في المقام المشترك لتختفي الكسور: ⟦س/3 + س/4 = 7 → 4س + 3س = 84⟧','كسر يساوي كسرًا: اضرب تبادليًا: ⟦(س + 1)/3 = (س − 1)/2 → 2س + 2 = 3س − 3⟧','تحقق بالتعويض في المعادلة الأصلية؛ يكشف الأخطاء في ثوانٍ.'],
+ ex:[['حل ⟦5س − 7 = 2س + 8⟧',['⟦5س − 2س = 8 + 7⟧','⟦3س = 15⟧'],'⟦س = 5⟧'],
+  ['حل ⟦س/3 + س/4 = 14⟧',['اضرب في 12: ⟦4س + 3س = 168⟧','⟦7س = 168⟧'],'⟦س = 24⟧'],
+  ['حل ⟦(س + 1)/3 = (س − 1)/2⟧',['اضرب تبادليًا: ⟦2(س + 1) = 3(س − 1)⟧','⟦2س + 2 = 3س − 3⟧'],'⟦س = 5⟧']],
+ traps:['نقل الحد دون قلب إشارته.','ضرب حد واحد فقط في المقام المشترك ونسيان بقية الحدود.','الإجابة بقيمة س حين يسأل عن ⟦س + 2⟧ أو ⟦2س⟧.']},
+{t:'Linear equations',d:'Solving with balance steps, with fractions, and by cross-multiplying.',
+ intro:['An equation is a balanced scale: whatever you do to one side you do to the other until the unknown is alone. ⟦3x − 7 = 11⟧ becomes ⟦3x = 18⟧, then ⟦x = 6⟧.','In multiple choice you always have a second route: plug the choices into the equation; the one that works is the answer.'],
+ rules:['Move terms: unknowns on one side, numbers on the other; a term changes sign when it crosses.','Divide both sides by the coefficient of the unknown at the end.','With fractions: multiply both sides by the common denominator to clear them: ⟦x/3 + x/4 = 7 → 4x + 3x = 84⟧','A fraction equal to a fraction: cross-multiply: ⟦(x + 1)/3 = (x − 1)/2 → 2x + 2 = 3x − 3⟧','Check by substituting into the original equation; it catches mistakes in seconds.'],
+ ex:[['Solve ⟦5x − 7 = 2x + 8⟧',['⟦5x − 2x = 8 + 7⟧','⟦3x = 15⟧'],'⟦x = 5⟧'],
+  ['Solve ⟦x/3 + x/4 = 14⟧',['Multiply by 12: ⟦4x + 3x = 168⟧','⟦7x = 168⟧'],'⟦x = 24⟧'],
+  ['Solve ⟦(x + 1)/3 = (x − 1)/2⟧',['Cross-multiply: ⟦2(x + 1) = 3(x − 1)⟧','⟦2x + 2 = 3x − 3⟧'],'⟦x = 5⟧']],
+ traps:['Moving a term without changing its sign.','Multiplying only one term by the common denominator and forgetting the rest.','Giving x when the question asks for ⟦x + 2⟧ or ⟦2x⟧.']},
+[()=>{ const a=R(2,9),x=R(-6,12)||3,b=R(-15,15)||4,c=a*x+b;
+   return {s:'algebra',q:bi(`إذا كان ⟦${lin(a,b,'س')} = ${N(c)}⟧ فما قيمة س؟`,`If ⟦${lin(a,b,'x')} = ${N(c)}⟧, what is x?`),o:mkOpts(x,[(c+b)/a,c-b,x+1].map(v=>Math.round(v*100)/100),N,true),e:bi(`⟦${a}س = ${N(c)} ${b<0?'+':'−'} ${Math.abs(b)} = ${N(c-b)}⟧، ⟦س = ${N(x)}⟧`,`⟦${a}x = ${N(c)} ${b<0?'+':'−'} ${Math.abs(b)} = ${N(c-b)}⟧, ⟦x = ${N(x)}⟧`)}; },
+ ()=>{ for(;;){ const a=R(3,9),c=R(1,a-1),x=R(-5,10)||2,b=R(-12,12),d=(a-c)*x+b; if(d===b) continue;
+   return {s:'algebra',q:bi(`حل المعادلة ⟦${lin(a,b,'س')} = ${lin(c,d,'س')}⟧`,`Solve ⟦${lin(a,b,'x')} = ${lin(c,d,'x')}⟧`),o:mkOpts(x,[(d+b)/(a-c),(d-b)/(a+c),-x].map(v=>Math.round(v*100)/100),v=>`س = ${N(v)}`,true).map(s=>bi(`⟦${s}⟧`,`⟦${s.replace('س','x')}⟧`)),e:bi(`⟦${a}س − ${c}س = ${N(d)} ${b<0?'+':'−'} ${Math.abs(b)}⟧، ⟦${a-c===1?'':a-c}س = ${N(d-b)}⟧، ⟦س = ${N(x)}⟧`,`⟦${a}x − ${c}x = ${N(d)} ${b<0?'+':'−'} ${Math.abs(b)}⟧, ⟦${a-c===1?'':a-c}x = ${N(d-b)}⟧, ⟦x = ${N(x)}⟧`)}; } },
+ ()=>{ const [p,q]=pick([[2,3],[3,4],[2,5],[3,5],[4,5],[2,4],[3,6],[4,6]]),l=p*q/gcd(p,q),x=l*R(1,6),s=x/p+x/q;
+   return {s:'algebra',q:bi(`إذا كان ⟦س/${p} + س/${q} = ${s}⟧ فما قيمة س؟`,`If ⟦x/${p} + x/${q} = ${s}⟧, what is x?`),o:mkOpts(x,[s*(p+q)/2|0,s*l/(p+q)*2|0||x+l,x+l]),e:bi(`اضرب في ${l}: ⟦${l/p}س + ${l/q}س = ${s*l}⟧، ⟦${l/p+l/q}س = ${s*l}⟧، ⟦س = ${x}⟧`,`Multiply by ${l}: ⟦${l/p}x + ${l/q}x = ${s*l}⟧, ⟦${l/p+l/q}x = ${s*l}⟧, ⟦x = ${x}⟧`)}; },
+ ()=>{ for(;;){ const p=R(2,6),q=R(2,6),a=R(-5,5),b=R(-5,5); if(p===q||a===b) continue; const num=p*b-q*a; if(num%(q-p)) continue; const x=num/(q-p); if(x===0||Math.abs(x)>30) continue;
+   const t=(v,k)=>`${v} ${k<0?'−':'+'} ${Math.abs(k)}`; if(a===0||b===0) continue;
+   return {s:'algebra',q:bi(`إذا كان ⟦(${t('س',a)})/${p} = (${t('س',b)})/${q}⟧ فما قيمة س؟`,`If ⟦(${t('x',a)})/${p} = (${t('x',b)})/${q}⟧, what is x?`),o:mkOpts(x,[-x,(p*b+q*a)/(q-p),x+p].map(v=>Math.round(v*100)/100),N,true),e:bi(`اضرب تبادليًا: ⟦${q}(${t('س',a)}) = ${p}(${t('س',b)})⟧، ⟦${q}س ${q*a<0?'−':'+'} ${Math.abs(q*a)} = ${p}س ${p*b<0?'−':'+'} ${Math.abs(p*b)}⟧، ⟦س = ${N(x)}⟧`,`Cross-multiply: ⟦${q}(${t('x',a)}) = ${p}(${t('x',b)})⟧, ⟦${q}x ${q*a<0?'−':'+'} ${Math.abs(q*a)} = ${p}x ${p*b<0?'−':'+'} ${Math.abs(p*b)}⟧, ⟦x = ${N(x)}⟧`)}; } }]);
+
+FDL('l-sys','al','algebra','balance',
+{t:'معادلتان بمجهولين',d:'الحذف والتعويض، وطلب مجموع المجهولين مباشرة، ومسائل الرؤوس والأرجل.',
+ intro:['حين يكون عندك مجهولان تحتاج معادلتين. والهدف دائمًا أن تتخلص من أحد المجهولين لتبقى معادلة بمجهول واحد تعرف حلها.','في الاختبار كثيرًا ما يُطلب ⟦س + ص⟧ أو ⟦س − ص⟧ لا كل مجهول وحده، وهنا يختصر جمع المعادلتين أو طرحهما الحل كله.'],
+ rules:['الحذف: اجمع المعادلتين أو اطرحهما ليختفي أحد المتغيرين، واضرب إحداهما في عدد إن احتجت.','التعويض: أوجد أحد المتغيرين من معادلة سهلة وعوّضه في الأخرى.','إذا كانت المعادلتان «متماثلتين» مثل ⟦2س + ص⟧ و⟦س + 2ص⟧ فاجمعهما: ⟦3س + 3ص⟧','المجموع والفرق: الأكبر ⟦= (المجموع + الفرق) ÷ 2⟧، والأصغر ⟦= (المجموع − الفرق) ÷ 2⟧','مسائل الرؤوس والأرجل والتذاكر تُترجم إلى معادلتين: واحدة للعدد وأخرى للقيمة.'],
+ ex:[['إذا كان ⟦س + ص = 10⟧ و⟦س − ص = 4⟧ فما س و ص؟',['اجمع: ⟦2س = 14⟧، ⟦س = 7⟧','⟦ص = 10 − 7 = 3⟧'],'⟦س = 7⟧ ، ⟦ص = 3⟧'],
+  ['إذا كان ⟦2س + ص = 11⟧ و⟦س + 2ص = 13⟧ فما ⟦س + ص⟧؟',['اجمع المعادلتين: ⟦3س + 3ص = 24⟧','اقسم على 3'],'8'],
+  ['في حظيرة دجاج وأغنام، عدد الرؤوس 20 وعدد الأرجل 56. كم عدد الأغنام؟',['لو كانت كلها دجاجًا لكانت الأرجل 40','الزيادة ⟦56 − 40 = 16⟧، وكل خروف يزيد رجلين','⟦16 ÷ 2 = 8⟧'],'8']],
+ traps:['طرح المعادلتين مع نسيان قلب إشارة الحد الثاني.','حل كل مجهول وحده حين يطلب السؤال مجموعهما؛ يضيع وقتًا.','في الرؤوس والأرجل: الإجابة بعدد الدجاج حين يُسأل عن الأغنام.']},
+{t:'Two equations in two unknowns',d:'Elimination and substitution, asking for the sum directly, and heads-and-legs problems.',
+ intro:['With two unknowns you need two equations. The goal is always to get rid of one unknown so you are left with a one-unknown equation you know how to solve.','The test often asks for ⟦x + y⟧ or ⟦x − y⟧ rather than each unknown, and adding or subtracting the equations does the whole job.'],
+ rules:['Elimination: add or subtract the equations so one variable disappears, multiplying one equation by a number if needed.','Substitution: find one variable from an easy equation and put it into the other.','If the equations mirror each other, like ⟦2x + y⟧ and ⟦x + 2y⟧, add them: ⟦3x + 3y⟧','Sum and difference: larger ⟦= (sum + difference) ÷ 2⟧, smaller ⟦= (sum − difference) ÷ 2⟧','Heads-and-legs and ticket problems become two equations: one for the count, one for the value.'],
+ ex:[['If ⟦x + y = 10⟧ and ⟦x − y = 4⟧, find x and y.',['Add: ⟦2x = 14⟧, ⟦x = 7⟧','⟦y = 10 − 7 = 3⟧'],'⟦x = 7⟧, ⟦y = 3⟧'],
+  ['If ⟦2x + y = 11⟧ and ⟦x + 2y = 13⟧, what is ⟦x + y⟧?',['Add the equations: ⟦3x + 3y = 24⟧','Divide by 3'],'8'],
+  ['A pen has chickens and sheep: 20 heads and 56 legs. How many sheep?',['If all were chickens there would be 40 legs','The extra ⟦56 − 40 = 16⟧, and each sheep adds 2 legs','⟦16 ÷ 2 = 8⟧'],'8']],
+ traps:['Subtracting equations and forgetting to flip the sign of the second term.','Solving for each unknown when the sum is asked; it wastes time.','Heads and legs: giving the number of chickens when sheep are asked.']},
+[()=>{ const y=R(1,15),x=y+R(1,12),S=x+y,D=x-y,big=R(0,1);
+   return {s:'algebra',q:bi(`عددان مجموعهما ${S} والفرق بينهما ${D}. ما العدد ${big?'الأكبر':'الأصغر'}؟`,`Two numbers add up to ${S} and differ by ${D}. What is the ${big?'larger':'smaller'} number?`),o:mkOpts(big?x:y,[big?y:x,S/2|0,D,(S+D)/2+D]),e:bi(`الأكبر ⟦(${S} + ${D}) ÷ 2 = ${x}⟧، والأصغر ⟦(${S} − ${D}) ÷ 2 = ${y}⟧`,`Larger ⟦(${S} + ${D}) ÷ 2 = ${x}⟧, smaller ⟦(${S} − ${D}) ÷ 2 = ${y}⟧`)}; },
+ ()=>{ const a=R(2,5),x=R(1,9),y=R(1,9),s1=a*x+y,s2=x+a*y,sum=(s1+s2)/(a+1);
+   return {s:'algebra',q:bi(`إذا كان ⟦${a}س + ص = ${s1}⟧ و⟦س + ${a}ص = ${s2}⟧ فما قيمة ⟦س + ص⟧؟`,`If ⟦${a}x + y = ${s1}⟧ and ⟦x + ${a}y = ${s2}⟧, what is ⟦x + y⟧?`),o:mkOpts(sum,[s1+s2,(s1+s2)/2,Math.abs(s1-s2)||sum+2]),e:bi(`اجمع: ⟦${a+1}س + ${a+1}ص = ${s1+s2}⟧، فـ⟦س + ص = ${sum}⟧`,`Add: ⟦${a+1}x + ${a+1}y = ${s1+s2}⟧, so ⟦x + y = ${sum}⟧`)}; },
+ ()=>{ const s=R(3,15),c=R(3,20),H=s+c,Lg=4*s+2*c,ask=R(0,1);
+   return {s:'algebra',q:bi(`في مزرعة دجاج وأغنام، عدد الرؤوس ${H} وعدد الأرجل ${Lg}. كم عدد ${ask?'الأغنام':'الدجاج'}؟`,`A farm has chickens and sheep: ${H} heads and ${Lg} legs. How many ${ask?'sheep':'chickens'} are there?`),o:mkOpts(ask?s:c,[ask?c:s,Lg/4|0,H/2|0]),e:bi(`لو كانت كلها دجاجًا لكانت الأرجل ${2*H}. الزيادة ⟦${Lg} − ${2*H} = ${Lg-2*H}⟧، والأغنام ⟦${Lg-2*H} ÷ 2 = ${s}⟧، والدجاج ${c}`,`If all were chickens there would be ${2*H} legs. The extra ⟦${Lg} − ${2*H} = ${Lg-2*H}⟧, so sheep ⟦${Lg-2*H} ÷ 2 = ${s}⟧ and chickens ${c}`)}; },
+ ()=>{ const pa=pick([20,25,30,40,50]),pc=pick([10,15,20]),a=R(3,20),c=R(3,20),n=a+c,tot=a*pa+c*pc;
+   if(pa<=pc) return FD.find(x=>x.id==='l-sys').g[3]();
+   return {s:'algebra',q:bi(`بِيعت ${n} تذكرة لعرض: تذكرة الكبار بـ${arSAR(pa)} وتذكرة الصغار بـ${arSAR(pc)}، والمبيعات ${arSAR(tot)}. كم تذكرة كبار بِيعت؟`,`${n} tickets were sold for a show: adults ${pa} SAR, children ${pc} SAR, for ${tot} SAR in all. How many adult tickets were sold?`),o:mkOpts(a,[c,Math.round(tot/pa),n-a+1]),e:bi(`لو كانت كلها للصغار لكانت ⟦${n} × ${pc} = ${n*pc}⟧. الفرق ⟦${tot} − ${n*pc} = ${tot-n*pc}⟧، وكل تذكرة كبار تزيد ${pa-pc}: ⟦${tot-n*pc} ÷ ${pa-pc} = ${a}⟧`,`If all were children's tickets: ⟦${n} × ${pc} = ${n*pc}⟧. The difference ⟦${tot} − ${n*pc} = ${tot-n*pc}⟧, and each adult ticket adds ${pa-pc}: ⟦${tot-n*pc} ÷ ${pa-pc} = ${a}⟧`)}; }]);
+
+const ineq=(v,op,k)=>`${v} ${op} ${N(k)}`;
+FDL('l-ineq','al','algebra','numline',
+{t:'المتباينات',d:'حل المتباينة، وقلب الإشارة عند الضرب في سالب، وعد الأعداد الصحيحة.',
+ intro:['المتباينة مثل المعادلة، لكن حلها مجموعة من القيم لا قيمة واحدة: ⟦س > 3⟧ تعني كل عدد أكبر من 3.','تُحل بخطوات المعادلة نفسها، مع قاعدة واحدة إضافية يقع فيها كثيرون: الضرب أو القسمة على عدد سالب يقلب اتجاه الإشارة.'],
+ rules:['حل المتباينة كالمعادلة: انقل الحدود ثم اقسم على المعامل.','الضرب أو القسمة على سالب يقلب الإشارة: ⟦−2س > 6 → س < −3⟧','المتباينة المركبة: طبّق الخطوة على الأطراف الثلاثة معًا: ⟦−1 < 2س + 1 < 7 → −1 < س < 3⟧','عد الأعداد الصحيحة: انتبه للطرفين؛ ⟦≤⟧ تشمل الطرف و⟦<⟧ لا تشمله.','القيمة المطلقة: ⟦|س| < 3⟧ تعني ⟦−3 < س < 3⟧، و⟦|س| > 3⟧ تعني ⟦س > 3⟧ أو ⟦س < −3⟧'],
+ ex:[['حل ⟦3 − 2س ≥ 9⟧',['⟦−2س ≥ 6⟧','القسمة على ⟦−2⟧ تقلب الإشارة'],'⟦س ≤ −3⟧'],
+  ['كم عددًا صحيحًا يحقق ⟦−2 ≤ س < 4⟧؟',['⟦−2، −1، 0، 1، 2، 3⟧','الطرف 4 غير مشمول'],'6'],
+  ['حل ⟦|س − 1| ≤ 2⟧',['⟦−2 ≤ س − 1 ≤ 2⟧','أضف 1 للأطراف الثلاثة'],'⟦−1 ≤ س ≤ 3⟧']],
+ traps:['نسيان قلب الإشارة عند القسمة على سالب.','عد الطرف غير المشمول في ⟦<⟧ أو نسيان الصفر عند عد الأعداد الصحيحة.','الظن أن ⟦س^2 > 4⟧ تعني ⟦س > 2⟧ فقط؛ تشمل أيضًا ⟦س < −2⟧.']},
+{t:'Inequalities',d:'Solving inequalities, flipping the sign for negatives, and counting integers.',
+ intro:['An inequality is like an equation, but its solution is a set of values rather than one value: ⟦x > 3⟧ means every number greater than 3.','You solve it with the same steps as an equation, plus one rule many students miss: multiplying or dividing by a negative number flips the sign.'],
+ rules:['Solve like an equation: move terms, then divide by the coefficient.','Multiplying or dividing by a negative flips the sign: ⟦−2x > 6 → x < −3⟧','Compound inequality: apply each step to all three parts: ⟦−1 < 2x + 1 < 7 → −1 < x < 3⟧','Counting integers: watch the ends; ⟦≤⟧ includes the end and ⟦<⟧ does not.','Absolute value: ⟦|x| < 3⟧ means ⟦−3 < x < 3⟧, and ⟦|x| > 3⟧ means ⟦x > 3⟧ or ⟦x < −3⟧'],
+ ex:[['Solve ⟦3 − 2x ≥ 9⟧',['⟦−2x ≥ 6⟧','Dividing by ⟦−2⟧ flips the sign'],'⟦x ≤ −3⟧'],
+  ['How many integers satisfy ⟦−2 ≤ x < 4⟧?',['⟦−2, −1, 0, 1, 2, 3⟧','4 is not included'],'6'],
+  ['Solve ⟦|x − 1| ≤ 2⟧',['⟦−2 ≤ x − 1 ≤ 2⟧','Add 1 to all three parts'],'⟦−1 ≤ x ≤ 3⟧']],
+ traps:['Forgetting to flip the sign when dividing by a negative.','Counting an end that ⟦<⟧ excludes, or forgetting zero when counting integers.','Thinking ⟦x^2 > 4⟧ means only ⟦x > 2⟧; it also includes ⟦x < −2⟧.']},
+[()=>{ const a=R(2,7),k=R(-5,8),b=R(-12,12),c=a*k+b,op=pick(['>','≥','<','≤']),opp={'>':'<','<':'>','≥':'≤','≤':'≥'}[op];
+   const O=(v,o2,kk)=>`⟦${ineq(v,o2,kk).replace('<','&lt;').replace('>','&gt;')}⟧`; const mk=v=>[O(v,op,k),O(v,opp,k),O(v,op,-k===k?k+1:-k),O(v,op,(c+b)/a===k?k+2:Math.round((c+b)/a*100)/100)];
+   const oa=mk('س'),oe=mk('x'); if(new Set(oa).size<4) return FD.find(x=>x.id==='l-ineq').g[0]();
+   return {s:'algebra',q:bi(`حل المتباينة ⟦${lin(a,b,'س')} ${op} ${N(c)}⟧`,`Solve ⟦${lin(a,b,'x')} ${op} ${N(c)}⟧`),o:oa.map((x,i)=>bi(x,oe[i])),e:bi(`⟦${a}س ${op} ${N(c-b)}⟧، ثم القسمة على ${a} (موجب) لا تقلب الإشارة: ⟦${ineq('س',op,k)}⟧`,`⟦${a}x ${op} ${N(c-b)}⟧; dividing by ${a} (positive) keeps the sign: ⟦${ineq('x',op,k)}⟧`)}; },
+ ()=>{ const a=R(2,6),k=R(-6,6),b=R(-10,10),c=-a*k+b,op=pick(['>','≥','<','≤']),opp={'>':'<','<':'>','≥':'≤','≤':'≥'}[op];
+   const O=(v,o2,kk)=>`⟦${ineq(v,o2,kk).replace('<','&lt;').replace('>','&gt;')}⟧`; const mk=v=>[O(v,opp,k),O(v,op,k),O(v,opp,-k===k?k-1:-k),O(v,op,-k===k?k+1:-k)];
+   const oa=mk('س'),oe=mk('x'); if(new Set(oa).size<4) return FD.find(x=>x.id==='l-ineq').g[1]();
+   const L=v=>`${b===0?'':N(b)+' '}${b===0?'−':'−'} ${a}${v}`.trim();
+   return {s:'algebra',q:bi(`حل المتباينة ⟦${b===0?`−${a}س`:`${N(b)} − ${a}س`} ${op} ${N(c)}⟧`,`Solve ⟦${b===0?`−${a}x`:`${N(b)} − ${a}x`} ${op} ${N(c)}⟧`),o:oa.map((x,i)=>bi(x,oe[i])),e:bi(`⟦−${a}س ${op} ${N(c-b)}⟧، والقسمة على ⟦−${a}⟧ تقلب الإشارة: ⟦${ineq('س',opp,k)}⟧`,`⟦−${a}x ${op} ${N(c-b)}⟧; dividing by ⟦−${a}⟧ flips the sign: ⟦${ineq('x',opp,k)}⟧`)}; },
+ ()=>{ const lo=R(-6,2),hi=lo+R(3,9),l1=pick(['<','≤']),l2=pick(['<','≤']),n=(hi-lo+1)-(l1==='<'?1:0)-(l2==='<'?1:0);
+   return {s:'algebra',q:bi(`كم عددًا صحيحًا يحقق ⟦${N(lo)} ${l1} س ${l2} ${N(hi)}⟧؟`,`How many integers satisfy ⟦${N(lo)} ${l1} x ${l2} ${N(hi)}⟧?`),o:mkOpts(n,[hi-lo+1,hi-lo,n+2,hi-lo-1]),e:bi(`من ${N(l1==='<'?lo+1:lo)} إلى ${N(l2==='<'?hi-1:hi)}: ⟦${N(l2==='<'?hi-1:hi)} − (${N(l1==='<'?lo+1:lo)}) + 1 = ${n}⟧`,`From ${N(l1==='<'?lo+1:lo)} to ${N(l2==='<'?hi-1:hi)}: ⟦${N(l2==='<'?hi-1:hi)} − (${N(l1==='<'?lo+1:lo)}) + 1 = ${n}⟧`)}; },
+ ()=>{ if(R(0,1)){ const a=R(2,6),b=R(1,9),m=R(4,12),c=a*m+b+R(1,a-1);
+     return {s:'algebra',q:bi(`ما أكبر عدد صحيح س يحقق ⟦${a}س + ${b} < ${c}⟧؟`,`What is the greatest integer x with ⟦${a}x + ${b} < ${c}⟧?`),o:mkOpts(m,[m+1,c-b,m-1]),e:bi(`⟦${a}س < ${c-b}⟧، ⟦س < ${dS(Math.round((c-b)/a*100)/100)}⟧، فأكبر عدد صحيح ${m}`,`⟦${a}x < ${c-b}⟧, ⟦x < ${dS(Math.round((c-b)/a*100)/100)}⟧, so the greatest integer is ${m}`)}; }
+   const c=R(-3,4),r=R(1,6),lo=c-r,hi=c+r,le=R(0,1),n=le?2*r+1:2*r-1;
+   return {s:'algebra',q:bi(`كم عددًا صحيحًا يحقق ⟦|س ${c<0?'+':'−'} ${Math.abs(c)}| ${le?'≤':'<'} ${r}⟧؟`,`How many integers satisfy ⟦|x ${c<0?'+':'−'} ${Math.abs(c)}| ${le?'≤':'<'} ${r}⟧?`),o:mkOpts(n,[le?2*r:2*r+1,r,n+2]),e:bi(`⟦${N(lo)} ${le?'≤':'<'} س ${le?'≤':'<'} ${N(hi)}⟧، وعدد الأعداد الصحيحة ${n}`,`⟦${N(lo)} ${le?'≤':'<'} x ${le?'≤':'<'} ${N(hi)}⟧, which contains ${n} integers`)}; }]);
+
+FDL('l-ident','al','algebra','squares',
+{t:'المتطابقات والتحليل',d:'مربع المجموع والفرق، والفرق بين مربعين، وتحليل العبارة التربيعية.',
+ intro:['المتطابقات صيغ صحيحة لكل قيم المتغيرات، وهي أقوى أدوات الاختصار في الجبر: تحول سؤالًا يبدو طويلًا إلى خطوة واحدة.','أشهرها ثلاث: مربع المجموع، ومربع الفرق، والفرق بين مربعين. احفظها في الاتجاهين: فك الأقواس، والتحليل إلى أقواس.'],
+ rules:['⟦(س + ص)^2 = س^2 + 2س ص + ص^2⟧','⟦(س − ص)^2 = س^2 − 2س ص + ص^2⟧','الفرق بين مربعين: ⟦س^2 − ص^2 = (س − ص)(س + ص)⟧','تحليل ⟦س^2 + بس + ج⟧: ابحث عن عددين مجموعهما ب وحاصل ضربهما ج: ⟦س^2 − 5س + 6 = (س − 2)(س − 3)⟧','حساب ذهني: ⟦51^2 − 49^2 = (51 − 49)(51 + 49) = 200⟧، ⟦99^2 = (100 − 1)^2 = 9801⟧'],
+ ex:[['إذا كان ⟦س + ص = 7⟧ و⟦س ص = 10⟧ فما ⟦س^2 + ص^2⟧؟',['⟦س^2 + ص^2 = (س + ص)^2 − 2س ص⟧','⟦49 − 20 = 29⟧'],'29'],
+  ['احسب ⟦98^2 − 2^2⟧',['⟦(98 − 2)(98 + 2)⟧','⟦96 × 100 = 9600⟧'],'9600'],
+  ['حلّل ⟦س^2 − 5س + 6⟧',['عددان مجموعهما ⟦−5⟧ وحاصل ضربهما 6: ⟦−2⟧ و⟦−3⟧'],'⟦(س − 2)(س − 3)⟧']],
+ traps:['⟦(س + ص)^2 ≠ س^2 + ص^2⟧: الحد الأوسط ⟦2س ص⟧ لا يُنسى.','⟦س^2 + ص^2⟧ لا تتحلل مثل ⟦س^2 − ص^2⟧.','الخلط في الإشارات عند التحليل: الضرب موجب والمجموع سالب يعني أن العددين سالبان.']},
+{t:'Identities and factoring',d:'Square of a sum and a difference, difference of squares, and factoring quadratics.',
+ intro:['Identities are formulas that hold for every value, and they are algebra\'s strongest shortcuts: they turn a long-looking question into one step.','The main three are the square of a sum, the square of a difference, and the difference of squares. Know them both ways: expanding and factoring.'],
+ rules:['⟦(x + y)^2 = x^2 + 2xy + y^2⟧','⟦(x − y)^2 = x^2 − 2xy + y^2⟧','Difference of squares: ⟦x^2 − y^2 = (x − y)(x + y)⟧','Factoring ⟦x^2 + bx + c⟧: find two numbers that add to b and multiply to c: ⟦x^2 − 5x + 6 = (x − 2)(x − 3)⟧','Mental math: ⟦51^2 − 49^2 = (51 − 49)(51 + 49) = 200⟧, ⟦99^2 = (100 − 1)^2 = 9801⟧'],
+ ex:[['If ⟦x + y = 7⟧ and ⟦xy = 10⟧, what is ⟦x^2 + y^2⟧?',['⟦x^2 + y^2 = (x + y)^2 − 2xy⟧','⟦49 − 20 = 29⟧'],'29'],
+  ['Work out ⟦98^2 − 2^2⟧',['⟦(98 − 2)(98 + 2)⟧','⟦96 × 100 = 9600⟧'],'9600'],
+  ['Factor ⟦x^2 − 5x + 6⟧',['Two numbers adding to ⟦−5⟧ and multiplying to 6: ⟦−2⟧ and ⟦−3⟧'],'⟦(x − 2)(x − 3)⟧']],
+ traps:['⟦(x + y)^2 ≠ x^2 + y^2⟧: never drop the middle term ⟦2xy⟧.','⟦x^2 + y^2⟧ does not factor like ⟦x^2 − y^2⟧.','Sign mix-ups when factoring: a positive product with a negative sum means both numbers are negative.']},
+[()=>{ const x=R(1,9),y=R(1,9),s=x+y,p=x*y,mn=R(0,1);
+   if(mn){ const d=x-y; return {s:'algebra',q:bi(`إذا كان ⟦س − ص = ${N(d)}⟧ و⟦س ص = ${p}⟧ فما قيمة ⟦س^2 + ص^2⟧؟`,`If ⟦x − y = ${N(d)}⟧ and ⟦xy = ${p}⟧, what is ⟦x^2 + y^2⟧?`),o:mkOpts(d*d+2*p,[d*d-2*p,d*d+p,d*d]),e:bi(`⟦(س − ص)^2 + 2س ص = ${d*d} + ${2*p} = ${d*d+2*p}⟧`,`⟦(x − y)^2 + 2xy = ${d*d} + ${2*p} = ${d*d+2*p}⟧`)}; }
+   return {s:'algebra',q:bi(`إذا كان ⟦س + ص = ${s}⟧ و⟦س ص = ${p}⟧ فما قيمة ⟦س^2 + ص^2⟧؟`,`If ⟦x + y = ${s}⟧ and ⟦xy = ${p}⟧, what is ⟦x^2 + y^2⟧?`),o:mkOpts(s*s-2*p,[s*s+2*p,s*s-p,s*s]),e:bi(`⟦(س + ص)^2 − 2س ص = ${s*s} − ${2*p} = ${s*s-2*p}⟧`,`⟦(x + y)^2 − 2xy = ${s*s} − ${2*p} = ${s*s-2*p}⟧`)}; },
+ ()=>{ if(R(0,1)){ const m=pick([50,60,70,80,100,40,30]),d=R(1,4),a=m+d,b=m-d,ans=a*a-b*b;
+     return {s:'algebra',q:bi(`ما قيمة ⟦${a}^2 − ${b}^2⟧؟`,`What is ⟦${a}^2 − ${b}^2⟧?`),o:mkOpts(ans,[(a-b)**2,ans/2,ans+a-b]),e:bi(`⟦(${a} − ${b})(${a} + ${b}) = ${a-b} × ${a+b} = ${ans}⟧`,`⟦(${a} − ${b})(${a} + ${b}) = ${a-b} × ${a+b} = ${ans}⟧`)}; }
+   const t=pick([20,30,40,50,60,70,80,90,100]),d=R(1,3),a=t+d,b=t-d,ans=a*b;
+   return {s:'algebra',q:bi(`ما ناتج ⟦${a} × ${b}⟧؟`,`What is ⟦${a} × ${b}⟧?`),o:mkOpts(ans,[t*t,t*t+d*d,ans-10]),e:bi(`⟦(${t} + ${d})(${t} − ${d}) = ${t}^2 − ${d}^2 = ${t*t} − ${d*d} = ${ans}⟧`,`⟦(${t} + ${d})(${t} − ${d}) = ${t}^2 − ${d}^2 = ${t*t} − ${d*d} = ${ans}⟧`)}; },
+ ()=>{ for(;;){ const p=R(-7,7),q=R(-7,7); if(!p||!q||p===q||p===-q) continue; const b=-(p+q),c=p*q;
+   const fac=(v,r1,r2)=>`(${v} ${r1<0?'+':'−'} ${Math.abs(r1)})(${v} ${r2<0?'+':'−'} ${Math.abs(r2)})`; const qu=v=>`${v}^2 ${b<0?'−':'+'} ${Math.abs(b)===1?'':Math.abs(b)}${v} ${c<0?'−':'+'} ${Math.abs(c)}`;
+   const mk=v=>[`⟦${fac(v,p,q)}⟧`,`⟦${fac(v,-p,-q)}⟧`,`⟦${fac(v,p,-q)}⟧`,`⟦${fac(v,-p,q)}⟧`]; const oa=mk('س'),oe=mk('x'); if(new Set(oa).size<4) continue;
+   return {s:'algebra',q:bi(`تحليل العبارة ⟦${qu('س')}⟧ هو:`,`⟦${qu('x')}⟧ factors as:`),o:oa.map((x,i)=>bi(x,oe[i])),e:bi(`عددان مجموعهما ${N(b)} وحاصل ضربهما ${N(c)}: ${N(-p)} و${N(-q)}`,`Two numbers adding to ${N(b)} and multiplying to ${N(c)}: ${N(-p)} and ${N(-q)}`)}; } },
+ ()=>{ const s=R(3,15),d=R(1,s-1),dd=s*d;
+   return {s:'algebra',q:bi(`إذا كان ⟦س^2 − ص^2 = ${dd}⟧ و⟦س + ص = ${s}⟧ فما قيمة ⟦س − ص⟧؟`,`If ⟦x^2 − y^2 = ${dd}⟧ and ⟦x + y = ${s}⟧, what is ⟦x − y⟧?`),o:mkOpts(d,[dd-s,s-d,d+s]),e:bi(`⟦(س − ص)(س + ص) = ${dd}⟧، ⟦س − ص = ${dd} ÷ ${s} = ${d}⟧`,`⟦(x − y)(x + y) = ${dd}⟧, ⟦x − y = ${dd} ÷ ${s} = ${d}⟧`)}; }]);
+
+const WD={ar:['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'],en:['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday']};
+FDL('l-seq','al','algebra','sequence',
+{t:'المتتابعات والأنماط',d:'الحسابية والهندسية، والحد النوني، والأنماط الدورية.',
+ intro:['المتتابعة أعداد مرتبة بقاعدة. السؤال إما أن يطلب الحد التالي، أو حدًا بعيدًا مثل الحد العشرين، أو مجموع الحدود.','ابدأ دائمًا بفحص الفرق بين كل حدين متتاليين؛ فإن لم يكن ثابتًا فافحص النسبة، ثم فروق الفروق.'],
+ rules:['الحسابية: فرق ثابت d، والحد رقم n ⟦= a + (n − 1)d⟧','الهندسية: نسبة ثابتة r، والحد رقم n ⟦= a × r^(n − 1)⟧','إذا لم يثبت الفرق ولا النسبة: افحص فروق الفروق، أو المربعات والمكعبات، أو متتابعتين متداخلتين في المواقع الفردية والزوجية.','مجموع الحسابية ⟦= عدد الحدود × (الأول + الأخير) ÷ 2⟧، و⟦1 + 2 + … + 100 = 5050⟧','النمط الدوري (أيام الأسبوع، الألوان المتكررة): اقسم على طول الدورة وانظر إلى الباقي.'],
+ ex:[['ما الحد العشرون في ⟦5، 9، 13، …⟧؟',['الفرق 4','⟦5 + 19 × 4 = 81⟧'],'81'],
+  ['ما الحد التالي في ⟦2، 5، 10، 17، 26، …⟧؟',['الفروق ⟦3، 5، 7، 9⟧ ثم 11','أو القاعدة ⟦n^2 + 1⟧'],'37'],
+  ['إذا كان اليوم الأحد، فما اليوم بعد 100 يوم؟',['⟦100 = 14 × 7 + 2⟧','الباقي 2: يومان بعد الأحد'],'الثلاثاء']],
+ traps:['الخطأ بحد واحد: الحد العشرون يحتاج 19 فرقًا لا 20.','حساب «بعد 100 يوم» بعد اليوم نفسه بدلًا من الانطلاق منه.','الاكتفاء بفرق أول حدين دون التحقق من البقية.']},
+{t:'Sequences and patterns',d:'Arithmetic and geometric sequences, the nth term, and repeating patterns.',
+ intro:['A sequence is a list of numbers that follows a rule. The question asks for the next term, a far term such as the twentieth, or the sum of terms.','Always start by checking the difference between neighbors; if it is not constant, check the ratio, then the differences of the differences.'],
+ rules:['Arithmetic: constant difference d; the nth term ⟦= a + (n − 1)d⟧','Geometric: constant ratio r; the nth term ⟦= a × r^(n − 1)⟧','If neither the difference nor the ratio is constant: check second differences, squares and cubes, or two sequences interleaved in odd and even places.','Sum of an arithmetic sequence ⟦= number of terms × (first + last) ÷ 2⟧, and ⟦1 + 2 + … + 100 = 5050⟧','Repeating patterns (weekdays, repeating colors): divide by the cycle length and look at the remainder.'],
+ ex:[['What is the 20th term of ⟦5, 9, 13, …⟧?',['The difference is 4','⟦5 + 19 × 4 = 81⟧'],'81'],
+  ['What comes next in ⟦2, 5, 10, 17, 26, …⟧?',['Differences ⟦3, 5, 7, 9⟧, then 11','Or the rule ⟦n^2 + 1⟧'],'37'],
+  ['If today is Sunday, what day is it 100 days from now?',['⟦100 = 14 × 7 + 2⟧','Remainder 2: two days after Sunday'],'Tuesday']],
+ traps:['Off by one: the 20th term needs 19 steps, not 20.','Counting "100 days from now" from the day after instead of from today.','Trusting the first difference without checking the rest.']},
+[()=>{ const a=R(-5,12),d=pick([2,3,4,5,6,7,-2,-3,-4]),n=R(8,30),ans=a+(n-1)*d,seq=[0,1,2].map(i=>N(a+i*d)).join('، '),seqE=[0,1,2].map(i=>N(a+i*d)).join(', ');
+   return {s:'algebra',q:bi(`ما الحد رقم ${n} في المتتابعة ⟦${seq}، …⟧؟`,`What is term number ${n} of ⟦${seqE}, …⟧?`),o:mkOpts(ans,[a+n*d,ans-a,n*d],N,true),e:bi(`⟦${N(a)} + (${n} − 1) × ${d<0?`(${N(d)})`:d} = ${N(ans)}⟧`,`⟦${N(a)} + (${n} − 1) × ${d<0?`(${N(d)})`:d} = ${N(ans)}⟧`)}; },
+ ()=>{ const a=pick([1,2,3,4,5]),r=pick([2,3]),k=R(4,5),s=[...Array(k)].map((_,i)=>a*r**i),ans=a*r**k;
+   return {s:'algebra',q:bi(`ما الحد التالي في ⟦${s.join('، ')}، …⟧؟`,`What comes next in ⟦${s.join(', ')}, …⟧?`),o:mkOpts(ans,[s[k-1]+(s[k-1]-s[k-2]),ans/r+a,ans*r]),e:bi(`كل حد ${r===2?'ضعف':'ثلاثة أمثال'} سابقه: ⟦${s[k-1]} × ${r} = ${ans}⟧`,`Each term is ${r===2?'twice':'three times'} the previous: ⟦${s[k-1]} × ${r} = ${ans}⟧`)}; },
+ ()=>{ const t=R(0,2); let s,ans,why;
+   if(t===0){ const c=R(-2,3); s=[1,2,3,4,5].map(n=>n*n+c); ans=36+c; why=bi(`القاعدة ⟦n^2 ${c<0?'−':'+'} ${Math.abs(c)}⟧، والفروق تزيد 2 كل مرة`,`The rule is ⟦n^2 ${c<0?'−':'+'} ${Math.abs(c)}⟧; the differences grow by 2`); if(c===0) why=bi('مربعات الأعداد: ⟦6^2 = 36⟧','Perfect squares: ⟦6^2 = 36⟧'); }
+   else if(t===1){ const a=R(1,5),d=R(1,3); s=[a]; for(let i=1;i<5;i++) s.push(s[i-1]+d*i); ans=s[4]+d*5; why=bi(`الفروق ⟦${[1,2,3,4].map(i=>d*i).join('، ')}⟧ ثم ${d*5}`,`Differences ⟦${[1,2,3,4].map(i=>d*i).join(', ')}⟧, then ${d*5}`); }
+   else { const a=R(1,5),b=R(10,20),p=R(2,4),q=R(1,3); s=[a,b,a+p,b-q,a+2*p,b-2*q]; ans=a+3*p; why=bi(`متتابعتان متداخلتان: المواقع الفردية تزيد ${p}، والزوجية تنقص ${q}`,`Two interleaved sequences: odd places go up by ${p}, even places down by ${q}`); }
+   return {s:'algebra',q:bi(`ما الحد التالي في ⟦${s.map(N).join('، ')}، …⟧؟`,`What comes next in ⟦${s.map(N).join(', ')}, …⟧?`),o:mkOpts(ans,[s[s.length-1]+(s[s.length-1]-s[s.length-2]),ans+1,ans-2],N,true),e:why}; },
+ ()=>{ if(R(0,1)){ const d0=R(0,6),n=R(15,99),r=n%7,ans=(d0+r)%7;
+     return {s:'algebra',q:bi(`إذا كان اليوم ${WD.ar[d0]}، فأي يوم يكون بعد ${arC(n,AN.day)} من اليوم؟`,`If today is ${WD.en[d0]}, what day will it be ${n} days from today?`),o:[0,1,2,3].map(k=>bi(WD.ar[(ans+[0,1,6,3][k])%7],WD.en[(ans+[0,1,6,3][k])%7])),e:bi(`⟦${n} = ${Math.floor(n/7)} × 7 + ${r}⟧، ${r?`فننتقل ${r===1?'يومًا واحدًا':r===2?'يومين':r+' أيام'} بعد ${WD.ar[d0]}`:'والباقي صفر فهو اليوم نفسه'}`,`⟦${n} = ${Math.floor(n/7)} × 7 + ${r}⟧, ${r?`so move ${r} day${r===1?'':'s'} past ${WD.en[d0]}`:'remainder 0, so the same day'}`)}; }
+   const a=R(1,9),d=R(1,6),n=pick([10,12,15,20,25,30]),l=a+(n-1)*d,S=n*(a+l)/2;
+   return {s:'algebra',q:bi(`ما مجموع أول ${arC(n,['حد واحد','حدين','حدود','حدًّا'])} من المتتابعة ⟦${a}، ${a+d}، ${a+2*d}، …⟧؟`,`What is the sum of the first ${n} terms of ⟦${a}, ${a+d}, ${a+2*d}, …⟧?`),o:mkOpts(S,[n*l,S+l,n*(a+l)]),e:bi(`الحد الأخير ⟦${a} + ${n-1} × ${d} = ${l}⟧، والمجموع ⟦${n} × (${a} + ${l}) ÷ 2 = ${S}⟧`,`The last term is ⟦${a} + ${n-1} × ${d} = ${l}⟧, and the sum is ⟦${n} × (${a} + ${l}) ÷ 2 = ${S}⟧`)}; }]);
+
+/* ---- unit 4: geometry ---- */
+const pi=(c,k=0)=>`⟦${k?k+' '+(c<0?'−':'+')+' ':''}${Math.abs(c)===1?'':N(Math.abs(c))}π⟧`; /* k + cπ */
+const FD_ANG_FIG=FG(`<path d="M20 45H200M20 110H200" /><path d="M60 140L160 15"/>${FT(154,33,'65°')}${FT(66,98,'115°')}`);
+FDL('g-ang','geo','geometry','clock',
+{t:'الزوايا والمستقيمات',d:'المتتامتان والمتكاملتان، والمتقابلتان بالرأس، والمستقيمان المتوازيان، وزاوية الساعة.',
+ intro:['الزاوية مقدار الانفراج بين ضلعين، وتقاس بالدرجات. معظم أسئلة الزوايا لا تحتاج إلا أربع حقائق ترى بها الشكل كله.','وفي الرسوم كثيرًا ما تُعطى زاوية واحدة ويُطلب غيرها: ابحث عن الطريق القصير بين الزاويتين عبر هذه الحقائق.'],
+ rules:['الزاويتان على مستقيم واحد مجموعهما ⟦180°⟧، والزوايا حول نقطة مجموعها ⟦360°⟧','المتقابلتان بالرأس متساويتان.','المتتامتان مجموعهما ⟦90°⟧، والمتكاملتان مجموعهما ⟦180°⟧','مستقيمان متوازيان يقطعهما قاطع: كل الزوايا الحادة متساوية، وكل المنفرجة متساوية، والحادة + المنفرجة ⟦= 180°⟧','زاوية عقربي الساعة: كل ساعة ⟦30°⟧ وكل دقيقة ⟦6°⟧ لعقرب الدقائق، ويتحرك عقرب الساعات ⟦0.5°⟧ كل دقيقة.'],
+ ex:[['زاويتان متكاملتان، إحداهما تزيد على الأخرى بمقدار ⟦40°⟧. ما قياس الكبرى؟',['⟦س + س + 40 = 180⟧','⟦2س = 140⟧، ⟦س = 70⟧','الكبرى ⟦70 + 40⟧'],'⟦110°⟧'],
+  ['ما قياس الزاوية بين عقربي الساعة عند 3:30؟',['عقرب الدقائق عند 6: ⟦180°⟧ من 12','عقرب الساعات بين 3 و4: ⟦90 + 15 = 105°⟧','⟦180 − 105 = 75⟧'],'⟦75°⟧'],
+  ['في الشكل مستقيمان متوازيان يقطعهما قاطع، وإحدى الزوايا ⟦65°⟧. ما قياس الزاوية المنفرجة؟',['الحادة والمنفرجة عند التقاطع مجموعهما ⟦180°⟧','⟦180 − 65 = 115⟧'],'⟦115°⟧',FD_ANG_FIG]],
+ traps:['الخلط بين المتتامتين ⟦90°⟧ والمتكاملتين ⟦180°⟧.','حساب زاوية الساعة مع إهمال حركة عقرب الساعات: عند 3:30 ليس عند 3 بالضبط.','الحكم بالنظر إلى الرسم؛ الرسوم في الاختبار ليست بمقياس رسم، فاعتمد على المعطيات.']},
+{t:'Angles and lines',d:'Complementary and supplementary angles, vertical angles, parallel lines and clock angles.',
+ intro:['An angle measures the opening between two rays, in degrees. Most angle questions need only four facts to see the whole figure.','Figures often give one angle and ask for another: find the short path between them through these facts.'],
+ rules:['Angles on a straight line add up to ⟦180°⟧, and angles around a point add up to ⟦360°⟧','Vertical (opposite) angles are equal.','Complementary angles add up to ⟦90°⟧, supplementary angles to ⟦180°⟧','Two parallel lines cut by a transversal: all acute angles are equal, all obtuse angles are equal, and acute + obtuse ⟦= 180°⟧','Clock hands: each hour mark is ⟦30°⟧, the minute hand moves ⟦6°⟧ a minute, and the hour hand moves ⟦0.5°⟧ a minute.'],
+ ex:[['Two supplementary angles differ by ⟦40°⟧. What is the larger one?',['⟦x + x + 40 = 180⟧','⟦2x = 140⟧, ⟦x = 70⟧','Larger ⟦70 + 40⟧'],'⟦110°⟧'],
+  ['What is the angle between the clock hands at 3:30?',['The minute hand is at 6: ⟦180°⟧ from 12','The hour hand is between 3 and 4: ⟦90 + 15 = 105°⟧','⟦180 − 105 = 75⟧'],'⟦75°⟧'],
+  ['The figure shows two parallel lines and a transversal with an angle of ⟦65°⟧. What is the obtuse angle?',['An acute and an obtuse angle at a crossing add up to ⟦180°⟧','⟦180 − 65 = 115⟧'],'⟦115°⟧',FD_ANG_FIG]],
+ traps:['Mixing up complementary ⟦90°⟧ and supplementary ⟦180°⟧.','Ignoring the hour hand\'s movement: at 3:30 it is not exactly on 3.','Judging by the drawing; test figures are not to scale, so rely on the given values.']},
+[()=>{ if(R(0,1)){ const a=R(12,78); return {s:'geometry',q:bi(`ما قياس الزاوية المتممة لزاوية قياسها ⟦${a}°⟧؟`,`What is the complement of a ⟦${a}°⟧ angle?`),o:mkOpts(90-a,[180-a,a,90+a],x=>`${x}°`),e:bi(`⟦90 − ${a} = ${90-a}°⟧`,`⟦90 − ${a} = ${90-a}°⟧`)}; }
+   const d=2*R(5,40),x=(180-d)/2; return {s:'geometry',q:bi(`زاويتان متكاملتان، إحداهما تزيد على الأخرى بمقدار ⟦${d}°⟧. ما قياس الكبرى؟`,`Two supplementary angles differ by ⟦${d}°⟧. What is the larger one?`),o:mkOpts(x+d,[x,180-d,90+d],v=>`${v}°`),e:bi(`⟦2س + ${d} = 180⟧، ⟦س = ${x}⟧، والكبرى ⟦${x+d}°⟧`,`⟦2x + ${d} = 180⟧, ⟦x = ${x}⟧, larger ⟦${x+d}°⟧`)}; },
+ ()=>{ const a=R(35,80),ask=pick(['top','left','bottom']),ans=ask==='left'?a:180-a,pos={top:[110,45],left:[70,79],bottom:[110,110]}[ask];
+   const f=FG(`<path d="M25 30L195 120M25 120L195 30"/>${FT(152,79,a+'°')}${FT(pos[0],pos[1],'?')}`);
+   return {s:'geometry',q:bi(`${f}مستقيمان متقاطعان كما في الشكل. ما قياس الزاوية المشار إليها بعلامة الاستفهام؟`,`${f}Two lines cross as shown. What is the angle marked with a question mark?`),o:mkOpts(ans,[ask==='left'?180-a:a,90-a>0?90-a:a+10,360-a],v=>`${v}°`),e:ask==='left'?bi(`متقابلتان بالرأس فهما متساويتان: ⟦${a}°⟧`,`Vertical angles are equal: ⟦${a}°⟧`):bi(`على مستقيم واحد مع الزاوية ⟦${a}°⟧: ⟦180 − ${a} = ${180-a}°⟧`,`On a straight line with the ⟦${a}°⟧ angle: ⟦180 − ${a} = ${180-a}°⟧`)}; },
+ ()=>{ const h=R(1,11),m=pick([0,10,15,20,30,40,45,50]); let ang=Math.abs(30*h-5.5*m); if(ang>180) ang=360-ang; const naive=Math.min(Math.abs(30*h-6*m),360-Math.abs(30*h-6*m));
+   const tm=`${h}:${String(m).padStart(2,'0')}`;
+   return {s:'geometry',q:bi(`ما قياس الزاوية الصغرى بين عقربي الساعة عند ${tm}؟`,`What is the smaller angle between the clock hands at ${tm}?`),o:mkOpts(ang,[naive,ang+15,180-ang||ang+30],v=>`${N(v)}°`),e:bi(`عقرب الدقائق عند ⟦${6*m}°⟧ وعقرب الساعات عند ⟦${30*h} + ${N(m/2)} = ${N(30*h+m/2)}°⟧، والفرق ⟦${N(ang)}°⟧`,`Minute hand at ⟦${6*m}°⟧, hour hand at ⟦${30*h} + ${N(m/2)} = ${N(30*h+m/2)}°⟧; the gap is ⟦${N(ang)}°⟧`)}; },
+ ()=>{ const a=R(40,75),reg=pick(['ur','ul','ll','lr']),ans=(reg==='ur'||reg==='ll')?a:180-a,B=[84,110],off={ur:[18,-10],ul:[-22,-10],ll:[-18,14],lr:[22,14]}[reg];
+   const f=FG(`<path d="M20 45H200M20 110H200"/><path d="M60 140L160 15"/>${FT(154,35,a+'°')}${FT(B[0]+off[0],B[1]+off[1],'?')}`);
+   return {s:'geometry',q:bi(`${f}المستقيمان الأفقيان متوازيان ويقطعهما مستقيم ثالث. ما قياس الزاوية المشار إليها بعلامة الاستفهام؟`,`${f}The two horizontal lines are parallel and cut by a third line. What is the angle marked with a question mark?`),o:mkOpts(ans,[ans===a?180-a:a,90-a/2|0,ans+10],v=>`${v}°`),e:ans===a?bi(`الزاويتان حادتان، وكل الحادة في الشكل متساوية: ⟦${a}°⟧`,`Both are acute, and all acute angles here are equal: ⟦${a}°⟧`):bi(`المشار إليها منفرجة، والحادة + المنفرجة ⟦= 180°⟧: ⟦180 − ${a} = ${180-a}°⟧`,`The marked angle is obtuse, and acute + obtuse ⟦= 180°⟧: ⟦180 − ${a} = ${180-a}°⟧`)}; }]);
+
+const TRIP=[[3,4,5],[5,12,13],[8,15,17],[7,24,25]];
+FDL('g-tri','geo','geometry','pyth',
+{t:'المثلثات',d:'مجموع الزوايا والزاوية الخارجية، وأنواع المثلثات، وفيثاغورس، والمساحة.',
+ intro:['المثلث أكثر شكل يتكرر في الهندسة، وحتى الأشكال الأخرى تُحل غالبًا بتقسيمها إلى مثلثات.','احفظ الثلاثيات الفيثاغورية، فهي توفر عليك الجذور في معظم الأسئلة.'],
+ rules:['مجموع زوايا المثلث ⟦180°⟧، والزاوية الخارجية تساوي مجموع الداخليتين البعيدتين عنها.','متساوي الساقين: زاويتا القاعدة متساويتان. ومتطابق الأضلاع: كل زاوية ⟦60°⟧','فيثاغورس في القائم: ⟦a^2 + b^2 = c^2⟧، والثلاثيات: ⟦3، 4، 5⟧ و⟦5، 12، 13⟧ و⟦8، 15، 17⟧ ومضاعفاتها.','المساحة ⟦= ½ × القاعدة × الارتفاع⟧، والارتفاع عمودي على القاعدة.','متباينة المثلث: كل ضلع أصغر من مجموع الآخرين وأكبر من الفرق بينهما.','المثلث ⟦30-60-90⟧: أضلاعه بنسبة ⟦1 : √3 : 2⟧، والمثلث ⟦45-45-90⟧: ⟦1 : 1 : √2⟧'],
+ ex:[['زاويتان في مثلث قياسهما ⟦48°⟧ و⟦67°⟧. ما الثالثة؟',['⟦180 − 48 − 67⟧'],'⟦65°⟧'],
+  ['مثلث قائم وتره 26 وأحد ضلعيه 10. ما الضلع الثالث؟',['⟦10 ، ? ، 26⟧ مضاعف ⟦5، 12، 13⟧ بمعامل 2','⟦12 × 2 = 24⟧'],'24'],
+  ['ضلعان في مثلث طولاهما 4 و9، والثالث عدد صحيح. كم قيمة ممكنة للثالث؟',['⟦9 − 4 < ض < 9 + 4⟧ أي ⟦5 < ض < 13⟧','⟦6، 7، …، 12⟧'],'7']],
+ traps:['استعمال فيثاغورس في مثلث غير قائم.','اعتبار الضلع المائل ارتفاعًا في حساب المساحة.','نسيان أن الوتر هو الأطول ويقابل الزاوية القائمة.']},
+{t:'Triangles',d:'Angle sum and exterior angles, triangle types, Pythagoras and area.',
+ intro:['The triangle is the most frequent shape in geometry, and other shapes are often solved by splitting them into triangles.','Learn the Pythagorean triples; they save you square roots in most questions.'],
+ rules:['The angles of a triangle add up to ⟦180°⟧, and an exterior angle equals the sum of the two remote interior angles.','Isosceles: the base angles are equal. Equilateral: every angle is ⟦60°⟧','Pythagoras in a right triangle: ⟦a^2 + b^2 = c^2⟧, with triples ⟦3, 4, 5⟧, ⟦5, 12, 13⟧, ⟦8, 15, 17⟧ and their multiples.','Area ⟦= ½ × base × height⟧, with the height perpendicular to the base.','Triangle inequality: each side is less than the sum of the other two and more than their difference.','A ⟦30-60-90⟧ triangle has sides in the ratio ⟦1 : √3 : 2⟧, and a ⟦45-45-90⟧ triangle ⟦1 : 1 : √2⟧'],
+ ex:[['Two angles of a triangle are ⟦48°⟧ and ⟦67°⟧. What is the third?',['⟦180 − 48 − 67⟧'],'⟦65°⟧'],
+  ['A right triangle has hypotenuse 26 and one leg 10. What is the other leg?',['⟦10, ?, 26⟧ is ⟦5, 12, 13⟧ times 2','⟦12 × 2 = 24⟧'],'24'],
+  ['Two sides of a triangle are 4 and 9, and the third is a whole number. How many values are possible?',['⟦9 − 4 < s < 9 + 4⟧, so ⟦5 < s < 13⟧','⟦6, 7, …, 12⟧'],'7']],
+ traps:['Using Pythagoras in a triangle that is not right-angled.','Using a slanted side as the height when finding the area.','Forgetting that the hypotenuse is the longest side, opposite the right angle.']},
+[()=>{ if(R(0,1)){ const a=R(25,85),b=R(25,150-a),c=180-a-b; return {s:'geometry',q:bi(`زاويتان في مثلث قياسهما ⟦${a}°⟧ و⟦${b}°⟧. ما قياس الزاوية الثالثة؟`,`Two angles of a triangle measure ⟦${a}°⟧ and ⟦${b}°⟧. What is the third angle?`),o:mkOpts(c,[180-a,a+b,c+10,360-a-b],v=>`${v}°`),e:bi(`⟦180 − ${a} − ${b} = ${c}°⟧`,`⟦180 − ${a} − ${b} = ${c}°⟧`)}; }
+   const a=R(30,70),b=R(30,80),ext=a+b,f=FG(`<polygon points="40,120 150,120 85,35"/><path d="M150 120H205"/>${FT(98,52,a+'°')}${FT(58,112,b+'°')}${FT(172,110,'?')}`);
+   return {s:'geometry',q:bi(`${f}في الشكل مثلث مُدّ أحد أضلاعه. ما قياس الزاوية الخارجية المشار إليها؟`,`${f}One side of the triangle is extended. What is the marked exterior angle?`),o:mkOpts(ext,[180-ext,180-a,180-b],v=>`${v}°`),e:bi(`الخارجية = مجموع الداخليتين البعيدتين: ⟦${a} + ${b} = ${ext}°⟧`,`Exterior angle = sum of the remote interior angles: ⟦${a} + ${b} = ${ext}°⟧`)}; },
+ ()=>{ const [p,q,r]=pick(TRIP.slice(0,3)),k=pick([1,2,3,4]),A=p*k,B=q*k,C=r*k,hyp=R(0,1);
+   const f=FG(`<polygon points="40,125 190,125 40,35"/><path d="M40 115h10v10"/>${FT(28,80,hyp?A:A)}${FT(115,140,hyp?B:'?')}${FT(124,72,hyp?'?':C)}`);
+   if(hyp) return {s:'geometry',q:bi(`${f}مثلث قائم الزاوية طولا ضلعي القائمة ${A} و${B}. ما طول الوتر؟`,`${f}A right triangle has legs ${A} and ${B}. What is the hypotenuse?`),o:mkOpts(C,[A+B,C+k,B+1]),e:bi(`⟦√(${A*A} + ${B*B}) = √${C*C} = ${C}⟧`,`⟦√(${A*A} + ${B*B}) = √${C*C} = ${C}⟧`)};
+   return {s:'geometry',q:bi(`${f}مثلث قائم الزاوية وتره ${C} وأحد ضلعي القائمة ${A}. ما طول الضلع الآخر؟`,`${f}A right triangle has hypotenuse ${C} and one leg ${A}. What is the other leg?`),o:mkOpts(B,[C-A,B+k,C+A>B?Math.round(Math.sqrt(C*C+A*A)):B+2]),e:bi(`⟦√(${C*C} − ${A*A}) = √${B*B} = ${B}⟧`,`⟦√(${C*C} − ${A*A}) = √${B*B} = ${B}⟧`)}; },
+ ()=>{ const b=2*R(2,10),h=R(3,12),A=b*h/2,f=FG(`<polygon points="25,125 195,125 135,35"/><path d="M135 35V125" stroke-dasharray="5 4"/><path d="M135 115h10v10"/>${FT(110,140,b)}${FT(148,80,h,'start')}`);
+   if(R(0,1)) return {s:'geometry',q:bi(`${f}مثلث طول قاعدته ${b} سم وارتفاعه ${h} سم. ما مساحته بالسنتيمتر المربع؟`,`${f}A triangle has base ${b} cm and height ${h} cm. What is its area in cm²?`),o:mkOpts(A,[b*h,b+h,A+h]),e:bi(`⟦½ × ${b} × ${h} = ${A}⟧`,`⟦½ × ${b} × ${h} = ${A}⟧`)};
+   return {s:'geometry',q:bi(`مساحة مثلث ${A} سم² وطول قاعدته ${b} سم. ما ارتفاعه؟`,`A triangle has area ${A} cm² and base ${b} cm. What is its height?`),o:mkOpts(h,[A/b,2*h,h+2].map(v=>Math.round(v*100)/100)),e:bi(`⟦2 × ${A} ÷ ${b} = ${h}⟧`,`⟦2 × ${A} ÷ ${b} = ${h}⟧`)}; },
+ ()=>{ if(R(0,1)){ const v=2*R(10,70),bse=(180-v)/2; return {s:'geometry',q:bi(`مثلث متساوي الساقين، قياس زاوية رأسه ⟦${v}°⟧. ما قياس إحدى زاويتي القاعدة؟`,`An isosceles triangle has a vertex angle of ⟦${v}°⟧. What is each base angle?`),o:mkOpts(bse,[180-v,v,v/2],x=>`${x}°`),e:bi(`⟦(180 − ${v}) ÷ 2 = ${bse}°⟧`,`⟦(180 − ${v}) ÷ 2 = ${bse}°⟧`)}; }
+   let a=R(3,12),b=R(3,15); while(a===b) b=R(3,15); const n=2*Math.min(a,b)-1;
+   return {s:'geometry',q:bi(`ضلعان في مثلث طولاهما ${a} و${b}، وطول الضلع الثالث عدد صحيح. كم قيمة ممكنة لطول الضلع الثالث؟`,`Two sides of a triangle are ${a} and ${b}, and the third side is a whole number. How many values are possible for it?`),o:mkOpts(n,[n+2,a+b-1,Math.abs(a-b)+1]),e:bi(`⟦${Math.abs(a-b)} < ض < ${a+b}⟧، فالقيم من ${Math.abs(a-b)+1} إلى ${a+b-1}: ${arC(n,['قيمة واحدة','قيمتان','قيم','قيمة'])}`,`⟦${Math.abs(a-b)} < s < ${a+b}⟧, so the values run from ${Math.abs(a-b)+1} to ${a+b-1}: ${n} values`)}; }]);
+
+FDL('g-quad','geo','geometry','rect',
+{t:'الأشكال الرباعية والمضلعات',d:'المستطيل والمربع ومتوازي الأضلاع والمعين وشبه المنحرف، وزوايا المضلعات.',
+ intro:['لكل شكل رباعي قانون مساحة واحد تحتاجه، والفكرة المشتركة بينها: القاعدة في الارتفاع العمودي، ثم تعديل بسيط لكل شكل.','أما المضلعات فسؤالها الأشهر عن مجموع الزوايا الداخلية، أو قياس زاوية المضلع المنتظم.'],
+ rules:['المستطيل: المساحة ⟦= الطول × العرض⟧، والمحيط ⟦= 2(الطول + العرض)⟧، والقطر بفيثاغورس.','المربع: المساحة ⟦= ل^2⟧، وبمعرفة القطر ق: ⟦المساحة = ق^2 ÷ 2⟧','متوازي الأضلاع: القاعدة × الارتفاع. المعين: نصف حاصل ضرب القطرين. شبه المنحرف: ⟦½ × (القاعدتين) × الارتفاع⟧','مجموع زوايا المضلع ذي n ضلعًا ⟦= (n − 2) × 180°⟧، والزاوية الخارجية للمنتظم ⟦= 360° ÷ n⟧','إذا ضُربت أبعاد شكل في k ضُربت مساحته في ⟦k^2⟧'],
+ ex:[['مستطيل محيطه 30 سم وطوله 9 سم. ما مساحته؟',['نصف المحيط ⟦15 = الطول + العرض⟧','العرض ⟦15 − 9 = 6⟧','⟦9 × 6 = 54⟧'],'54 سم²'],
+  ['ما قياس الزاوية الداخلية في الخماسي المنتظم؟',['المجموع ⟦(5 − 2) × 180 = 540⟧','⟦540 ÷ 5 = 108⟧'],'⟦108°⟧'],
+  ['شبه منحرف قاعدتاه 6 و10 وارتفاعه 5. ما مساحته؟',['⟦½ × (6 + 10) × 5⟧','⟦8 × 5 = 40⟧'],'40']],
+ traps:['استعمال الضلع المائل في متوازي الأضلاع بدل الارتفاع.','نسيان قسمة المحيط على 2 قبل إيجاد العرض.','الظن أن مضاعفة الضلع تضاعف المساحة؛ بل تجعلها أربعة أمثال.']},
+{t:'Quadrilaterals and polygons',d:'Rectangle, square, parallelogram, rhombus and trapezoid, and polygon angles.',
+ intro:['Each quadrilateral has one area formula you need, and the shared idea is base times perpendicular height, with a small change for each shape.','For polygons the best-known question is the sum of interior angles, or the size of one angle in a regular polygon.'],
+ rules:['Rectangle: area ⟦= length × width⟧, perimeter ⟦= 2(length + width)⟧, diagonal by Pythagoras.','Square: area ⟦= s^2⟧; from the diagonal d: ⟦area = d^2 ÷ 2⟧','Parallelogram: base × height. Rhombus: half the product of the diagonals. Trapezoid: ⟦½ × (sum of the parallel sides) × height⟧','Interior angles of an n-sided polygon add up to ⟦(n − 2) × 180°⟧; a regular polygon\'s exterior angle ⟦= 360° ÷ n⟧','Multiply a shape\'s dimensions by k and its area is multiplied by ⟦k^2⟧'],
+ ex:[['A rectangle has perimeter 30 cm and length 9 cm. What is its area?',['Half the perimeter: ⟦15 = length + width⟧','Width ⟦15 − 9 = 6⟧','⟦9 × 6 = 54⟧'],'54 cm²'],
+  ['What is each interior angle of a regular pentagon?',['Sum ⟦(5 − 2) × 180 = 540⟧','⟦540 ÷ 5 = 108⟧'],'⟦108°⟧'],
+  ['A trapezoid has parallel sides 6 and 10 and height 5. What is its area?',['⟦½ × (6 + 10) × 5⟧','⟦8 × 5 = 40⟧'],'40']],
+ traps:['Using the slanted side of a parallelogram instead of the height.','Forgetting to halve the perimeter before finding the width.','Thinking that doubling the side doubles the area; it makes it four times as large.']},
+[()=>{ const l=R(5,20),w=R(2,l-1),P=2*(l+w),A=l*w,f=FG(`<rect x="35" y="35" width="150" height="80"/>${FT(110,128,l)}${FT(24,75,'?')}`);
+   return {s:'geometry',q:bi(`${f}مستطيل محيطه ${P} سم وطوله ${l} سم. ما مساحته بالسنتيمتر المربع؟`,`${f}A rectangle has perimeter ${P} cm and length ${l} cm. What is its area in cm²?`),o:mkOpts(A,[l*(P-2*l),P*l/4|0||A+3,A+l]),e:bi(`العرض ⟦${P/2} − ${l} = ${w}⟧، والمساحة ⟦${l} × ${w} = ${A}⟧`,`Width ⟦${P/2} − ${l} = ${w}⟧; area ⟦${l} × ${w} = ${A}⟧`)}; },
+ ()=>{ const t=R(0,2),n=pick([5,6,8,9,10,12]),S=(n-2)*180;
+   if(t===0) return {s:'geometry',q:bi(`ما مجموع قياسات الزوايا الداخلية لمضلع عدد أضلاعه ${n}؟`,`What is the sum of the interior angles of a ${n}-sided polygon?`),o:mkOpts(S,[n*180,(n-1)*180,S+90],v=>`${v}°`),e:bi(`⟦(${n} − 2) × 180 = ${S}°⟧`,`⟦(${n} − 2) × 180 = ${S}°⟧`)};
+   if(t===1) return {s:'geometry',q:bi(`ما قياس الزاوية الداخلية الواحدة في مضلع منتظم عدد أضلاعه ${n}؟`,`What is one interior angle of a regular ${n}-sided polygon?`),o:mkOpts(S/n,[360/n,180-S/n===S/n?S/n+10:180-S/n,S/n+10],v=>`${v}°`),e:bi(`⟦${S} ÷ ${n} = ${S/n}°⟧`,`⟦${S} ÷ ${n} = ${S/n}°⟧`)};
+   return {s:'geometry',q:bi(`مضلع منتظم قياس زاويته الخارجية ⟦${360/n}°⟧. كم عدد أضلاعه؟`,`A regular polygon has an exterior angle of ⟦${360/n}°⟧. How many sides does it have?`),o:mkOpts(n,[180/(360/n)|0||n+2,n+2,n-1]),e:bi(`⟦360 ÷ ${360/n} = ${n}⟧`,`⟦360 ÷ ${360/n} = ${n}⟧`)}; },
+ ()=>{ if(R(0,1)){ const a=R(3,12),b=a+2*R(1,5),h=R(2,10),A=(a+b)*h/2,f=FG(`<polygon points="70,40 150,40 195,120 25,120"/><path d="M70 40V120" stroke-dasharray="5 4"/>${FT(110,30,a)}${FT(110,136,b)}${FT(80,82,h,'start')}`);
+     return {s:'geometry',q:bi(`${f}شبه منحرف طولا قاعدتيه المتوازيتين ${a} و${b}، وارتفاعه ${h}. ما مساحته؟`,`${f}A trapezoid has parallel sides ${a} and ${b}, and height ${h}. What is its area?`),o:mkOpts(A,[(a+b)*h,a*b*h/2,A+h]),e:bi(`⟦½ × (${a} + ${b}) × ${h} = ${A}⟧`,`⟦½ × (${a} + ${b}) × ${h} = ${A}⟧`)}; }
+   const d1=2*R(2,9),d2=2*R(2,9),A=d1*d2/2,f=FG(`<polygon points="110,15 175,75 110,135 45,75"/><path d="M110 15V135M45 75H175" stroke-dasharray="5 4"/>${FT(118,105,d1,'start')}${FT(150,66,d2)}`);
+   return {s:'geometry',q:bi(`${f}معين طولا قطريه ${d1} و${d2}. ما مساحته؟`,`${f}A rhombus has diagonals ${d1} and ${d2}. What is its area?`),o:mkOpts(A,[d1*d2,(d1+d2)*2,A+d1]),e:bi(`⟦½ × ${d1} × ${d2} = ${A}⟧`,`⟦½ × ${d1} × ${d2} = ${A}⟧`)}; },
+ ()=>{ if(R(0,1)){ const k=pick([2,3,4]),A=pick([5,6,8,10,12,15,20]),ans=A*k*k;
+     return {s:'geometry',q:bi(`مستطيل مساحته ${A} سم². إذا ضُرب كل من طوله وعرضه في ${k}، فكم تصبح مساحته؟`,`A rectangle has area ${A} cm². If its length and width are each multiplied by ${k}, what is the new area?`),o:mkOpts(ans,[A*k,A*2*k,A+k*k]),e:bi(`المساحة تُضرب في ⟦${k}^2 = ${k*k}⟧: ⟦${A} × ${k*k} = ${ans}⟧`,`The area is multiplied by ⟦${k}^2 = ${k*k}⟧: ⟦${A} × ${k*k} = ${ans}⟧`)}; }
+   const d=2*R(2,10),A=d*d/2;
+   return {s:'geometry',q:bi(`مربع طول قطره ${d} سم. ما مساحته؟`,`A square has a diagonal of ${d} cm. What is its area?`),o:mkOpts(A,[d*d,A/2,d*2]),e:bi(`⟦ق^2 ÷ 2 = ${d*d} ÷ 2 = ${A}⟧`,`⟦d^2 ÷ 2 = ${d*d} ÷ 2 = ${A}⟧`)}; }]);
+
+FDL('g-circ','geo','geometry','circle',
+{t:'الدائرة',d:'المحيط والمساحة، والقوس والقطاع، والزاوية المحيطية والمركزية.',
+ intro:['كل قوانين الدائرة تبدأ من نصف القطر، فإذا أُعطيت المحيط أو المساحة أو القطر فأول خطوة إيجاد نصف القطر.','والإجابات في الاختبار تُكتب غالبًا بدلالة π، فلا تعوض عنها بـ3.14 إلا إذا كانت الخيارات أعدادًا.'],
+ rules:['المحيط ⟦= 2π × نق = π × القطر⟧، والمساحة ⟦= π × نق^2⟧','القوس: ⟦(الزاوية ÷ 360) × المحيط⟧، والقطاع: ⟦(الزاوية ÷ 360) × المساحة⟧','الزاوية المحيطية نصف المركزية المشتركة معها في القوس نفسه.','الزاوية المحيطية المرسومة على القطر قائمة ⟦90°⟧','إذا ضُرب نصف القطر في k: المحيط يُضرب في k، والمساحة في ⟦k^2⟧'],
+ ex:[['دائرة محيطها ⟦10π⟧. ما مساحتها؟',['⟦2π × نق = 10π⟧، ⟦نق = 5⟧','⟦π × 5^2⟧'],'⟦25π⟧'],
+  ['ما مساحة قطاع زاويته ⟦90°⟧ من دائرة نصف قطرها 8؟',['⟦90 ÷ 360 = 1/4⟧','⟦1/4 × 64π⟧'],'⟦16π⟧'],
+  ['زاوية مركزية قياسها ⟦100°⟧. ما قياس الزاوية المحيطية المرسومة على القوس نفسه؟',['المحيطية نصف المركزية'],'⟦50°⟧']],
+ traps:['استعمال القطر مكان نصف القطر في قانون المساحة.','الظن أن مضاعفة نصف القطر تضاعف المساحة؛ بل تجعلها أربعة أمثال.','الخلط بين قانوني المحيط والمساحة: ⟦2πنق⟧ و⟦πنق^2⟧.']},
+{t:'The circle',d:'Circumference and area, arcs and sectors, inscribed and central angles.',
+ intro:['Every circle formula starts from the radius, so if you are given the circumference, area or diameter, the first step is finding the radius.','Test answers are usually written in terms of π, so keep π unless the choices are plain numbers.'],
+ rules:['Circumference ⟦= 2πr = π × diameter⟧, area ⟦= πr^2⟧','Arc: ⟦(angle ÷ 360) × circumference⟧; sector: ⟦(angle ÷ 360) × area⟧','An inscribed angle is half the central angle on the same arc.','An inscribed angle on a diameter is a right angle ⟦90°⟧','Multiply the radius by k: the circumference is multiplied by k and the area by ⟦k^2⟧'],
+ ex:[['A circle has circumference ⟦10π⟧. What is its area?',['⟦2πr = 10π⟧, ⟦r = 5⟧','⟦π × 5^2⟧'],'⟦25π⟧'],
+  ['What is the area of a ⟦90°⟧ sector of a circle with radius 8?',['⟦90 ÷ 360 = 1/4⟧','⟦1/4 × 64π⟧'],'⟦16π⟧'],
+  ['A central angle is ⟦100°⟧. What is the inscribed angle on the same arc?',['The inscribed angle is half the central one'],'⟦50°⟧']],
+ traps:['Using the diameter instead of the radius in the area formula.','Thinking that doubling the radius doubles the area; it makes it four times as large.','Mixing up ⟦2πr⟧ and ⟦πr^2⟧.']},
+[()=>{ const r=R(2,12);
+   if(R(0,1)) return {s:'geometry',q:bi(`دائرة محيطها ⟦${2*r}π⟧ سم. ما مساحتها؟`,`A circle has circumference ⟦${2*r}π⟧ cm. What is its area?`),o:mkOpts(r*r,[4*r*r,2*r,r*r*2],x=>`⟦${x}π⟧`),e:bi(`⟦نق = ${r}⟧، والمساحة ⟦π × ${r}^2 = ${r*r}π⟧`,`⟦r = ${r}⟧, area ⟦π × ${r}^2 = ${r*r}π⟧`)};
+   return {s:'geometry',q:bi(`دائرة مساحتها ⟦${r*r}π⟧ سم². ما محيطها؟`,`A circle has area ⟦${r*r}π⟧ cm². What is its circumference?`),o:mkOpts(2*r,[r,r*r,4*r],x=>`⟦${x}π⟧`),e:bi(`⟦نق^2 = ${r*r}⟧، ⟦نق = ${r}⟧، والمحيط ⟦2π × ${r} = ${2*r}π⟧`,`⟦r^2 = ${r*r}⟧, ⟦r = ${r}⟧, circumference ⟦2π × ${r} = ${2*r}π⟧`)}; },
+ ()=>{ const r=pick([2,3,4,6,8,9,10,12]),th=pick([30,45,60,90,120,180,240,270]),t2=th*Math.PI/180,ex=(110+60*Math.cos(-t2)).toFixed(1),ey=(75+60*Math.sin(-t2)).toFixed(1);
+   const f=FG(`<circle cx="110" cy="75" r="60"/><path d="M110 75L170 75A60 60 0 ${th>180?1:0} 0 ${ex} ${ey}Z" ${SH}/>${FT(140,86,r)}${FT(122,64,th+'°','start')}`);
+   if(R(0,1)){ const ans=th*r*r/360; if(!Number.isInteger(ans*2)) return FD.find(x=>x.id==='g-circ').g[1]();
+     return {s:'geometry',q:bi(`${f}دائرة نصف قطرها ${r} سم. ما مساحة القطاع المظلل الذي زاويته المركزية ⟦${th}°⟧؟`,`${f}A circle has radius ${r} cm. What is the area of the shaded sector with central angle ⟦${th}°⟧?`),o:mkOpts(ans,[r*r,th*2*r/360,ans*2],x=>`⟦${N(x)}π⟧`),e:bi(`⟦${th}/360 × π × ${r}^2 = ${N(ans)}π⟧`,`⟦${th}/360 × π × ${r}^2 = ${N(ans)}π⟧`)}; }
+   const ans=th*2*r/360; if(!Number.isInteger(ans*2)) return FD.find(x=>x.id==='g-circ').g[1]();
+   return {s:'geometry',q:bi(`${f}دائرة نصف قطرها ${r} سم. ما طول القوس المقابل للزاوية المركزية ⟦${th}°⟧؟`,`${f}A circle has radius ${r} cm. What is the length of the arc for the central angle ⟦${th}°⟧?`),o:mkOpts(ans,[th*r*r/360,2*r,ans*2],x=>`⟦${N(x)}π⟧`),e:bi(`⟦${th}/360 × 2π × ${r} = ${N(ans)}π⟧`,`⟦${th}/360 × 2π × ${r} = ${N(ans)}π⟧`)}; },
+ ()=>{ if(R(0,1)){ const c=2*R(20,85); return {s:'geometry',q:bi(`زاوية مركزية في دائرة قياسها ⟦${c}°⟧. ما قياس الزاوية المحيطية المرسومة على القوس نفسه؟`,`A central angle measures ⟦${c}°⟧. What is the inscribed angle on the same arc?`),o:mkOpts(c/2,[c,2*c>=360?c+20:2*c,180-c],v=>`${v}°`),e:bi(`المحيطية نصف المركزية: ⟦${c} ÷ 2 = ${c/2}°⟧`,`Inscribed = half the central angle: ⟦${c} ÷ 2 = ${c/2}°⟧`)}; }
+   const a=R(20,70),b=90-a,f=FG(`<circle cx="110" cy="75" r="60"/><polygon points="50,75 170,75 ${(110+60*Math.cos(2*Math.PI-Math.PI*a/90)).toFixed(1)},${(75+60*Math.sin(2*Math.PI-Math.PI*a/90)).toFixed(1)}"/>${FT(70,68,a+'°')}${FT(150,68,'?')}`);
+   return {s:'geometry',q:bi(`${f}مثلث مرسوم داخل دائرة، أحد أضلاعه قطر فيها، وإحدى زاويتيه على القطر ⟦${a}°⟧. ما قياس زاويته الأخرى على القطر؟`,`${f}A triangle is drawn in a circle with one side a diameter. One of its angles on the diameter is ⟦${a}°⟧. What is its other angle on the diameter?`),o:mkOpts(b,[180-a,a,90+a>180?b+10:90+a].map(v=>v===b?b+20:v).concat([]),v=>`${v}°`),e:bi(`الزاوية المقابلة للقطر قائمة، فالثالثة ⟦180 − 90 − ${a} = ${b}°⟧`,`The angle opposite the diameter is right, so ⟦180 − 90 − ${a} = ${b}°⟧`)}; },
+ ()=>{ const k=pick([2,3,4]),w=pick(['a','c']),ar={2:'مثلي',3:'ثلاثة أمثال',4:'أربعة أمثال'},m=w==='a'?k*k:k;
+   const opt=x=>bi(x===1?'لا تتغير':`تُضرب في ${x}`,x===1?'it does not change':`it is multiplied by ${x}`);
+   return {s:'geometry',q:bi(`إذا أصبح نصف قطر دائرة ${ar[k]} ما كان عليه، فماذا يحدث ${w==='a'?'لمساحتها':'لمحيطها'}؟`,`If a circle\'s radius becomes ${k} times as long, what happens to its ${w==='a'?'area':'circumference'}?`),o:[opt(m),opt(w==='a'?k:k*k),opt(w==='a'?2*k:2*k===k*k?k+1:2*k),opt(w==='a'?k**3:k**3)].map((x,i,arr)=>arr.findIndex(y=>y.ar===x.ar)===i?x:opt(m+i*5)),e:w==='a'?bi(`المساحة تتبع مربع نصف القطر: ⟦${k}^2 = ${k*k}⟧`,`Area follows the square of the radius: ⟦${k}^2 = ${k*k}⟧`):bi(`المحيط يتناسب طرديًا مع نصف القطر: يُضرب في ${k}`,`The circumference is proportional to the radius: multiplied by ${k}`)}; }]);
+
+const FD_SH_FIG=FG(`<rect x="60" y="20" width="110" height="110" ${SH}/><circle cx="115" cy="75" r="55" fill="var(--paper,#fff)"/><rect x="60" y="20" width="110" height="110"/>${FT(115,142,10)}`);
+FDL('g-shade','geo','geometry','circle',
+{t:'المساحات المظللة',d:'الطرح بين شكلين، والدائرة داخل المربع والمربع داخل الدائرة، والحلقة.',
+ intro:['سؤال المساحة المظللة يبدو صعبًا لأن الشكل غريب، لكن طريقته ثابتة تقريبًا: مساحة الشكل الكبير ناقص مساحة الشكل الذي لا يدخل في التظليل.','المفتاح أن تعرف كيف ترتبط أبعاد الشكلين: قطر الدائرة يساوي ضلع المربع حين تكون الدائرة داخله، ويساوي قطر المربع حين يكون المربع داخلها.'],
+ rules:['المظلل = الشكل الكبير − الشكل غير المظلل.','دائرة داخل مربع تمس أضلاعه: قطرها = ضلع المربع.','مربع داخل دائرة رؤوسه عليها: قطر المربع = قطر الدائرة، ومساحة المربع ⟦= القطر^2 ÷ 2⟧','الحلقة بين دائرتين متحدتي المركز: ⟦π(نق₁^2 − نق₂^2)⟧','مثلث رأسه على الضلع المقابل من مستطيل وقاعدته ضلع المستطيل: مساحته نصف مساحة المستطيل دائمًا.'],
+ ex:[['مربع طول ضلعه 10، رُسمت داخله دائرة تمس أضلاعه. ما المساحة المظللة خارج الدائرة؟',['مساحة المربع 100','نصف القطر 5، ومساحة الدائرة ⟦25π⟧'],'⟦100 − 25π⟧',FD_SH_FIG],
+  ['دائرة نصف قطرها 5 رُسم داخلها مربع رؤوسه على الدائرة. ما مساحة الجزء من الدائرة خارج المربع؟',['قطر المربع 10، ومساحته ⟦100 ÷ 2 = 50⟧','مساحة الدائرة ⟦25π⟧'],'⟦25π − 50⟧'],
+  ['دائرتان متحدتا المركز نصفا قطريهما 7 و4. ما مساحة الحلقة بينهما؟',['⟦π(49 − 16)⟧'],'⟦33π⟧']],
+ traps:['استعمال القطر مكان نصف القطر في مساحة الدائرة.','طرح المحيطات بدل المساحات.','اعتبار ضلع المربع المرسوم داخل الدائرة مساويًا لقطرها.']},
+{t:'Shaded areas',d:'Subtracting one shape from another, a circle in a square, a square in a circle, and rings.',
+ intro:['Shaded-area questions look hard because the figure is unusual, but the method is almost always the same: the large shape minus the part that is not shaded.','The key is how the two shapes\' sizes are linked: a circle inside a square has a diameter equal to the side, and a square inside a circle has a diagonal equal to the diameter.'],
+ rules:['Shaded = large shape − unshaded shape.','A circle inside a square touching its sides: diameter = side of the square.','A square inside a circle with its corners on it: diagonal = diameter, and the square\'s area ⟦= diagonal^2 ÷ 2⟧','The ring between two circles with the same center: ⟦π(R^2 − r^2)⟧','A triangle with its base on one side of a rectangle and its tip on the opposite side always has half the rectangle\'s area.'],
+ ex:[['A circle is drawn inside a square of side 10, touching its sides. What is the shaded area outside the circle?',['The square\'s area is 100','The radius is 5, so the circle\'s area is ⟦25π⟧'],'⟦100 − 25π⟧',FD_SH_FIG],
+  ['A square is drawn inside a circle of radius 5 with its corners on the circle. What is the area of the circle outside the square?',['The square\'s diagonal is 10, so its area is ⟦100 ÷ 2 = 50⟧','The circle\'s area is ⟦25π⟧'],'⟦25π − 50⟧'],
+  ['Two circles with the same center have radii 7 and 4. What is the area of the ring between them?',['⟦π(49 − 16)⟧'],'⟦33π⟧']],
+ traps:['Using the diameter instead of the radius in the circle area.','Subtracting circumferences instead of areas.','Taking the side of a square inside a circle to equal the diameter.']},
+[()=>{ const s=2*R(2,10),r=s/2,A=s*s,B=r*r,f=FG(`<rect x="60" y="20" width="110" height="110" ${SH}/><circle cx="115" cy="75" r="55" fill="var(--paper,#fff)"/><rect x="60" y="20" width="110" height="110"/>${FT(115,142,s)}`);
+   return {s:'geometry',q:bi(`${f}دائرة مرسومة داخل مربع طول ضلعه ${s} سم وتمس أضلاعه. ما المساحة المظللة؟`,`${f}A circle is drawn inside a square of side ${s} cm, touching its sides. What is the shaded area?`),o:fo(`⟦${A} − ${B}π⟧`,[`⟦${A} − ${4*B}π⟧`,`⟦${A} − ${2*r}π⟧`,`⟦${B}π − ${A}⟧`],i=>`⟦${A} − ${B+i}π⟧`),e:bi(`⟦${s}^2 − π × ${r}^2 = ${A} − ${B}π⟧`,`⟦${s}^2 − π × ${r}^2 = ${A} − ${B}π⟧`)}; },
+ ()=>{ const r=R(2,10),sq=2*r*r,f=FG(`<circle cx="110" cy="75" r="60" ${SH}/><polygon points="110,15 170,75 110,135 50,75" fill="var(--paper,#fff)"/><circle cx="110" cy="75" r="60"/><path d="M110 75H170" stroke-dasharray="4 3"/>${FT(140,86,r)}`);
+   return {s:'geometry',q:bi(`${f}مربع رؤوسه على دائرة نصف قطرها ${r} سم. ما المساحة المظللة داخل الدائرة وخارج المربع؟`,`${f}A square has its corners on a circle of radius ${r} cm. What is the shaded area inside the circle and outside the square?`),o:[`⟦${r*r}π − ${sq}⟧`,`⟦${r*r}π − ${4*r*r}⟧`,`⟦${4*r*r}π − ${sq}⟧`,`⟦${r*r}π − ${r*r}⟧`],e:bi(`قطر المربع ⟦${2*r}⟧ ومساحته ⟦${4*r*r} ÷ 2 = ${sq}⟧، ومساحة الدائرة ⟦${r*r}π⟧`,`The square\'s diagonal is ⟦${2*r}⟧, its area ⟦${4*r*r} ÷ 2 = ${sq}⟧; the circle\'s area is ⟦${r*r}π⟧`)}; },
+ ()=>{ const r=R(2,7),Rr=r+R(1,5),ans=Rr*Rr-r*r,f=FG(`<circle cx="110" cy="75" r="62" ${SH}/><circle cx="110" cy="75" r="${Math.round(62*r/Rr)}" fill="var(--paper,#fff)"/><circle cx="110" cy="75" r="62"/><circle cx="110" cy="75" r="${Math.round(62*r/Rr)}"/>`);
+   return {s:'geometry',q:bi(`${f}دائرتان لهما المركز نفسه، نصفا قطريهما ${Rr} سم و${r} سم. ما مساحة الحلقة المظللة بينهما؟`,`${f}Two circles share a center, with radii ${Rr} cm and ${r} cm. What is the area of the shaded ring?`),o:mkOpts(ans,[(Rr-r)**2,2*(Rr-r),Rr*Rr+r*r],x=>`⟦${x}π⟧`),e:bi(`⟦π(${Rr}^2 − ${r}^2) = π(${Rr*Rr} − ${r*r}) = ${ans}π⟧`,`⟦π(${Rr}^2 − ${r}^2) = π(${Rr*Rr} − ${r*r}) = ${ans}π⟧`)}; },
+ ()=>{ if(R(0,1)){ const l=2*R(3,10),w=R(3,10),A=l*w/2,f=FG(`<rect x="30" y="30" width="160" height="90" ${SH}/><polygon points="30,120 190,120 ${R(60,160)},30" fill="var(--paper,#fff)"/><rect x="30" y="30" width="160" height="90"/>${FT(110,136,l)}${FT(18,77,w)}`);
+     return {s:'geometry',q:bi(`${f}مستطيل بعداه ${l} و${w}، رُسم داخله مثلث قاعدته الضلع السفلي ورأسه على الضلع العلوي. ما المساحة المظللة؟`,`${f}A rectangle measures ${l} by ${w}. A triangle inside it has the bottom side as its base and its tip on the top side. What is the shaded area?`),o:mkOpts(A,[l*w,A/2,l*w-A/2]),e:bi(`المثلث نصف المستطيل، فالمظلل النصف الآخر: ⟦${l} × ${w} ÷ 2 = ${A}⟧`,`The triangle is half the rectangle, so the shaded part is the other half: ⟦${l} × ${w} ÷ 2 = ${A}⟧`)}; }
+   const s=2*R(2,8),r=s/2,A=s*s,f=FG(`<rect x="60" y="20" width="110" height="110"/><path d="M60 130A55 55 0 0 1 170 130Z" ${SH}/>${FT(115,142,s)}`);
+   return {s:'geometry',q:bi(`${f}مربع طول ضلعه ${s} سم، رُسم داخله نصف دائرة قطرها الضلع السفلي. ما مساحة الجزء غير المظلل من المربع؟`,`${f}A square has side ${s} cm, with a half circle drawn inside on the bottom side as diameter. What is the unshaded area of the square?`),o:[`⟦${A} − ${N(r*r/2)}π⟧`,`⟦${A} − ${r*r}π⟧`,`⟦${N(r*r/2)}π⟧`,`⟦${A} − ${2*r*r}π⟧`],e:bi(`نصف القطر ${r}، ونصف الدائرة ⟦½ × π × ${r}^2 = ${N(r*r/2)}π⟧، والباقي ⟦${A} − ${N(r*r/2)}π⟧`,`Radius ${r}; the half circle is ⟦½ × π × ${r}^2 = ${N(r*r/2)}π⟧, and the rest is ⟦${A} − ${N(r*r/2)}π⟧`)}; }]);
+
+FDL('g-solid','geo','geometry','cube',
+{t:'المجسمات',d:'المكعب ومتوازي المستطيلات والأسطوانة والمخروط والكرة، وأثر تكبير الأبعاد.',
+ intro:['المجسم شكل له طول وعرض وارتفاع. أسئلته نوعان: الحجم (كم يتسع؟) والمساحة السطحية (كم نحتاج لتغليفه؟).','معظم قوانين الحجم فكرة واحدة: مساحة القاعدة × الارتفاع، ثم الثلث للمخروط والهرم.'],
+ rules:['المكعب: الحجم ⟦= ل^3⟧، والمساحة الكلية ⟦= 6ل^2⟧','متوازي المستطيلات: الحجم ⟦= الطول × العرض × الارتفاع⟧','الأسطوانة: الحجم ⟦= π × نق^2 × ع⟧','المخروط والهرم: ثلث المنشور أو الأسطوانة التي لها القاعدة والارتفاع نفساهما.','الكرة: الحجم ⟦= 4/3 × π × نق^3⟧','إذا ضُربت الأبعاد في k ضُرب الحجم في ⟦k^3⟧'],
+ ex:[['مكعب مساحته الكلية 150 سم². ما حجمه؟',['⟦6ل^2 = 150⟧، ⟦ل^2 = 25⟧، ⟦ل = 5⟧','⟦5^3 = 125⟧'],'125 سم³'],
+  ['كم مكعبًا طول حرفه 2 سم يملأ صندوقًا أبعاده 6 و4 و4 سم؟',['حجم الصندوق ⟦6 × 4 × 4 = 96⟧','حجم المكعب الصغير 8','⟦96 ÷ 8 = 12⟧'],'12'],
+  ['أسطوانة نصف قطر قاعدتها 3 وارتفاعها 10. ما حجمها؟',['⟦π × 9 × 10⟧'],'⟦90π⟧']],
+ traps:['الخلط بين الحجم والمساحة السطحية.','نسيان الثلث في المخروط والهرم.','الظن أن مضاعفة الحرف تضاعف الحجم؛ بل تجعله 8 أمثال.']},
+{t:'Solids',d:'Cube, box, cylinder, cone and sphere, and the effect of enlarging dimensions.',
+ intro:['A solid has length, width and height. Questions are of two kinds: volume (how much it holds) and surface area (how much it takes to cover it).','Most volume formulas are one idea: base area × height, then a third for cones and pyramids.'],
+ rules:['Cube: volume ⟦= s^3⟧, total surface area ⟦= 6s^2⟧','Box: volume ⟦= length × width × height⟧','Cylinder: volume ⟦= π × r^2 × h⟧','Cone and pyramid: a third of the prism or cylinder with the same base and height.','Sphere: volume ⟦= 4/3 × π × r^3⟧','Multiply the dimensions by k and the volume is multiplied by ⟦k^3⟧'],
+ ex:[['A cube has a total surface area of 150 cm². What is its volume?',['⟦6s^2 = 150⟧, ⟦s^2 = 25⟧, ⟦s = 5⟧','⟦5^3 = 125⟧'],'125 cm³'],
+  ['How many cubes of edge 2 cm fill a box 6 by 4 by 4 cm?',['Box volume ⟦6 × 4 × 4 = 96⟧','Small cube volume 8','⟦96 ÷ 8 = 12⟧'],'12'],
+  ['A cylinder has base radius 3 and height 10. What is its volume?',['⟦π × 9 × 10⟧'],'⟦90π⟧']],
+ traps:['Mixing up volume and surface area.','Forgetting the third for cones and pyramids.','Thinking that doubling the edge doubles the volume; it makes it 8 times as large.']},
+[()=>{ const s=R(2,9);
+   if(R(0,1)) return {s:'geometry',q:bi(`مكعب مساحته الكلية ${6*s*s} سم². ما حجمه بالسنتيمتر المكعب؟`,`A cube has a total surface area of ${6*s*s} cm². What is its volume in cm³?`),o:mkOpts(s**3,[s*s,6*s*s,s**3+s*s]),e:bi(`⟦ل^2 = ${6*s*s} ÷ 6 = ${s*s}⟧، ⟦ل = ${s}⟧، والحجم ⟦${s}^3 = ${s**3}⟧`,`⟦s^2 = ${6*s*s} ÷ 6 = ${s*s}⟧, ⟦s = ${s}⟧, volume ⟦${s}^3 = ${s**3}⟧`)};
+   return {s:'geometry',q:bi(`مكعب حجمه ${s**3} سم³. ما مساحته الكلية بالسنتيمتر المربع؟`,`A cube has a volume of ${s**3} cm³. What is its total surface area in cm²?`),o:mkOpts(6*s*s,[s*s,4*s*s,6*s]),e:bi(`⟦ل = ${s}⟧، والمساحة ⟦6 × ${s}^2 = ${6*s*s}⟧`,`⟦s = ${s}⟧, area ⟦6 × ${s}^2 = ${6*s*s}⟧`)}; },
+ ()=>{ const e=pick([1,2,3]),a=e*R(2,5),b=e*R(2,5),c=e*R(1,4),ans=(a*b*c)/(e**3),f=FG(`<path d="M40 60L80 30H190V100L150 130H40Z M40 60H150V130 M150 60L190 30"/>${FT(95,142,a)}${FT(178,122,b)}${FT(28,98,c)}`);
+   return {s:'geometry',q:bi(`${f}صندوق على شكل متوازي مستطيلات أبعاده ${a} و${b} و${c} سم. كم مكعبًا طول حرفه ${e} سم يلزم لملئه تمامًا؟`,`${f}A box measures ${a} by ${b} by ${c} cm. How many cubes of edge ${e} cm fill it exactly?`),o:mkOpts(ans,[a*b*c,ans*e,ans+e*2]),e:bi(`⟦(${a} × ${b} × ${c}) ÷ ${e}^3 = ${a*b*c} ÷ ${e**3} = ${ans}⟧`,`⟦(${a} × ${b} × ${c}) ÷ ${e}^3 = ${a*b*c} ÷ ${e**3} = ${ans}⟧`)}; },
+ ()=>{ const r=R(1,6),h=R(2,12),cone=R(0,2)===0,V=r*r*h/(cone?3:1);
+   if(cone&&!Number.isInteger(V)) return FD.find(x=>x.id==='g-solid').g[2]();
+   return {s:'geometry',q:bi(`${cone?'مخروط':'أسطوانة'} نصف قطر قاعدت${cone?'ه':'ها'} ${r} سم وارتفاع${cone?'ه':'ها'} ${h} سم. ما حجم${cone?'ه':'ها'}؟`,`A ${cone?'cone':'cylinder'} has base radius ${r} cm and height ${h} cm. What is its volume?`),o:mkOpts(V,[cone?r*r*h:2*r*r*h,2*r*h,r*h],x=>`⟦${N(x)}π⟧`),e:bi(`⟦${cone?'1/3 × ':''}π × ${r}^2 × ${h} = ${N(V)}π⟧`,`⟦${cone?'1/3 × ':''}π × ${r}^2 × ${h} = ${N(V)}π⟧`)}; },
+ ()=>{ const k=pick([2,3]),V=pick([5,8,10,12,20,30]),ans=V*k**3;
+   return {s:'geometry',q:bi(`صندوق حجمه ${V} سم³. إذا ضُربت أبعاده الثلاثة كلها في ${k}، فكم يصبح حجمه؟`,`A box has a volume of ${V} cm³. If all three of its dimensions are multiplied by ${k}, what is the new volume?`),o:mkOpts(ans,[V*k,V*k*k,V*3*k]),e:bi(`الحجم يُضرب في ⟦${k}^3 = ${k**3}⟧: ⟦${V} × ${k**3} = ${ans}⟧`,`The volume is multiplied by ⟦${k}^3 = ${k**3}⟧: ⟦${V} × ${k**3} = ${ans}⟧`)}; }]);
+
+/* ---- unit 5: statistics and comparison ---- */
+FDL('s-mean','st','stats','mean',
+{t:'المتوسط الحسابي',d:'المتوسط والمجموع، وإضافة قيمة أو حذفها، والمتوسط المرجّح.',
+ intro:['المتوسط الحسابي مجموع القيم مقسومًا على عددها. لكن أسئلة الاختبار نادرًا ما تطلبه مباشرة، بل تعطيك المتوسط وتطلب شيئًا آخر.','لذلك أهم مهارة هنا هي التحويل العكسي: من المتوسط إلى المجموع. احفظها: المجموع = المتوسط × العدد.'],
+ rules:['المتوسط ⟦= المجموع ÷ العدد⟧، فالمجموع ⟦= المتوسط × العدد⟧','إضافة قيمة أو حذفها: احسب المجموع الجديد ثم اقسم على العدد الجديد.','إضافة ثابت لكل القيم تزيد المتوسط بالثابت نفسه، وضرب كل القيم في عدد يضرب المتوسط فيه.','المتوسط المرجّح لمجموعتين: ⟦(ن₁ × م₁ + ن₂ × م₂) ÷ (ن₁ + ن₂)⟧','متوسط أعداد متتالية أو متتابعة حسابية = متوسط الأول والأخير.'],
+ ex:[['متوسط 5 أعداد 12. حُذف أحدها فصار متوسط الباقي 10. ما العدد المحذوف؟',['المجموع قبل الحذف ⟦5 × 12 = 60⟧','المجموع بعده ⟦4 × 10 = 40⟧','⟦60 − 40 = 20⟧'],'20'],
+  ['فصل فيه 20 طالبًا متوسط درجاتهم 70، وفصل فيه 30 طالبًا متوسطهم 80. ما متوسط الطلاب جميعًا؟',['⟦20 × 70 + 30 × 80 = 1400 + 2400 = 3800⟧','⟦3800 ÷ 50 = 76⟧'],'76'],
+  ['ما متوسط الأعداد الصحيحة من 11 إلى 19؟',['أعداد متتالية: متوسط الأول والأخير','⟦(11 + 19) ÷ 2 = 15⟧'],'15']],
+ traps:['حساب متوسط المتوسطين في المجموعتين المختلفتين في العدد: ⟦(70 + 80) ÷ 2 = 75⟧ خطأ.','القسمة على العدد القديم بعد الإضافة أو الحذف.','نسيان أن المتوسط قد لا يكون إحدى القيم.']},
+{t:'The mean',d:'The mean and the total, adding or removing a value, and weighted means.',
+ intro:['The mean is the sum of the values divided by how many there are. Test questions rarely ask for it directly; they give the mean and ask for something else.','So the key skill is going backwards from the mean to the total. Remember: total = mean × count.'],
+ rules:['Mean ⟦= total ÷ count⟧, so total ⟦= mean × count⟧','Adding or removing a value: find the new total, then divide by the new count.','Adding a constant to every value raises the mean by that constant; multiplying every value multiplies the mean.','Weighted mean of two groups: ⟦(n₁ × m₁ + n₂ × m₂) ÷ (n₁ + n₂)⟧','The mean of consecutive numbers or an arithmetic sequence = the mean of the first and last.'],
+ ex:[['5 numbers have a mean of 12. One is removed and the rest have a mean of 10. What number was removed?',['Total before ⟦5 × 12 = 60⟧','Total after ⟦4 × 10 = 40⟧','⟦60 − 40 = 20⟧'],'20'],
+  ['A class of 20 averages 70 and a class of 30 averages 80. What is the mean of all the students?',['⟦20 × 70 + 30 × 80 = 1400 + 2400 = 3800⟧','⟦3800 ÷ 50 = 76⟧'],'76'],
+  ['What is the mean of the whole numbers from 11 to 19?',['Consecutive numbers: the mean of the first and last','⟦(11 + 19) ÷ 2 = 15⟧'],'15']],
+ traps:['Averaging the two means when the groups differ in size: ⟦(70 + 80) ÷ 2 = 75⟧ is wrong.','Dividing by the old count after adding or removing a value.','Forgetting that the mean need not be one of the values.']},
+[()=>{ const n=R(3,6),m=R(10,40),v=[...Array(n-1)].map(()=>R(m-12,m+12)),x=n*m-v.reduce((a,b)=>a+b,0); if(x<1) return FD.find(l=>l.id==='s-mean').g[0]();
+   return {s:'stats',q:bi(`متوسط ${n} أعداد هو ${m}. إذا كان ${n-1===2?'اثنان':n-1} منها ${v.join(' و')}، فما العدد ${n-1===2?'الثالث':'الباقي'}؟`,`${n} numbers have a mean of ${m}. If ${n-1} of them are ${v.join(', ')}, what is the remaining number?`),o:mkOpts(x,[m,n*m,x+n]),e:bi(`المجموع ⟦${n} × ${m} = ${n*m}⟧، والمعروف ${v.reduce((a,b)=>a+b,0)}، فالباقي ⟦${x}⟧`,`Total ⟦${n} × ${m} = ${n*m}⟧; the known values sum to ${v.reduce((a,b)=>a+b,0)}, so the rest is ⟦${x}⟧`)}; },
+ ()=>{ for(;;){ const n=R(4,9),m=R(8,30),m2=m+R(-6,6); if(m2===m||m2<1) continue; const rem=R(0,1); const x=rem?n*m-(n-1)*m2:(n+1)*m2-n*m; if(x<1) continue;
+   return {s:'stats',q:rem?bi(`متوسط ${n} أعداد ${m}. حُذف أحدها فصار متوسط الباقي ${m2}. ما العدد المحذوف؟`,`${n} numbers have a mean of ${m}. One is removed and the mean of the rest is ${m2}. What number was removed?`):bi(`متوسط ${n} أعداد ${m}. أُضيف إليها عدد فصار المتوسط ${m2}. ما العدد المضاف؟`,`${n} numbers have a mean of ${m}. A number is added and the mean becomes ${m2}. What number was added?`),o:mkOpts(x,[Math.abs(m-m2),m2,x+m-m2===x?x+2:x+m-m2]),e:rem?bi(`⟦${n} × ${m} − ${n-1} × ${m2} = ${n*m} − ${(n-1)*m2} = ${x}⟧`,`⟦${n} × ${m} − ${n-1} × ${m2} = ${n*m} − ${(n-1)*m2} = ${x}⟧`):bi(`⟦${n+1} × ${m2} − ${n} × ${m} = ${(n+1)*m2} − ${n*m} = ${x}⟧`,`⟦${n+1} × ${m2} − ${n} × ${m} = ${(n+1)*m2} − ${n*m} = ${x}⟧`)}; } },
+ ()=>{ for(;;){ const n1=pick([10,20,30,40]),n2=pick([10,20,30,40,60]),m1=R(60,90),m2=R(60,95); if(m1===m2) continue; const t=n1*m1+n2*m2; if(t%(n1+n2)) continue; const ans=t/(n1+n2); if(n1===n2) continue;
+   return {s:'stats',q:bi(`مجموعة من ${n1} طالبًا متوسط درجاتهم ${m1}، ومجموعة من ${n2} طالبًا متوسطهم ${m2}. ما متوسط درجات المجموعتين معًا؟`,`A group of ${n1} students averages ${m1}, and a group of ${n2} averages ${m2}. What is the mean of both groups together?`),o:mkOpts(ans,[(m1+m2)/2,ans+2,ans-2].map(v=>Math.round(v*10)/10)),e:bi(`⟦(${n1} × ${m1} + ${n2} × ${m2}) ÷ ${n1+n2} = ${t} ÷ ${n1+n2} = ${ans}⟧`,`⟦(${n1} × ${m1} + ${n2} × ${m2}) ÷ ${n1+n2} = ${t} ÷ ${n1+n2} = ${ans}⟧`)}; } },
+ ()=>{ if(R(0,1)){ const a=R(5,40),k=pick([5,7,9,11,13]),l=a+k-1,ans=(a+l)/2;
+     return {s:'stats',q:bi(`ما متوسط الأعداد الصحيحة المتتالية من ${a} إلى ${l}؟`,`What is the mean of the consecutive whole numbers from ${a} to ${l}?`),o:mkOpts(ans,[(a+l)/2+1,l-a,(a+l)]),e:bi(`⟦(${a} + ${l}) ÷ 2 = ${ans}⟧`,`⟦(${a} + ${l}) ÷ 2 = ${ans}⟧`)}; }
+   const m=R(10,50),c=R(2,9),mul=R(0,1),ans=mul?m*c:m+c;
+   return {s:'stats',q:bi(`متوسط مجموعة من الأعداد ${m}. إذا ${mul?`ضُرب كل عدد منها في ${c}`:`أُضيف ${c} إلى كل عدد منها`}، فما المتوسط الجديد؟`,`A set of numbers has a mean of ${m}. If ${mul?`every number is multiplied by ${c}`:`${c} is added to every number`}, what is the new mean?`),o:mkOpts(ans,[mul?m+c:m*c,m,ans+c]),e:bi(mul?`الضرب في ${c} يضرب المتوسط: ⟦${m} × ${c} = ${ans}⟧`:`إضافة ${c} لكل عدد تزيد المتوسط ${c}: ⟦${m} + ${c} = ${ans}⟧`,mul?`Multiplying by ${c} multiplies the mean: ⟦${m} × ${c} = ${ans}⟧`:`Adding ${c} to each number adds ${c} to the mean: ⟦${m} + ${c} = ${ans}⟧`)}; }]);
+
+const FD_FREQ_T=[['درجات','Score'],['عدد الطلاب','Students']];
+FDL('s-med','st','stats','median',
+{t:'الوسيط والمنوال والمدى',d:'رتّب قبل أن تبحث عن الوسيط، والمنوال الأكثر تكرارًا، والمدى بين الطرفين.',
+ intro:['ثلاثة مقاييس تصف البيانات بطرق مختلفة: الوسيط هو القيمة في المنتصف بعد الترتيب، والمنوال هو الأكثر تكرارًا، والمدى هو المسافة بين الأكبر والأصغر.','الخطأ الأشهر في هذا الباب واحد: البحث عن الوسيط قبل ترتيب القيم.'],
+ rules:['الوسيط: رتّب القيم ثم خذ الوسطى. وإذا كان عدد القيم زوجيًا فالوسيط متوسط القيمتين الوسطيين.','ترتيب الوسيط في n قيمة ⟦= (n + 1) ÷ 2⟧','المنوال: القيمة الأكثر تكرارًا، وقد يكون أكثر من منوال، وقد لا يوجد منوال.','المدى ⟦= أكبر قيمة − أصغر قيمة⟧','القيمة المتطرفة (الكبيرة جدًا أو الصغيرة جدًا) تغيّر المتوسط كثيرًا، أما الوسيط فبالكاد يتأثر.'],
+ ex:[['ما وسيط القيم ⟦7، 3، 9، 4، 12، 5⟧؟',['رتّب: ⟦3، 4، 5، 7، 9، 12⟧','العدد زوجي: الوسطيان 5 و7','⟦(5 + 7) ÷ 2 = 6⟧'],'6'],
+  ['ما منوال القيم ⟦4، 8، 4، 6، 8، 4، 9⟧؟',['4 تكررت ثلاث مرات، و8 مرتين'],'4'],
+  ['أعمار ⟦12، 15، 15، 18، 60⟧. أيهما أكبر: المتوسط أم الوسيط؟',['الوسيط 15','المتوسط ⟦120 ÷ 5 = 24⟧ بسبب القيمة المتطرفة 60'],'المتوسط']],
+ traps:['أخذ القيمة الوسطى قبل الترتيب.','نسيان أن الوسيط في العدد الزوجي متوسط قيمتين.','حساب المدى من أول القائمة وآخرها لا من أكبر قيمة وأصغرها.']},
+{t:'Median, mode and range',d:'Sort before you look for the median; the mode is the most frequent; the range spans the ends.',
+ intro:['Three measures describe data in different ways: the median is the middle value after sorting, the mode is the most frequent value, and the range is the distance between the largest and smallest.','The best-known mistake here is a single one: looking for the median before sorting.'],
+ rules:['Median: sort the values and take the middle one. With an even count, the median is the mean of the two middle values.','The median\'s position among n values ⟦= (n + 1) ÷ 2⟧','Mode: the most frequent value; there may be several modes, or none.','Range ⟦= largest value − smallest value⟧','An outlier (very large or very small) moves the mean a lot but barely moves the median.'],
+ ex:[['What is the median of ⟦7, 3, 9, 4, 12, 5⟧?',['Sort: ⟦3, 4, 5, 7, 9, 12⟧','Even count: the middle two are 5 and 7','⟦(5 + 7) ÷ 2 = 6⟧'],'6'],
+  ['What is the mode of ⟦4, 8, 4, 6, 8, 4, 9⟧?',['4 appears three times, 8 twice'],'4'],
+  ['Ages ⟦12, 15, 15, 18, 60⟧. Which is larger: the mean or the median?',['The median is 15','The mean is ⟦120 ÷ 5 = 24⟧ because of the outlier 60'],'The mean']],
+ traps:['Taking the middle value before sorting.','Forgetting that with an even count the median is the mean of two values.','Taking the range from the first and last listed values instead of the largest and smallest.']},
+[()=>{ const n=pick([5,7,9]),v=[...Array(n)].map(()=>R(2,40)),s=v.slice().sort((a,b)=>a-b),med=s[(n-1)/2];
+   if(new Set(v).size<n) return FD.find(l=>l.id==='s-med').g[0]();
+   return {s:'stats',q:bi(`ما وسيط القيم ⟦${v.join('، ')}⟧؟`,`What is the median of ⟦${v.join(', ')}⟧?`),o:mkOpts(med,[v[(n-1)/2],Math.round(v.reduce((a,b)=>a+b,0)/n),s[(n-1)/2+1]]),e:bi(`بعد الترتيب: ⟦${s.join('، ')}⟧، والوسطى ${med}`,`Sorted: ⟦${s.join(', ')}⟧; the middle value is ${med}`)}; },
+ ()=>{ const n=pick([4,6,8]); let v,s,m1,m2; do{ v=[...Array(n)].map(()=>R(2,30)); s=v.slice().sort((a,b)=>a-b); m1=s[n/2-1]; m2=s[n/2]; }while(new Set(v).size<n||(m1+m2)%2);
+   const med=(m1+m2)/2;
+   return {s:'stats',q:bi(`ما وسيط القيم ⟦${v.join('، ')}⟧؟`,`What is the median of ⟦${v.join(', ')}⟧?`),o:mkOpts(med,[m1,m2,(v[n/2-1]+v[n/2])/2]),e:bi(`بعد الترتيب: ⟦${s.join('، ')}⟧، والوسطيان ${m1} و${m2}: ⟦(${m1} + ${m2}) ÷ 2 = ${med}⟧`,`Sorted: ⟦${s.join(', ')}⟧; the middle two are ${m1} and ${m2}: ⟦(${m1} + ${m2}) ÷ 2 = ${med}⟧`)}; },
+ ()=>{ if(R(0,1)){ const mo=R(2,15),others=shuffle([...Array(14)].map((_,i)=>i+2).filter(x=>x!==mo)).slice(0,4),tw=others[0],v=shuffle([mo,mo,mo,tw,tw,...others.slice(1)]);
+     return {s:'stats',q:bi(`ما منوال القيم ⟦${v.join('، ')}⟧؟`,`What is the mode of ⟦${v.join(', ')}⟧?`),o:mkOpts(mo,[tw,others[1],others[2]]),e:bi(`${mo} تكررت 3 مرات، وهي الأكثر تكرارًا`,`${mo} appears 3 times, more than any other value`)}; }
+   const v=[...Array(6)].map(()=>R(3,60)),mx=Math.max(...v),mn=Math.min(...v),ans=mx-mn; if(ans===Math.abs(v[0]-v[5])||ans===0) return FD.find(l=>l.id==='s-med').g[2]();
+   return {s:'stats',q:bi(`ما مدى القيم ⟦${v.join('، ')}⟧؟`,`What is the range of ⟦${v.join(', ')}⟧?`),o:mkOpts(ans,[Math.abs(v[0]-v[5]),mx,mx+mn]),e:bi(`⟦${mx} − ${mn} = ${ans}⟧`,`⟦${mx} − ${mn} = ${ans}⟧`)}; },
+ ()=>{ const sc=[60,70,80,90,100],f=sc.map(()=>R(1,6)),n=f.reduce((a,b)=>a+b,0); if(n%2===0) return FD.find(l=>l.id==='s-med').g[3]();
+   const pos=(n+1)/2; let c=0,med; for(let i=0;i<5;i++){ c+=f[i]; if(c>=pos){ med=sc[i]; break; } } const modeV=sc[f.indexOf(Math.max(...f))];
+   const tA=rsTbl([FD_FREQ_T[0][0],...sc],[[FD_FREQ_T[1][0],...f]]),tE=rsTbl([FD_FREQ_T[0][1],...sc],[[FD_FREQ_T[1][1],...f]]);
+   return {s:'stats',q:bi(`${tA}<br>يبيّن الجدول درجات طلاب في اختبار وعدد من حصل على كل درجة. ما وسيط الدرجات؟`,`${tE}<br>The table shows test scores and how many students got each score. What is the median score?`),o:fo(String(med),[String(modeV),'80',String(sc[(sc.indexOf(med)+1)%5])],i=>String(sc[(sc.indexOf(med)+i)%5])),e:bi(`عدد الطلاب ${n}، والوسيط ترتيبه ⟦(${n} + 1) ÷ 2 = ${pos}⟧، والطالب رقم ${pos} درجته ${med}`,`There are ${n} students, so the median is student number ⟦(${n} + 1) ÷ 2 = ${pos}⟧, who scored ${med}`)}; }]);
+
+FDL('s-chart','st','stats','mean',
+{t:'قراءة الجداول والرسوم البيانية',d:'الأعمدة والقطاعات الدائرية والجداول: اقرأ قبل أن تحسب.',
+ intro:['أسئلة الرسوم البيانية لا تختبر حسابًا صعبًا، بل دقة القراءة: ما الوحدة؟ ما مقياس المحور؟ هل الأرقام بالآلاف أم بالنسب؟','وغالبًا تأتي عدة أسئلة على الرسم نفسه، فاستثمر نصف دقيقة في فهمه أولًا.'],
+ rules:['اقرأ العنوان والوحدة ومقياس المحور قبل قراءة السؤال.','الأعمدة: الفرق بين عمودين طرح، والنسبة بينهما قسمة.','القطاعات الدائرية: النصيب ⟦= النسبة × المجموع⟧، وزاوية القطاع ⟦= النسبة × 360°⟧','نسبة التغير بين فترتين ⟦= الفرق ÷ قيمة الفترة الأقدم⟧','إذا قال السؤال «تقريبًا» فقرّب الأرقام واستبعد الخيارات البعيدة.'],
+ ex:[['في رسم دائري، قطاع نسبته ⟦25%⟧ من مبيعات قيمتها 8000 ريال. كم قيمة هذا القطاع؟',['⟦8000 × 1/4⟧'],'2000'],
+  ['في القطاع نفسه، ما قياس زاويته المركزية؟',['⟦25% × 360⟧'],'⟦90°⟧'],
+  ['ارتفعت المبيعات في جدول من 400 إلى 500. ما نسبة الارتفاع؟',['⟦100 ÷ 400⟧'],'⟦25%⟧']],
+ traps:['قراءة عمود بالخطأ من محور غير مقسّم بانتظام.','القسمة على القيمة الأحدث في نسبة التغير.','نسيان وحدة الأرقام (بالآلاف أو بالملايين).']},
+{t:'Reading tables and charts',d:'Bar charts, pie charts and tables: read before you calculate.',
+ intro:['Chart questions do not test hard arithmetic; they test careful reading: what is the unit, what is the scale, are the figures in thousands or in percent?','Several questions often come on the same chart, so spend half a minute understanding it first.'],
+ rules:['Read the title, unit and axis scale before reading the question.','Bars: the difference between two bars is a subtraction; the ratio is a division.','Pie charts: a share ⟦= percent × total⟧, and a sector\'s angle ⟦= percent × 360°⟧','Percent change between two periods ⟦= difference ÷ the earlier value⟧','If the question says "about", round and rule out the far-off choices.'],
+ ex:[['In a pie chart, a ⟦25%⟧ sector is part of 8000 SAR in sales. How much is that sector?',['⟦8000 × 1/4⟧'],'2000'],
+  ['For the same sector, what is its central angle?',['⟦25% × 360⟧'],'⟦90°⟧'],
+  ['Sales in a table rose from 400 to 500. What is the percent increase?',['⟦100 ÷ 400⟧'],'⟦25%⟧']],
+ traps:['Misreading a bar against an unevenly spaced axis.','Dividing by the later value in percent change.','Forgetting the unit of the figures (thousands or millions).']},
+[()=>{ const th=pick([[['السبت','الأحد','الاثنين','الثلاثاء','الأربعاء'],['Sat','Sun','Mon','Tue','Wed'],'مبيعات مكتبة خلال خمسة أيام (بالقطعة)','A bookshop\'s sales over five days (items)'],[['1442','1443','1444','1445','1446'],['1442','1443','1444','1445','1446'],'عدد المشتركين في نادٍ رياضي','Members of a sports club']]),mx=pick([50,100,200]),v=[...Array(5)].map(()=>mx/10*R(2,10)),i=R(0,4); let j=(i+R(1,4))%5;
+   const fA=rsBars(v,th[0],mx),fE=rsBars(v,th[1],mx),sum=R(0,1);
+   if(sum){ const tot=v.reduce((a,b)=>a+b,0); return {s:'stats',q:bi(`${fA}يبيّن الرسم ${th[2]}. ما المجموع الكلي؟`,`${fE}The chart shows ${th[3].toLowerCase()}. What is the total?`),o:mkOpts(tot,[tot-v[0],tot+mx/10,Math.max(...v)*5]),e:bi(`⟦${v.join(' + ')} = ${tot}⟧`,`⟦${v.join(' + ')} = ${tot}⟧`)}; }
+   if(v[i]===v[j]) j=(j+1)%5; const d=Math.abs(v[i]-v[j]); if(!d) return FD.find(l=>l.id==='s-chart').g[0]();
+   return {s:'stats',q:bi(`${fA}يبيّن الرسم ${th[2]}. ما الفرق بين قيمتي «${th[0][i]}» و«${th[0][j]}»؟`,`${fE}The chart shows ${th[3].toLowerCase()}. What is the difference between “${th[1][i]}” and “${th[1][j]}”?`),o:mkOpts(d,[v[i]+v[j],d+mx/10,Math.max(v[i],v[j])]),e:bi(`⟦${Math.max(v[i],v[j])} − ${Math.min(v[i],v[j])} = ${d}⟧`,`⟦${Math.max(v[i],v[j])} − ${Math.min(v[i],v[j])} = ${d}⟧`)}; },
+ ()=>{ const th=pick([['ميزانية أسرة شهرية','A family\'s monthly budget',['السكن','الطعام','التعليم','أخرى'],['Housing','Food','Education','Other']],['أوقات طالب في يومه','A student\'s day',['النوم','الدراسة','المذاكرة','أخرى'],['Sleep','School','Study','Other']],['مبيعات متجر','A shop\'s sales',['ملابس','أحذية','حقائب','عطور'],['Clothes','Shoes','Bags','Perfume']]]);
+   const p=pick([[40,25,20,15],[50,25,15,10],[30,30,25,15],[45,20,20,15],[35,30,20,15]]),tot=pick([4000,6000,8000,12000,2400,24]),k=R(0,3),ang=R(0,1);
+   const fA=rsPie(p,th[2]),fE=rsPie(p,th[3]);
+   if(ang) return {s:'stats',q:bi(`${fA}يبيّن الشكل ${th[0]}. ما قياس الزاوية المركزية لقطاع «${th[2][k]}»؟`,`${fE}The chart shows ${th[1].toLowerCase()}. What is the central angle of the “${th[3][k]}” sector?`),o:mkOpts(p[k]*3.6,[p[k],p[k]*3.6+18,p[k]*2],v=>`${N(v)}°`),e:bi(`⟦${p[k]}% × 360 = ${N(p[k]*3.6)}°⟧`,`⟦${p[k]}% × 360 = ${N(p[k]*3.6)}°⟧`)};
+   const amt=tot*p[k]/100; if(!Number.isInteger(amt)) return FD.find(l=>l.id==='s-chart').g[1]();
+   return {s:'stats',q:bi(`${fA}يبيّن الشكل ${th[0]}، والمجموع ${tot}. كم نصيب «${th[2][k]}»؟`,`${fE}The chart shows ${th[1].toLowerCase()}; the total is ${tot}. How much is “${th[3][k]}”?`),o:mkOpts(amt,[p[k]*10,tot/4,amt*2]),e:bi(`⟦${tot} × ${p[k]/100} = ${N(amt)}⟧`,`⟦${tot} × ${p[k]/100} = ${N(amt)}⟧`)}; },
+ ()=>{ const [o,pc]=pick([[400,25],[200,15],[500,20],[800,25],[250,40],[600,5],[300,10],[120,25],[150,20]]),up=R(0,1),nw=up?o*(100+pc)/100:o*(100-pc)/100,y=R(1440,1445),df=Math.abs(nw-o);
+   const tA=rsTbl(['السنة',`${y}`,`${y+1}`],[['عدد الزوار',o,nw]]),tE=rsTbl(['Year',`${y}`,`${y+1}`],[['Visitors',o,nw]]);
+   return {s:'stats',q:bi(`${tA}<br>يبيّن الجدول عدد زوار معرض في سنتين. ما نسبة ${up?'الزيادة':'النقص'} في عدد الزوار؟`,`${tE}<br>The table shows a fair's visitors in two years. What is the percent ${up?'increase':'decrease'}?`),o:fo(`${pc}%`,[`${Math.round(df/nw*1000)/10}%`,`${df}%`,`${pc+5}%`],i=>`${pc+5*i+5}%`),e:bi(`⟦${df} ÷ ${o} = ${pc}%⟧`,`⟦${df} ÷ ${o} = ${pc}%⟧`)}; },
+ ()=>{ const nm=pick([[['أحمد','سعد','خالد','فهد'],['Ahmed','Saad','Khalid','Fahd']],[['نورة','سارة','هند','مها'],['Noura','Sara','Hind','Maha']]]),sub=[['الرياضيات','العلوم','اللغة'],['Math','Science','Language']];
+   const rows=nm[0].map(()=>sub[0].map(()=>R(60,100))),k=R(0,3),avg=rows[k].reduce((a,b)=>a+b,0)/3; if(!Number.isInteger(avg)) return FD.find(l=>l.id==='s-chart').g[3]();
+   const tA=rsTbl(['الطالب',...sub[0]],rows.map((r,i)=>[nm[0][i],...r])),tE=rsTbl(['Student',...sub[1]],rows.map((r,i)=>[nm[1][i],...r]));
+   return {s:'stats',q:bi(`${tA}<br>ما متوسط درجات ${nm[0][k]} في المواد الثلاث؟`,`${tE}<br>What is ${nm[1][k]}'s mean score in the three subjects?`),o:mkOpts(avg,[rows[k].reduce((a,b)=>a+b,0),Math.max(...rows[k]),avg+3]),e:bi(`⟦(${rows[k].join(' + ')}) ÷ 3 = ${avg}⟧`,`⟦(${rows[k].join(' + ')}) ÷ 3 = ${avg}⟧`)}; }]);
+
+const cq=(a,b)=>bi(`القيمة الأولى: ${a.ar}<br>القيمة الثانية: ${b.ar}`,`Quantity A: ${a.en}<br>Quantity B: ${b.en}`);
+const mq=(ar,en)=>bi(`⟦${ar}⟧`,`⟦${en??ar}⟧`);
+FDL('s-cmp','st','comparison','numline',
+{t:'أسئلة المقارنة',d:'أربعة خيارات ثابتة، وطريقة تجربة القيم، ومتى تختار «المعطيات غير كافية».',
+ intro:['في سؤال المقارنة تُعطى قيمتان، وتختار من أربعة خيارات ثابتة لا تتغير: الأولى أكبر، أو الثانية أكبر، أو متساويتان، أو المعطيات غير كافية.','لا تحتاج غالبًا إلى حساب القيمتين بدقة، بل إلى معرفة أيهما أكبر فقط، وهذا يختصر الوقت كثيرًا.'],
+ rules:['الخيارات ثابتة دائمًا، فلا تقرأها في كل سؤال.','بسّط القيمتين معًا: اطرح الكمية نفسها من الطرفين، أو اقسمهما على العدد الموجب نفسه.','مع المتغيرات جرّب قيمًا مختلفة: ⟦0، 1، −1، ½، عدد كبير⟧. إذا تغيّر الجواب بين قيمة وأخرى فالمعطيات غير كافية.','إذا كانت القيمتان أعدادًا محددة بلا متغيرات فلا تختر «المعطيات غير كافية» أبدًا.','لا تحسب ما لا تحتاج: ⟦17 × 19⟧ مقابل ⟦18^2⟧ يكفي فيه أن ⟦17 × 19 = 18^2 − 1⟧'],
+ ex:[['القيمة الأولى: ⟦س^2⟧ ، القيمة الثانية: ⟦س⟧',['جرّب ⟦س = 2⟧: الأولى أكبر','جرّب ⟦س = ½⟧: الثانية أكبر','الجواب تغيّر'],'المعطيات غير كافية'],
+  ['القيمة الأولى: ⟦3/7⟧ ، القيمة الثانية: ⟦0.43⟧',['⟦3 ÷ 7 ≈ 0.4286⟧','⟦0.4286 < 0.43⟧'],'الثانية أكبر'],
+  ['القيمة الأولى: ⟦17 × 19⟧ ، القيمة الثانية: ⟦18^2⟧',['⟦(18 − 1)(18 + 1) = 18^2 − 1⟧'],'الثانية أكبر']],
+ traps:['تجربة قيمة واحدة فقط للمتغير والحكم بها.','نسيان تجربة الصفر والكسور والأعداد السالبة.','اختيار «المعطيات غير كافية» لقيمتين عدديتين محددتين.']},
+{t:'Comparison questions',d:'Four fixed choices, testing values, and when to choose "cannot be determined".',
+ intro:['A comparison question gives two quantities and four fixed choices that never change: A is greater, B is greater, they are equal, or the relationship cannot be determined.','You rarely need the exact value of either quantity; you only need to know which is larger, which saves a lot of time.'],
+ rules:['The choices are always the same, so do not reread them each time.','Simplify both sides together: subtract the same amount from both, or divide both by the same positive number.','With variables, test different values: ⟦0, 1, −1, ½, a large number⟧. If the answer changes between values, it cannot be determined.','If both quantities are fixed numbers with no variables, never choose "cannot be determined".','Do not calculate what you do not need: for ⟦17 × 19⟧ vs ⟦18^2⟧, it is enough that ⟦17 × 19 = 18^2 − 1⟧'],
+ ex:[['Quantity A: ⟦x^2⟧, Quantity B: ⟦x⟧',['Try ⟦x = 2⟧: A is greater','Try ⟦x = ½⟧: B is greater','The answer changed'],'Cannot be determined'],
+  ['Quantity A: ⟦3/7⟧, Quantity B: ⟦0.43⟧',['⟦3 ÷ 7 ≈ 0.4286⟧','⟦0.4286 < 0.43⟧'],'B is greater'],
+  ['Quantity A: ⟦17 × 19⟧, Quantity B: ⟦18^2⟧',['⟦(18 − 1)(18 + 1) = 18^2 − 1⟧'],'B is greater']],
+ traps:['Testing a single value for the variable and deciding from it.','Forgetting to test zero, fractions and negative numbers.','Choosing "cannot be determined" for two fixed numbers.']},
+[()=>{ for(;;){ const n=R(2,9),d=R(n+1,13); if(gcd(n,d)!==1) continue; const v=n/d,dec=Math.round(v*100+pick([-1,1,0]))/100; if(dec<=0) continue; const a=v>dec?0:v<dec?1:2;
+   return {s:'comparison',cmp:1,q:cq(mq(`${n}/${d}`),mq(dS(dec))),a,e:bi(`⟦${n} ÷ ${d} ≈ ${v.toFixed(4)}⟧ مقابل ⟦${dS(dec)}⟧`,`⟦${n} ÷ ${d} ≈ ${v.toFixed(4)}⟧ vs ⟦${dS(dec)}⟧`)}; } },
+ ()=>{ const t=R(0,2); let A,B,qa,qb,why;
+   if(t===0){ let x=R(2,5),y=R(2,5); while(y===x) y=R(2,5); A=x**y; B=y**x; qa=mq(`${x}^${y}`); qb=mq(`${y}^${x}`); why=bi(`⟦${x}^${y} = ${A}⟧ ، ⟦${y}^${x} = ${B}⟧`,`⟦${x}^${y} = ${A}⟧, ⟦${y}^${x} = ${B}⟧`); }
+   else if(t===1){ const n=pick([20,30,40,50,60,70,80,90,25,15]),d=R(1,3); A=(n-d)*(n+d); B=n*n; if(R(0,1)){ [A,B]=[B,A]; qa=mq(`${n}^2`); qb=mq(`${n-d} × ${n+d}`); } else { qa=mq(`${n-d} × ${n+d}`); qb=mq(`${n}^2`); } why=bi(`⟦(${n} − ${d})(${n} + ${d}) = ${n}^2 − ${d*d}⟧`,`⟦(${n} − ${d})(${n} + ${d}) = ${n}^2 − ${d*d}⟧`); }
+   else { const p=pick([10,20,25,40,50]),m=pick([20,40,60,80,30]),sw=R(0,1); A=p*m/100; B=sw?m*p/100:p*m/100+pick([-2,2]); qa=bi(`⟦${p}%⟧ من ${m}`,`⟦${p}%⟧ of ${m}`); qb=sw?bi(`⟦${m}%⟧ من ${p}`,`⟦${m}%⟧ of ${p}`):mq(N(B)); why=bi(`⟦${p}%⟧ من ${m} = ${N(A)}`,`⟦${p}%⟧ of ${m} = ${N(A)}`); }
+   return {s:'comparison',cmp:1,q:cq(qa,qb),a:A>B?0:A<B?1:2,e:why}; },
+ ()=>{ const c=pick(['gt1','01','neg','none','pos']);
+   const C={gt1:[bi('⟦س > 1⟧','⟦x > 1⟧'),0,bi('مربع العدد الأكبر من 1 أكبر منه: ⟦2^2 = 4 > 2⟧','The square of a number above 1 is larger: ⟦2^2 = 4 > 2⟧')],'01':[bi('⟦0 &lt; س &lt; 1⟧','⟦0 &lt; x &lt; 1⟧'),1,bi('مربع الكسر بين 0 و1 أصغر منه: ⟦(½)^2 = ¼ < ½⟧','The square of a fraction between 0 and 1 is smaller: ⟦(½)^2 = ¼ < ½⟧')],neg:[bi('⟦س &lt; 0⟧','⟦x &lt; 0⟧'),0,bi('المربع موجب والعدد سالب: ⟦(−2)^2 = 4 > −2⟧','The square is positive and the number negative: ⟦(−2)^2 = 4 > −2⟧')],none:[bi('س عددًا حقيقيًا','x is a real number'),3,bi('عند ⟦س = 2⟧ الأولى أكبر، وعند ⟦س = ½⟧ الثانية أكبر، وعند ⟦س = 1⟧ متساويتان','At ⟦x = 2⟧ A is greater, at ⟦x = ½⟧ B is greater, at ⟦x = 1⟧ they are equal')],pos:[bi('⟦س > 0⟧','⟦x > 0⟧'),3,bi('عند ⟦س = 2⟧ الأولى أكبر، وعند ⟦س = ½⟧ الثانية أكبر','At ⟦x = 2⟧ A is greater, at ⟦x = ½⟧ B is greater')]}[c];
+   const cond=C[0].ar.startsWith('⟦')?C[0]:C[0];
+   return {s:'comparison',cmp:1,q:bi(`إذا كان ${cond.ar}:<br>القيمة الأولى: ⟦س^2⟧<br>القيمة الثانية: ⟦س⟧`,`If ${cond.en}:<br>Quantity A: ⟦x^2⟧<br>Quantity B: ⟦x⟧`),a:C[1],e:C[2]}; },
+ ()=>{ const t=R(0,2);
+   if(t===0){ const a=R(2,9),b=R(1,9),k=R(1,9),sg=pick([-1,0,1]),c=b+sg*k; const A=bi(`⟦${a}س + ${b}⟧`,`⟦${a}x + ${b}⟧`),B=bi(`⟦${a}س + ${c}⟧`,`⟦${a}x + ${c}⟧`);
+     return {s:'comparison',cmp:1,q:bi(`س عدد حقيقي.<br>القيمة الأولى: ${A.ar}<br>القيمة الثانية: ${B.ar}`,`x is a real number.<br>Quantity A: ${A.en}<br>Quantity B: ${B.en}`),a:b>c?0:b<c?1:2,e:bi(`اطرح ⟦${a}س⟧ من الطرفين: يبقى ${b} مقابل ${N(c)}`,`Subtract ⟦${a}x⟧ from both: ${b} vs ${N(c)}`)}; }
+   if(t===1){ const x=R(2,9),y=R(2,9),s=x+y; const ask=R(0,1);
+     return {s:'comparison',cmp:1,q:bi(`إذا كان ⟦س + ص = ${s}⟧:<br>القيمة الأولى: ⟦س⟧<br>القيمة الثانية: ⟦ص⟧`,`If ⟦x + y = ${s}⟧:<br>Quantity A: ⟦x⟧<br>Quantity B: ⟦y⟧`),a:3,e:bi(`قد يكون ⟦س = ${s-1}⟧ و⟦ص = 1⟧، أو العكس؛ الجواب يتغير`,`It could be ⟦x = ${s-1}⟧ and ⟦y = 1⟧, or the other way round; the answer changes`)}; }
+   const x=R(2,12),m=R(2,5),kk=R(1,9),y=m*x-kk+pick([-2,0,2]),A=m*x;
+   return {s:'comparison',cmp:1,q:bi(`إذا كان ⟦س = ${x}⟧:<br>القيمة الأولى: ⟦${m}س⟧<br>القيمة الثانية: ⟦${y+kk} − ${kk}⟧`,`If ⟦x = ${x}⟧:<br>Quantity A: ⟦${m}x⟧<br>Quantity B: ⟦${y+kk} − ${kk}⟧`),a:A>y?0:A<y?1:2,e:bi(`⟦${m} × ${x} = ${A}⟧ ، و⟦${y+kk} − ${kk} = ${y}⟧`,`⟦${m} × ${x} = ${A}⟧, and ⟦${y+kk} − ${kk} = ${y}⟧`)}; }]);
+
 /* ============ Verbal bank expansion (AR + EN) ============ */
 Object.assign(PASSAGES.ar,{
   P4:'الوقف في الحضارة الإسلامية هو حبس أصل المال وتسبيل منفعته، أي أن يبقى الأصل ثابتًا لا يُباع ولا يُورث، وتُصرف غلّته في وجوه الخير. وقد أسهمت الأوقاف عبر القرون في بناء المدارس والمستشفيات وحفر الآبار، حتى إن بعض المدن كانت تعتمد عليها في تعليم أبنائها وعلاج مرضاها. ويرى الباحثون أن سرّ استمرار الوقف قرونًا طويلة يكمن في فكرته الأساسية: الأصل باقٍ والنفع متجدد.',
@@ -1490,6 +2355,99 @@ const FLASH=[
  FC('r5','reading','reading','معنى الكلمة في السياق','ضع الخيار مكان الكلمة واقرأ الجملة كاملة.','يعزو = ينسب','Word in context','Put the choice in place of the word and reread the sentence.','attribute = link as a cause'),
  FC('r6','reading','reading','سؤال «ليس من...»','ابحث عن الخيار غير المذكور في النص، لا عن الخطأ علميًا.','ليس من الأصناف المذكورة: البرحي','"Which is NOT..." questions','Look for the choice not in the passage, not the one that is false in general.','Which variety is not mentioned: Barhi')
 ];
+/* foundation-track cards: 90 more cards, three for each foundation lesson */
+FLASH.push(
+ FC('fd01','arith','numline','ترتيب العمليات','الأقواس، ثم الأسس، ثم الضرب والقسمة حسب ورودهما، ثم الجمع والطرح حسب ورودهما.','⟦12 + 18 ÷ 3 × 2 = 12 + 12 = 24⟧','Order of operations','Brackets, then exponents, then multiplication and division left to right, then addition and subtraction left to right.','⟦12 + 18 ÷ 3 × 2 = 12 + 12 = 24⟧'),
+ FC('fd02','arith','numline','إشارات الضرب والقسمة','متشابهتان تعطيان موجبًا، ومختلفتان تعطيان سالبًا. وطرح السالب جمع.','⟦(−4) × (−3) = 12⟧ ، ⟦5 − (−3) = 8⟧','Signs in × and ÷','Same signs give a positive, different signs a negative. Subtracting a negative is adding.','⟦(−4) × (−3) = 12⟧, ⟦5 − (−3) = 8⟧'),
+ FC('fd03','arith','numline','الضرب في 5 و25 و99','في 5: ×10 ثم ÷2. في 25: ×100 ثم ÷4. في 99: ×100 ثم اطرح العدد.','⟦36 × 25 = 3600 ÷ 4 = 900⟧','Times 5, 25 and 99','×5: ×10 then ÷2. ×25: ×100 then ÷4. ×99: ×100 then subtract the number.','⟦36 × 25 = 3600 ÷ 4 = 900⟧'),
+ FC('fd04','arith','fractions','تبسيط الكسر','اقسم البسط والمقام على أكبر قاسم مشترك بينهما.','⟦36/48⟧ ÷ 12 = ⟦3/4⟧','Simplifying a fraction','Divide the top and bottom by their greatest common factor.','⟦36/48⟧ ÷ 12 = ⟦3/4⟧'),
+ FC('fd05','arith','fractions','كسر من عدد','اقسم العدد على المقام، ثم اضرب في البسط.','⟦2/5⟧ من 45 = ⟦9 × 2 = 18⟧','A fraction of a number','Divide by the denominator, then multiply by the numerator.','⟦2/5⟧ of 45 = ⟦9 × 2 = 18⟧'),
+ FC('fd06','arith','fractions','البسطان المتساويان','إذا تساوى البسطان فالأكبر صاحب المقام الأصغر.','⟦3/7 > 3/8⟧','Equal numerators','With equal numerators, the smaller denominator gives the larger fraction.','⟦3/7 > 3/8⟧'),
+ FC('fd07','arith','fractions','جمع الكسور','وحّد المقامين ثم اجمع البسطين. لا تجمع المقامات.','⟦1/4 + 2/3 = 3/12 + 8/12 = 11/12⟧','Adding fractions','Make the denominators equal, then add the numerators. Never add the denominators.','⟦1/4 + 2/3 = 3/12 + 8/12 = 11/12⟧'),
+ FC('fd08','arith','fractions','قسمة الكسور','اقلب الكسر الثاني ثم اضرب.','⟦2/3 ÷ 4/9 = 2/3 × 9/4 = 3/2⟧','Dividing fractions','Flip the second fraction, then multiply.','⟦2/3 ÷ 4/9 = 2/3 × 9/4 = 3/2⟧'),
+ FC('fd09','arith','fractions','«جزء من الباقي»','اضرب الأجزاء المتبقية: أنفق الثلث ثم ربع الباقي ← يبقى ⟦2/3 × 3/4⟧.','يبقى ⟦1/2⟧ من الأصل','"Part of the rest"','Multiply the parts left: spend a third, then a quarter of the rest → ⟦2/3 × 3/4⟧ is left.','⟦1/2⟧ of the original is left'),
+ FC('fd10','arith','percent','ضرب الأعداد العشرية','اضرب بلا فاصلة، ثم اجعل منازل الناتج بعدد منازل العددين معًا.','⟦0.3 × 0.02 = 0.006⟧','Multiplying decimals','Multiply without the points, then give the result as many places as both numbers together.','⟦0.3 × 0.02 = 0.006⟧'),
+ FC('fd11','arith','percent','قسمة الأعداد العشرية','اضرب العددين في 10 أو 100 حتى يصبح المقسوم عليه عددًا صحيحًا.','⟦1.2 ÷ 0.04 = 120 ÷ 4 = 30⟧','Dividing decimals','Multiply both numbers by 10 or 100 until the divisor is whole.','⟦1.2 ÷ 0.04 = 120 ÷ 4 = 30⟧'),
+ FC('fd12','arith','percent','الأثمان','احفظ: ⟦1/8 = 0.125 = 12.5%⟧ و⟦3/8 = 0.375⟧ و⟦5/8 = 0.625⟧ و⟦7/8 = 0.875⟧','⟦3/8⟧ من 40 = 15','Eighths','Learn: ⟦1/8 = 0.125 = 12.5%⟧, ⟦3/8 = 0.375⟧, ⟦5/8 = 0.625⟧, ⟦7/8 = 0.875⟧','⟦3/8⟧ of 40 = 15'),
+ FC('fd13','algebra','exponent','قسمة الأسس','الأساس نفسه: اطرح الأسس.','⟦2^7 ÷ 2^4 = 2^3 = 8⟧','Dividing powers','Same base: subtract the exponents.','⟦2^7 ÷ 2^4 = 2^3 = 8⟧'),
+ FC('fd14','algebra','exponent','الأس الصفري والسالب','⟦a^0 = 1⟧، و⟦a^(−n) = 1/a^n⟧','⟦2^(−3) = 1/8⟧ ، ⟦(1/3)^(−2) = 9⟧','Zero and negative exponents','⟦a^0 = 1⟧, and ⟦a^(−n) = 1/a^n⟧','⟦2^(−3) = 1/8⟧, ⟦(1/3)^(−2) = 9⟧'),
+ FC('fd15','algebra','exponent','توحيد الأساس','اكتب الأعداد بأساس واحد ثم ساوِ الأسس.','⟦9^س = 27 → 3^(2س) = 3^3 → س = 3/2⟧','A common base','Rewrite with one base, then set the exponents equal.','⟦9^x = 27 → 3^(2x) = 3^3 → x = 3/2⟧'),
+ FC('fd16','algebra','squares','تبسيط الجذر','استخرج أكبر مربع يقسم العدد.','⟦√72 = √36 × √2 = 6√2⟧','Simplifying a root','Take out the largest square factor.','⟦√72 = √36 × √2 = 6√2⟧'),
+ FC('fd17','algebra','squares','جمع الجذور','تُجمع الجذور المتشابهة فقط، والجذر لا يتوزع على الجمع.','⟦√18 + √8 = 5√2⟧ ، ⟦√(9 + 16) = 5⟧','Adding roots','Only like roots add, and a root does not split over addition.','⟦√18 + √8 = 5√2⟧, ⟦√(9 + 16) = 5⟧'),
+ FC('fd18','algebra','squares','جذر العدد العشري','للناتج نصف عدد المنازل العشرية.','⟦√0.0049 = 0.07⟧ ، ⟦√0.09 = 0.3⟧','Root of a decimal','The result has half as many decimal places.','⟦√0.0049 = 0.07⟧, ⟦√0.09 = 0.3⟧'),
+ FC('fd19','arith','numline','القسمة على 3 و9','مجموع الأرقام يقبل القسمة على 3 أو 9.','⟦5832 → 18⟧ يقبل القسمة على 9','Divisible by 3 and 9','The digit sum is divisible by 3 or 9.','⟦5832 → 18⟧, divisible by 9'),
+ FC('fd20','arith','numline','الأعداد الأولية','أكبر من 1 ولا قواسم لها إلا 1 ونفسها. العدد 1 ليس أوليًا.','⟦51 = 3 × 17⟧ و⟦91 = 7 × 13⟧ ليسا أوليين','Primes','Greater than 1 with no divisors but 1 and themselves. 1 is not prime.','⟦51 = 3 × 17⟧ and ⟦91 = 7 × 13⟧ are not prime'),
+ FC('fd21','arith','numline','عدد القواسم','حلّل إلى عوامل أولية، وأضف 1 لكل أس، ثم اضرب.','⟦72 = 2^3 × 3^2 → 4 × 3 = 12⟧','Number of divisors','Factor into primes, add 1 to each exponent, then multiply.','⟦72 = 2^3 × 3^2 → 4 × 3 = 12⟧'),
+ FC('fd22','arith','ratio','التناسب العكسي','حاصل الضرب ثابت: عمال × أيام = حجم العمل.','6 عمال في 15 يومًا = 9 عمال في 10 أيام','Inverse proportion','The product is constant: workers × days = the job.','6 workers for 15 days = 9 workers for 10 days'),
+ FC('fd23','arith','ratio','ربط نسبتين','وحّد الحد المشترك بين النسبتين.','⟦أ : ب = 2 : 3⟧ و⟦ب : ج = 4 : 5⟧ ← ⟦8 : 12 : 15⟧','Linking two ratios','Make the shared term the same in both.','⟦a : b = 2 : 3⟧, ⟦b : c = 4 : 5⟧ → ⟦8 : 12 : 15⟧'),
+ FC('fd24','arith','ratio','الفرق بين نصيبين','اقسم الفرق على الفرق في عدد الأجزاء.','⟦3 : 5⟧ والفرق 12 ← الجزء 6','Difference between shares','Divide the difference by the difference in parts.','⟦3 : 5⟧ with a difference of 12 → one part is 6'),
+ FC('fd25','arith','percent','ابنِ من 10%','⟦10%⟧ قسمة على 10، ثم ركّب منها أي نسبة.','⟦15%⟧ من 360 = ⟦36 + 18 = 54⟧','Build from 10%','⟦10%⟧ is dividing by 10; build any percent from it.','⟦15%⟧ of 360 = ⟦36 + 18 = 54⟧'),
+ FC('fd26','arith','percent','قلب النسبة المئوية','⟦x%⟧ من y = ⟦y%⟧ من x. اختر الأسهل.','⟦8%⟧ من 50 = ⟦50%⟧ من 8 = 4','Swapping a percent','⟦x%⟧ of y = ⟦y%⟧ of x. Pick the easier one.','⟦8%⟧ of 50 = ⟦50%⟧ of 8 = 4'),
+ FC('fd27','arith','percent','إيجاد الكل من الجزء','اقسم الجزء على النسبة.','⟦40%⟧ من عدد = 18 ← ⟦18 ÷ 0.4 = 45⟧','Finding the whole','Divide the part by the percent.','⟦40%⟧ of a number is 18 → ⟦18 ÷ 0.4 = 45⟧'),
+ FC('fd28','arith','percent','نسبة الربح','الربح ÷ التكلفة × 100، والقسمة دائمًا على التكلفة.','شراء 250 وبيع 300 ← ⟦50 ÷ 250 = 20%⟧','Profit percent','Profit ÷ cost × 100; always divide by the cost.','Bought 250, sold 300 → ⟦50 ÷ 250 = 20%⟧'),
+ FC('fd29','arith','percent','السعر قبل الخصم','اقسم السعر بعد الخصم على ما تدفعه من السعر.','بعد خصم ⟦25%⟧ = 180 ← ⟦180 ÷ 0.75 = 240⟧','Price before a discount','Divide the discounted price by the share you pay.','180 after ⟦25%⟧ off → ⟦180 ÷ 0.75 = 240⟧'),
+ FC('fd30','arith','percent','الخصمان المتتاليان','اضرب المعاملين ولا تجمع النسبتين.','⟦20%⟧ ثم ⟦10%⟧: ⟦0.8 × 0.9 = 0.72⟧ ← خصم ⟦28%⟧','Two discounts in a row','Multiply the factors; never add the percents.','⟦20%⟧ then ⟦10%⟧: ⟦0.8 × 0.9 = 0.72⟧ → ⟦28%⟧ off'),
+ FC('fd31','arith','speed','الدقائق إلى ساعات','اقسم على 60.','⟦45 دقيقة = 3/4 ساعة⟧ ، ⟦20 دقيقة = 1/3 ساعة⟧','Minutes to hours','Divide by 60.','⟦45 min = 3/4 h⟧, ⟦20 min = 1/3 h⟧'),
+ FC('fd32','arith','speed','السرعة المتوسطة','المسافة الكلية ÷ الزمن الكلي، لا متوسط السرعتين.','ذهاب 60 وعودة 40 ← المتوسط 48','Average speed','Total distance ÷ total time, not the mean of the speeds.','Out at 60, back at 40 → average 48'),
+ FC('fd33','arith','speed','الالتقاء والملاحقة','متقابلان: اجمع السرعتين. في الاتجاه نفسه: اطرح.','300 كم بسرعتي 70 و80 ← ⟦300 ÷ 150 = 2⟧ ساعة','Meeting and chasing','Toward each other: add the speeds. Same direction: subtract.','300 km at 70 and 80 → ⟦300 ÷ 150 = 2⟧ h'),
+ FC('fd34','arith','work','معدل الإنجاز','من ينهي العمل في n يومًا ينجز ⟦1/n⟧ كل يوم.','عمل في 6 أيام ← ⟦1/6⟧ يوميًا','Work rate','Someone who finishes in n days does ⟦1/n⟧ each day.','A job in 6 days → ⟦1/6⟧ a day'),
+ FC('fd35','arith','work','الملء والتفريغ','اطرح معدل التفريغ من معدل الملء.','⟦1/4 − 1/12 = 1/6⟧ ← 6 ساعات','Filling and draining','Subtract the drain rate from the fill rate.','⟦1/4 − 1/12 = 1/6⟧ → 6 hours'),
+ FC('fd36','arith','work','الزمن معًا لشخصين','⟦حاصل الضرب ÷ المجموع⟧','6 و3 ← ⟦18 ÷ 9 = 2⟧','Time together for two','⟦product ÷ sum⟧','6 and 3 → ⟦18 ÷ 9 = 2⟧'),
+ FC('fd37','arith','balance','فرق العمرين ثابت','الفرق بين عمري شخصين لا يتغير مع مرور السنين.','الأب يكبر ابنه 28 سنة اليوم وبعد 10 سنوات','The age gap is constant','The difference between two ages never changes over time.','A father 28 years older now is 28 years older in 10 years'),
+ FC('fd38','arith','balance','مجموع الأعمار بعد سنين','يزيد بمقدار عدد السنين × عدد الأشخاص.','4 إخوة بعد 5 سنوات ← المجموع يزيد 20','Sum of ages later','It grows by years × number of people.','4 brothers, 5 years later → the sum grows by 20'),
+ FC('fd39','arith','balance','من الكلمات إلى معادلة','«ضعف» ×2، «يزيد على» +، «أصغر بـ» −، «مجموع» +.','عمر الأب 4 أمثال ابنه ومجموعهما 50 ← ⟦5س = 50⟧','Words to equations','"Twice" ×2, "more than" +, "younger by" −, "sum" +.','Father 4 times the son, sum 50 → ⟦5x = 50⟧'),
+ FC('fd40','arith','prob','مبدأ العد','اضرب عدد الطرق في كل مرحلة.','3 قمصان و4 بناطيل ← 12 زيًّا','Counting principle','Multiply the ways at each stage.','3 shirts and 4 trousers → 12 outfits'),
+ FC('fd41','arith','prob','المصافحات والمباريات','اختيار اثنين من n بلا ترتيب: ⟦n(n − 1) ÷ 2⟧','6 أشخاص ← 15 مصافحة','Handshakes and matches','Choosing two of n, order not mattering: ⟦n(n − 1) ÷ 2⟧','6 people → 15 handshakes'),
+ FC('fd42','arith','prob','احتمال حدثين مستقلين','اضرب الاحتمالين. واحتمال عدم الوقوع ⟦= 1 − P⟧','صورة مرتين: ⟦1/2 × 1/2 = 1/4⟧','Two independent events','Multiply the probabilities. The chance of "not" ⟦= 1 − P⟧','Heads twice: ⟦1/2 × 1/2 = 1/4⟧'),
+ FC('fd43','algebra','balance','فك القوس بعد السالب','السالب قبل القوس يقلب كل إشارة داخله.','⟦−2(س − 3) = −2س + 6⟧','A minus before brackets','A minus before brackets flips every sign inside.','⟦−2(x − 3) = −2x + 6⟧'),
+ FC('fd44','algebra','balance','التعويض بالسالب','ضع القيمة بين قوسين قبل التربيع.','⟦س = −3 → س^2 = 9⟧ ، ⟦−س^2 = −9⟧','Substituting a negative','Put the value in brackets before squaring.','⟦x = −3 → x^2 = 9⟧, ⟦−x^2 = −9⟧'),
+ FC('fd45','algebra','balance','العبارة كاملة','اكتب المطلوب بدلالة المعطى دون إيجاد المتغير.','⟦2أ − ب = 5 → 6أ − 3ب = 15⟧','The whole expression','Write what is asked in terms of what is given, without finding the variable.','⟦2a − b = 5 → 6a − 3b = 15⟧'),
+ FC('fd46','algebra','balance','المعادلة بكسور','اضرب الطرفين في المقام المشترك.','⟦س/3 + س/4 = 14 → 7س = 168 → س = 24⟧','Equations with fractions','Multiply both sides by the common denominator.','⟦x/3 + x/4 = 14 → 7x = 168 → x = 24⟧'),
+ FC('fd47','algebra','balance','الضرب التبادلي','كسر = كسر: البسط × المقام الآخر.','⟦(س + 1)/3 = (س − 1)/2 → س = 5⟧','Cross-multiplying','Fraction = fraction: each numerator times the other denominator.','⟦(x + 1)/3 = (x − 1)/2 → x = 5⟧'),
+ FC('fd48','algebra','balance','جرّب الخيارات','في المعادلات المعقدة عوّض الخيارات، فالذي يحقق المعادلة هو الجواب.','⟦3س − 7 = 11⟧: جرّب 6 ← ⟦18 − 7 = 11⟧','Try the choices','For a messy equation, plug in the choices; the one that works is the answer.','⟦3x − 7 = 11⟧: try 6 → ⟦18 − 7 = 11⟧'),
+ FC('fd49','algebra','balance','المجموع والفرق','الأكبر ⟦= (المجموع + الفرق) ÷ 2⟧','مجموعهما 10 والفرق 4 ← 7 و3','Sum and difference','Larger ⟦= (sum + difference) ÷ 2⟧','Sum 10, difference 4 → 7 and 3'),
+ FC('fd50','algebra','balance','المعادلتان المتماثلتان','⟦2س + ص⟧ و⟦س + 2ص⟧: اجمعهما ثم اقسم على 3.','⟦3س + 3ص = 24 → س + ص = 8⟧','Mirror-image equations','⟦2x + y⟧ and ⟦x + 2y⟧: add them, then divide by 3.','⟦3x + 3y = 24 → x + y = 8⟧'),
+ FC('fd51','algebra','balance','الرؤوس والأرجل','افترض الكل من النوع الأقل أرجلًا، ثم اقسم الزيادة على فرق الأرجل.','20 رأسًا و56 رجلًا ← ⟦(56 − 40) ÷ 2 = 8⟧ أغنام','Heads and legs','Assume all are the fewer-legged kind, then divide the extra by the difference in legs.','20 heads, 56 legs → ⟦(56 − 40) ÷ 2 = 8⟧ sheep'),
+ FC('fd52','algebra','numline','قلب إشارة المتباينة','الضرب أو القسمة على سالب يقلب الإشارة.','⟦−2س > 6 → س < −3⟧','Flipping an inequality','Multiplying or dividing by a negative flips the sign.','⟦−2x > 6 → x < −3⟧'),
+ FC('fd53','algebra','numline','عد الأعداد الصحيحة','⟦≤⟧ تشمل الطرف و⟦<⟧ لا تشمله، ولا تنس الصفر.','⟦−2 ≤ س < 4⟧ ← 6 أعداد','Counting integers','⟦≤⟧ includes the end, ⟦<⟧ does not; do not forget zero.','⟦−2 ≤ x < 4⟧ → 6 integers'),
+ FC('fd54','algebra','numline','القيمة المطلقة','⟦|س| < a⟧ تعني ⟦−a < س < a⟧','⟦|س − 1| ≤ 2 → −1 ≤ س ≤ 3⟧','Absolute value','⟦|x| < a⟧ means ⟦−a < x < a⟧','⟦|x − 1| ≤ 2 → −1 ≤ x ≤ 3⟧'),
+ FC('fd55','algebra','squares','مربع المجموع','⟦(س + ص)^2 = س^2 + 2س ص + ص^2⟧، والحد الأوسط لا يُنسى.','⟦س + ص = 7⟧ و⟦س ص = 10⟧ ← ⟦س^2 + ص^2 = 29⟧','Square of a sum','⟦(x + y)^2 = x^2 + 2xy + y^2⟧; never drop the middle term.','⟦x + y = 7⟧, ⟦xy = 10⟧ → ⟦x^2 + y^2 = 29⟧'),
+ FC('fd56','algebra','squares','الفرق بين مربعين','⟦س^2 − ص^2 = (س − ص)(س + ص)⟧','⟦51^2 − 49^2 = 2 × 100 = 200⟧','Difference of squares','⟦x^2 − y^2 = (x − y)(x + y)⟧','⟦51^2 − 49^2 = 2 × 100 = 200⟧'),
+ FC('fd57','algebra','squares','تحليل العبارة التربيعية','عددان مجموعهما معامل س وحاصل ضربهما الحد الثابت.','⟦س^2 − 5س + 6 = (س − 2)(س − 3)⟧','Factoring a quadratic','Two numbers that add to the x coefficient and multiply to the constant.','⟦x^2 − 5x + 6 = (x − 2)(x − 3)⟧'),
+ FC('fd58','algebra','sequence','الحد النوني الحسابي','⟦a + (n − 1)d⟧: الحد العشرون يحتاج 19 فرقًا.','⟦5، 9، 13⟧ ← الحد 20 = ⟦5 + 19 × 4 = 81⟧','The nth arithmetic term','⟦a + (n − 1)d⟧: the 20th term needs 19 steps.','⟦5, 9, 13⟧ → 20th term = ⟦5 + 19 × 4 = 81⟧'),
+ FC('fd59','algebra','sequence','مجموع المتتابعة الحسابية','عدد الحدود × (الأول + الأخير) ÷ 2','⟦1 + 2 + … + 100 = 100 × 101 ÷ 2 = 5050⟧','Sum of an arithmetic sequence','Number of terms × (first + last) ÷ 2','⟦1 + 2 + … + 100 = 100 × 101 ÷ 2 = 5050⟧'),
+ FC('fd60','algebra','sequence','الأنماط الدورية','اقسم على طول الدورة وانظر إلى الباقي.','بعد 100 يوم من الأحد: ⟦100 = 14 × 7 + 2⟧ ← الثلاثاء','Repeating patterns','Divide by the cycle length and look at the remainder.','100 days after Sunday: ⟦100 = 14 × 7 + 2⟧ → Tuesday'),
+ FC('fd61','geometry','clock','المتتامتان والمتكاملتان','المتتامتان مجموعهما ⟦90°⟧، والمتكاملتان ⟦180°⟧','متممة ⟦64°⟧ = ⟦26°⟧','Complementary and supplementary','Complementary angles add to ⟦90°⟧, supplementary to ⟦180°⟧','The complement of ⟦64°⟧ is ⟦26°⟧'),
+ FC('fd62','geometry','clock','المستقيمان المتوازيان','كل الزوايا الحادة متساوية، وكل المنفرجة متساوية، والحادة + المنفرجة ⟦= 180°⟧','حادة ⟦65°⟧ ← منفرجة ⟦115°⟧','Parallel lines','All acute angles are equal, all obtuse angles are equal, and acute + obtuse ⟦= 180°⟧','Acute ⟦65°⟧ → obtuse ⟦115°⟧'),
+ FC('fd63','geometry','clock','زاوية الساعة الدقيقة','⟦|30 × الساعة − 5.5 × الدقائق|⟧','3:30 ← ⟦|90 − 165| = 75°⟧','Exact clock angle','⟦|30 × hour − 5.5 × minutes|⟧','3:30 → ⟦|90 − 165| = 75°⟧'),
+ FC('fd64','geometry','triAngles','الزاوية الخارجية','تساوي مجموع الزاويتين الداخليتين البعيدتين.','داخليتان ⟦40°⟧ و⟦70°⟧ ← الخارجية ⟦110°⟧','Exterior angle','Equals the sum of the two remote interior angles.','Interior ⟦40°⟧ and ⟦70°⟧ → exterior ⟦110°⟧'),
+ FC('fd65','geometry','pyth','الثلاثيات الفيثاغورية','⟦3، 4، 5⟧ ، ⟦5، 12، 13⟧ ، ⟦8، 15، 17⟧ ومضاعفاتها.','وتر 26 وضلع 10 ← 24','Pythagorean triples','⟦3, 4, 5⟧, ⟦5, 12, 13⟧, ⟦8, 15, 17⟧ and their multiples.','Hypotenuse 26, leg 10 → 24'),
+ FC('fd66','geometry','triAngles','متباينة المثلث','الضلع الثالث بين الفرق والمجموع (دون تساوي).','4 و9 ← ⟦5 < ض < 13⟧','Triangle inequality','The third side lies strictly between the difference and the sum.','4 and 9 → ⟦5 < s < 13⟧'),
+ FC('fd67','geometry','rect','المعين وشبه المنحرف','المعين: ⟦½ × ق₁ × ق₂⟧. شبه المنحرف: ⟦½ × (أ + ب) × ع⟧','قاعدتان 6 و10 وارتفاع 5 ← 40','Rhombus and trapezoid','Rhombus: ⟦½ × d₁ × d₂⟧. Trapezoid: ⟦½ × (a + b) × h⟧','Sides 6 and 10, height 5 → 40'),
+ FC('fd68','geometry','polygon','زاوية المضلع المنتظم','الداخلية ⟦= (n − 2) × 180 ÷ n⟧، والخارجية ⟦= 360 ÷ n⟧','الخماسي: ⟦108°⟧ و⟦72°⟧','Regular polygon angles','Interior ⟦= (n − 2) × 180 ÷ n⟧, exterior ⟦= 360 ÷ n⟧','Pentagon: ⟦108°⟧ and ⟦72°⟧'),
+ FC('fd69','geometry','rect','تكبير الأبعاد والمساحة','ضرب الأبعاد في k يضرب المساحة في ⟦k^2⟧','مضاعفة الضلع ← 4 أمثال المساحة','Scaling and area','Multiplying lengths by k multiplies the area by ⟦k^2⟧','Double the side → 4 times the area'),
+ FC('fd70','geometry','circle','من المحيط إلى المساحة','أوجد نصف القطر أولًا.','محيط ⟦10π⟧ ← ⟦نق = 5⟧ ← مساحة ⟦25π⟧','From circumference to area','Find the radius first.','Circumference ⟦10π⟧ → ⟦r = 5⟧ → area ⟦25π⟧'),
+ FC('fd71','geometry','circle','القطاع والقوس','القطاع: ⟦(θ ÷ 360) × πنق^2⟧. القوس: ⟦(θ ÷ 360) × 2πنق⟧','⟦90°⟧ ونق 8 ← قطاع ⟦16π⟧','Sector and arc','Sector: ⟦(θ ÷ 360) × πr^2⟧. Arc: ⟦(θ ÷ 360) × 2πr⟧','⟦90°⟧, r 8 → sector ⟦16π⟧'),
+ FC('fd72','geometry','circle','الزاوية المحيطية','نصف المركزية على القوس نفسه، وعلى القطر قائمة.','مركزية ⟦100°⟧ ← محيطية ⟦50°⟧','Inscribed angle','Half the central angle on the same arc; on a diameter it is a right angle.','Central ⟦100°⟧ → inscribed ⟦50°⟧'),
+ FC('fd73','geometry','circle','دائرة داخل مربع','قطر الدائرة = ضلع المربع.','مربع 10 ← المظلل ⟦100 − 25π⟧','A circle in a square','The circle\'s diameter = the square\'s side.','Square 10 → shaded ⟦100 − 25π⟧'),
+ FC('fd74','geometry','circle','مربع داخل دائرة','قطر المربع = قطر الدائرة، ومساحته ⟦= القطر^2 ÷ 2⟧','نق 5 ← المربع 50 والمظلل ⟦25π − 50⟧','A square in a circle','The square\'s diagonal = the diameter, and its area ⟦= diagonal^2 ÷ 2⟧','r 5 → square 50, shaded ⟦25π − 50⟧'),
+ FC('fd75','geometry','circle','الحلقة','⟦π(نق₁^2 − نق₂^2)⟧، لا ⟦π(نق₁ − نق₂)^2⟧','7 و4 ← ⟦33π⟧','The ring','⟦π(R^2 − r^2)⟧, not ⟦π(R − r)^2⟧','7 and 4 → ⟦33π⟧'),
+ FC('fd76','geometry','cube','المكعب','الحجم ⟦= ل^3⟧، والمساحة الكلية ⟦= 6ل^2⟧','مساحة 150 ← ل 5 ← حجم 125','The cube','Volume ⟦= s^3⟧, total surface ⟦= 6s^2⟧','Surface 150 → s 5 → volume 125'),
+ FC('fd77','geometry','cube','الأسطوانة والمخروط','الأسطوانة ⟦πنق^2 ع⟧، والمخروط ثلثها.','نق 3 وع 10 ← ⟦90π⟧ و⟦30π⟧','Cylinder and cone','Cylinder ⟦πr^2 h⟧; a cone is a third of it.','r 3, h 10 → ⟦90π⟧ and ⟦30π⟧'),
+ FC('fd78','geometry','cube','تكبير الأبعاد والحجم','ضرب الأبعاد في k يضرب الحجم في ⟦k^3⟧','مضاعفة الحرف ← 8 أمثال الحجم','Scaling and volume','Multiplying lengths by k multiplies the volume by ⟦k^3⟧','Double the edge → 8 times the volume'),
+ FC('fd79','stats','mean','من المتوسط إلى المجموع','المجموع ⟦= المتوسط × العدد⟧','متوسط 5 أعداد 12 ← المجموع 60','From mean to total','Total ⟦= mean × count⟧','5 numbers averaging 12 → total 60'),
+ FC('fd80','stats','mean','المتوسط المرجّح','اجمع المجاميع ثم اقسم على العدد الكلي، لا تأخذ متوسط المتوسطين.','20 بمتوسط 70 و30 بمتوسط 80 ← 76','Weighted mean','Add the totals and divide by the full count; do not average the averages.','20 at 70 and 30 at 80 → 76'),
+ FC('fd81','stats','mean','الإضافة إلى كل القيم','إضافة ثابت تزيد المتوسط به، والضرب في عدد يضرب المتوسط فيه.','متوسط 42 وكل قيمة ×6 ← 252','Changing every value','Adding a constant adds it to the mean; multiplying multiplies the mean.','Mean 42, every value ×6 → 252'),
+ FC('fd82','stats','median','الوسيط في العدد الزوجي','رتّب ثم خذ متوسط القيمتين الوسطيين.','⟦3، 4، 5، 7، 9، 12⟧ ← 6','Median with an even count','Sort, then average the two middle values.','⟦3, 4, 5, 7, 9, 12⟧ → 6'),
+ FC('fd83','stats','median','المنوال والمدى','المنوال الأكثر تكرارًا، والمدى ⟦= الأكبر − الأصغر⟧','⟦4، 8، 4، 6، 9⟧: المنوال 4 والمدى 5','Mode and range','The mode is the most frequent value; range ⟦= largest − smallest⟧','⟦4, 8, 4, 6, 9⟧: mode 4, range 5'),
+ FC('fd84','stats','median','القيمة المتطرفة','تجذب المتوسط بقوة، والوسيط بالكاد يتأثر.','⟦12، 15، 15، 18، 60⟧: الوسيط 15 والمتوسط 24','Outliers','They pull the mean strongly; the median barely moves.','⟦12, 15, 15, 18, 60⟧: median 15, mean 24'),
+ FC('fd85','stats','mean','زاوية القطاع الدائري','⟦النسبة × 360°⟧','⟦25%⟧ ← ⟦90°⟧ ، ⟦15%⟧ ← ⟦54°⟧','Pie-chart angle','⟦percent × 360°⟧','⟦25%⟧ → ⟦90°⟧, ⟦15%⟧ → ⟦54°⟧'),
+ FC('fd86','stats','mean','اقرأ الرسم أولًا','العنوان، والوحدة (آلاف؟ نسب؟)، ومقياس المحور، قبل أي حساب.','محور بالآلاف: العمود 30 يعني 30000','Read the chart first','The title, unit (thousands? percent?) and axis scale before any calculation.','An axis in thousands: a bar at 30 means 30,000'),
+ FC('fd87','stats','mean','التغير في الجدول','الفرق ÷ القيمة الأقدم.','من 400 إلى 500 ← ⟦25%⟧','Change in a table','Difference ÷ the earlier value.','400 to 500 → ⟦25%⟧'),
+ FC('fd88','comparison','numline','بسّط الطرفين','اطرح الكمية نفسها من القيمتين أو اقسمهما على موجب واحد.','⟦3س + 5⟧ مقابل ⟦3س + 2⟧ ← 5 مقابل 2','Simplify both sides','Subtract the same amount from both, or divide both by the same positive number.','⟦3x + 5⟧ vs ⟦3x + 2⟧ → 5 vs 2'),
+ FC('fd89','comparison','numline','قيم الاختبار','جرّب ⟦0، 1، −1، ½، عدد كبير⟧. إذا تغيّر الجواب فالمعطيات غير كافية.','⟦س^2⟧ مقابل ⟦س⟧ بلا شرط ← غير كافية','Test values','Try ⟦0, 1, −1, ½, a large number⟧. If the answer changes, it cannot be determined.','⟦x^2⟧ vs ⟦x⟧ with no condition → cannot be determined'),
+ FC('fd90','comparison','numline','قيمتان عدديتان','إذا خلت القيمتان من المتغيرات فالجواب محدد دائمًا: لا تختر «غير كافية».','⟦17 × 19⟧ مقابل ⟦18^2⟧ ← الثانية أكبر بواحد','Two fixed numbers','With no variables the answer is always fixed: never choose "cannot be determined".','⟦17 × 19⟧ vs ⟦18^2⟧ → B is greater by one')
+);
 
 const TECH=[
  {ill:'odd',t:{ar:'الاستبعاد',en:'Elimination'},d:{ar:'احذف الخيارات المستحيلة أولًا. حذف خيارين يرفع فرصتك إلى ٥٠٪ حتى لو لم تُكمل الحل.',en:'Cross out impossible choices first. Removing two raises your odds to 50% even without finishing.'}},
@@ -1556,7 +2514,7 @@ const T = {
   levelRule:['','أقل من ٧٠٪','٧٠٪ فأكثر','٨٥٪ فأكثر بزمن مناسب','٩٥٪ فأكثر في آخر ٢٠ سؤالًا وضمن الزمن المستهدف'],
   roadTitle:'معايير الجاهزية للـ ١٠٠', weekTitle:'مهام الأسبوع', fullPlan:'الخطة كاملة', settings:'الإعدادات',
   ready:[ 'كل المهارات العشر في درجة «ثبات»', '٣ محاكاة كاملة متتالية بدرجة تقديرية ٩٥ فأكثر', 'متوسط زمنك ضمن المستهدف في كل مهارة', 'لا مراجعات مستحقة في دفتر الأخطاء' ],
-  learnTitle:'حقيبة القدرات', kitIntro:'كل ما تحتاجه في مكان واحد: بطاقات المفاهيم، والدروس، وتقنيات الحل، والأنماط المتكررة في التجميعات، والمفردات، والمصادر.', tabs:{cards:'البطاقات',lessons:'الدروس',tech:'التقنيات',patterns:'أنماط التجميعات',vocab:'المفردات',resources:'المصادر'},
+  learnTitle:'حقيبة القدرات', kitIntro:'كل ما تحتاجه في مكان واحد: بطاقات المفاهيم، والدروس، وتقنيات الحل، والأنماط المتكررة في التجميعات، والمفردات، والمصادر.', tabs:{found:'التأسيس',cards:'البطاقات',lessons:'الدروس',tech:'التقنيات',patterns:'أنماط التجميعات',vocab:'المفردات',resources:'المصادر'},
   deckAll:'كل البطاقات', cardsIntro:'اقرأ وجه البطاقة وحاول أن تتذكر، ثم اقلبها. «راجعها» تعيدها إليك اليوم، و«أعرفها» تؤجلها بضعة أيام.', tapFlip:'اضغط للقلب', example:'مثال', allInDeck:'كل بطاقات القسم', deckDone:'أنهيت بطاقات هذا القسم لليوم. ارجع غدًا أو اختر قسمًا آخر.', techIntro:'تقنيات يعتمد عليها المتفوقون لرفع الدقة والسرعة. طبّق واحدة في كل جلسة حتى تصبح عادة.', patIntro:'أنماط أسئلة تتكرر في التجميعات التي يتداولها الطلاب بعد الاختبار، مع مثال يوضح كل نمط.', how:'كيف يأتي', trick:'مفتاح الحل', practicePattern:'تدرّب على هذا النمط', skillCards:'بطاقات هذه المهارة',
   verbal:'القسم اللفظي', quant:'القسم الكمي',
   concept:'المفهوم', mind:'كيف يفكر واضع السؤال', steps:'خطوات الحل', types:'الأنماط مع أمثلة', rules:'القوانين والحقائق', traps:'الفخاخ', examples:'أمثلة محلولة', speed:'للوصول إلى ١٠٠', more:'للاستزادة', mastery:'مستواك في هذه المهارة', targetTime:'الزمن المستهدف',
@@ -1569,7 +2527,7 @@ const T = {
   pDiag:'الاختبار التشخيصي', pDiagD:'سؤالان من كل مهارة · ٢٠ سؤالًا في ١٥ دقيقة.',
   pVerbal:'قسم لفظي', pVerbalD:'٢٤ سؤالًا · ٢٥ دقيقة بتوقيت الاختبار.',
   pQuant:'قسم كمي', pQuantD:'٢٤ سؤالًا · ٢٥ دقيقة بلا آلة حاسبة.',
-  pMock:'محاكاة كاملة', pMockD:'٥ أقسام × ٢٤ سؤالًا × ٢٥ دقيقة، بأسئلة جديدة في كل مرة.', rsTitle:'الأقسام المتكررة', rsIntro:'٦٠ قسمًا كميًا بتركيبة القسم كما يأتي في الاختبار المحوسب وبترتيبه: ٤ مسائل، ثم مقارنتان، ثم سؤالا هندسة، ثم سؤالان على جدول، ثم سؤال جبر. الأسئلة أصلية وثابتة لكل قسم، فأعد القسم وقارن درجتك.', rsOne:'قسم', rsDone:'أقسام محلولة', rsFreeNote:'أول قسمين مجانيان.', modelsTitle:'النماذج الكاملة', modelsIntro:'٣٠ نموذجًا ثابتًا بصيغة الاختبار (٥ أقسام × ٢٤ سؤالًا × ٢٥ دقيقة)، تتبع توزيع أسئلة الاختبار وأنماطه المتكررة. أعد أي نموذج وقارن درجتك.', model:'نموذج', best:'أفضل', notTaken:'لم يُحل', modelsDone:'نماذج محلولة',
+  pMock:'محاكاة كاملة', pMockD:'٥ أقسام × ٢٤ سؤالًا × ٢٥ دقيقة، بأسئلة جديدة في كل مرة.', rsTitle:'الأقسام المتكررة', rsIntro:'٦٠ قسمًا كميًا بتركيبة القسم كما يأتي في الاختبار المحوسب وبترتيبه: ٤ مسائل، ثم مقارنتان، ثم سؤالا هندسة، ثم سؤالان على جدول، ثم سؤال جبر. الأسئلة أصلية وثابتة لكل قسم، فأعد القسم وقارن درجتك.', rsOne:'قسم', rsDone:'أقسام محلولة', rsFreeNote:'أول قسمين مجانيان.', fdTitle:'مسار التأسيس', fdIntro:'ثلاثون درسًا قصيرًا تبني الكمي من الصفر بالترتيب: الأعداد، ثم الحساب، ثم الجبر، ثم الهندسة، ثم الإحصاء والمقارنة. في كل درس شرح مختصر، وقواعد، وأمثلة محلولة خطوة بخطوة، وفخاخ شائعة، ثم تدريب من ١٠ أسئلة يبدأ سهلًا ويتدرج.', fdDoneN:'دروس تدربت عليها', fdFreeNote:'الدروس كلها مفتوحة للقراءة، وتدريبات أول ٥ دروس مجانية.', fdLesson:'الدرس', fdOf:'من', fdRules:'القواعد', fdEx:'أمثلة محلولة', fdExN:'مثال', fdDrill:'تدرّب على الدرس', fdDrillD:'١٠ أسئلة تبدأ سهلة ثم تتدرج، مع تصحيح فوري وشرح بعد كل سؤال.', fdGo:'ابدأ التدريب', fdBest:'أفضل نتيجة', fdNot:'لم تتدرب بعد', fdCards:'بطاقات الدرس', fdPromoT:'تبدأ من الصفر في الكمي؟', fdPromoD:'مسار التأسيس: ٣٠ درسًا قصيرًا بالترتيب، من الكسور والأسس إلى الهندسة والإحصاء، ولكل درس تدريب متدرج.', fdPromoGo:'افتح مسار التأسيس', modelsTitle:'النماذج الكاملة', modelsIntro:'٣٠ نموذجًا ثابتًا بصيغة الاختبار (٥ أقسام × ٢٤ سؤالًا × ٢٥ دقيقة)، تتبع توزيع أسئلة الاختبار وأنماطه المتكررة. أعد أي نموذج وقارن درجتك.', model:'نموذج', best:'أفضل', notTaken:'لم يُحل', modelsDone:'نماذج محلولة',
   bySkillTitle:'تدريب حسب المهارة', start:'ابدأ', questions:'سؤالًا', min:'دقيقة', sec:'ث', q:'سؤال', of:'من',
   due:'مستحقة', noDue:'لا مراجعات مستحقة اليوم',
   sectionLabel:'القسم', finishSection:'إنهاء القسم', finishTest:'إنهاء', prev:'السابق', next:'التالي', check:'تحقق', flag:'علّم للمراجعة', flagged:'معلَّم', map:'خريطة الأسئلة',
@@ -1596,7 +2554,7 @@ const T = {
   methodTitle:'كيف تعمل الطريقة', methodIntro:'كل ما في أكاديمية القدرات مبني على مبادئ تعلّم أثبتت أبحاث علم النفس التربوي فعاليتها، ويعتمدها المتفوقون في الاختبارات المعيارية.',
   footer:'أكاديمية القدرات · info@gat.academy',
   none:'لا يوجد', mistakesEmpty:'لا أخطاء مسجلة بعد.', items:'سؤال',
-  kinds:{rs:'قسم متكرر',model:'نموذج',diag:'تشخيصي',verbal:'قسم لفظي',quant:'قسم كمي',mock:'محاكاة كاملة',skill:'مهارة',review:'مراجعة',session:'جلسة اليوم'},
+  kinds:{fd:'تأسيس',rs:'قسم متكرر',model:'نموذج',diag:'تشخيصي',verbal:'قسم لفظي',quant:'قسم كمي',mock:'محاكاة كاملة',skill:'مهارة',review:'مراجعة',session:'جلسة اليوم'},
   timeUp:'انتهى الوقت', letters:['أ','ب','ج','د'], back:'رجوع', close:'إغلاق'
  },
  en:{
@@ -1623,7 +2581,7 @@ const T = {
   levelRule:['','below 70%','70% or more','85%+ at a good pace','95%+ over the last 20 questions within target time'],
   roadTitle:'Readiness criteria for 100', weekTitle:'This week', fullPlan:'Full plan', settings:'Settings',
   ready:['All ten skills at "Locked in"','3 full simulations in a row estimated at 95+','Average time within target for every skill','No reviews due in your mistake log'],
-  learnTitle:'The GAT kit', kitIntro:'Everything in one place: concept cards, lessons, solving techniques, recurring compilation patterns, vocabulary and resources.', tabs:{cards:'Cards',lessons:'Lessons',tech:'Techniques',patterns:'Compilation patterns',vocab:'Vocabulary',resources:'Resources'},
+  learnTitle:'The GAT kit', kitIntro:'Everything in one place: concept cards, lessons, solving techniques, recurring compilation patterns, vocabulary and resources.', tabs:{found:'Foundation',cards:'Cards',lessons:'Lessons',tech:'Techniques',patterns:'Compilation patterns',vocab:'Vocabulary',resources:'Resources'},
   deckAll:'All cards', cardsIntro:'Read the front and try to recall the answer, then flip. "Review again" brings the card back today; "I know it" sets it aside for a few days.', tapFlip:'Tap to flip', example:'Example', allInDeck:'All cards in this deck', deckDone:'You have finished this deck for today. Come back tomorrow or pick another deck.', techIntro:'Techniques top scorers rely on for accuracy and speed. Use one each session until it becomes a habit.', patIntro:'Question patterns that keep showing up in the compilations students share after the test, each with an example.', how:'How it appears', trick:'The key', practicePattern:'Practice this pattern', skillCards:'Cards for this skill',
   verbal:'Verbal', quant:'Quantitative',
   concept:'The concept', mind:'How the test writer thinks', steps:'How to solve', types:'Patterns with examples', rules:'Rules and facts', traps:'Traps', examples:'Worked examples', speed:'Getting to 100', more:'Go further', mastery:'Your level in this skill', targetTime:'Target time',
@@ -1636,7 +2594,7 @@ const T = {
   pDiag:'Diagnostic test', pDiagD:'Two questions from each skill · 20 questions in 15 minutes.',
   pVerbal:'Verbal section', pVerbalD:'24 questions · 25 minutes, on test timing.',
   pQuant:'Quant section', pQuantD:'24 questions · 25 minutes, no calculator.',
-  pMock:'Full simulation', pMockD:'5 sections × 24 questions × 25 minutes, with new questions every time.', rsTitle:'Recurring sections', rsIntro:'60 quantitative sections built like a section of the computer-based test, in its order: 4 word problems, 2 comparisons, 2 geometry items, 2 questions on a table, then 1 algebra item. The questions are original and fixed for each section, so you can retake one and compare.', rsOne:'Section', rsDone:'sections done', rsFreeNote:'The first two sections are free.', modelsTitle:'Full model tests', modelsIntro:'30 fixed tests in the test format (5 sections × 24 questions × 25 minutes) that follow the test’s question mix and recurring patterns. Retake any test and compare your scores.', model:'Test', best:'best', notTaken:'not taken', modelsDone:'tests completed',
+  pMock:'Full simulation', pMockD:'5 sections × 24 questions × 25 minutes, with new questions every time.', rsTitle:'Recurring sections', rsIntro:'60 quantitative sections built like a section of the computer-based test, in its order: 4 word problems, 2 comparisons, 2 geometry items, 2 questions on a table, then 1 algebra item. The questions are original and fixed for each section, so you can retake one and compare.', rsOne:'Section', rsDone:'sections done', rsFreeNote:'The first two sections are free.', fdTitle:'Foundation track', fdIntro:'Thirty short lessons that build the quantitative part from zero, in order: numbers, then arithmetic, algebra, geometry, and statistics and comparison. Each lesson has a short explanation, the rules, step-by-step worked examples and common traps, then a 10-question drill that starts easy and builds up.', fdDoneN:'lessons practiced', fdFreeNote:'Every lesson is open to read, and the drills for the first 5 lessons are free.', fdLesson:'Lesson', fdOf:'of', fdRules:'Rules', fdEx:'Worked examples', fdExN:'Example', fdDrill:'Practice this lesson', fdDrillD:'10 questions that start easy and build up, with instant feedback and an explanation after each one.', fdGo:'Start practice', fdBest:'Best score', fdNot:'Not practiced yet', fdCards:'Cards for this lesson', fdPromoT:'Starting the quantitative part from zero?', fdPromoD:'The foundation track: 30 short lessons in order, from fractions and exponents to geometry and statistics, each with a graded drill.', fdPromoGo:'Open the foundation track', modelsTitle:'Full model tests', modelsIntro:'30 fixed tests in the test format (5 sections × 24 questions × 25 minutes) that follow the test’s question mix and recurring patterns. Retake any test and compare your scores.', model:'Test', best:'best', notTaken:'not taken', modelsDone:'tests completed',
   bySkillTitle:'Practice by skill', start:'Start', questions:'questions', min:'min', sec:'s', q:'Question', of:'of',
   due:'due', noDue:'No reviews due today',
   sectionLabel:'Section', finishSection:'End section', finishTest:'Finish', prev:'Previous', next:'Next', check:'Check', flag:'Mark for review', flagged:'Marked', map:'Question map',
@@ -1663,7 +2621,7 @@ const T = {
   methodTitle:'How the method works', methodIntro:'Everything in GAT Academy is built on learning principles backed by educational psychology research and used by top scorers on standardized tests.',
   footer:'GAT Academy · info@gat.academy',
   none:'None', mistakesEmpty:'No mistakes logged yet.', items:'questions',
-  kinds:{rs:'Recurring section',model:'Model test',diag:'Diagnostic',verbal:'Verbal section',quant:'Quant section',mock:'Full simulation',skill:'Skill',review:'Review',session:'Session'},
+  kinds:{fd:'Foundation',rs:'Recurring section',model:'Model test',diag:'Diagnostic',verbal:'Verbal section',quant:'Quant section',mock:'Full simulation',skill:'Skill',review:'Review',session:'Session'},
   timeUp:'Time is up', letters:['A','B','C','D'], back:'Back', close:'Close'
  }
 };
@@ -1920,15 +2878,15 @@ const ymd=x=>x.getFullYear()+'-'+pad2(x.getMonth()+1)+'-'+pad2(x.getDate());
 const todayStr=()=>ymd(new Date());
 const addDays=(d,n)=>{ const x=new Date(String(d).slice(0,10)+'T12:00:00'); x.setDate(x.getDate()+n); return ymd(x); };
 const isDay=v=>typeof v==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(v)&&!isNaN(new Date(v+'T12:00:00'));
-const DEF=()=>({lang:'ar',track:'sci',target:100,examDate:'',weeks:8,planStart:todayStr(),done:{},stats:{},recent:[],attempts:[],mistakes:[],days:[],sessionDays:[],vocab:{ar:{},en:{}},cards:{},models:{},rs:{},xp:{},causes:{concept:0,careless:0,time:0,trap:0}});
+const DEF=()=>({lang:'ar',track:'sci',target:100,examDate:'',weeks:8,planStart:todayStr(),done:{},stats:{},recent:[],attempts:[],mistakes:[],days:[],sessionDays:[],vocab:{ar:{},en:{}},cards:{},models:{},rs:{},fd:{},xp:{},causes:{concept:0,careless:0,time:0,trap:0}});
 /* any stored or imported state (old shapes, missing fields, wrong types) becomes a valid state with defaults; never throws */
 function normalize(o){
   if(!o||typeof o!=='object'||Array.isArray(o)) o={};
   const s=Object.assign(DEF(),o);
   const isObj=v=>!!v&&typeof v==='object'&&!Array.isArray(v);
   ['recent','attempts','mistakes','days','sessionDays'].forEach(k=>{ if(!Array.isArray(s[k])) s[k]=[]; });
-  ['done','stats','cards','models','rs','xp','causes','vocab','dq','diag','rst'].forEach(k=>{ if(s[k]!=null&&!isObj(s[k])) delete s[k]; });
-  ['done','stats','cards','models','rs','xp','causes','vocab'].forEach(k=>{ if(!isObj(s[k])) s[k]={}; });
+  ['done','stats','cards','models','rs','fd','xp','causes','vocab','dq','diag','rst'].forEach(k=>{ if(s[k]!=null&&!isObj(s[k])) delete s[k]; });
+  ['done','stats','cards','models','rs','fd','xp','causes','vocab'].forEach(k=>{ if(!isObj(s[k])) s[k]={}; });
   if(!isObj(s.vocab.ar)) s.vocab.ar={}; if(!isObj(s.vocab.en)) s.vocab.en={};
   for(const c of ['concept','careless','time','trap']) s.causes[c]=Math.max(0,+s.causes[c]||0);
   s.lang=s.lang==='en'?'en':'ar'; s.track=s.track==='lit'?'lit':'sci'; s.target=Math.max(60,Math.min(100,Math.round(+s.target)||100)); s.weeks=[4,6,8,10,12].includes(+s.weeks)?+s.weeks:8;
@@ -1938,7 +2896,7 @@ function normalize(o){
   const days=a=>[...new Set(a.filter(isDay))].sort(); s.days=days(s.days); s.sessionDays=days(s.sessionDays);
   if(s.diag&&(!isObj(s.diag.skills)||!isDay(s.diag.date))) delete s.diag;
   if(s.dq&&!isDay(s.dq.d)) delete s.dq;
-  for(const k of ['cards','xp','models','rs','stats']) for(const [id,v] of Object.entries(s[k])) if(!isObj(v)) delete s[k][id];
+  for(const k of ['cards','xp','models','rs','fd','stats']) for(const [id,v] of Object.entries(s[k])) if(!isObj(v)) delete s[k][id];
   for(const l of ['ar','en']) for(const [w,v] of Object.entries(s.vocab[l])) if(!isObj(v)) delete s.vocab[l][w];
   return s;
 }
@@ -2233,6 +3191,7 @@ function startTest(kind,o={}){
     sections=ord.map((a,i)=>sec(`${t('sectionLabel')} ${numL(i+1)} · ${a==='V'?t('vShort'):t('qShort')}`,a==='V'?verbalSection(lang,used):quantSection(lang,used),25)); }
   else if(kind==='model'){ title=`${t('model')} ${numL(o.k+1)}`; sections=modelSections(o.k,lang).map((x,i)=>sec(`${t('sectionLabel')} ${numL(i+1)} · ${x.a==='V'?t('vShort'):t('qShort')}`,x.qs,25)); }
   else if(kind==='rs'){ if(!PRO()&&o.k>=RS_FREE){ hitLimit('test'); return; } const r=rsSection(o.k); title=`${t('rsOne')} ${numL(o.k+1)} · ${r.name[lang]}`; sections=[sec(title,rsQuestions(o.k,lang),13)]; }
+  else if(kind==='fd'){ const l=fdLesson(o.id); if(!l) return; if(!fdOpen(o.id)){ hitLimit('skill'); return; } mode='learn'; title=`${l[lang].t}`; sections=[sec(title,fdQuestions(o.id,lang),15)]; o.k=o.id; }
   else if(kind==='skill'){ mode='learn'; title=SKILLS[o.skill][lang]; sections=[sec(title,buildSkill(o.skill,10,lang,used),15)]; }
   else if(kind==='session'){ mode='learn'; title=t('sessionTitle'); let qs=sessionSet(lang); const left=dailyLeft(); if(qs.length>left) qs=qs.slice(0,left); sections=[sec(title,qs,Math.max(5,Math.round(qs.length*1.3)))]; }
   else if(kind==='review'){ const d=dueList(lang).slice(0,Math.min(20,dailyLeft())); if(!d.length){ toast(t('noDue')); return; } mode='learn'; title=t('pReview'); sections=[sec(title,d.map(m=>({...m})),Math.max(5,d.length*1.5))]; }
@@ -2284,6 +3243,7 @@ function finishTest(){
   if(X.task) S.done[X.task]=true;
   if(X.kind==='session'||X.kind==='review') addDaily(all.filter(x=>x.your!=null).length);
   if(X.kind==='diag'&&!S.diag){ const sk={}; for(const [k,b] of Object.entries(bySkill)) sk[k]={c:b.c,t:b.t}; S.diag={date:d,pct:att.pct,skills:sk}; }
+  if(X.kind==='fd'&&X.mk){ const m=S.fd[X.mk]||{}; m.last=att.pct; m.best=Math.max(m.best||0,att.pct); m.date=d; S.fd[X.mk]=m; }
   if(X.kind==='rs'){ const m=S.rs[X.mk]||{}; m.last=att.pct; m.best=Math.max(m.best||0,att.pct); m.date=d; m.aid=att.id; S.rs[X.mk]=m; }
   if(X.kind==='model'){ const m=S.models[X.mk]||{}; m.last=att.pct; m.est=est; m.best=Math.max(m.best||0,att.pct); m.date=d; m.aid=att.id; S.models[X.mk]=m; }
   saveDetail(att,all);
@@ -2570,7 +3530,8 @@ function pageLearn(tab='cards'){
   const tabs=`<nav class="tabs">${Object.entries(t('tabs')).map(([k,v])=>`<a href="#learn-${k}" class="${tab===k?'on':''}">${v}</a>`).join('')}</nav>`;
   let body='';
   if(tab==='lessons'){ const card=s=>{ const i=skillInfo(s), l=LESSONS[s][S.lang], c=FLASH.find(f=>f.sk===s); return `<a class="lcard" href="#lesson-${s}"><div class="lc-ill">${ILL[c.ill]()}</div><div class="lc-top"><h3>${SKILLS[s][S.lang]}</h3>${pips(i.level)}</div><p>${M(esc(l.concept[0]))}</p><div class="lc-f"><span class="muted small">${t('levels')[i.level]}${xpList(s).length+lockedXp(s).length?` · <span class="lc-xp">▶ ${numL(xpList(s).length+lockedXp(s).length)} ${t('xpShort')}</span>`:''}</span><span class="lc-go">${t('lessonsOpen')}</span></div></a>`; };
-    body=`<h2 class="sec-h hl">${t('verbal')}</h2><div class="lgrid">${V_SKILLS.map(card).join('')}</div><h2 class="sec-h hl">${t('quant')}</h2><div class="lgrid">${Q_SKILLS.map(card).join('')}</div>`; }
+    body=`<a class="card fd-promo" href="#learn-found"><div><h2>${t('fdPromoT')}</h2><p>${t('fdPromoD')}</p></div><span class="btn soft sm">${t('fdPromoGo')}</span></a><h2 class="sec-h hl">${t('verbal')}</h2><div class="lgrid">${V_SKILLS.map(card).join('')}</div><h2 class="sec-h hl">${t('quant')}</h2><div class="lgrid">${Q_SKILLS.map(card).join('')}</div>`; }
+  else if(tab==='found') body=foundView();
   else if(tab==='cards') body=cardsView();
   else if(tab==='tech'){ const n=techN(TECH.length); body=`<p class="lead">${t('techIntro')}</p><h2 class="sr-only">${t('tabs').tech}</h2><div class="notes">${TECH.slice(0,n).map((x,i)=>`<article class="note-card c${i%4}"><div class="nc-ill">${ILL[x.ill]()}</div><h3>${esc(L(x.t))}</h3><p>${M(esc(L(x.d)))}</p></article>`).join('')}</div>`
     +(n<TECH.length?proFold('tech',t('moreTech')(numL(TECH.length-n)),`<div class="notes locked-notes">${TECH.slice(n).map((x,i)=>`<button type="button" class="note-card c${(i+n)%4} locked" data-lock="tech"><h3>${esc(L(x.t))}</h3>${lockBadge()}</button>`).join('')}</div>`,'tech'):''); }
@@ -2615,6 +3576,28 @@ function xpSection(s){ const xs=xpList(s), lk=lockedXp(s); if(!xs.length&&!lk.le
   return `<section class="card xp-sec" id="xp-${s}"><div class="xp-sec-h"><h2>${t('xpTitle')}</h2><span class="chip num">${numL(n)} / ${numL(items.length)}</span></div><p class="muted small">${t('xpIntro')}</p>
     <div class="xpl">${items.map((x,i)=>x.locked?`<button type="button" class="xpc locked" data-lock="xp"><span class="xpn"><span class="pl">${LOCKSVG}</span><span>${t('xpN')} ${numL(i+1)}</span><span class="xpm">${t('xpMin')(numL(x.min))}</span></span><b>${esc(x.title)}</b><small>${t('ben').xp}</small></button>`
       :`<button class="xpc" data-xp="${x.key}"><span class="xpn"><span class="pl">${play}</span><span>${t('xpN')} ${numL(i+1)}</span><span class="xpm">${esc(x.min||'')}</span>${done[x.key]?`<span class="dn">✓ ${t('xpDone')}</span>`:''}</span><b>${esc(x.title)}</b>${x.goals&&x.goals[0]?`<small>${esc(x.goals[0])}</small>`:''}</button>`).join('')}</div></section>`; }
+/* ============ Foundation track pages ============ */
+const fdNum=id=>FD.findIndex(l=>l.id===id);
+const fdOpen=id=>PRO()||fdNum(id)<FD_FREE;
+function fdStat(id){ const m=(S.fd||{})[id]; return m?`<span class="fd-st ${m.best>=80?'ok':''}">${t('fdBest')}: <b class="num">${numL(m.best)}%</b></span>`:`<span class="fd-st muted">${t('fdNot')}</span>`; }
+function foundView(){ const done=FD.filter(l=>(S.fd||{})[l.id]).length;
+  return `<p class="lead">${t('fdIntro')}</p><div class="vstats"><span><b class="num">${numL(done)}</b> / ${numL(FD.length)} ${t('fdDoneN')}</span></div>${PRO()?'':`<p class="small muted">${t('fdFreeNote')}</p>`}`
+   +FDU.map(([u,nm])=>`<h2 class="sec-h hl">${L(nm)}</h2><div class="fd-grid">${FD.filter(l=>l.u===u).map(l=>{ const i=fdNum(l.id), c=l[S.lang]; return `<a class="fd-card" href="#fl-${l.id}"><span class="fd-n num">${numL(i+1)}</span><div class="fd-b"><h3>${esc(c.t)}</h3><p>${M(esc(c.d))}</p>${fdStat(l.id)}</div></a>`; }).join('')}</div>`).join(''); }
+function pageFound(id){ const i=fdNum(id); if(i<0) return pageLearn('found'); const l=FD[i], c=l[S.lang], ar=S.lang==='ar', unit=L(FDU.find(x=>x[0]===l.u)[1]);
+  const fig=f=>f?`<div class="fd-fig">${f.replace(/<br>$/,'')}</div>`:'';
+  const cards=FLASH.filter(x=>/^fd\d+$/.test(x.id)&&+x.id.slice(2)>3*i&&+x.id.slice(2)<=3*i+3);
+  const prev=FD[i-1], next=FD[i+1];
+  const card=x=>cardOpen(x)?`<details class="mini-flash"><summary>${stickyCard(x,false,false)}</summary>${stickyCard(x,true,false)}</details>`:`<button type="button" class="mini-lock ${['c0','c1','c2','c3'][ALL_SKILLS.indexOf(x.sk)%4]}" data-lock="cards"><span class="chip">${SKILLS[x.sk][S.lang]}</span><b>${esc(L(x.f))}</b>${lockBadge()}</button>`;
+  return `<header class="page-h lesson-h"><div><a class="back" href="#learn-found">${t('fdTitle')}</a><div class="eyebrow">${t('fdLesson')} ${numL(i+1)} ${t('fdOf')} ${numL(FD.length)} · ${unit}</div><h1><span class="hl">${esc(c.t)}</span></h1></div><div class="lh-ill">${ILL[l.ill]()}</div></header>
+  <div class="fd-lesson">
+    <section class="card">${c.intro.map(p=>`<p>${M(esc(p))}</p>`).join('')}</section>
+    <section><h2 class="h2s">${t('fdRules')}</h2><div class="rules">${c.rules.map(x=>`<div class="rule">${M(esc(x))}</div>`).join('')}</div></section>
+    <section><h2 class="h2s">${t('fdEx')}</h2><div class="fd-exs">${c.ex.map((e,k)=>`<article class="card fd-ex"><div class="eyebrow">${t('fdExN')} ${numL(k+1)}</div>${fig(e[3])}<p class="fd-q">${M(esc(e[0]))}</p><ol class="nsteps">${e[1].map(s=>`<li><span>${M(esc(s))}</span></li>`).join('')}</ol><p class="fd-a"><b>${t('answer')}:</b> ${M(esc(e[2]))}</p></article>`).join('')}</div></section>
+    <section class="card warn-card"><h2>${t('traps')}</h2><ul class="bul">${c.traps.map(x=>`<li>${M(esc(x))}</li>`).join('')}</ul></section>
+    <section class="card accent-card fd-drill"><div><h2>${t('fdDrill')}</h2><p class="small">${t('fdDrillD')}</p>${fdStat(id)}</div><button class="btn primary" data-fd="${id}">${fdOpen(id)?'':LOCKSVG}${t('fdGo')}</button></section>
+    ${cards.length?`<section><h2 class="h2s">${t('fdCards')}</h2><div class="notes small-notes">${cards.map(card).join('')}</div></section>`:''}
+    <nav class="fd-nav">${prev?`<a class="btn ghost" href="#fl-${prev.id}">${ar?'→':'←'} ${esc(prev[S.lang].t)}</a>`:'<span></span>'}${next?`<a class="btn soft" href="#fl-${next.id}">${esc(next[S.lang].t)} ${ar?'←':'→'}</a>`:''}</nav>
+  </div>`; }
 function pageLesson(s){
   const l=LESSONS[s]?.[S.lang]; if(!l) return pageLearn(); const i=skillInfo(s), ar=S.lang==='ar';
   const res=l.res.map(r=>r[0]==='yt'?{k:'video',t:{ar:'يوتيوب: '+r[1],en:'YouTube: '+r[1]},d:{ar:'بحث جاهز لشروحات هذه المهارة.',en:'A ready search for lessons on this skill.'},u:yt(r[1])}:{k:'link',t:{ar:r[1],en:r[1]},d:{ar:'مرجع خارجي للتعمق.',en:'External reference for deeper practice.'},u:r[2]});
@@ -2936,6 +3919,7 @@ let AUTHQ=null, AUTHERR=null;
 function route(){ let h=(location.hash||'#today').slice(1);
   if(/^sign(in|up)(\?|$)/.test(h)){ const m=/err=([\w-]+)/.exec(h); AUTHERR=m?m[1]:null; AUTHQ=h.slice(0,6); h='today'; try{ history.replaceState(null,'',location.pathname+location.search+'#today'); }catch(e){} }
   if(h.startsWith('lesson-')) return {p:'learn',v:()=>pageLesson(h.slice(7))};
+  if(h.startsWith('fl-')) return {p:'learn',v:()=>pageFound(h.slice(3))};
   if(h.startsWith('learn')) return {p:'learn',v:()=>pageLearn(h.split('-')[1]||'cards')};
   if(h==='plan') return {p:'today',v:pagePlan};
   if(h.startsWith('upgrade')) return {p:'upgrade',v:()=>pageUpgrade(h.split('?')[1]||'')};
@@ -3004,6 +3988,7 @@ function bindMain(){
   m.querySelectorAll('[data-deck]').forEach(b=>b.onclick=()=>{ FCV.deck=b.dataset.deck; FCV.flip=false; renderRoute(); });
   m.querySelectorAll('[data-model]').forEach(b=>b.onclick=()=>startTest('model',{k:+b.dataset.model}));
   m.querySelectorAll('[data-rs]').forEach(b=>b.onclick=()=>startTest('rs',{k:+b.dataset.rs}));
+  m.querySelectorAll('[data-fd]').forEach(b=>b.onclick=()=>startTest('fd',{id:b.dataset.fd}));
   on('#v-know',()=>vocabAct(true)); on('#v-again',()=>vocabAct(false));
   on('#bk-copy',()=>{ const code=btoa(unescape(encodeURIComponent(JSON.stringify(S)))), ta=$('#bk-in'); const fb=()=>{ ta.value=code; ta.select(); };
     const fb2=()=>{ fb(); toast(t('copyManual')); }; if(navigator.clipboard) navigator.clipboard.writeText(code).then(()=>{ ta.value=code; toast(t('copied')); }).catch(fb2); else fb2(); });
@@ -3176,6 +4161,7 @@ function mergeStates(a,b){
   const pickBox=(x,y)=>{ const r={...x}; for(const [k,v] of Object.entries(y||{})){ const w=r[k]; if(!w||(v.t&&w.t?v.t>w.t:((v.box||0)>(w.box||0)||((v.box||0)===(w.box||0)&&(v.due||'')>(w.due||''))))) r[k]=v; } return r; };
   o.cards=pickBox(a.cards,b.cards); o.vocab={ar:pickBox(a.vocab.ar,b.vocab.ar),en:pickBox(a.vocab.en,b.vocab.en)};
   o.xp={...a.xp}; for(const [k,v] of Object.entries(b.xp)){ const w=o.xp[k]; if(!w||(v.score||0)>(w.score||0)||((v.score||0)===(w.score||0)&&(v.date||'')>(w.date||''))) o.xp[k]=v; }
+  for(const P of ['rs','fd']){ o[P]={...a[P]}; for(const [k,v] of Object.entries(b[P]||{})){ const w=o[P][k]; o[P][k]=!w?v:{...((v.date||'')>=(w.date||'')?v:w),best:Math.max(v.best||0,w.best||0)}; } }
   o.lastExport=[a.lastExport,b.lastExport].filter(Boolean).sort().pop()||undefined;
   o.diag=[a.diag,b.diag].filter(x=>x&&x.date).sort((x,y)=>x.date<y.date?-1:x.date>y.date?1:0)[0]; if(!o.diag) delete o.diag; /* baseline: the first diagnostic */
   o.since=[a.since,b.since].filter(Boolean).sort()[0]; if(!o.since) delete o.since;
@@ -3196,8 +4182,8 @@ function applyResets(o,a,b){
     const later=(arr,f)=>fresh?arr.filter(f):[];
     const models=()=>{ const r={...au.models}; if(fresh) for(const [k,v] of Object.entries(ot.models)) if(!r[k]&&ms36(v.aid)>m) r[k]=v; return r; };
     if(P==='skills'){ const ids=new Set(au.attempts.map(x=>x.id)); o.attempts=au.attempts.concat(later(ot.attempts,x=>!ids.has(x.id)&&ms36(x.id)>m)).sort((x,y)=>(x.date+x.id)<(y.date+y.id)?-1:1).slice(-300);
-      o.recent=au.recent.concat(later(ot.recent,x=>(x.d||'')>=day)).slice(-1500); o.stats=au.stats; o.days=uniDays(au.days,later(ot.days,d=>d>=day)); o.sessionDays=uniDays(au.sessionDays,later(ot.sessionDays,d=>d>=day)); o.models=models(); }
-    if(P==='models'){ o.models=models(); const keep=new Set(au.attempts.map(x=>x.id)); o.attempts=o.attempts.filter(x=>x.kind!=='model'||keep.has(x.id)||ms36(x.id)>m); }
+      o.recent=au.recent.concat(later(ot.recent,x=>(x.d||'')>=day)).slice(-1500); o.stats=au.stats; o.days=uniDays(au.days,later(ot.days,d=>d>=day)); o.sessionDays=uniDays(au.sessionDays,later(ot.sessionDays,d=>d>=day)); o.models=models(); o.rs={...au.rs}; o.fd={...au.fd}; }
+    if(P==='models'){ o.models=models(); o.rs={...au.rs}; const keep=new Set(au.attempts.map(x=>x.id)); o.attempts=o.attempts.filter(x=>x.kind!=='model'||keep.has(x.id)||ms36(x.id)>m); }
     if(P==='mistakes'){ const keys=new Set(au.mistakes.map(x=>x.key)); o.mistakes=au.mistakes.concat(later(ot.mistakes,x=>!keys.has(x.key)&&(x.at||0)>m)); o.causes={...au.causes}; }
     if(P==='cards'){ const pick=(x,y)=>{ const r={...(x||{})}; if(fresh) for(const [k,v] of Object.entries(y||{})) if(!r[k]&&(v.t||0)>m) r[k]=v; return r; }; o.cards=pick(au.cards,ot.cards); o.vocab={ar:pick(au.vocab.ar,ot.vocab.ar),en:pick(au.vocab.en,ot.vocab.en)}; o.xp=pick(au.xp,ot.xp); }
     if(P==='plan'){ o.planStart=au.planStart; o.weeks=au.weeks; o.done={...au.done}; }
@@ -3259,9 +4245,9 @@ function resetParts(parts){
   if(parts.includes('all')){ DET={}; try{ localStorage.removeItem(DKEY); }catch(e){} const keep={lang:S.lang,track:S.track,target:S.target,diag:S.diag,dq:S.dq,since:S.since,repHide:S.repHide,repSeen:S.repSeen,nudgeD:S.nudgeD}; S=normalize({}); for(const k in keep) if(keep[k]!=null) S[k]=keep[k]; mark('plan','mistakes','models','cards','skills'); save(); renderRoute(); return; }
   if(has('plan')){ S.done={}; S.planStart=todayStr(); mark('plan'); }
   if(has('mistakes')){ S.mistakes=[]; S.causes={concept:0,careless:0,time:0,trap:0}; mark('mistakes'); }
-  if(has('models')){ Object.values(S.models||{}).forEach(m=>{ if(m.aid) delete DET[m.aid]; }); S.models={}; S.attempts=S.attempts.filter(a=>a.kind!=='model'); mark('models'); }
+  if(has('models')){ Object.values(S.models||{}).forEach(m=>{ if(m.aid) delete DET[m.aid]; }); S.models={}; S.rs={}; S.attempts=S.attempts.filter(a=>a.kind!=='model'&&a.kind!=='rs'); mark('models'); }
   if(has('cards')){ S.cards={}; S.vocab={ar:{},en:{}}; S.xp={}; mark('cards'); }
-  if(has('skills')){ DET={}; S.recent=[]; S.stats={}; S.attempts=[]; S.days=[]; S.sessionDays=[]; S.models={}; mark('skills','models'); }
+  if(has('skills')){ DET={}; S.recent=[]; S.stats={}; S.attempts=[]; S.days=[]; S.sessionDays=[]; S.models={}; S.rs={}; S.fd={}; mark('skills','models'); }
   try{ localStorage.setItem(DKEY,JSON.stringify(DET)); }catch(e){}
   save(); renderRoute();
 }

@@ -1116,3 +1116,23 @@ body.exam-open:has(#exam .rs) #toast{bottom:calc(20px + env(safe-area-inset-bott
 /* figures inside questions (recurring sections) */
 .qfig{display:block;inline-size:100%;max-inline-size:260px;block-size:auto;margin:.2rem auto .6rem;color:inherit;overflow:visible}
 .qfig text{font-weight:600}
+/* foundation track */
+.fd-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+.fd-card{display:flex;gap:12px;align-items:flex-start;background:var(--surface);border:1.5px solid var(--line);border-radius:var(--r);padding:14px;text-decoration:none;color:var(--ink);transition:transform .1s,border-color .15s}
+.fd-card:hover{border-color:var(--pri);transform:translateY(-1px)}
+.fd-n{flex:none;inline-size:34px;block-size:34px;border-radius:50%;display:grid;place-items:center;background:var(--pri-soft);color:var(--pri-ink);font-weight:800}
+.fd-b{min-inline-size:0}.fd-b h3{font-size:1rem;margin:0 0 4px}.fd-b p{margin:0 0 6px;font-size:.88rem;color:var(--muted);line-height:1.7}
+.fd-st{font-size:.82rem}.fd-st.ok b{color:var(--ok-t)}
+.fd-lesson{display:grid;gap:20px;max-inline-size:900px}
+.fd-lesson .card p{line-height:1.9}
+.fd-exs{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(280px,1fr))}
+.fd-ex{display:grid;gap:10px;align-content:start}.fd-ex .eyebrow{margin:0}
+.fd-ex .fd-q{font-weight:700;margin:0;line-height:1.8}
+.fd-ex .fd-a{margin:0;padding-top:10px;border-top:1.5px dashed var(--line)}
+.fd-fig .qfig{max-inline-size:220px;margin:0 auto}
+.fd-drill{display:flex;gap:16px;align-items:center;justify-content:space-between;flex-wrap:wrap}.fd-drill h2{margin:0 0 4px}.fd-drill p{margin:0 0 6px}
+.fd-drill .fd-st b{color:var(--butter)}
+.fd-nav{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.fd-promo{display:flex;gap:14px;align-items:center;justify-content:space-between;flex-wrap:wrap;text-decoration:none;color:inherit;margin-block-end:16px;border-inline-start:5px solid var(--pri)}
+.fd-promo h2{font-size:1.05rem;margin:0 0 4px}.fd-promo p{margin:0;font-size:.9rem;color:var(--muted)}
+.fd-lesson .rule .m,.fd-ex .m,.fd-lesson .bul .m{white-space:nowrap}

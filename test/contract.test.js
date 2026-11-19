@@ -87,13 +87,13 @@ run(async () => {
   section("explainer keys and the free/premium bundle split");
   const cfg = (await anon("GET", "/api/config")).j.config;
   const keys = (await anon("GET", "/api/xp/keys")).j;
-  ok(Array.isArray(keys.all) && keys.all.length === 66 && new Set(keys.all).size === 66, "66 distinct explainer keys", keys.all && keys.all.length);
-  ok(keys.all.filter(k => k.startsWith("en-")).length === 33, "33 English + 33 Arabic");
-  ok(keys.all.every(k => keys.all.includes(k.startsWith("en-") ? k.slice(3) : "en-" + k)), "every explainer exists in both languages");
+  ok(Array.isArray(keys.all) && keys.all.length === 96 && new Set(keys.all).size === 96, "96 distinct explainer keys", keys.all && keys.all.length);
+  ok(keys.all.filter(k => k.startsWith("en-")).length === 33 && keys.all.filter(k => k.startsWith("fd-")).length === 30, "33 English + 33 Arabic + 30 foundation (Arabic only)");
+  ok(keys.all.filter(k => !k.startsWith("fd-")).every(k => keys.all.includes(k.startsWith("en-") ? k.slice(3) : "en-" + k)), "every skill explainer exists in both languages");
   const freeSet = new Set(cfg.free.xp.filter(k => keys.all.includes(k)));
   ok(cfg.free.xp.every(k => keys.all.includes(k)), "every free key in the config is a real explainer", cfg.free.xp.filter(k => !keys.all.includes(k)));
   ok(JSON.stringify([...keys.free].sort()) === JSON.stringify([...freeSet].sort()), "/api/xp/keys free list = config free list");
-  ok(Object.keys(TRACKS).every(k => keys.all.includes(k)) && keys.all.every(k => TRACKS[k]), "tracks.json has a track for every explainer and nothing else", keys.all.filter(k => !TRACKS[k]));
+  ok(Object.keys(TRACKS).every(k => keys.all.includes(k)) && keys.all.filter(k => !k.startsWith("fd-")).every(k => TRACKS[k]), "tracks.json has a track for every skill explainer (foundation ones as recorded) and nothing else", keys.all.filter(k => !k.startsWith("fd-") && !TRACKS[k]));
 
   r = await anon("GET", "/xp/free.js");
   ok(r.s === 200 && /javascript/.test(r.h.get("content-type") || ""), "/xp/free.js served to anyone");
@@ -120,7 +120,7 @@ run(async () => {
   const srcFiles = fs.readdirSync(path.join(ROOT, "xpsrc")).filter(f => /\.js$/.test(f)).sort((a, b) => (a === "xp_legacy.js" ? -1 : b === "xp_legacy.js" ? 1 : a < b ? -1 : 1));
   const ref = Object.fromEntries(lessonsIn(srcFiles.map(f => fs.readFileSync(path.join(ROOT, "xpsrc", f), "utf8")).join("\n")).map(L => [L.key, JSON.stringify(L)]));
   const changed = [...freeL, ...premL].filter(L => JSON.stringify(L) !== ref[L.key]).map(L => L.key);
-  ok(Object.keys(ref).length === 66 && changed.length === 0, "every explainer in the bundles is identical to its source", changed);
+  ok(Object.keys(ref).length === 96 && changed.length === 0, "every explainer in the bundles is identical to its source", changed);
 
   // the split follows the admin setting: make one premium explainer free, check, then restore
   const st = (await A("GET", "/api/admin/settings")).j.config;
@@ -143,9 +143,9 @@ run(async () => {
   const wrong = [];
   for (const k of keys.all) {
     const want = freeSet.has(k) ? 404 : 402;
-    for (const id of clipIdsOf(TRACKS[k])) { const s = (await fetch(`${BASE}/audio/${id}.mp3`)).status; if (s !== want && !(want === 404 && s === 200)) wrong.push(`${k}/${id}: ${s} (want ${want})`); }
+    for (const id of (TRACKS[k] ? clipIdsOf(TRACKS[k]) : [])) { const s = (await fetch(`${BASE}/audio/${id}.mp3`)).status; if (s !== want && !(want === 404 && s === 200)) wrong.push(`${k}/${id}: ${s} (want ${want})`); }
     // legacy per-line clips share the lesson key as prefix
-    if (want === 402) { const s = (await fetch(`${BASE}/audio/${k}-s1-b1.mp3`)).status; if (s !== 402) wrong.push(`${k}-s1-b1: ${s}`); }
+    if (want === 402 && TRACKS[k]) { const s = (await fetch(`${BASE}/audio/${k}-s1-b1.mp3`)).status; if (s !== 402) wrong.push(`${k}-s1-b1: ${s}`); }
   }
   ok(wrong.length === 0, "every premium clip id answers 402 to a visitor, every free clip id does not", wrong.slice(0, 10));
   // with real rows stored
@@ -166,7 +166,7 @@ run(async () => {
     a = await get(A, premClip); ok(a.status === 200, "premium clip: admin -> 200");
     a = await get(null, freeClip); ok(a.status === 200 && /public/.test(a.headers.get("cache-control") || ""), "free clip: visitor -> 200, public cache", [a.status, a.headers.get("cache-control")]);
     const idx = (await anon("GET", "/audio/index.json")).j; ok(Array.isArray(idx) && idx.includes(premClip) && idx.includes(freeClip), "/audio/index.json lists stored clip ids");
-    a = await fetch(`${BASE}/audio/tracks.json`); const tj = await a.json(); ok(a.status === 200 && Object.keys(tj).length === 66, "/audio/tracks.json served");
+    a = await fetch(`${BASE}/audio/tracks.json`); const tj = await a.json(); ok(a.status === 200 && Object.keys(tj).length === Object.keys(TRACKS).length, "/audio/tracks.json served");
   } finally {
     const ins = [premClip, freeClip].filter(id => !had.includes(id)); if (ins.length) await sql("DELETE FROM narration WHERE id = ANY($1)", [ins]);
   }

@@ -176,9 +176,10 @@ function splitSource(code, keep) {
 
 let cache = { sig: "", free: "", premium: "", keys: { all: [], free: [] } };
 function files() { return fs.existsSync(SRC) ? fs.readdirSync(SRC).filter(f => /\.js$/.test(f)).sort((a, b) => (a === "xp_legacy.js" ? -1 : b === "xp_legacy.js" ? 1 : a < b ? -1 : 1)) : []; }
+// a lesson: an object with a key and its scenes, written out or built by a helper and spread in ({key, sk, ...B(…)})
 function allKeys() {
   const ks = [];
-  for (const f of files()) { const code = fs.readFileSync(path.join(SRC, f), "utf8"); walk(acorn.parse(code, { ecmaVersion: "latest" }), n => { if (n.type === "ObjectExpression") { const k = keyOfObj(n); if (k && n.properties.some(p => p.key && (p.key.name === "scenes" || p.key.value === "scenes"))) ks.push(k); } }); }
+  for (const f of files()) { const code = fs.readFileSync(path.join(SRC, f), "utf8"); walk(acorn.parse(code, { ecmaVersion: "latest" }), n => { if (n.type === "ObjectExpression") { const k = keyOfObj(n); if (k && (n.properties.some(p => p.key && (p.key.name === "scenes" || p.key.value === "scenes")) || (n.properties.some(p => p.type === "SpreadElement") && n.properties.some(p => p.key && p.key.name === "sk")))) ks.push(k); } }); }
   return [...new Set(ks)];
 }
 function build(freeKeys) {

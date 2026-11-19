@@ -3953,8 +3953,8 @@ function M(str){ const ar=S.lang==='ar';
   const out=String(str).replace(/⟦(.+?)⟧/g,(_,m)=>{ const hasAr=/[\u0600-\u06FF]/.test(m);
     m=m.replace(/\^\(([^)]+)\)/g,'<sup>$1</sup>').replace(/\^([0-9A-Za-z؀-ۿ−-]+)/g,'<sup>$1</sup>');
     m=m.replace(/(^|[^\d.\w])(\d+)\/(\d+)(?![\d.\w])/g,'$1<span class="frac"><span>$2</span><span>$3</span></span>');
-    if(ar&&hasAr) return `<span class="m m-ar" dir="rtl">${m.replace(/→/g,'←')}</span>`;
-    m=m.replace(/([\u0600-\u06FF]+)/g,'$1\u200E'); return `<span class="m" dir="ltr">${m}</span>`; });
+    if(ar&&hasAr) return `<span class="m m-ar${m.replace(/<[^>]+>/g,'').length>30?' m-long':''}" dir="rtl">${m.replace(/→/g,'←')}</span>`;
+    const lg=m.replace(/<[^>]+>/g,'').length>30?' m-long':''; m=m.replace(/([\u0600-\u06FF]+)/g,'$1\u200E'); return `<span class="m${lg}" dir="ltr">${m}</span>`; });
   return ar?arDigits(out):out; }
 const numL=n=>S.lang==='ar'?String(n).replace(/\d/g,d=>'٠١٢٣٤٥٦٧٨٩'[d]):String(n);
 const stem=q=>M(q.includes('<br>')?q:esc(q));

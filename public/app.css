@@ -885,7 +885,7 @@ body.sheet-open{overflow:hidden}
 .restart h2{font-size:1.06rem}
 
 /* long math in explanations may wrap */
-.fb p .m,.rev-exp .m{white-space:normal}
+.fb p .m.m-long,.rev-exp .m.m-long{white-space:normal}
 
 /* ================= round 3 polish ================= */
 .nowrap{white-space:nowrap}

@@ -718,5 +718,13 @@
  {
   "id": "v3-en-fd-s-cmp-no",
   "url": "https://elevenlabsusercontent.com/database/workspace/547b3dceb8124db5aabf67a41ca1e3b4/content_generation/P8eTsGaSV7aibwQbWgmW/SRCNabH0sZSlvxbkvBaA/content.mp3?Expires=1795082400&KeyName=assets-cdn-key-1&Signature=r1lKfjMGRgppb4MVolopiic--Oc="
+ },
+ {
+  "id": "intro-ar",
+  "url": "https://elevenlabsusercontent.com/database/workspace/547b3dceb8124db5aabf67a41ca1e3b4/content_generation/5egAdFhhq4Y673pQ7kae/IFG2hwRHuUW9I0F5Bjj6/content.mp3?Expires=1795089600&KeyName=assets-cdn-key-1&Signature=Ifx1SUeEbGq3OoeYioRaFgHWDq4="
+ },
+ {
+  "id": "intro-en",
+  "url": "https://elevenlabsusercontent.com/database/workspace/547b3dceb8124db5aabf67a41ca1e3b4/content_generation/0lq2BWO7ObbyTwgTXdez/oOrGQRzDhR45CHiUuH59/content.mp3?Expires=1795089600&KeyName=assets-cdn-key-1&Signature=9Idrkcwy4RDyYzT-3tTxcK7C9pU="
  }
 ]

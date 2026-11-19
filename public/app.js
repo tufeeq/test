@@ -3584,12 +3584,11 @@ function foundView(){ const done=FD.filter(l=>(S.fd||{})[l.id]).length;
   return `<p class="lead">${t('fdIntro')}</p><div class="vstats"><span><b class="num">${numL(done)}</b> / ${numL(FD.length)} ${t('fdDoneN')}</span></div>${PRO()?'':`<p class="small muted">${t('fdFreeNote')}</p>`}`
    +FDU.map(([u,nm])=>`<h2 class="sec-h hl">${L(nm)}</h2><div class="fd-grid">${FD.filter(l=>l.u===u).map(l=>{ const i=fdNum(l.id), c=l[S.lang]; return `<a class="fd-card" href="#fl-${l.id}"><span class="fd-n num">${numL(i+1)}</span><div class="fd-b"><h3>${esc(c.t)}</h3><p>${M(esc(c.d))}</p>${fdStat(l.id)}</div></a>`; }).join('')}</div>`).join(''); }
 /* the lesson's narrated explainer (key fd-<id>): playable when its bundle is loaded, otherwise shown locked */
-function fdXp(id){ const k='fd-'+id, L=XPOK()&&XP.get?XP.get(k):null, ar=S.lang==='ar';
-  if(!ar&&!L) return ''; /* the foundation explainers are recorded in Arabic only for now */
+function fdXp(id){ const k=(S.lang==='en'?'en-fd-':'fd-')+id, L=XPOK()&&XP.get?XP.get(k):null;
   const play='<svg viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z" fill="currentColor" stroke="none"/></svg>', done=(S.xp||{})[k];
   if(L) return `<section class="card xp-sec"><div class="xp-sec-h"><h2>${t('fdXpT')}</h2></div><div class="xpl"><button class="xpc" data-xp="${k}"><span class="xpn"><span class="pl">${play}</span><span>${t('xpN')}</span><span class="xpm">${esc(L.min||'')}</span>${done?`<span class="dn">✓ ${t('xpDone')}</span>`:''}</span><b>${esc(L.title)}</b><small>${t('fdXpD')}</small></button></div></section>`;
   if(PRO()) return '';
-  return `<section class="card xp-sec"><div class="xp-sec-h"><h2>${t('fdXpT')}</h2></div><div class="xpl"><button type="button" class="xpc locked" data-lock="xp"><span class="xpn"><span class="pl">${LOCKSVG}</span><span>${t('xpN')}</span></span><b>${esc(FD[fdNum(id)].ar.t)}</b><small>${t('ben').xp}</small></button></div></section>`; }
+  return `<section class="card xp-sec"><div class="xp-sec-h"><h2>${t('fdXpT')}</h2></div><div class="xpl"><button type="button" class="xpc locked" data-lock="xp"><span class="xpn"><span class="pl">${LOCKSVG}</span><span>${t('xpN')}</span></span><b>${esc(FD[fdNum(id)][S.lang].t)}</b><small>${t('ben').xp}</small></button></div></section>`; }
 function pageFound(id){ const i=fdNum(id); if(i<0) return pageLearn('found'); const l=FD[i], c=l[S.lang], ar=S.lang==='ar', unit=L(FDU.find(x=>x[0]===l.u)[1]);
   const fig=f=>f?`<div class="fd-fig">${f.replace(/<br>$/,'')}</div>`:'';
   const cards=FLASH.filter(x=>/^fd\d+$/.test(x.id)&&+x.id.slice(2)>3*i&&+x.id.slice(2)<=3*i+3);

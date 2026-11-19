@@ -87,13 +87,13 @@ run(async () => {
   section("explainer keys and the free/premium bundle split");
   const cfg = (await anon("GET", "/api/config")).j.config;
   const keys = (await anon("GET", "/api/xp/keys")).j;
-  ok(Array.isArray(keys.all) && keys.all.length === 96 && new Set(keys.all).size === 96, "96 distinct explainer keys", keys.all && keys.all.length);
-  ok(keys.all.filter(k => k.startsWith("en-")).length === 33 && keys.all.filter(k => k.startsWith("fd-")).length === 30, "33 English + 33 Arabic + 30 foundation (Arabic only)");
-  ok(keys.all.filter(k => !k.startsWith("fd-")).every(k => keys.all.includes(k.startsWith("en-") ? k.slice(3) : "en-" + k)), "every skill explainer exists in both languages");
+  ok(Array.isArray(keys.all) && keys.all.length === 126 && new Set(keys.all).size === 126, "126 distinct explainer keys", keys.all && keys.all.length);
+  ok(keys.all.filter(k => k.startsWith("en-")).length === 63 && keys.all.filter(k => k.startsWith("fd-")).length === 30 && keys.all.filter(k => k.startsWith("en-fd-")).length === 30, "63 English + 63 Arabic (each with 30 foundation explainers)");
+  ok(keys.all.every(k => keys.all.includes(k.startsWith("en-") ? k.slice(3) : "en-" + k)), "every explainer exists in both languages");
   const freeSet = new Set(cfg.free.xp.filter(k => keys.all.includes(k)));
   ok(cfg.free.xp.every(k => keys.all.includes(k)), "every free key in the config is a real explainer", cfg.free.xp.filter(k => !keys.all.includes(k)));
   ok(JSON.stringify([...keys.free].sort()) === JSON.stringify([...freeSet].sort()), "/api/xp/keys free list = config free list");
-  ok(Object.keys(TRACKS).every(k => keys.all.includes(k)) && keys.all.filter(k => !k.startsWith("fd-")).every(k => TRACKS[k]), "tracks.json has a track for every skill explainer (foundation ones as recorded) and nothing else", keys.all.filter(k => !k.startsWith("fd-") && !TRACKS[k]));
+  ok(Object.keys(TRACKS).every(k => keys.all.includes(k)) && keys.all.every(k => TRACKS[k]), "tracks.json has a track for every explainer and nothing else", keys.all.filter(k => !TRACKS[k]));
 
   r = await anon("GET", "/xp/free.js");
   ok(r.s === 200 && /javascript/.test(r.h.get("content-type") || ""), "/xp/free.js served to anyone");
@@ -120,7 +120,7 @@ run(async () => {
   const srcFiles = fs.readdirSync(path.join(ROOT, "xpsrc")).filter(f => /\.js$/.test(f)).sort((a, b) => (a === "xp_legacy.js" ? -1 : b === "xp_legacy.js" ? 1 : a < b ? -1 : 1));
   const ref = Object.fromEntries(lessonsIn(srcFiles.map(f => fs.readFileSync(path.join(ROOT, "xpsrc", f), "utf8")).join("\n")).map(L => [L.key, JSON.stringify(L)]));
   const changed = [...freeL, ...premL].filter(L => JSON.stringify(L) !== ref[L.key]).map(L => L.key);
-  ok(Object.keys(ref).length === 96 && changed.length === 0, "every explainer in the bundles is identical to its source", changed);
+  ok(Object.keys(ref).length === 126 && changed.length === 0, "every explainer in the bundles is identical to its source", changed);
 
   // the split follows the admin setting: make one premium explainer free, check, then restore
   const st = (await A("GET", "/api/admin/settings")).j.config;

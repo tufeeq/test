@@ -315,9 +315,9 @@ app.post("/api/signup", wrap(async (req, res) => {
   if (pw.length < 8 || pw.length > 200) return fail(res, 400, "weak-password");
   const name = cleanName(req.body.name);
   if (!validName(name)) return fail(res, 400, "invalid-name");
-  /* the mobile number is optional, but required for WhatsApp reminders */
-  const remind = req.body.remind === true, rawPhone = String(req.body.phone == null ? "" : req.body.phone).trim(), phone = rawPhone ? cleanPhone(rawPhone) : null;
-  if ((rawPhone || remind) && !phone) return fail(res, 400, "invalid-phone");
+  /* the mobile number is required at sign-up (the owner's decision); it also serves the optional WhatsApp reminders */
+  const remind = req.body.remind === true, phone = cleanPhone(req.body.phone);
+  if (!phone) return fail(res, 400, "invalid-phone");
   if (req.body.consent !== true) return fail(res, 400, "consent");
   // a taken address answers before the (slow) hash, so a flood of sign-ups for one address cannot burn CPU
   if ((await pool.query("SELECT 1 FROM users WHERE email=$1", [email])).rows[0]) return fail(res, 409, "email-already-in-use");

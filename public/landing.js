@@ -183,7 +183,7 @@ try { var _rf = new URLSearchParams(location.search).get('ref'); if (_rf && /^[A
     q7: 'Does it work on mobile?',
     a7: '<p>Yes. It runs in the browser on your phone, tablet or computer with nothing to install, and the design is made for small screens. Once you sign up, your progress is saved to your account and follows you to any device.</p>',
     q8: 'Is my data private?',
-    a8: '<p>We keep only your email, your name, your mobile number if you add it, and your practice progress (plus your track, target score and test date if you add them), and we use them only to support your preparation. We never ask for an ID, and you can delete your account and all your data at any time from the account page.</p>',
+    a8: '<p>We keep only your email, your name, your mobile number and your practice progress (plus your track, target score and test date if you add them), and we use them only to support your preparation. We never ask for an ID, and you can delete your account and all your data at any time from the account page.</p>',
     finEyebrow: 'Five minutes is enough to start', finH: 'Find your level today. Start your plan tomorrow.',
     finP: 'Take the diagnostic for free, then watch the explainer for your weakest skill.',
     readGuide: 'Read the test guide',

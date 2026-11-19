@@ -82,7 +82,7 @@ module.exports = function notify(app, { pool, wrap, fail, needUser, needAdmin, l
   app.post("/u/unsub", require("express").urlencoded({ extended: false, limit: "2kb" }), wrap(unsub));
 
   // ---------- email ----------
-  function shell({ lang, title, lead, lines = [], cta, ctaUrl, id }) {
+  function shell({ lang, title, lead, lines = [], cta, ctaUrl, id, asked, after }) {
     const ar = lang !== "en", dir = ar ? "rtl" : "ltr", al = ar ? "right" : "left";
     const foot = ar ? "وصلتك هذه الرسالة لأن لديك حسابًا في أكاديمية القدرات." : "You received this because you have a GAT Academy account.";
     const off = ar ? "إيقاف هذه الرسائل" : "Stop these emails";
@@ -95,7 +95,8 @@ module.exports = function notify(app, { pool, wrap, fail, needUser, needAdmin, l
 <p style="font-size:15px;line-height:1.85;margin:0 0 10px;color:#3A3460">${lead}</p>
 ${lines.map(l => `<p style="font-size:15px;line-height:1.8;margin:0 0 6px;color:#3A3460">• ${l}</p>`).join("")}</td></tr>
 ${cta ? `<tr><td style="padding:16px 26px 8px;text-align:${al}"><a href="${esc(ctaUrl)}" style="display:inline-block;background:#6A4BF2;color:#FFFFFF;text-decoration:none;font-weight:700;font-size:15px;padding:12px 24px;border-radius:12px">${esc(cta)}</a></td></tr>` : ""}
-<tr><td style="padding:18px 26px 22px;text-align:${al};font-size:12px;line-height:1.7;color:#7A7398">${foot} <a href="${esc(unsubUrl(id))}" style="color:#7A7398">${off}</a></td></tr>
+${after ? `<tr><td style="padding:4px 26px 0;text-align:${al};font-size:13px;line-height:1.8;color:#5E5880">${after}</td></tr>` : ""}
+<tr><td style="padding:18px 26px 22px;text-align:${al};font-size:12px;line-height:1.7;color:#7A7398">${asked ? (ar ? "وصلتك هذه الرسالة لأن أحدًا طلبها لحسابك في أكاديمية القدرات." : "You received this because it was requested for your GAT Academy account.") : `${foot} <a href="${esc(unsubUrl(id))}" style="color:#7A7398">${off}</a>`}</td></tr>
 </table></td></tr></table></body></html>`;
   }
   const textOf = html => html.replace(/<style[\s\S]*?<\/style>/g, "").replace(/<a [^>]*href="([^"]+)"[^>]*>([^<]*)<\/a>/g, "$2: $1").replace(/<br\s*\/?>/g, "\n").replace(/<\/(p|h1|tr)>/g, "\n").replace(/<[^>]+>/g, "")
@@ -103,7 +104,7 @@ ${cta ? `<tr><td style="padding:16px 26px 8px;text-align:${al}"><a href="${esc(c
   async function sendMail(u, m) {
     const html = shell({ ...m, lang: u.lang, id: u.id });
     const msg = { from: FROM, to: u.email, subject: m.subject || m.title, html, text: textOf(html),
-      headers: { "List-Unsubscribe": `<${unsubUrl(u.id)}>, <mailto:info@gat.academy?subject=unsubscribe>`, "List-Unsubscribe-Post": "List-Unsubscribe=One-Click" } };
+      headers: m.asked ? {} : { "List-Unsubscribe": `<${unsubUrl(u.id)}>, <mailto:info@gat.academy?subject=unsubscribe>`, "List-Unsubscribe-Post": "List-Unsubscribe=One-Click" } };
     if (DRY) { outbox.push({ ch: "email", to: u.email, subject: msg.subject, html, text: msg.text, at: Date.now() }); if (outbox.length > 200) outbox.shift(); return; }
     if (!transport) throw new Error("smtp-not-configured");
     await transport.sendMail(msg);
@@ -189,6 +190,17 @@ ${cta ? `<tr><td style="padding:16px 26px 8px;text-align:${al}"><a href="${esc(c
     if (kind === "expiring") return { push: { title: ar ? "اشتراكك ينتهي خلال ٣ أيام" : "Your subscription ends in 3 days", body: ar ? "جدّده لتبقى خطتك ونماذجك مفتوحة." : "Renew to keep your plan and model tests open.", url: "/app#upgrade", tag: "expiring" },
       mail: ar ? { title: "اشتراكك ينتهي خلال ثلاثة أيام", lead: "حتى لا تتوقف خطتك قبل اختبارك، جدّد اشتراكك من صفحة الاشتراك. تقدّمك وسجلك يبقيان كما هما.", cta: "جدّد الاشتراك", ctaUrl: APP("#upgrade") }
         : { title: "Your subscription ends in three days", lead: "So your plan doesn’t stop before your test, renew from the subscription page. Your progress and history stay as they are.", cta: "Renew", ctaUrl: APP("#upgrade") } };
+    if (kind === "reset") return ar ? {
+      asked: true, title: "إعادة تعيين كلمة المرور", subject: "رابط إعادة تعيين كلمة المرور",
+      lead: `${name ? name + "، " : ""}وصلنا طلب لإعادة تعيين كلمة مرور حسابك. اضغط الزر واختر كلمة مرور جديدة.`,
+      lines: ["الرابط صالح لمدة ثلاثين دقيقة، ولمرة واحدة فقط.", "بعد التعيين يُسجَّل خروج حسابك من الأجهزة الأخرى."],
+      cta: "عيّن كلمة مرور جديدة", ctaUrl: x.url,
+      after: "إن لم تطلب ذلك فتجاهل هذه الرسالة، وتبقى كلمة مرورك الحالية كما هي." } : {
+      asked: true, title: "Reset your password", subject: "Your password reset link",
+      lead: `${name ? name + ", w" : "W"}e received a request to reset your account password. Press the button and choose a new one.`,
+      lines: ["The link works for thirty minutes, and only once.", "After the reset, your account is signed out on other devices."],
+      cta: "Set a new password", ctaUrl: x.url,
+      after: "If you didn’t ask for this, ignore this email; your current password stays as it is." };
     if (kind === "test") return { push: { title: ar ? "تجربة التنبيهات" : "Test notification", body: ar ? "التنبيهات تعمل على هذا الجهاز." : "Notifications work on this device.", url: "/app#today", tag: "test" },
       mail: { title: ar ? "رسالة تجريبية" : "Test email", lead: ar ? "إعداد البريد يعمل. هذه رسالة تجريبية من لوحة الإدارة." : "Email is set up. This is a test message from the admin dashboard.", cta: ar ? "فتح المنصة" : "Open the platform", ctaUrl: APP("") } };
     return null;
@@ -294,5 +306,7 @@ ${cta ? `<tr><td style="padding:16px 26px 8px;text-align:${al}"><a href="${esc(c
     app.delete("/api/admin/notify/outbox", needAdmin, (req, res) => { outbox.length = 0; res.json({ ok: true }); });
   }
 
-  return { migrate, start, kick, run };
+  // a message the student asked for (password reset): sent at once, whatever their reminder settings
+  async function sendAsked(u, kind, x) { const m = msgs(kind, u, x); await sendMail(u, m); }
+  return { migrate, start, kick, run, sendAsked, mailOn };
 };

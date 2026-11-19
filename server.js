@@ -58,6 +58,9 @@ async function migrate() {
       user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
       expires_at TIMESTAMPTZ NOT NULL
     );
+    CREATE TABLE IF NOT EXISTS password_resets (token_hash TEXT PRIMARY KEY, user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT now(), expires_at TIMESTAMPTZ NOT NULL, used_at TIMESTAMPTZ);
+    CREATE INDEX IF NOT EXISTS password_resets_user_idx ON password_resets(user_id);
     CREATE INDEX IF NOT EXISTS sessions_user_idx ON sessions(user_id);
     CREATE TABLE IF NOT EXISTS narration (
       id TEXT PRIMARY KEY,
@@ -381,6 +384,45 @@ app.post("/api/password", needUser, wrap(async (req, res) => {
   await pool.query("DELETE FROM sessions WHERE user_id=$1 AND token_hash<>$2", [req.user.id, sha(tok || "")]);
   res.json({ ok: true });
 }));
+
+// ---------- password reset by email ----------
+// The student asks with their email; if an account has it, a single-use link valid for 30 minutes is emailed
+// (only a hash of the token is stored). The answer is the same whether or not the email has an account. When email
+// is not set up on the server, {mail:false} tells the app to offer the manual route (writing to info@gat.academy).
+const RESET_MIN = 30;
+app.post("/api/password/forgot", wrap(async (req, res) => {
+  const email = String(req.body.email || "").trim().toLowerCase(), lang = req.body.lang === "en" ? "en" : "ar";
+  if (!N.mailOn()) return res.json({ ok: true, mail: false });
+  if (!/^[^\s@]{1,64}@[^\s@]{1,190}\.[^\s@]{2,}$/.test(email)) return fail(res, 400, "invalid-email");
+  if (limited("pf:" + req.ip, 20, 3600e3) || limited("pfe:" + email, 3, 900e3)) return fail(res, 429, "too-many-requests");
+  const u = (await pool.query("SELECT u.id,u.email,u.name,COALESCE(p.lang,$2) lang FROM users u LEFT JOIN progress p ON p.user_id=u.id WHERE u.email=$1", [email, lang])).rows[0];
+  if (u) {
+    const tok = crypto.randomBytes(32).toString("base64url");
+    await pool.query("UPDATE password_resets SET used_at=now() WHERE user_id=$1 AND used_at IS NULL", [u.id]); // only the newest link works
+    await pool.query("INSERT INTO password_resets(token_hash,user_id,expires_at) VALUES($1,$2,now()+make_interval(mins=>$3))", [sha(tok), u.id, RESET_MIN]);
+    const url = `${ORIGIN}/app${lang === "en" ? "?lang=en" : ""}#reset=${tok}`;
+    try { await N.sendAsked({ ...u, lang }, "reset", { url }); } // in the language the student asked in
+    catch (e) { console.error("reset email", e.code || "", (e.message || "").slice(0, 160)); return fail(res, 502, "mail-failed"); }
+  }
+  res.json({ ok: true, mail: true });
+}));
+app.post("/api/password/reset", wrap(async (req, res) => {
+  const tok = String(req.body.token || ""), next = String(req.body.password || "");
+  if (limited("pr:" + req.ip, 30, 900e3)) return fail(res, 429, "too-many-requests");
+  if (!/^[\w-]{30,60}$/.test(tok)) return fail(res, 400, "reset-invalid");
+  if (next.length < 8 || next.length > 200) return fail(res, 400, "weak-password");
+  // claim the token in one statement, so two tabs cannot both use it
+  const r = await pool.query("UPDATE password_resets SET used_at=now() WHERE token_hash=$1 AND used_at IS NULL AND expires_at>now() RETURNING user_id", [sha(tok)]);
+  if (!r.rows[0]) return fail(res, 400, "reset-invalid");
+  const id = r.rows[0].user_id;
+  await pool.query("UPDATE users SET pass_hash=$1 WHERE id=$2", [await PW.hash(next, 11), id]);
+  await pool.query("DELETE FROM sessions WHERE user_id=$1", [id]); // whoever had the old password is signed out
+  await pool.query("UPDATE password_resets SET used_at=now() WHERE user_id=$1 AND used_at IS NULL", [id]);
+  const u = (await pool.query("SELECT id,email,name,phone,remind,ref_code FROM users WHERE id=$1", [id])).rows[0];
+  await createSession(req, res, id);
+  res.json({ user: { ...pub(u), plan: await C.planOf(u) } });
+}));
+setInterval(() => pool.query("DELETE FROM password_resets WHERE expires_at<now()-interval '1 day'").catch(() => {}), 3600e3).unref();
 
 app.delete("/api/me", needUser, wrap(async (req, res) => {
   await pool.query("DELETE FROM users WHERE id=$1", [req.user.id]);

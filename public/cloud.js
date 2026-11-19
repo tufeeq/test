@@ -139,7 +139,7 @@ async function afterLogin(u) {
 }
 let checked = false, offline = false, bootTries = 0; // checked: the first /api/me answer (or failure) has arrived; offline: the server could not be reached
 window.CLOUD = {
-  get user() { return user; }, get ready() { return checked; }, get offline() { return offline; }, get status() { return status; }, get lastSync() { return lastSync; }, google: false, resetByAdmin: true,
+  get user() { return user; }, get ready() { return checked; }, get offline() { return offline; }, get status() { return status; }, get lastSync() { return lastSync; }, google: false, resetByAdmin: false,
   queue() { if (!user) return; clearTimeout(timer); timer = setTimeout(push, 2500); },
   async pushNow() { if (!user) return; retry = 0; await push(); }, // never throws: callers read CLOUD.status ("error" = not synced)
   async signUp(email, password, name, phone, remind) { let ref = ""; try { ref = localStorage.getItem("gat_ref") || ""; } catch (e) {} const r = await api("POST", "/api/signup", { email, password, name, phone, remind: !!remind, ref, consent: true }); vstep("signup"); await afterLogin(r.user); },
@@ -159,7 +159,9 @@ window.CLOUD = {
     evq = []; reset(); setPlan(null); safe(() => A().render());
   },
   droppedElsewhere() { reset(); setPlan(null); }, // another tab of this browser signed this account out
-  async reset() { const x = new Error("reset"); x.code = "reset-admin"; throw x; },
+  /* password reset by email: {mail:false} means email is not set up on the server, so the app offers writing to the team */
+  async reset(email, lang) { return api("POST", "/api/password/forgot", { email, lang }); },
+  async resetPassword(token, password) { const r = await api("POST", "/api/password/reset", { token, password }); await afterLogin(r.user); },
   async changePassword(current, next) { await api("POST", "/api/password", { current, next }); },
   async deleteAccount() { await api("DELETE", "/api/me"); ls.del(OWNER); ls.del(PLAN_KEY); evq = []; reset(); setPlan(null); },
   get plan() { return plan; }, get config() { return config; }, get xpKeys() { return xpKeys; },

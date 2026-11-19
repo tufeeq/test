@@ -439,3 +439,12 @@ html[data-pay="store"] .lp-paym .lp-stc{display:none}
 .lp-was b{color:var(--pink-t, #A3165A)}
 .lp-noleak{margin:0 auto 18px;max-width:62ch;text-align:center;background:var(--butter-soft);border:1.5px dashed var(--warn,#C98A00);border-radius:14px;padding:12px 16px;line-height:1.8}
 .lp-proof{flex-wrap:wrap}
+/* the narrated tour */
+.lp-how-grid{display:grid;grid-template-columns:minmax(0,340px) minmax(0,1fr);gap:28px;align-items:start}
+.lp-vid{position:relative;margin:0;justify-self:center;inline-size:100%;max-inline-size:340px}
+.lp-vid video{display:block;inline-size:100%;aspect-ratio:9/16;border-radius:22px;border:3px solid var(--edge);box-shadow:8px 8px 0 var(--edge);background:#F2EFFC;cursor:pointer}
+.lp-vplay{position:absolute;inset-inline:16%;inset-block-end:16%;display:flex;align-items:center;justify-content:center;gap:8px;background:var(--pri);color:#fff;border:3px solid var(--edge);box-shadow:5px 5px 0 var(--edge);border-radius:16px;padding:12px 14px;font:inherit;font-weight:800;cursor:pointer;min-block-size:48px}
+.lp-vplay svg{inline-size:20px;block-size:20px}
+.lp-vid.on .lp-vplay{display:none}
+.lp-vid figcaption{margin-block-start:14px;font-size:.88rem;color:var(--muted);text-align:center}
+@media (max-width:820px){.lp-how-grid{grid-template-columns:1fr}.lp-vid{max-inline-size:320px}}

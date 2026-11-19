@@ -553,7 +553,7 @@ app.use(S.staticText); // js, css, svg, json…: brotli/gzip, a year of caching 
 app.use(express.static(PUB, { index: false, setHeaders: (res, f) => {
   const v = res.req && typeof res.req.query.v === "string" && res.req.query.v;
   if (v && v === S.verOf(path.relative(PUB, f).split(path.sep).join("/"))) res.set("Cache-Control", "public, max-age=31536000, immutable");
-  else if (/\.(png|ico|jpg|webp)$/.test(f)) res.set("Cache-Control", "public, max-age=604800");
+  else if (/\.(png|ico|jpg|webp|mp4)$/.test(f)) res.set("Cache-Control", "public, max-age=604800");
   else res.set("Cache-Control", "no-cache");
 } }));
 app.use("/api", (req, res) => fail(res, 404, "not-found"));

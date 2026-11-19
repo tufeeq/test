@@ -104,6 +104,7 @@ try { var _rf = new URLSearchParams(location.search).get('ref'); if (_rf && /^[A
     dO1: '3 + 4 × 2', dO2: 'Multiply first: 4 × 2 = 8', dO3: '3 + 8 = 11',
     dG1: '110°', dS1: 'It was cold, ____ the sun was out.', dS2: 'but', dS3: 'signals the unexpected',
     howEyebrow: 'From day one to test day', howH: 'How GAT Academy works', howP: 'Five clear steps, so every day you know what to study and why.',
+    vidPlay: 'Watch the tour (1 min)', vidCap: 'A narrated tour: from the diagnostic to test day.',
     s1h: 'Diagnostic test', s1p: '20 questions in about 15 minutes, two from each skill, to show your level in all ten skills from day one.',
     s2h: 'Personal plan', s2p: 'A daily plan up to your test date that starts with your weakest skills and spreads review across the days.',
     s3h: 'Learn with explainers', s3p: 'An animated, narrated explainer for each idea, a short quiz after it, then flashcards, techniques and recurring patterns.',
@@ -448,8 +449,26 @@ try { var _rf = new URLSearchParams(location.search).get('ref'); if (_rf && /^[A
       LANG = LANG === 'ar' ? 'en' : 'ar'; sset(LKEY, LANG);
       if (SSR !== 'ar') { location.href = lb.getAttribute('href') + location.hash; return; } // the Arabic text isn't in this HTML
       try { var u = new URL(location.href); if (u.searchParams.has('lang')) { u.searchParams.set('lang', LANG); history.replaceState(null, '', u.pathname + u.search + u.hash); } } catch (err) {}
-      setRootLang(); translate(); renderLive(); syncDemo(); syncThemeBtn();
+      setRootLang(); translate(); renderLive(); syncDemo(); syncThemeBtn(); if (window.__tourLang) window.__tourLang();
     });
+  }
+
+  /* ---------- the narrated tour: a silent video with its narration as a separate same-site clip, kept in step ---------- */
+  function initTour() {
+    var v = $('#how-v'), a = $('#how-a'), b = $('#how-play'), fig = $('#how-vid'); if (!v || !a || !b) return;
+    var lang = function () { return LANG === 'en' ? 'en' : 'ar'; }, cur = null;
+    var load = function () { var l = lang(); if (cur === l) return; cur = l; v.src = '/video/intro-' + l + '.mp4'; a.src = '/audio/intro-' + l + '.mp3'; v.poster = '/video/intro-' + l + '.jpg'; };
+    var sync = function () { if (!a.paused && Math.abs(a.currentTime - v.currentTime) > 0.3) { try { a.currentTime = v.currentTime; } catch (e) {} } };
+    /* both start inside the tap itself (iOS Safari only lets sound start from a direct user gesture) */
+    var play = function () { load(); fig.classList.add('on'); try { a.currentTime = v.currentTime || 0; } catch (e) {} var pv = v.play(), pa = a.play(); if (pv && pv.catch) pv.catch(function () {}); if (pa && pa.catch) pa.catch(function () {}); };
+    var pause = function () { v.pause(); a.pause(); fig.classList.remove('on'); };
+    b.addEventListener('click', play);
+    v.addEventListener('click', function () { v.paused ? play() : pause(); });
+    v.addEventListener('timeupdate', sync); v.addEventListener('seeked', function () { try { a.currentTime = v.currentTime; } catch (e) {} });
+    v.addEventListener('waiting', function () { a.pause(); }); v.addEventListener('playing', function () { if (a.paused && fig.classList.contains('on')) a.play().catch(function () {}); });
+    v.addEventListener('ended', function () { a.pause(); fig.classList.remove('on'); v.currentTime = 0; });
+    window.__tourLang = function () { pause(); cur = null; v.removeAttribute('src'); a.removeAttribute('src'); v.poster = '/video/intro-' + lang() + '.jpg'; };
+    v.poster = '/video/intro-' + lang() + '.jpg';
   }
 
   /* ---------- the free guide (PDF) ----------
@@ -506,7 +525,7 @@ try { var _rf = new URLSearchParams(location.search).get('ref'); if (_rf && /^[A
     R.classList.remove('lp-pending');
     renderLive();
     initChrome();
-    initGuide();
+    initGuide(); initTour();
     initDemo();
     initReveal();
     loadConfig();

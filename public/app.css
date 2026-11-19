@@ -1137,3 +1137,25 @@ body.exam-open:has(#exam .rs) #toast{bottom:calc(20px + env(safe-area-inset-bott
 .fd-promo h2{font-size:1.05rem;margin:0 0 4px}.fd-promo p{margin:0;font-size:.9rem;color:var(--muted)}
 .fd-lesson .rule .m,.fd-ex .m,.fd-lesson .bul .m{white-space:nowrap}
 .fd-part{font-size:clamp(1.35rem,1.1rem + 1vw,1.75rem);margin-block:26px 2px;padding-block-start:14px;border-block-start:2px solid var(--edge)}
+/* the journey: foundation → practice → mocks */
+.journey{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.journey li{display:flex;align-items:flex-start;gap:10px;background:var(--surface);border:1.5px solid var(--line);border-radius:14px;padding:10px 12px;color:var(--muted)}
+.journey li b{display:block;font-family:var(--f-head);font-size:.98rem;color:var(--ink2);line-height:1.35}
+.journey li span:not(.jn){display:block;font-size:.82rem;line-height:1.45}
+.journey .jn{flex:none;inline-size:30px;block-size:30px;border-radius:50%;display:grid;place-items:center;background:var(--surface2);color:var(--ink2);font-family:var(--f-head);font-weight:800}
+.journey .jn svg{inline-size:16px;block-size:16px}
+.journey li.on{border:2px solid var(--edge);box-shadow:var(--pop);color:var(--ink2)}
+.journey li.on b{color:var(--ink)}
+.journey li.on .jn{background:var(--pri);color:#fff}
+.journey li.done .jn{background:var(--pri-soft);color:var(--ink)}
+@media (max-width:640px){.journey{grid-template-columns:1fr;gap:6px}.journey li{padding:8px 12px;align-items:center}.journey li:not(.on) span:not(.jn){display:none}}
+.next-card .sess-txt>.btn{margin-block-start:10px}
+.zero-link{margin:0;color:var(--muted)}
+.zero-link a{font-weight:700}
+/* the kit: "for you now" before the full library */
+.foryou{display:grid;gap:8px;margin-block-end:4px}
+.foryou h2{font-size:1.15rem;margin:0}
+.fy-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px}
+.fy-card{display:grid;gap:2px;background:var(--surface);border:2px solid var(--edge);box-shadow:var(--pop);border-radius:14px;padding:10px 14px;color:var(--ink);text-decoration:none}
+.fy-card .eyebrow{font-size:1rem;margin:0}
+.fy-card b{font-family:var(--f-head);line-height:1.4}

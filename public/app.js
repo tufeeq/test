@@ -3249,7 +3249,7 @@ const T = {
   levelRule:['','أقل من ٧٠٪','٧٠٪ فأكثر','٨٥٪ فأكثر بزمن مناسب','٩٥٪ فأكثر في آخر ٢٠ سؤالًا وضمن الزمن المستهدف'],
   roadTitle:'معايير الجاهزية للـ ١٠٠', weekTitle:'مهام الأسبوع', fullPlan:'الخطة كاملة', settings:'الإعدادات',
   ready:[ 'كل المهارات العشر في درجة «ثبات»', '٣ محاكاة كاملة متتالية بدرجة تقديرية ٩٥ فأكثر', 'متوسط زمنك ضمن المستهدف في كل مهارة', 'لا مراجعات مستحقة في دفتر الأخطاء' ],
-  learnTitle:'حقيبة القدرات', kitIntro:'كل ما تحتاجه في مكان واحد: بطاقات المفاهيم، والدروس، وتقنيات الحل، والأنماط المتكررة في التجميعات، والمفردات، والمصادر.', tabs:{found:'التأسيس',cards:'البطاقات',lessons:'الدروس',tech:'التقنيات',patterns:'أنماط التجميعات',vocab:'المفردات',resources:'المصادر'},
+  learnTitle:'حقيبة القدرات', kitIntro:'كل ما تحتاجه في مكان واحد. ابدأ بالتأسيس إن كنت تبدأ من الصفر، أو بالدروس إن كان عندك أساس، والباقي مراجع ترجع إليها وقت الحاجة.', tabs:{found:'التأسيس',lessons:'الدروس',cards:'البطاقات',vocab:'المفردات',tech:'التقنيات',patterns:'أنماط التجميعات',resources:'المصادر'},
   deckAll:'كل البطاقات', cardsIntro:'اقرأ وجه البطاقة وحاول أن تتذكر، ثم اقلبها. «راجعها» تعيدها إليك اليوم، و«أعرفها» تؤجلها بضعة أيام.', tapFlip:'اضغط للقلب', example:'مثال', allInDeck:'كل بطاقات القسم', deckDone:'أنهيت بطاقات هذا القسم لليوم. ارجع غدًا أو اختر قسمًا آخر.', techIntro:'تقنيات يعتمد عليها المتفوقون لرفع الدقة والسرعة. طبّق واحدة في كل جلسة حتى تصبح عادة.', patIntro:'أنماط أسئلة تتكرر في التجميعات التي يتداولها الطلاب بعد الاختبار، مع مثال يوضح كل نمط.', how:'كيف يأتي', trick:'مفتاح الحل', practicePattern:'تدرّب على هذا النمط', skillCards:'بطاقات هذه المهارة',
   verbal:'القسم اللفظي', quant:'القسم الكمي',
   concept:'المفهوم', mind:'كيف يفكر واضع السؤال', steps:'خطوات الحل', types:'الأنماط مع أمثلة', rules:'القوانين والحقائق', traps:'الفخاخ', examples:'أمثلة محلولة', speed:'للوصول إلى ١٠٠', more:'للاستزادة', mastery:'مستواك في هذه المهارة', targetTime:'الزمن المستهدف',
@@ -3316,7 +3316,7 @@ const T = {
   levelRule:['','below 70%','70% or more','85%+ at a good pace','95%+ over the last 20 questions within target time'],
   roadTitle:'Readiness criteria for 100', weekTitle:'This week', fullPlan:'Full plan', settings:'Settings',
   ready:['All ten skills at "Locked in"','3 full simulations in a row estimated at 95+','Average time within target for every skill','No reviews due in your mistake log'],
-  learnTitle:'The GAT kit', kitIntro:'Everything in one place: concept cards, lessons, solving techniques, recurring compilation patterns, vocabulary and resources.', tabs:{found:'Foundation',cards:'Cards',lessons:'Lessons',tech:'Techniques',patterns:'Compilation patterns',vocab:'Vocabulary',resources:'Resources'},
+  learnTitle:'The GAT kit', kitIntro:'Everything in one place. Start with the foundation if you are starting from zero, or with the lessons if you have a base; the rest is reference to come back to when you need it.', tabs:{found:'Foundation',lessons:'Lessons',cards:'Cards',vocab:'Vocabulary',tech:'Techniques',patterns:'Compilation patterns',resources:'Resources'},
   deckAll:'All cards', cardsIntro:'Read the front and try to recall the answer, then flip. "Review again" brings the card back today; "I know it" sets it aside for a few days.', tapFlip:'Tap to flip', example:'Example', allInDeck:'All cards in this deck', deckDone:'You have finished this deck for today. Come back tomorrow or pick another deck.', techIntro:'Techniques top scorers rely on for accuracy and speed. Use one each session until it becomes a habit.', patIntro:'Question patterns that keep showing up in the compilations students share after the test, each with an example.', how:'How it appears', trick:'The key', practicePattern:'Practice this pattern', skillCards:'Cards for this skill',
   verbal:'Verbal', quant:'Quantitative',
   concept:'The concept', mind:'How the test writer thinks', steps:'How to solve', types:'Patterns with examples', rules:'Rules and facts', traps:'Traps', examples:'Worked examples', speed:'Getting to 100', more:'Go further', mastery:'Your level in this skill', targetTime:'Target time',
@@ -4194,10 +4194,34 @@ function taskItem(tk){ const d=taskDone(tk);
   return `<div class="task ${d?'done':''}"><span class="chk">${d?ICON.check:''}</span><span class="tl">${esc(taskLabel(tk))}</span><button class="btn sm ${d?'ghost':'soft'}" data-task="${tk.id}">${!PRO()&&((tk.type!=='skill'&&PRO_KINDS[tk.type])||(tk.type==='diag'&&d))?LOCKSVG:''}${tk.type==='text'?(d?'↺':'✓'):(d?(S.lang==='ar'?'أعد':'Redo'):t('start'))}</button></div>`; }
 
 /* ============ PAGES ============ */
+/* ---- one guided path: the journey stage (foundation → practice → mocks) and the single next step ---- */
+const SK_FDU={analogy:['van'],completion:['vco'],context:['vcx'],odd:['vod'],reading:['vre'],arith:['num','ar'],algebra:['al'],geometry:['geo'],stats:['st'],comparison:['st']};
+const fdDone=id=>(((S.fd||{})[id]||{}).best||0)>=80;
+const fdNextFor=s=>FD.find(l=>SK_FDU[s].includes(l.u)&&!fdDone(l.id));
+/* a skill needs its foundation when it has enough answers and accuracy under 70% */
+const needFound=()=>rankSkills().filter(i=>i.n>=5&&i.acc<.7&&fdNextFor(i.s));
+function journeyStage(){ if(!S.attempts.length||needFound().length) return 0; return ALL_SKILLS.every(s=>skillInfo(s).level>=3)||readiness()>=60?2:1; }
+function nextStep(){ const st=journeyStage(), w=st===0?needFound()[0]:null;
+  if(w) return {st,kind:'found',s:w.s,l:fdNextFor(w.s)};
+  if(st===2&&S.sessionDays.includes(todayStr())) return {st,kind:'mock'};
+  return {st,kind:'session'}; }
+function journeyBar(st){ const N=[bi('التأسيس','Foundation'),bi('التدريب','Practice'),bi('المحاكاة','Full mocks')], D=[bi('دروس قصيرة لما ينقصك','Short lessons for what you lack'),bi('جلسات يومية على نقاط ضعفك','Daily sessions on your weak spots'),bi('اختبارات كاملة بالوقت الحقيقي','Full tests in real time')];
+  return `<ol class="journey" aria-label="${L(bi('رحلتك إلى الاختبار','Your path to the test'))}">${N.map((n,i)=>`<li class="${i<st?'done':i===st?'on':''}"${i===st?' aria-current="step"':''}><span class="jn num" aria-hidden="true">${i<st?ICON.check:numL(i+1)}</span><div><b>${L(n)}</b><span>${L(D[i])}</span></div></li>`).join('')}</ol>`; }
+const NEXT_E=()=>L(bi('خطوتك التالية','Your next step'));
+function nextCard(ns){
+  if(ns.kind==='found'){ const c=ns.l[S.lang], sk=SKILLS[ns.s];
+    return `<section class="session card next-card"><div class="sess-txt"><div class="eyebrow">${NEXT_E()} · ${L(bi('التأسيس','Foundation'))}</div><h2>${esc(c.t)}</h2>
+      <p class="muted">${L(bi(`دقتك في ${sk.ar} أقل من ٧٠٪، فنبني أساسها أولًا: درس قصير ثم ١٠ أسئلة.`,`Your accuracy in ${sk.en} is under 70%, so we build its basics first: a short lesson, then 10 questions.`))}</p>
+      <button class="btn ghost sm" data-start="session">${L(bi('أو ابدأ جلسة اليوم','Or start today\'s session'))}</button></div>
+      <a class="btn primary xl" href="#fl-${ns.l.id}">${L(bi('ابدأ الدرس','Start the lesson'))}</a></section>`; }
+  if(ns.kind==='mock') return `<section class="session card next-card"><div class="sess-txt"><div class="eyebrow">${NEXT_E()} · ${L(bi('المحاكاة','Full mocks'))}</div><h2>${L(bi('أنت جاهز لمحاكاة كاملة','You are ready for a full mock'))}</h2>
+      <p class="muted">${L(bi('أنهيت جلسة اليوم ومستواك يسمح. خذ اختبارًا كاملًا كيوم الاختبار: ٥ أقسام × ٢٥ دقيقة، ولا رجوع إلى قسم سابق.','Today\'s session is done and your level is there. Take a full test as on test day: 5 sections × 25 minutes, with no going back to a previous section.'))}</p></div>
+      <button class="btn primary xl" data-start="mock">${PRO()?'':LOCKSVG}${L(bi('ابدأ المحاكاة','Start the mock'))}</button></section>`;
+  return ''; }
 function pageToday(){
   const dl=daysLeft(), est=estimate(), rd=readiness(), plan=buildPlan(), cw=currentWeek(), wk=plan[cw];
   const hasData=S.attempts.length>0, sp=sessionPlan(), doneToday=S.sessionDays.includes(todayStr()), checks=readyChecks();
-  const invite=!diagTaken()&&!hasData, dl2=acct()?dailyLeft():Infinity, streak=calcStreak();
+  const invite=!diagTaken()&&!hasData, dl2=acct()?dailyLeft():Infinity, streak=calcStreak(); const ns=nextStep(), nc=nextCard(ns);
   const repCard=CLOUD_BUILD&&!PRO()&&!S.repHide&&!S.repSeen&&reportReady()?`<section class="card rep-card"><div><div class="eyebrow">${t('reportReadyE')}</div><h2>${t('reportReadyT')}</h2><p class="muted">${t('reportReadyD')}</p></div><div class="row"><a class="btn primary" href="#report">${t('reportOpen')}</a><button class="btn ghost sm" id="rp-hide">${t('dismiss')}</button></div></section>`:'';
   if(invite) return `
   <section class="hero hero-new"><div class="hero-main">
@@ -4207,6 +4231,7 @@ function pageToday(){
     <div class="sess-txt"><div class="eyebrow">${t('diagInviteE')}</div><h2>${t('diagInviteT')}</h2><p>${t('diagInviteD')}</p></div>
     <button class="btn primary xl" data-start="diag">${t('diagFirst')}</button>
   </section>
+  <p class="zero-link small">${L(bi('تبدأ من الصفر؟','Starting from zero?'))} <a href="#learn-found">${L(bi('ابدأ بمسار التأسيس','Begin with the foundation track'))}</a></p>
   <ol class="first-steps" aria-label="${t('firstStepsL')}">${t('firstSteps').map(([h,d],i)=>`<li><span class="fs-n num" aria-hidden="true">${numL(i+1)}</span><div><b>${h}</b><span>${d}</span></div></li>`).join('')}</ol>`;
   return `
   <section class="hero">
@@ -4224,12 +4249,13 @@ function pageToday(){
     <div class="hero-ring">${ring(hasData?rd:null,'%',168,t('readiness'))}</div>
   </section>
   ${repCard}
-  ${invite?`<section class="session card diag-invite">
+  ${journeyBar(ns.st)}
+  ${nc?nc:invite?`<section class="session card diag-invite">
     <div class="sess-txt"><div class="eyebrow">${t('diagInviteE')}</div><h2>${t('diagInviteT')}</h2><p>${t('diagInviteD')}</p></div>
     <button class="btn primary xl" data-start="diag">${t('diagFirst')}</button>
   </section>`:`<section class="session card">
     <div class="sess-txt">
-      <div class="eyebrow">${t('sessionTitle')}</div>
+      <div class="eyebrow">${NEXT_E()} · ${t('sessionTitle')}</div>
       <h2>${doneToday?t('sessionDone'):dl2===Infinity?t('sessionSub'):t('sessFree')(Math.min(25,dl2))}</h2>
       ${dl2===Infinity?`<p class="muted">${t('sessionParts')(numL(sp.due.length),numL(sp.nWeak),numL(sp.nMix))}</p>`:''}<div class="chips">${sp.weak.map(s=>`<span class="chip">${SKILLS[s][S.lang]}</span>`).join('')}</div>
       ${dl2!==Infinity?`<p class="daily-left small">${dl2>0?t('dailyLeft')(numL(dl2),numL(FREE.dailyQuestions)):t('dailyOut')}</p>`:''}
@@ -4246,10 +4272,7 @@ function pageToday(){
     <div class="card"><div class="block-head"><h3>${t('weekTitle')} · ${t('phaseNames')[wk.ph]}</h3><a href="#plan">${t('fullPlan')}</a></div>${!PRO()&&cw>=FREE.planWeeks?lockLine('plan'):`<div class="task-list">${wk.tasks.slice(0,5).map(taskItem).join('')}</div>`}</div>
     <div class="card"><h3>${t('roadTitle')}</h3><ul class="checks">${t('ready').map((x,i)=>`<li class="${checks[i]?'ok':''}"><span class="ck">${checks[i]?ICON.check:''}</span>${x}</li>`).join('')}</ul></div>
   </section>
-  <section class="block">
-    <div class="block-head"><h2 class="hl">${t('methodTitle')}</h2><a href="#guide">${t('nav.guide')}</a></div>
-    <div class="method-strip">${METHOD[S.lang].slice(0,4).map(m=>`<div class="mcard"><h3>${m[0]}</h3><p>${m[1]}</p><span class="mtag">${m[2]}</span></div>`).join('')}</div>
-  </section>`;
+  `;
 }
 function masteryMap(recent){ const tile=s=>{ const i=skillInfo(s,recent); return `<a class="mtile l${i.level}" href="#lesson-${s}"><span class="mt-n">${SKILLS[s][S.lang]}</span>${pips(i.level)}<span class="mt-f"><span class="mt-l">${t('levels')[i.level]}</span><span class="mt-a num">${i.acc==null?'—':numL(Math.round(i.acc*100))+'%'}</span></span></a>`; };
   return `<div class="mmap"><div class="mcol"><div class="mcol-h">${t('verbal')}</div><div class="mtiles">${V_SKILLS.map(tile).join('')}</div></div><div class="mcol"><div class="mcol-h">${t('quant')}</div><div class="mtiles">${Q_SKILLS.map(tile).join('')}</div></div></div>`; }
@@ -4261,7 +4284,13 @@ function pagePlan(){
   <ol class="phase-row">${t('phaseNames').map((p,i)=>`<li class="${plan[cw].ph===i?'cur':''}"><b>${p}</b><span>${t('phaseDesc')[i]}</span></li>`).join('')}</ol>
   <div class="weeks">${plan.map(w=>!PRO()&&w.i>=FREE.planWeeks?`<section class="week card locked"><div class="wk-h"><h3>${t('week')} ${numL(w.i+1)}</h3><span class="chip ph${w.ph}">${t('phaseNames')[w.ph]}</span>${w.i===cw?`<span class="now">${t('thisWeek')}</span>`:''}</div>${lockLine('plan')}</section>`:`<section class="week card ${w.i===cw?'cur':''}"><div class="wk-h"><h3>${t('week')} ${numL(w.i+1)}</h3><span class="chip ph${w.ph}">${t('phaseNames')[w.ph]}</span>${w.i===cw?`<span class="now">${t('thisWeek')}</span>`:''}<span class="wk-c num">${numL(w.tasks.filter(taskDone).length)}/${numL(w.tasks.length)}</span></div><div class="task-list">${w.tasks.map(taskItem).join('')}</div></section>`).join('')}</div>`;
 }
-function pageLearn(tab='cards'){
+/* "for you now": up to three items for the weakest skill, so the kit opens on what matters before the full library */
+function forYou(){ if(!S.attempts.length) return ''; const w=rankSkills()[0]; if(!w||w.level>=3) return ''; const s=w.s, sk=SKILLS[s][S.lang], it=[];
+  const f=fdNextFor(s); if(f) it.push([`#fl-${f.id}`,L(bi('درس تأسيس','Foundation lesson')),f[S.lang].t]);
+  it.push([`#lesson-${s}`,L(bi('درس المهارة','Skill lesson')),sk]);
+  const pi=PATTERNS.findIndex(p=>p.sk===s); if(pi>=0&&pi<techN(PATTERNS.length)) it.push(['#learn-patterns',L(bi('نمط متكرر','Recurring pattern')),L(PATTERNS[pi].t)]);
+  return `<section class="foryou"><div class="block-head"><h2>${L(bi('لك الآن','For you now'))}</h2><span class="muted small">${L(bi(`أضعف مهارة عندك الآن: ${sk}`,`Your weakest skill right now: ${sk}`))}</span></div><div class="fy-row">${it.map(([h,k,tt])=>`<a class="fy-card" href="${h}"><span class="eyebrow">${k}</span><b>${esc(tt)}</b></a>`).join('')}</div></section>`; }
+function pageLearn(tab='lessons'){
   const tabs=`<nav class="tabs">${Object.entries(t('tabs')).map(([k,v])=>`<a href="#learn-${k}" class="${tab===k?'on':''}">${v}</a>`).join('')}</nav>`;
   let body='';
   if(tab==='lessons'){ const card=s=>{ const i=skillInfo(s), l=LESSONS[s][S.lang], c=FLASH.find(f=>f.sk===s); return `<a class="lcard" href="#lesson-${s}"><div class="lc-ill">${ILL[c.ill]()}</div><div class="lc-top"><h3>${SKILLS[s][S.lang]}</h3>${pips(i.level)}</div><p>${M(esc(l.concept[0]))}</p><div class="lc-f"><span class="muted small">${t('levels')[i.level]}${xpList(s).length+lockedXp(s).length?` · <span class="lc-xp">▶ ${numL(xpList(s).length+lockedXp(s).length)} ${t('xpShort')}</span>`:''}</span><span class="lc-go">${t('lessonsOpen')}</span></div></a>`; };
@@ -4274,7 +4303,7 @@ function pageLearn(tab='cards'){
     +(n<PATTERNS.length?proFold('pat',t('morePat')(numL(PATTERNS.length-n)),`<div class="pats">${PATTERNS.slice(n).map((p,i)=>`<button type="button" class="pat card locked" data-lock="tech"><div class="pat-h"><span class="pnum">${numL(i+n+1)}</span><h3>${esc(L(p.t))}</h3><span class="chip">${SKILLS[p.sk][S.lang]}</span></div>${lockBadge()}</button>`).join('')}</div>`,'tech'):''); }
   else if(tab==='vocab') body=vocabView();
   else body=`<p class="lead">${t('resIntro')}</p>${RESOURCES.map(c=>`<h2 class="sec-h hl">${L(c.cat)}</h2><div class="rgrid">${c.items.map(resCard).join('')}</div>`).join('')}`;
-  return `<header class="page-h"><h1><span class="hl">${t('learnTitle')}</span></h1><p>${t('kitIntro')}</p></header>${tabs}${body}`;
+  return `<header class="page-h"><h1><span class="hl">${t('learnTitle')}</span></h1><p>${t('kitIntro')}</p></header>${forYou()}${tabs}${body}`;
 }
 /* flashcards */
 let FCV={deck:'all',flip:false};
@@ -4665,7 +4694,7 @@ function route(){ let h=(location.hash||'#today').slice(1);
   if(/^sign(in|up)(\?|$)/.test(h)){ const m=/err=([\w-]+)/.exec(h); AUTHERR=m?m[1]:null; AUTHQ=h.slice(0,6); h='today'; try{ history.replaceState(null,'',location.pathname+location.search+'#today'); }catch(e){} }
   if(h.startsWith('lesson-')) return {p:'learn',v:()=>pageLesson(h.slice(7))};
   if(h.startsWith('fl-')) return {p:'learn',v:()=>pageFound(h.slice(3))};
-  if(h.startsWith('learn')) return {p:'learn',v:()=>pageLearn(h.split('-')[1]||'cards')};
+  if(h.startsWith('learn')) return {p:'learn',v:()=>pageLearn(h.split('-')[1]||(journeyStage()===0?'found':'lessons'))};
   if(h==='plan') return {p:'today',v:pagePlan};
   if(h.startsWith('upgrade')) return {p:'upgrade',v:()=>pageUpgrade(h.split('?')[1]||'')};
   if(h==='redeem'||h.startsWith('redeem?')) return {p:'upgrade',v:()=>pageRedeem(h.split('?')[1]||'')};

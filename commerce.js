@@ -185,8 +185,11 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
   const xpFreeVer = async () => verOfBundle(await bundles());
   app.get("/xp/free.js", wrap(async (req, res) => { const b = await bundles();
     res.set({ "Cache-Control": req.query.v === verOfBundle(b) ? "public, max-age=31536000, immutable" : "no-cache" }).type("application/javascript").send(b.free); }));
-  app.get("/api/xp/premium.js", needUser, needPro, wrap(async (req, res) => { const b = await bundles(); res.set({ "Cache-Control": "private, no-store" }).type("application/javascript").send(b.premium); }));
-  app.get("/api/xp/keys", wrap(async (req, res) => { const b = await bundles(); res.json(b.keys); }));
+  /* the premium bundle is versioned too: a subscriber's browser keeps it (privately) until its content changes, instead of downloading it on every visit */
+  let pver = { src: null, v: "" };
+  const verOfPrem = b => { if (pver.src !== b.premium) pver = { src: b.premium, v: require("crypto").createHash("sha1").update(b.premium).digest("hex").slice(0, 10) }; return pver.v; };
+  app.get("/api/xp/premium.js", needUser, needPro, wrap(async (req, res) => { const b = await bundles(); res.set({ "Cache-Control": req.query.v && req.query.v === verOfPrem(b) ? "private, max-age=31536000, immutable" : "private, no-store" }).type("application/javascript").send(b.premium); }));
+  app.get("/api/xp/keys", wrap(async (req, res) => { const b = await bundles(); res.json({ ...b.keys, pv: verOfPrem(b) }); }));
   // premium narration clips: which clip ids belong to premium explainers (computed from tracks.json)
   async function premiumClipIds() {
     const fs = require("fs"), path = require("path"); const f = path.join(__dirname, "data", "tracks.json");
@@ -810,10 +813,23 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
     const xp = (await pool.query(`SELECT k, count(*) FILTER (WHERE type='xp_start')::int starts, count(DISTINCT user_id) FILTER (WHERE type='xp_start')::int users,
       count(*) FILTER (WHERE type='xp_done')::int done, avg(v) FILTER (WHERE type='xp_done')::float score
       FROM events WHERE type IN ('xp_start','xp_done') AND at>=${SINCE("$1")} AND k IS NOT NULL GROUP BY k ORDER BY starts DESC`, [days])).rows;
-    // skill accuracy aggregated from the students' saved progress (stats per skill: c correct, t total, time)
-    const prog = await pool.query(`SELECT p FROM progress WHERE updated_at>=${SINCE("$1")}`, [days]);
+    // skill accuracy aggregated from the students' saved progress (stats per skill: c correct, t total, time).
+    // Done inside Postgres, so a large student base never blocks the Node event loop; if that query fails (an old
+    // database without pg_input_is_valid), the rows are read in small batches with a pause between them.
     const skills = {};
-    for (const row of prog.rows) { try { const st = (JSON.parse(row.p) || {}).stats || {}; for (const s in st) { const x = skills[s] || (skills[s] = { c: 0, t: 0, time: 0, users: 0 }); x.c += st[s].c || 0; x.t += st[s].t || 0; x.time += st[s].time || 0; x.users++; } } catch (e) {} }
+    try {
+      const r = await pool.query(`SELECT s.key sk, sum(COALESCE((s.value->>'c')::float,0)) c, sum(COALESCE((s.value->>'t')::float,0)) t, sum(COALESCE((s.value->>'time')::float,0)) tm, count(*)::int users
+        FROM progress, LATERAL jsonb_each(CASE WHEN pg_input_is_valid(p,'jsonb') AND jsonb_typeof((p::jsonb)->'stats')='object' THEN (p::jsonb)->'stats' ELSE '{}'::jsonb END) s
+        WHERE updated_at>=${SINCE("$1")} GROUP BY 1`, [days]);
+      for (const x of r.rows) skills[x.sk] = { c: x.c, t: x.t, time: x.tm, users: x.users };
+    } catch (e) {
+      const ids = (await pool.query(`SELECT user_id FROM progress WHERE updated_at>=${SINCE("$1")}`, [days])).rows.map(x => x.user_id);
+      for (let i = 0; i < ids.length; i += 200) {
+        const prog = await pool.query("SELECT p FROM progress WHERE user_id = ANY($1)", [ids.slice(i, i + 200)]);
+        for (const row of prog.rows) { try { const st = (JSON.parse(row.p) || {}).stats || {}; for (const s in st) { const x = skills[s] || (skills[s] = { c: 0, t: 0, time: 0, users: 0 }); x.c += st[s].c || 0; x.t += st[s].t || 0; x.time += st[s].time || 0; x.users++; } } catch (e2) {} }
+        await new Promise(r => setImmediate(r));
+      }
+    }
     const tests = (await pool.query(`SELECT k, count(*)::int n, avg(v)::float avg FROM events WHERE type='test_done' AND at>=${SINCE("$1")} GROUP BY k ORDER BY n DESC`, [days])).rows;
     res.json({ days, explainers: xp, skills, tests });
   });

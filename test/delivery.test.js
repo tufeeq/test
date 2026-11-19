@@ -97,7 +97,7 @@ run(async () => {
     const f = await get(urls[0]); ok(f.h.get("x-content-type-options") === "nosniff" && /default-src 'self'/.test(f.h.get("content-security-policy") || ""), "security headers also on font files"); }
 
   section("free explainer bundle: versioned in the pages, immutable only for the current version");
-  const xpUrl = html => (/<script src="(\/xp\/free\.js(?:\?v=[0-9a-f]{10})?)">/.exec(html) || [])[1];
+  const xpUrl = html => (/<script (?:type="text\/plain" data-later )?src="(\/xp\/free\.js(?:\?v=[0-9a-f]{10})?)">/.exec(html) || [])[1];
   const A = await adminClient();
   const u0 = xpUrl(pages["/app"]);
   ok(/\?v=[0-9a-f]{10}$/.test(u0 || ""), "the app links /xp/free.js with a version", u0);

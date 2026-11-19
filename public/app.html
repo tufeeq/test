@@ -41,15 +41,16 @@
 <div id="exam" hidden></div>
 <div id="toast" role="status" hidden></div>
 <div id="acct" hidden></div>
-<script src="/vendor/gsap.min.js"></script>
-<script src="/xp-engine.js"></script>
-<script src="/xp/free.js"></script>
+<!-- the explainer player (gsap, engine, free lessons) is not needed for the first screen: app.js loads these after its first render -->
+<script type="text/plain" data-later src="/vendor/gsap.min.js"></script>
+<script type="text/plain" data-later src="/xp-engine.js"></script>
+<script type="text/plain" data-later src="/xp/free.js"></script>
 <script src="/v.js"></script>
 <script src="/cloud.js" defer></script><!-- deferred: runs after app.js; listed first so app.js can tell it is the accounts build -->
 <script src="/app.js"></script>
 <!-- web fonts (self-hosted) are declared after the scripts on purpose: on a first visit the font files (about 290 KB) then download
      after app.js instead of alongside it, so the app appears about half a second sooner on a slow connection; text shows in
      the fallback font until they arrive (font-display: swap), exactly as before -->
-<link rel="stylesheet" href="/fonts.css">
+<link rel="stylesheet" href="/fonts.css" media="print" id="fonts-l">
 </body>
 </html>

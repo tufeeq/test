@@ -178,7 +178,9 @@ const DUMMY_HASH = bcrypt.hashSync("not-a-real-password", 11);
 // Hashing runs in a small worker pool instead (same library, same hashes); if a worker fails, we fall back in-thread.
 const PW = (() => {
   const { Worker } = require("worker_threads");
-  const n = Math.max(1, Math.min(4, (require("os").availableParallelism ? require("os").availableParallelism() : 2) - 1, Number(process.env.BCRYPT_WORKERS) || 4));
+  /* at least two workers (logins wait on bcrypt, the event loop does not), at most the number of cores; BCRYPT_WORKERS overrides */
+  const cores = require("os").availableParallelism ? require("os").availableParallelism() : 2;
+  const n = Number(process.env.BCRYPT_WORKERS) > 0 ? Math.min(8, Number(process.env.BCRYPT_WORKERS)) : Math.max(2, Math.min(4, cores));
   const code = `const b=require(${JSON.stringify(require.resolve("bcryptjs"))}),{parentPort}=require("worker_threads");
     parentPort.on("message",m=>{let r,err;try{r=m.op==="hash"?b.hashSync(m.a,m.b):b.compareSync(m.a,m.b);}catch(e){err=String(e&&e.message||e);}parentPort.postMessage({id:m.id,r,err});});`;
   const workers = [], waiting = new Map(); let seq = 0, rr = 0;

@@ -185,9 +185,10 @@ module.exports = function site(app, { PUB, loadConfig, xpFreeVer }) {
   // the free explainer bundle is built by the server (no file to hash): its script tag gets the bundle's own version, so
   // it is cached for a year like the other scripts instead of costing a revalidation round trip on every visit.
   // If the version cannot be read (database down), the tag stays unversioned and the bundle is revalidated as before.
-  const XP_TAG = '<script src="/xp/free.js">';
+  const XP_TAG = '<script type="text/plain" data-later src="/xp/free.js">';
   async function xpVer() { try { return (xpFreeVer && await xpFreeVer()) || ""; } catch (e) { return ""; } }
-  const withXp = (html, v) => v ? html.split(XP_TAG).join(`<script src="/xp/free.js?v=${v}">`) : html;
+  const XP_TAG0 = '<script src="/xp/free.js">'; /* the landing page's idle prefetch keeps the plain tag; the app holds it until after its first render */
+  const withXp = (html, v) => v ? html.split(XP_TAG).join(`<script type="text/plain" data-later src="/xp/free.js?v=${v}">`).split(XP_TAG0).join(`<script src="/xp/free.js?v=${v}">`) : html;
   async function sendApp(req, res) {
     const v = await xpVer();
     return sendPage(req, res, "app.html", { key: "xp:" + v, transform: html => withXp(html, v) });
@@ -371,7 +372,7 @@ module.exports = function site(app, { PUB, loadConfig, xpFreeVer }) {
     const body = JSON.stringify({
       name: "أكاديمية القدرات · GAT Academy", short_name: "أكاديمية القدرات", lang: "ar", dir: "rtl",
       description: "التحضير لاختبار القدرات العامة (GAT) بالعربية والإنجليزية · Prepare for the General Aptitude Test in Arabic and English",
-      start_url: "/app", scope: "/", display: "browser", background_color: "#FCFBFF", theme_color: "#6A4BF2",
+      start_url: "/app", scope: "/", display: "standalone", background_color: "#FCFBFF", theme_color: "#6A4BF2",
       icons: [{ src: v("/icon-192.png"), sizes: "192x192", type: "image/png" }, { src: v("/icon-512.png"), sizes: "512x512", type: "image/png" },
         { src: v("/icon-maskable-512.png"), sizes: "512x512", type: "image/png", purpose: "maskable" }, { src: v("/favicon.svg"), sizes: "any", type: "image/svg+xml" }]
     });

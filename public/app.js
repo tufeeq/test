@@ -4051,7 +4051,7 @@ function lockedXpCount(lang=S.lang){ return ALL_SKILLS.reduce((a,s)=>a+lockedXp(
 /* premium explainers for subscribers: injected once, then narration tracks are reloaded */
 let PREM=0;
 function loadPremium(){ if(PREM||!window.CLOUD||!window.CLOUD.isPro?.()||!XPOK()) return; PREM=1;
-  const s=document.createElement('script'); s.src='/api/xp/premium.js';
+  const s=document.createElement('script'); const pv=window.CLOUD.xpKeys&&window.CLOUD.xpKeys.pv; s.src='/api/xp/premium.js'+(pv?'?v='+pv:'');
   s.onload=()=>{ PREM=2; try{ XP.loadTracks(); }catch(e){} renderRoute(); };
   s.onerror=()=>{ PREM=0; s.remove(); };
   document.head.appendChild(s); }
@@ -4525,6 +4525,7 @@ function pageToday(){
     </div>
     ${dl2<=0?`<button class="btn primary xl" data-lock="daily">${LOCKSVG} ${t('unlock')}</button>`:`<button class="btn primary xl" data-start="session">${t('startSession')}</button>`}
   </section>`}
+  ${installCard()}
   ${hasLive()?`<div class="demo"><span>${L(bi('لديك اختبار محفوظ لم يكتمل.','You have a saved test in progress.'))}</span><button class="btn primary sm" data-resume>${L(bi('أكمل الاختبار','Continue the test'))}</button></div>`:''}
   ${journeyBar(ns.st)}
   ${CLOUD_BUILD&&!acct()&&hasData?`<div class="demo"><span>${t('saveStrip')}</span><button class="btn primary sm" data-acct data-tab="signup">${t('saveStripBtn')}</button></div>`:''}
@@ -5007,7 +5008,7 @@ function bindMain(){
   m.querySelectorAll('[data-acct]').forEach(b=>b.onclick=()=>{ if(b.dataset.tab) AC.tab=b.dataset.tab; openAcct(); });
   m.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>document.getElementById(b.dataset.go)?.scrollIntoView({behavior:SMOOTH()}));
   m.querySelectorAll('[data-start]').forEach(b=>b.onclick=()=>startTest(b.dataset.start,{skill:b.dataset.skill}));
-  m.querySelectorAll('[data-resume]').forEach(b=>b.onclick=()=>checkLive());
+  m.querySelectorAll('[data-resume]').forEach(b=>b.onclick=()=>checkLive()); bindInstall(m);
   m.querySelectorAll('[data-xp]').forEach(b=>b.onclick=()=>{ XP_BACK=b.dataset.xp; track('xp_start',b.dataset.xp); XP.open(b.dataset.xp); });
   m.querySelectorAll('[data-lock]').forEach(b=>b.onclick=e=>{ e.preventDefault(); e.stopPropagation(); if(b.dataset.lock==='report') openUpgrade('report'); else hitLimit(b.dataset.lock); });
   m.querySelectorAll('details[data-fold]').forEach(d=>d.ontoggle=()=>{ FOLD[d.dataset.fold]=d.open; });
@@ -5245,7 +5246,9 @@ function saveDetail(att,all){
   const others=Object.values(DET).filter(x=>!modelIds.has(x.id)).sort((a,b)=>a.id<b.id?1:-1);
   others.slice(20).forEach(x=>delete DET[x.id]);
   Object.values(DET).forEach(x=>{ if(x.kind==='model'&&!modelIds.has(x.id)&&!others.slice(0,20).includes(x)) delete DET[x.id]; });
-  for(let i=0;i<5;i++){ try{ localStorage.setItem(DKEY,JSON.stringify(DET)); break; }catch(e){ const old=Object.values(DET).sort((a,b)=>a.id<b.id?-1:1)[0]; if(!old) break; delete DET[old.id]; } }
+  /* the review copies are written when the browser is idle, so the result screen appears without waiting for a large write */
+  const write=()=>{ for(let i=0;i<5;i++){ try{ localStorage.setItem(DKEY,JSON.stringify(DET)); break; }catch(e){ const old=Object.values(DET).sort((a,b)=>a.id<b.id?-1:1)[0]; if(!old) break; delete DET[old.id]; } } };
+  if(window.requestIdleCallback) requestIdleCallback(write,{timeout:3000}); else setTimeout(write,300);
 }
 /* storage is full: drop the n oldest attempt details (a local convenience) to make room for the progress itself */
 function shrinkDetails(n){ const ids=Object.values(DET).sort((a,b)=>a.id<b.id?-1:1).slice(0,n).map(x=>x.id); if(!ids.length) return false; ids.forEach(id=>delete DET[id]);
@@ -5319,12 +5322,28 @@ function importText(txt){
 $('#lang-btn').onclick=()=>{ S.lang=S.lang==='ar'?'en':'ar'; VC.flip=false; save(); renderRoute(); const us=$('#upsheet'); if(us&&!us.hidden) renderUpsheet(); };
 let XP_BACK=null;
 let XP_NUDGE=false;
-if(XPOK()){ XP.setHooks({onDone:(k,sc,n)=>{ S.xp=S.xp||{}; const w=S.xp[k]; if(!w||sc>=(w.score||0)) S.xp[k]={score:sc,n,date:todayStr(),t:Date.now()}; save(); track('xp_done',k,sc);
+function xpHooks(){ if(!XPOK()||xpHooks.done) return; xpHooks.done=1; XP.setHooks({onDone:(k,sc,n)=>{ S.xp=S.xp||{}; const w=S.xp[k]; if(!w||sc>=(w.score||0)) S.xp[k]={score:sc,n,date:todayStr(),t:Date.now()}; save(); track('xp_done',k,sc);
     /* the student finished every free explainer of this skill and more are waiting: one warm invitation after the player closes */
     if(!PRO()){ const L0=XP.get?.(k), sk=L0&&L0.sk; if(sk&&lockedXp(sk).length&&xpList(sk).every(x=>S.xp[x.key])) XP_NUDGE=true; } },
   onClose:()=>{ const y=window.scrollY; renderRoute(); window.scrollTo(0,y); if(XP_NUDGE){ XP_NUDGE=false; maybeNudge('xp'); } const b=XP_BACK&&document.querySelector(`[data-xp="${XP_BACK}"]`); if(b) b.focus({preventScroll:true}); }}); XP.loadTracks(); }
 window.addEventListener('hashchange',()=>{ if(document.body.classList.contains('xp-open')&&XPOK()) XP.close(); closeUpgrade(); if(NUDGE){ NUDGE=null; renderNudge(); } /* the nudge belongs to the moment it was shown; moving on dismisses it so it never covers another page's buttons */ renderRoute(); authIntent(); window.scrollTo(0,0); });
+/* offline copy of the app and its assets, and "add to home screen" */
+if('serviceWorker' in navigator&&location.protocol==='https:') window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
+let INSTALL=null; window.addEventListener('beforeinstallprompt',e=>{ e.preventDefault(); INSTALL=e; if(location.hash.startsWith('#today')||!location.hash) renderRoute(); });
+const standalone=()=>matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
+const isIOS=()=>/iphone|ipad|ipod/i.test(navigator.userAgent)&&!window.MSStream;
+function installCard(){ if(standalone()||S.instHide||!diagTaken()||!(INSTALL||isIOS())) return '';
+  return `<div class="demo inst"><span>${L(bi('ثبّت أكاديمية القدرات على شاشتك الرئيسية، وافتحها بلمسة كتطبيق.','Add GAT Academy to your home screen and open it with one tap, like an app.'))}</span><span class="row"><button class="btn primary sm" id="inst-go">${L(bi('ثبّت','Install'))}</button><button class="btn ghost sm" id="inst-x">${L(bi('لاحقًا','Later'))}</button></span></div>`; }
+function bindInstall(m){ const g=m.querySelector('#inst-go'); if(g) g.onclick=async()=>{ if(INSTALL){ INSTALL.prompt(); try{ await INSTALL.userChoice; }catch(e){} INSTALL=null; renderRoute(); } else toast(L(bi('في سفاري: اضغط زر المشاركة ثم «إضافة إلى الشاشة الرئيسية».','In Safari: tap Share, then “Add to Home Screen”.'))); };
+  const x=m.querySelector('#inst-x'); if(x) x.onclick=()=>{ S.instHide=1; save(); renderRoute(); }; }
 renderRoute(); initAI(); checkLive();
+/* after the first screen: the web fonts, then (once the page has loaded) the explainer player in order; then hook it up and redraw */
+{ const fo=()=>{ const f=$('#fonts-l'); if(f) f.media='all'; }; if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',fo); else fo(); }
+
+(()=>{ const go=()=>{ const tags=[...document.querySelectorAll('script[data-later]')]; let i=0;
+    const next=()=>{ if(i>=tags.length){ xpHooks(); loadPremium(); if(!X) renderRoute(); return; } const tg=tags[i++], sc=document.createElement('script'); sc.src=tg.getAttribute('src'); sc.onload=next; sc.onerror=next; document.body.appendChild(sc); };
+    next(); };
+  if(document.readyState==='complete') setTimeout(go,0); else window.addEventListener('load',()=>setTimeout(go,0)); })();
 if(!STORE_OK){ SAVE_WARNED=true; setTimeout(()=>toast(tc('saveFail')),900); }
 try{ const msg=sessionStorage.getItem('masar100_msg'); if(msg){ sessionStorage.removeItem('masar100_msg'); if(T[S.lang][msg]) setTimeout(()=>toast(t(msg)),700); } }catch(e){} /* a message carried over a reload (e.g. sign-out) */
 { const el=$('#save-dot'); if(el){ el.classList.toggle('bad',!STORE_OK); el.title=STORE_OK?t('savedOk'):tc('saveFail'); el.setAttribute('aria-label',el.title); } }

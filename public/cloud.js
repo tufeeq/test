@@ -3,9 +3,16 @@
 const H = { "Content-Type": "application/json", "X-Masar": "1" };
 const OWNER = "masar100_owner"; // email of the account whose progress is in this browser's localStorage
 const ls = { get: k => { try { return localStorage.getItem(k); } catch (e) { return null; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} }, del: k => { try { localStorage.removeItem(k); } catch (e) {} } };
+/* large saves are gzipped on the way up (about 7× smaller), where the browser can; the server inflates them */
+let GZ_OK = typeof CompressionStream === "function";
+async function gz(txt) { return await new Response(new Blob([txt]).stream().pipeThrough(new CompressionStream("gzip"))).blob(); }
 async function call(method, url, body) {
   let r;
-  try { r = await fetch(url, { method, headers: H, credentials: "same-origin", cache: "no-store", body: body ? JSON.stringify(body) : undefined }); }
+  const txt = body ? JSON.stringify(body) : undefined, zip = !!(txt && GZ_OK && txt.length > 16000);
+  try {
+    r = zip ? await fetch(url, { method, headers: { ...H, "Content-Encoding": "gzip" }, credentials: "same-origin", cache: "no-store", body: await gz(txt) }) : await fetch(url, { method, headers: H, credentials: "same-origin", cache: "no-store", body: txt });
+    if (zip && (r.status === 415 || r.status === 400)) { GZ_OK = false; r = await fetch(url, { method, headers: H, credentials: "same-origin", cache: "no-store", body: txt }); }
+  }
   catch (e) { const x = new Error("network"); x.code = "network-request-failed"; throw x; }
   const j = method === "HEAD" ? {} : await r.json().catch(() => ({}));
   if (!r.ok) { const x = new Error(j.error || "server"); x.code = j.error || (r.status === 413 ? "too-large" : r.status === 401 ? "unauthenticated" : r.status === 429 ? "too-many-requests" : "other"); x.status = r.status;

@@ -1136,3 +1136,4 @@ body.exam-open:has(#exam .rs) #toast{bottom:calc(20px + env(safe-area-inset-bott
 .fd-promo{display:flex;gap:14px;align-items:center;justify-content:space-between;flex-wrap:wrap;text-decoration:none;color:inherit;margin-block-end:16px;border-inline-start:5px solid var(--pri)}
 .fd-promo h2{font-size:1.05rem;margin:0 0 4px}.fd-promo p{margin:0;font-size:.9rem;color:var(--muted)}
 .fd-lesson .rule .m,.fd-ex .m,.fd-lesson .bul .m{white-space:nowrap}
+.fd-part{font-size:clamp(1.35rem,1.1rem + 1vw,1.75rem);margin-block:26px 2px;padding-block-start:14px;border-block-start:2px solid var(--edge)}

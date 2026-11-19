@@ -1050,6 +1050,23 @@ async function vSettings(tok) {
   if (!S.draft) { S.draft = clone(r.config); S.dirty = false; S.errs = {}; }
   renderSettings();
 }
+async function loadNotify() {
+  const box = $("#nt-body"); if (!box) return;
+  const KIND = { welcome: _("الترحيب", "Welcome"), reminder: _("تذكير المساء", "Evening reminder"), trial_end: _("نهاية التجربة", "Trial ending"), expiring: _("قرب انتهاء الاشتراك", "Subscription ending"), test: _("تجربة", "Test") };
+  try {
+    const d = await api("GET", "/api/admin/notify");
+    const rows = d.last7 || [];
+    box.innerHTML = `<div class="nt-stat">
+      <p><b>${_("البريد", "Email")}:</b> ${d.email.configured ? `<span class="chip free">${_("مفعّل", "On")}</span> <bdi class="small muted" dir="ltr">${esc(d.email.from)}</bdi>` : `<span class="chip pink">${_("غير مُعدّ", "Not set up")}</span>`}</p>
+      <p><b>${_("تنبيهات المتصفح", "Browser push")}:</b> ${fmtN(d.push.users)} ${_("طالبًا على", "students on")} ${fmtN(d.push.subs)} ${_("جهازًا", "devices")}</p>
+      <p><b>${_("طلبوا التذكير", "Asked for reminders")}:</b> ${fmtN(d.remind)}</p><p><b>${_("أوقفوا البريد", "Unsubscribed")}:</b> ${fmtN(d.unsubscribed)}</p></div>
+      ${d.email.configured ? "" : `<p class="small muted">${_("لتفعيل البريد أضف متغيري البيئة SMTP_URL (مثل smtps://user:pass@smtp.host:465) و MAIL_FROM في إعدادات الخادم، ثم أعد النشر. التنبيهات تعمل بدونهما.", "To turn email on, set the SMTP_URL (e.g. smtps://user:pass@smtp.host:465) and MAIL_FROM environment variables on the server and redeploy. Push works without them.")}</p>`}
+      <div class="tbl"><table><thead><tr><th scope="col">${_("الرسالة (آخر ٧ أيام)", "Message (last 7 days)")}</th><th scope="col">${_("القناة", "Channel")}</th><th scope="col">${_("أُرسلت", "Sent")}</th><th scope="col">${_("فشلت", "Failed")}</th></tr></thead><tbody>
+      ${rows.length ? rows.map(r => `<tr><td>${esc(KIND[r.kind] || r.kind)}</td><td>${r.ch === "email" ? _("بريد", "Email") : _("تنبيه", "Push")}</td><td>${fmtN(r.ok)}</td><td>${fmtN(r.failed)}</td></tr>`).join("") : `<tr><td colspan="4" class="muted">${_("لا شيء بعد", "Nothing yet")}</td></tr>`}</tbody></table></div>
+      <p class="small muted">${_("الترحيب للحسابات الجديدة، وتذكير المساء (٧–١٠ مساءً) لمن لم يتدرب اليوم: تنبيه يومي، وبريد كل ٣ أيام على الأكثر لمن فعّل التذكير، ورسالة قبل نهاية التجربة بيوم وقبل نهاية الاشتراك بثلاثة أيام.", "Welcome for new accounts; the evening reminder (7–10 pm Saudi time) for students who haven't practised today: a daily push, and an email at most every 3 days for those who asked for reminders; plus a note a day before a trial ends and 3 days before a subscription ends.")}${d.lastRun ? " " + _("آخر تشغيل: ", "Last run: ") + esc(new Date(d.lastRun).toLocaleString()) : ""}</p>`;
+  } catch (e) { box.innerHTML = `<p class="small muted">${_("تعذّر تحميل الحالة.", "Could not load the status.")}</p>`; }
+  const b = $("#nt-test"); if (b) b.onclick = async () => { b.disabled = true; try { const r = await api("POST", "/api/admin/notify/test", {}); toast(r.email === true ? _("أُرسلت رسالة تجريبية إلى بريدك", "Test email sent to you") + (r.push ? _(" وتنبيه إلى أجهزتك", " and a push to your devices") : "") : r.push ? _("أُرسل تنبيه إلى أجهزتك", "Push sent to your devices") + (r.emailConfigured ? "" : _(" (البريد غير مُعدّ)", " (email not set up)")) : typeof r.email === "string" ? _("فشل البريد: ", "Email failed: ") + r.email : _("البريد غير مُعدّ، ولم تُفعَّل التنبيهات على أجهزتك.", "Email is not set up and push isn't on for your devices."), r.email === true || r.push ? "ok" : "err"); } catch (e) { toast(_("تعذّر الإرسال", "Could not send"), "err"); } b.disabled = false; loadNotify(); };
+}
 function renderSettings() {
   freshMain();
   const c = S.draft, D = SETTINGS.defaults, E = S.errs, keys = SETTINGS.xpKeys || [];
@@ -1119,8 +1136,9 @@ function renderSettings() {
       <div class="fld"><span>${_("معاينة مباشرة", "Live preview")}</span><div id="bn-prev" aria-live="polite"></div></div>
     </section>
   </div>
+  <section class="card" id="nt-card" aria-live="polite"><div class="card-h"><h2>${_("الرسائل الآلية والتنبيهات", "Automatic emails & notifications")}</h2><div class="sec-acts"><button class="btn ghost xs" type="button" id="nt-test">${_("أرسل تجربة لي", "Send me a test")}</button></div></div><div id="nt-body"><p class="small muted">${_("جارٍ التحميل…", "Loading…")}</p></div></section>
   <div class="savebar" id="savebar" ${S.dirty ? "" : "hidden"}><p>${_("لديك تغييرات غير محفوظة", "You have unsaved changes")}</p><div class="row"><button class="btn ghost sm" type="button" id="s-discard">${_("تجاهل", "Discard")}</button><button class="btn sand sm" type="button" id="s-save">${ic("check")}${_("حفظ التغييرات", "Save changes")}</button></div></div>`;
-  updatePreviews();
+  updatePreviews(); loadNotify();
   const dirty = () => { S.dirty = true; $("#savebar").hidden = false; $("#s-save2").disabled = false; };
   MAIN.addEventListener("input", e => {
     const t = e.target; const p = t.dataset.p; if (!p || t.dataset.bool != null) return;

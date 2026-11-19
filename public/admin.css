@@ -513,3 +513,5 @@ dialog.dlg .row{justify-content:flex-end}
 .vi-depth>div{background:var(--surface2);border-radius:12px;padding:8px 6px;text-align:center;display:grid;gap:2px}
 .vi-depth b{font-size:1rem}.vi-depth small{color:var(--muted);font-size:.75rem}
 @media (max-width:560px){.vi-depth{grid-template-columns:repeat(4,minmax(0,1fr))}.vi-depth>span{grid-column:1/-1}}
+
+.nt-stat{display:grid;gap:4px;margin-block-end:12px}.nt-stat p{margin:0}

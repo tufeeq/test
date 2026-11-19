@@ -4,7 +4,7 @@
 // Needs Playwright like smoke.test.js (PLAYWRIGHT_DIR, PW_CHROMIUM); skipped (exit 3) without it.
 "use strict";
 const path = require("path");
-const { signup, admin, ok, section, done, uid, BASE } = require("./lib");
+const { signup, freshUser, admin, ok, section, done, uid, BASE } = require("./lib");
 
 let chromium;
 try {
@@ -68,11 +68,12 @@ const RENDER_ALL = () => {
     ok(p.errs.length === 0, "no console or page errors (guest)", p.errs);
     await p.context().close();
 
-    section("subscriber: all 66 explainers render from free + premium bundles");
+    const NX = (await A("GET", "/api/admin/settings")).j.xpKeys.length; // every explainer the server bundles
+    section(`subscriber: all ${NX} explainers render from free + premium bundles`);
     p = await page(A);
     await p.goto(BASE + "/app", { waitUntil: "load" });
-    const all = await p.waitForFunction(() => window.XP && XP.all().length === 66, null, { timeout: 20000 }).then(() => true, () => false);
-    ok(all, "premium bundle loads for a subscriber (66 explainers)", await p.evaluate(() => window.XP && XP.all().length));
+    const all = await p.waitForFunction(n => window.XP && XP.all().length === n, NX, { timeout: 20000 }).then(() => true, () => false);
+    ok(all, `premium bundle loads for a subscriber (${NX} explainers)`, await p.evaluate(() => window.XP && XP.all().length));
     r = await p.evaluate(RENDER_ALL);
     ok(r.errors.length === 0, `every scene of every explainer renders (${r.beats} beats)`, r.errors.slice(0, 10));
     ok(p.errs.length === 0, "no console or page errors (subscriber)", p.errs);
@@ -80,7 +81,7 @@ const RENDER_ALL = () => {
 
     for (const [vp, key] of [[{ width: 390, height: 844 }, "ar-order"], [{ width: 1280, height: 800 }, "en-ge-angles"]]) {
       section(`player at ${vp.width}px: ${key}`);
-      p = await page(U, vp);
+      p = await page(key.startsWith("en-") ? await freshUser(`xpe_${uid()}@t.com`) : U, vp); // a fresh account: an account's saved language would win over ?lang=en
       await p.goto(BASE + "/app" + (key.startsWith("en-") ? "?lang=en" : ""), { waitUntil: "load" });
       await p.waitForFunction(k => window.XP && XP.get(k), key, { timeout: 15000 });
       await p.evaluate(() => { window.__done = null; XP.setHooks({ onDone: (k, s, n) => { window.__done = [k, s, n]; } }); });

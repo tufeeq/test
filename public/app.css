@@ -575,6 +575,7 @@ footer p{max-width:1160px;margin:0 auto}
 .acct-form .chkl input{min-block-size:auto;margin-top:5px;inline-size:18px;block-size:18px;accent-color:var(--pri)}
 .linkbtn{font:inherit;font-size:.86rem;background:none;border:0;color:var(--pri);cursor:pointer;justify-self:start;padding:4px 0;font-weight:700}
 .acct-priv{font-size:.86rem}
+.acct-push{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:8px}
 .acct-err{background:var(--coral-soft);color:var(--coral-t);border-radius:10px;padding:8px 12px;font-weight:700;font-size:.9rem}
 .acct-info{background:var(--ok-soft);color:var(--ok-t);border-radius:10px;padding:8px 12px;font-weight:700;font-size:.9rem}
 .save-opt.cloud{border-color:var(--pink)} .save-opt.cloud.ok{border-color:var(--ok)}

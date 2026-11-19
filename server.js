@@ -76,6 +76,7 @@ async function migrate() {
   `);
   await C.migrate();
   await O.migrate();
+  await N.migrate();
   await checkSchema();
 }
 // Every column the code reads or writes. The migrations above are idempotent (IF NOT EXISTS everywhere), but a column
@@ -91,7 +92,9 @@ const SCHEMA = {
   payments: "id user_id email plan_id amount currency coupon status gw_status refunded_amount refund_id created_at paid_at provider ext_id days refunded_at",
   coupons: "code pct max_uses used expires_at plan_ids active note created_at",
   events: "id user_id type k v day at",
-  admin_audit: "id admin_email action target meta at"
+  admin_audit: "id admin_email action target meta at",
+  push_subs: "endpoint user_id p256dh auth lang fails created_at last_ok",
+  notify_log: "id user_id kind ref ch ok at"
 };
 async function checkSchema() {
   const r = await pool.query("SELECT table_name t, column_name c FROM information_schema.columns WHERE table_schema='public'");
@@ -252,6 +255,7 @@ app.use("/api", wrap(auth));
 app.locals.auth = (req, res, next) => auth(req, res, next).catch(next);
 const C = commerce(app, { pool, wrap, fail, needUser, needAdmin, isAdminEmail, limited, cleanName });
 const O = oauth(app, { pool, wrap, createSession: (...a) => createSession(...a), cleanName, parseCookies, limited });
+const N = require("./notify")(app, { pool, wrap, fail, needUser, needAdmin, limited });
 
 // ---------- account ----------
 app.get("/api/me", wrap(async (req, res) => {
@@ -284,7 +288,7 @@ app.post("/api/results", needUser, wrap(async (req, res) => {
 app.post("/api/remind", needUser, wrap(async (req, res) => {
   const remind = req.body.remind === true, raw = String(req.body.phone == null ? "" : req.body.phone).trim(), phone = raw ? cleanPhone(raw) : null;
   if ((raw || (remind && !req.user.phone)) && !phone) return fail(res, 400, "invalid-phone");
-  await pool.query("UPDATE users SET remind=$1, phone=COALESCE($2,phone) WHERE id=$3", [remind, phone, req.user.id]);
+  await pool.query("UPDATE users SET remind=$1, phone=COALESCE($2,phone), mail_off=CASE WHEN $1 THEN false ELSE mail_off END WHERE id=$3", [remind, phone, req.user.id]); // ticking the box again undoes an email unsubscribe
   res.json({ user: pub({ ...req.user, remind, phone: phone || req.user.phone }) });
 }));
 app.post("/api/name", needUser, wrap(async (req, res) => {
@@ -310,7 +314,7 @@ function cleanPhone(v) {
 
 app.post("/api/signup", wrap(async (req, res) => {
   const email = String(req.body.email || "").trim().toLowerCase(), pw = String(req.body.password || "");
-  if (limited("su:" + req.ip, 60, 3600e3)) return fail(res, 429, "too-many-requests"); // generous: a whole class may sign up from one school IP
+  if (limited("su:" + req.ip, Number(process.env.SIGNUP_PER_HOUR) || 60, 3600e3)) return fail(res, 429, "too-many-requests"); // generous: a whole class may sign up from one school IP
   if (!validEmail(email)) return fail(res, 400, "invalid-email");
   if (pw.length < 8 || pw.length > 200) return fail(res, 400, "weak-password");
   const name = cleanName(req.body.name);
@@ -327,6 +331,7 @@ app.post("/api/signup", wrap(async (req, res) => {
   try { await pool.query("INSERT INTO users(id,email,pass_hash,name,phone,remind,referred_by) VALUES($1,$2,$3,$4,$5,$6,$7)", [id, email, hash, name, phone, remind, refBy]); }
   catch (e) { if (e.code === "23505") return fail(res, 409, "email-already-in-use"); throw e; }
   if (isAdminEmail(email)) console.log(`admin account claimed: ${email}`);
+  N.kick(); // the welcome email goes out within seconds
   await createSession(req, res, id);
   res.json({ user: { ...pub({ email, name }), plan: await C.planOf({ id, email }) } });
 }));
@@ -599,7 +604,7 @@ function shutdown(code = 0) {
 }
 
 migrate().then(() => {
-  srv = app.listen(PORT, () => { console.log(`GAT Academy running on :${PORT} (node ${process.version}, pool max ${pool.options.max}, ${PW.size} hash worker(s))`); S.warm(); });
+  srv = app.listen(PORT, () => { console.log(`GAT Academy running on :${PORT} (node ${process.version}, pool max ${pool.options.max}, ${PW.size} hash worker(s))`); S.warm(); N.start(); });
   // keep idle connections open longer than the platform's proxy does, so it never reuses a socket we just closed (sporadic 502s)
   srv.keepAliveTimeout = 65e3; srv.headersTimeout = 66e3;
   importNarration().catch(e => console.error("narration import", e.message));

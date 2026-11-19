@@ -44,7 +44,7 @@ async function waitFor(url, ms = 20000) {
       MOYASAR_SECRET_KEY: "sk_test_mock", MOYASAR_API_BASE: MOY + "/v1", MOYASAR_WEBHOOK_SECRET: "whsec_test",
       // fake OAuth apps + mocked provider calls, so /auth/* callbacks can be tested end to end
       GOOGLE_CLIENT_ID: "test-google-id", GOOGLE_CLIENT_SECRET: "test-google-secret", FACEBOOK_APP_ID: "1", FACEBOOK_APP_SECRET: "fb-secret",
-      NODE_ENV: "test" };
+      NODE_ENV: "test", NOTIFY_DRY: "1" };
     delete env.CANONICAL_HOST; delete env.REDIRECT_HOSTS;
     const t0 = Date.now();
     srv = spawn(process.execPath, ["-r", path.join(__dirname, "mock-oauth.cjs"), path.join(ROOT, "server.js")], { cwd: ROOT, env, stdio: ["ignore", "pipe", "pipe"] });

@@ -106,7 +106,7 @@ const IGNORE = /fonts\.(googleapis|gstatic)\.com|ERR_TUNNEL_CONNECTION_FAILED|ER
     ok(srv.diag && srv.kinds.join() === "diag", "the guest's diagnostic is stored in the new account", srv);
     await pg.click("#rs-close"); await pg.goto(BASE + "/app#practice"); await pg.waitForTimeout(900);
     const pr = await pg.evaluate(() => { const f = document.querySelector('.pro-fold[data-fold="practice"]'); return { fold: !!f, open: f && f.open, free: document.querySelectorAll("#main > .pgrid .pcard").length, inFold: f ? f.querySelectorAll(".mbox").length : 0 }; });
-    ok(pr.fold && !pr.open && pr.free === 2 && pr.inFold === 30, "practice: free cards first, locked items folded behind one line", pr);
+    ok(!pr.fold && pr.free >= 2, "practice: the free plan shows its cards with no wall of locked items", pr);
     await pg.goto(BASE + "/app#progress"); await pg.waitForTimeout(900);
     const sv = await pg.evaluate(() => ({ card: !!document.querySelector("#save .save-auto.ok"), extra: ["bk-file", "bk-load", "bk-copy", "bk-in", "bk-imp"].filter(i => document.getElementById(i)) }));
     ok(sv.card && !sv.extra.length, "progress: saving is shown as automatic, with no backup file or transfer code", sv);

@@ -189,9 +189,29 @@ module.exports = function site(app, { PUB, loadConfig, xpFreeVer }) {
   async function xpVer() { try { return (xpFreeVer && await xpFreeVer()) || ""; } catch (e) { return ""; } }
   const XP_TAG0 = '<script src="/xp/free.js">'; /* the landing page's idle prefetch keeps the plain tag; the app holds it until after its first render */
   const withXp = (html, v) => v ? html.split(XP_TAG).join(`<script type="text/plain" data-later src="/xp/free.js?v=${v}">`).split(XP_TAG0).join(`<script src="/xp/free.js?v=${v}">`) : html;
+  // one-language builds of app.js (langsplit.js): about a quarter less to download and parse. The language comes from
+  // ?lang= or the gat_lang cookie the app keeps; gat_full=1 (set by the app if the switch ever loops) or APP_SPLIT=0
+  // falls back to the full file.
+  const SPLIT = process.env.APP_SPLIT !== "0";
+  const LS = require("./langsplit");
+  const builds = { src: null, ar: null, en: null };
+  function appBuild(lang) {
+    const c = readFile(path.join(PUB, "app.js")); if (!c) return null;
+    if (builds.src !== c.hash) { builds.src = c.hash; builds.ar = builds.en = null; }
+    if (!builds[lang]) {
+      try { const buf = Buffer.from(LS.split(c.buf.toString("utf8"), lang), "utf8"); builds[lang] = { buf, hash: sha1(buf) }; }
+      catch (e) { console.error("app split", lang, e.message); builds[lang] = { failed: true }; }
+    }
+    return builds[lang].failed ? null : builds[lang];
+  }
+  const cookieOf = (req, k) => { const m = new RegExp("(?:^|;\\s*)" + k + "=([^;]*)").exec(String(req.headers.cookie || "")); return m ? m[1] : ""; };
+  const APP_TAG = /<script src="\/app\.js(\?v=\w+)?"><\/script>/;
   async function sendApp(req, res) {
     const v = await xpVer();
-    return sendPage(req, res, "app.html", { key: "xp:" + v, transform: html => withXp(html, v) });
+    const q = String(req.query.lang || ""), lang = q === "en" || q === "ar" ? q : cookieOf(req, "gat_lang") === "en" ? "en" : "ar";
+    const b = SPLIT && cookieOf(req, "gat_full") !== "1" ? appBuild(lang) : null;
+    const key = "xp:" + v + (b ? "|" + lang + "|" + b.hash : "");
+    return sendPage(req, res, "app.html", { key, transform: html => { html = withXp(html, v); return b ? html.replace(APP_TAG, `<script src="/app-${lang}.js?v=${b.hash.slice(0, 10)}"></script>`) : html; } });
   }
 
   // static text assets (js/css/svg/json/manifest…): compressed, versioned or revalidated
@@ -199,9 +219,15 @@ module.exports = function site(app, { PUB, loadConfig, xpFreeVer }) {
     if (req.method !== "GET" && req.method !== "HEAD") return next();
     const ext = path.extname(req.path).toLowerCase();
     if (!TYPES[ext] || ext === ".html") return next();
+    const v = typeof req.query.v === "string" ? req.query.v : "";
+    const lb = /^\/app-(ar|en)\.js$/.exec(req.path);
+    if (lb) {
+      const b = SPLIT && appBuild(lb[1]);
+      if (!b) return res.redirect(302, "/app.js");
+      return sendBody(req, res, b.buf, { type: TYPES[".js"], cache: v && v === b.hash.slice(0, 10) ? YEAR : "no-cache", hash: b.hash }).catch(next);
+    }
     const f = inPub(req.path); const c = f && asset(f);
     if (!c) return next();
-    const v = typeof req.query.v === "string" ? req.query.v : "";
     const cache = v && v === c.hash.slice(0, 10) ? YEAR : "no-cache";
     sendBody(req, res, c.buf, { type: TYPES[ext], cache, hash: c.hash }).catch(next);
   }
@@ -210,6 +236,7 @@ module.exports = function site(app, { PUB, loadConfig, xpFreeVer }) {
     ["app.js", "app.css", "fonts.css", "xp-engine.js", "vendor/gsap.min.js", "landing.js", "landing.css", "cloud.js", "admin.js", "admin.css", "legal.css", "legal.js"].forEach(n => {
       const c = asset(path.join(PUB, n)); if (c) ["br", "gzip"].forEach(e => compressCached(c.buf, e, 11, c.hash).catch(() => {}));
     });
+    if (SPLIT) setImmediate(() => ["ar", "en"].forEach(l => { const b = appBuild(l); if (b) ["br", "gzip"].forEach(e => compressCached(b.buf, e, 11, b.hash).catch(() => {})); }));
   }
 
   // ---------- landing page: English rendered on the server, JSON-LD ----------
@@ -337,9 +364,12 @@ module.exports = function site(app, { PUB, loadConfig, xpFreeVer }) {
     // the payment wording follows how plans are sold now: the external store (plans carry a buy link), or the live
     // gateway (moyasar), else neutral wording
     const prov = cfg && PAY.store && (cfg.plans || []).some(p => p.buy) ? "store" : cfg && PAY[cfg.provider] ? cfg.provider : "none";
-    const key = lang + "|" + sig + "|" + prov + "|" + xv + "|" + sha1(JSON.stringify(cfg && { p: cfg.plans, c: cfg.currency, r: cfg.refund }));
+    // the app build the visitor will get from the page's /app links (?lang=en there, else their language cookie), so the idle prefetch hits it
+    const al = lang === "en" || cookieOf(req, "gat_lang") === "en" ? "en" : "ar", ab = SPLIT && cookieOf(req, "gat_full") !== "1" ? appBuild(al) : null;
+    const key = lang + "|" + sig + "|" + prov + "|" + xv + "|" + (ab ? al + ab.hash : "") + "|" + sha1(JSON.stringify(cfg && { p: cfg.plans, c: cfg.currency, r: cfg.refund }));
     sendPage(req, res, "index.html", { key, transform: html => {
       html = withXp(html, xv);
+      if (ab) html = html.replace(/<link rel="prefetch" href="\/app\.js(\?v=\w+)?">/, `<link rel="prefetch" href="/app-${al}.js?v=${ab.hash.slice(0, 10)}">`);
       html = html.replace(/<html lang="ar" dir="rtl"/, `<html lang="ar" dir="rtl" data-pay="${prov}"`);
       const pay = PAY[prov] && PAY[prov][lang]; if (pay) html = translateHtml(html, pay);
       if (lang === "en") {

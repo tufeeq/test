@@ -39,3 +39,20 @@ self.addEventListener("fetch", e => {
   if (u.searchParams.has("v") || u.pathname.startsWith("/fonts/")) { e.respondWith(versioned(req)); return; }
   if (req.mode === "navigate" && u.pathname === "/app") e.respondWith(page(req, "/app"));
 });
+/* browser notifications sent by the server (evening reminder, trial or subscription ending) */
+self.addEventListener("push", e => {
+  let d = {};
+  try { d = e.data ? e.data.json() : {}; } catch (x) { d = { body: e.data ? e.data.text() : "" }; }
+  const title = d.title || "أكاديمية القدرات";
+  e.waitUntil(self.registration.showNotification(title, { body: d.body || "", icon: "/icon-192.png", badge: "/icon-192.png", tag: d.tag || "gat", renotify: false, data: { url: d.url || "/app#today" }, dir: /[؀-ۿ]/.test(title) ? "rtl" : "ltr", lang: /[؀-ۿ]/.test(title) ? "ar" : "en" }));
+});
+self.addEventListener("notificationclick", e => {
+  e.notification.close();
+  const url = new URL((e.notification.data && e.notification.data.url) || "/app#today", location.origin).href;
+  e.waitUntil((async () => {
+    for (const c of await clients.matchAll({ type: "window", includeUncontrolled: true })) {
+      if (new URL(c.url).pathname === "/app") { await c.focus(); try { await c.navigate(url); } catch (x) {} return; }
+    }
+    await clients.openWindow(url);
+  })());
+});

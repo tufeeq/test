@@ -33,7 +33,21 @@ async function signup(email, pw = "password123", name = "Test User") {
   c.user = r.j.user;
   return c;
 }
-const admin = () => signup(process.env.ADMIN_EMAIL || "admin@test.com", process.env.ADMIN_PASSWORD || "adminpass1", "Owner");
+// an account made straight in the database, then signed in (does not use up the per-IP sign-up allowance the suites share)
+async function freshUser(email, pw = "password123", name = "Test User") {
+  const hash = await require("bcryptjs").hash(pw, 4);
+  await sql("INSERT INTO users(id,email,pass_hash,name,phone) VALUES($1,$2,$3,$4,'0512345678') ON CONFLICT (email) DO NOTHING", ["fu" + uid(), email, hash, name]);
+  const c = client(); const r = await c("POST", "/api/login", { email, password: pw });
+  if (r.s !== 200) throw new Error("login " + email + " -> " + r.s);
+  c.user = r.j.user; return c;
+}
+// the admin account: signed in when it exists (a sign-up attempt would use up the per-IP sign-up allowance), else created
+async function admin() {
+  const email = process.env.ADMIN_EMAIL || "admin@test.com", pw = process.env.ADMIN_PASSWORD || "adminpass1";
+  const c = client(); const r = await c("POST", "/api/login", { email, password: pw });
+  if (r.s === 200) { c.user = r.j.user; return c; }
+  return signup(email, pw, "Owner");
+}
 const moy = path => fetch(MOY + path, { headers: { Authorization: MOCK_AUTH } }).then(r => r.json());
 
 // raw request through node:http (lets us send headers and bodies fetch() would refuse)
@@ -69,4 +83,4 @@ const run = fn => fn().then(done, e => { console.error("suite crashed:", e); pro
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
-module.exports = { BASE, MOY, DB, client, signup, admin, moy, raw, sql, ok, section, done, run, uid, sleep };
+module.exports = { BASE, MOY, DB, client, signup, freshUser, admin, moy, raw, sql, ok, section, done, run, uid, sleep };

@@ -145,6 +145,11 @@ window.CLOUD = {
   async signUp(email, password, name, phone, remind) { let ref = ""; try { ref = localStorage.getItem("gat_ref") || ""; } catch (e) {} const r = await api("POST", "/api/signup", { email, password, name, phone, remind: !!remind, ref, consent: true }); vstep("signup"); await afterLogin(r.user); },
   async startTrial() { const r = await api("POST", "/api/trial", {}); setPlan(r.plan); safe(() => A().render()); return r; },
   async setRemind(remind, phone) { const r = await api("POST", "/api/remind", { remind, phone }); if (user) { user.remind = r.user.remind; user.phoneEnd = r.user.phoneEnd; } safe(() => A().render()); },
+  /* browser notifications: the server keeps this browser's push subscription for the signed-in student */
+  async pushKey() { return (await api("GET", "/api/push/key")).key; },
+  async pushSub(sub, lang) { return api("POST", "/api/push/subscribe", { sub, lang }); },
+  async pushUnsub(endpoint) { return api("POST", "/api/push/unsubscribe", { endpoint: endpoint || "" }); },
+  async pushStatus(endpoint) { return (await api("POST", "/api/push/status", { endpoint })).on; },
   async setName(name) { const r = await api("POST", "/api/name", { name }); if (user) user.name = r.user.name; safe(() => A().render()); },
   async signIn(email, password) { const r = await api("POST", "/api/login", { email, password }); await afterLogin(r.user); },
   async signOut() {

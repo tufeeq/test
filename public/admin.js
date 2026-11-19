@@ -594,7 +594,7 @@ async function vFunnel(tok) {
 async function vStudents(tok) {
   const st = S.st;
   MAIN.innerHTML = ph("الطلاب", "Students", "الطلاب", "Students", "ابحث وصفِّ وافتح ملف أي طالب لإدارة اشتراكه وحسابه.", "Search, filter and open any student to manage their plan and account.",
-    `<a class="btn ghost sm" href="/api/admin/users.csv" download id="b-csv">${ic("download")}${_("تصدير CSV", "Export CSV")}</a>` + refreshBtn()) + `
+    `<a class="btn ghost sm" href="/api/admin/users.csv" download id="b-csv">${ic("download")}${_("تصدير CSV", "Export CSV")}</a>` + `<a class="btn ghost sm" href="/api/admin/reminders.csv" download>${ic("download")}${_("قائمة التذكير (واتساب)", "Reminder list (WhatsApp)")}</a>` + refreshBtn()) + `
   <section class="card">
     <div class="toolbar">
       <label class="search"><span class="sr">${_("بحث", "Search")}</span>${ic("search")}<input type="search" id="st-q" value="${esc(st.q)}" placeholder="${_("ابحث بالاسم أو البريد", "Search by name or email")}" dir="auto" autocomplete="off"></label>
@@ -1183,7 +1183,8 @@ const AUD = {
   coupon_batch_on: ["ticket", "pink", (m, t) => _("فعّل دفعة أكواد تفعيل", "Enabled an activation-code batch")],
   coupon_batch_off: ["ticket", "", (m, t) => _("أوقف دفعة أكواد تفعيل", "Disabled an activation-code batch")],
   settings: ["gear", "", m => _("حدّث الإعدادات", "Updated the settings") + (m.changed && !m.changed.length ? _(" (بلا تغيير)", " (no change)") : ""), m => (m.changed || []).join("  ·  ")],
-  export_users: ["download", "sky", m => _(`صدّر قائمة الطلاب (${fmtN(m.n)})`, `Exported the student list (${m.n})`)]
+  export_users: ["download", "sky", m => _(`صدّر قائمة الطلاب (${fmtN(m.n)})`, `Exported the student list (${m.n})`)],
+  export_reminders: ["download", "sky", m => _(`صدّر قائمة التذكير (${fmtN(m.n)})`, `Exported the reminder list (${m.n})`)]
 };
 async function vAudit(tok) {
   const r = await api("GET", "/api/admin/audit"); if (!live(tok)) return;

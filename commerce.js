@@ -590,6 +590,15 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
     const r = await pool.query(`SELECT u.id,u.email,u.name,u.created_at,p.track,p.target,p.exam_date,p.summary,p.updated_at,s.ends_at pro_until,s.source pro_source ${base} ORDER BY ${order} LIMIT ${size} OFFSET ${page * size}`, params);
     res.json({ total, page, size, users: r.rows.map(x => ({ ...x, isAdmin: isAdminEmail(x.email) })) });
   });
+  /* students who asked for WhatsApp reminders: number, test date, days left and last activity, for the daily broadcast */
+  A("get", "/reminders.csv", async (req, res) => {
+    const r = await pool.query(`SELECT u.name,u.phone,u.email,p.exam_date,p.summary,p.updated_at FROM users u LEFT JOIN progress p ON p.user_id=u.id WHERE u.remind AND u.phone IS NOT NULL ORDER BY p.exam_date NULLS LAST, u.created_at`);
+    const esc = v => { let s = v == null ? "" : String(v instanceof Date ? v.toISOString() : v); if (typeof v === "string" && /^[=+\-@\t\r]/.test(s)) s = "'" + s; return /[",\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
+    const today = new Date(); today.setUTCHours(0, 0, 0, 0);
+    const rows = r.rows.map(x => { const dl = x.exam_date ? Math.round((new Date(String(x.exam_date).slice(0, 10)) - today) / 864e5) : ""; return [x.name, x.phone, x.email, x.exam_date ? String(x.exam_date).slice(0, 10) : "", dl, x.summary && x.summary.streak, x.summary && x.summary.lastActive].map(esc).join(","); });
+    audit(req, "export_reminders", null, { n: rows.length });
+    res.set({ "Content-Type": "text/csv; charset=utf-8", "Content-Disposition": `attachment; filename="gat-academy-reminders-${day(new Date())}.csv"` }).send("\ufeff" + "name,phone,email,exam_date,days_left,streak,last_active\n" + rows.join("\n"));
+  });
   A("get", "/users.csv", async (req, res) => {
     const r = await pool.query(`SELECT u.email,u.name,u.created_at,p.track,p.target,p.exam_date,p.summary,p.updated_at,
       (SELECT max(ends_at) FROM subscriptions WHERE user_id=u.id AND revoked_at IS NULL AND ends_at>now()) pro_until FROM users u LEFT JOIN progress p ON p.user_id=u.id ORDER BY u.created_at`);

@@ -1,4 +1,4 @@
-// Sign-up requires a mobile number: Saudi numbers typed the local way are stored as +9665XXXXXXXX, others need +country form.
+// The mobile number is optional at sign-up (required only with WhatsApp reminders): Saudi numbers typed the local way are stored as +9665XXXXXXXX, others need +country form.
 "use strict";
 const { client, admin, sql, ok, section, run, uid } = require("./lib");
 const FWD = { "X-Forwarded-For": `10.252.${Math.floor(Math.random() * 250)}.${1 + Math.floor(Math.random() * 250)}` };
@@ -6,10 +6,16 @@ const FWD = { "X-Forwarded-For": `10.252.${Math.floor(Math.random() * 250)}.${1 
 run(async () => {
   const base = () => ({ email: `ph-${uid()}@test.local`, password: "password123", name: "Phone Test", consent: true });
   section("rejected");
-  for (const [p, why] of [[undefined, "missing"], ["", "empty"], ["12345", "too short"], ["0412345678", "Saudi landline-style"], ["+966112345678", "Saudi non-mobile"], ["abc0512345678", "letters"], ["+0512345678901", "bad country code"]]) {
+  for (const [p, why] of [["12345", "too short"], ["0412345678", "Saudi landline-style"], ["+966112345678", "Saudi non-mobile"], ["abc0512345678", "letters"], ["+0512345678901", "bad country code"]]) {
     const r = await client()("POST", "/api/signup", { ...base(), phone: p }, FWD);
     ok(r.s === 400 && r.j.error === "invalid-phone", "rejects " + why, [r.s, r.j]);
   }
+  section("optional, unless reminders are on");
+  for (const [p, why] of [[undefined, "missing"], ["", "empty"]]) {
+    const r = await client()("POST", "/api/signup", { ...base(), phone: p }, FWD);
+    ok(r.s === 200, "accepts " + why, [r.s, r.j]);
+  }
+  { const r = await client()("POST", "/api/signup", { ...base(), remind: true }, FWD); ok(r.s === 400 && r.j.error === "invalid-phone", "reminders need a number", [r.s, r.j]); }
   section("accepted and normalised");
   for (const [p, want] of [["0512345678", "+966512345678"], ["512 345 678", "+966512345678"], ["٠٥١٢٣٤٥٦٧٨", "+966512345678"], ["00966-51-234-5678", "+966512345678"], ["+9660512345678", "+966512345678"], ["+971501234567", "+971501234567"]]) {
     const b = base(); const r = await client()("POST", "/api/signup", { ...b, phone: p }, FWD);

@@ -1159,3 +1159,36 @@ body.exam-open:has(#exam .rs) #toast{bottom:calc(20px + env(safe-area-inset-bott
 .fy-card{display:grid;gap:2px;background:var(--surface);border:2px solid var(--edge);box-shadow:var(--pop);border-radius:14px;padding:10px 14px;color:var(--ink);text-decoration:none}
 .fy-card .eyebrow{font-size:1rem;margin:0}
 .fy-card b{font-family:var(--f-head);line-height:1.4}
+/* Today: compact status strip, next step above the fold */
+.today-top{display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center;background:var(--deep);color:var(--deep-ink);border-radius:22px;padding:16px 18px}
+.today-top .eyebrow{color:var(--butter);margin:0}
+.tt-h{font-size:clamp(1.25rem,1rem + 1.2vw,1.7rem);color:#fff;margin:0 0 6px}
+.today-top .hero-meta{margin:0;gap:6px}
+.today-top .pill{font-size:.8rem}
+.today-top .pill.warn{background:var(--butter);color:var(--note-ink)}
+.tt-ring{display:grid;justify-items:center;gap:2px}
+.prov{display:inline-block;font-size:.72rem;font-weight:700;padding:1px 7px;border-radius:999px;background:rgba(255,255,255,.16);color:inherit;vertical-align:middle}
+.nc-act{display:grid;gap:6px;justify-items:center}
+.nc-act .linkbtn{justify-self:center}
+@media (max-width:640px){.today-top{grid-template-columns:1fr auto;padding:14px}.tt-ring svg{inline-size:78px;block-size:78px}.nc-act{justify-items:stretch}}
+.m-ar{font-family:inherit;font-size:.95em}
+.frac{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;line-height:1.05;font-size:.85em;margin-inline:.1em}
+.frac>span:first-child{border-block-end:1.5px solid currentColor;padding-inline:.15em}
+.mfold{margin-block-start:8px}
+.mfold>summary{cursor:pointer;font-weight:700;color:var(--pri);padding:10px 0;min-block-size:44px;list-style:none}
+.mfold>summary::-webkit-details-marker{display:none}
+.mfold[open]>summary{margin-block-end:8px}
+.mbox.more b{font-size:1.4rem}
+.skip{position:absolute;inset-inline-start:8px;inset-block-start:-60px;z-index:100;background:var(--pri);color:#fff;padding:10px 14px;border-radius:10px;font-weight:700}
+.skip:focus{inset-block-start:8px}
+.ex-timer.el{background:var(--surface2);color:var(--ink2)}
+/* contrast fixes */
+.fd-n{color:var(--ink)}
+:root[data-theme="dark"] .lock-line b{color:var(--butter)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .lock-line b{color:var(--butter)}}
+.tabs a{min-block-size:44px;display:inline-flex;align-items:center}
+/* identity: one colour per stage of the journey — foundation butter, practice violet, mocks pink */
+.journey li.j0.on .jn{background:var(--butter);color:#1D1838}
+.journey li.j1.on .jn{background:var(--pri);color:#fff}
+.journey li.j2.on .jn{background:var(--pink);color:#fff}
+.journey li.j0.on{border-color:#1D1838}

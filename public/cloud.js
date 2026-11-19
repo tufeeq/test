@@ -135,7 +135,8 @@ window.CLOUD = {
   get user() { return user; }, get ready() { return checked; }, get offline() { return offline; }, get status() { return status; }, get lastSync() { return lastSync; }, google: false, resetByAdmin: true,
   queue() { if (!user) return; clearTimeout(timer); timer = setTimeout(push, 2500); },
   async pushNow() { if (!user) return; retry = 0; await push(); }, // never throws: callers read CLOUD.status ("error" = not synced)
-  async signUp(email, password, name, phone) { const r = await api("POST", "/api/signup", { email, password, name, phone, consent: true }); vstep("signup"); await afterLogin(r.user); },
+  async signUp(email, password, name, phone, remind) { const r = await api("POST", "/api/signup", { email, password, name, phone, remind: !!remind, consent: true }); vstep("signup"); await afterLogin(r.user); },
+  async setRemind(remind, phone) { const r = await api("POST", "/api/remind", { remind, phone }); if (user) { user.remind = r.user.remind; user.phoneEnd = r.user.phoneEnd; } safe(() => A().render()); },
   async setName(name) { const r = await api("POST", "/api/name", { name }); if (user) user.name = r.user.name; safe(() => A().render()); },
   async signIn(email, password) { const r = await api("POST", "/api/login", { email, password }); await afterLogin(r.user); },
   async signOut() {

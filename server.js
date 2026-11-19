@@ -67,6 +67,7 @@ async function migrate() {
     );
     ALTER TABLE users ADD COLUMN IF NOT EXISTS name TEXT;
     ALTER TABLE users ADD COLUMN IF NOT EXISTS phone TEXT;
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS remind BOOLEAN NOT NULL DEFAULT false;
   `);
   await C.migrate();
   await O.migrate();
@@ -197,7 +198,8 @@ const PW = (() => {
 // student's display name: 2–60 visible characters, control/format characters removed, spaces collapsed
 const cleanName = v => String(v == null ? "" : v).normalize("NFC").replace(/[\u0000-\u001f\u007f-\u009f\u200b-\u200f\u202a-\u202e\u2066-\u2069<>]/g, "").replace(/\s+/g, " ").trim();
 const validName = n => n.length >= 2 && n.length <= 60;
-const pub = u => ({ email: u.email, name: u.name || "", isAdmin: isAdminEmail(u.email) });
+/* the number itself never leaves the server; the account panel only learns whether one is set and its last digits */
+const pub = u => ({ email: u.email, name: u.name || "", isAdmin: isAdminEmail(u.email), remind: !!u.remind, phoneEnd: u.phone ? String(u.phone).slice(-3) : "" });
 const isAdminEmail = e => ADMIN_EMAILS.includes(String(e || "").toLowerCase());
 
 // simple in-memory rate limit. limited() records a hit and checks; over() only checks (hit() records later, e.g. on failure)
@@ -216,10 +218,10 @@ async function createSession(req, res, userId) {
 async function auth(req, res, next) {
   const tok = parseCookies(req)[COOKIE];
   if (tok && tok.length <= 200) {
-    const r = await pool.query("SELECT u.id,u.email,u.name,u.created_at,s.expires_at FROM sessions s JOIN users u ON u.id=s.user_id WHERE s.token_hash=$1 AND s.expires_at>now()", [sha(tok)]);
+    const r = await pool.query("SELECT u.id,u.email,u.name,u.phone,u.remind,u.created_at,s.expires_at FROM sessions s JOIN users u ON u.id=s.user_id WHERE s.token_hash=$1 AND s.expires_at>now()", [sha(tok)]);
     const row = r.rows[0];
     if (row) {
-      req.user = { id: row.id, email: row.email, name: row.name };
+      req.user = { id: row.id, email: row.email, name: row.name, phone: row.phone, remind: row.remind };
       // sliding expiry: a session used in its second half is renewed for another full period, so an active student is
       // never logged out mid-preparation; an abandoned device still expires after SESSION_DAYS
       if (new Date(row.expires_at).getTime() - Date.now() < SESSION_DAYS * 43200e3) {
@@ -251,6 +253,13 @@ app.get("/api/me", wrap(async (req, res) => {
   res.json({ user: req.user ? { ...pub(req.user), plan: await C.planOf(req.user), ...(req.user.created_at && Date.now() - new Date(req.user.created_at) < 15 * 60e3 ? { fresh: true } : {}) } : null, config: C.publicCfg(c) });
 }));
 
+/* WhatsApp reminders: turned on or off from the account panel; on needs a valid mobile number */
+app.post("/api/remind", needUser, wrap(async (req, res) => {
+  const remind = req.body.remind === true, raw = String(req.body.phone == null ? "" : req.body.phone).trim(), phone = raw ? cleanPhone(raw) : null;
+  if ((raw || (remind && !req.user.phone)) && !phone) return fail(res, 400, "invalid-phone");
+  await pool.query("UPDATE users SET remind=$1, phone=COALESCE($2,phone) WHERE id=$3", [remind, phone, req.user.id]);
+  res.json({ user: pub({ ...req.user, remind, phone: phone || req.user.phone }) });
+}));
 app.post("/api/name", needUser, wrap(async (req, res) => {
   const name = cleanName(req.body.name);
   if (!validName(name)) return fail(res, 400, "invalid-name");
@@ -279,13 +288,14 @@ app.post("/api/signup", wrap(async (req, res) => {
   if (pw.length < 8 || pw.length > 200) return fail(res, 400, "weak-password");
   const name = cleanName(req.body.name);
   if (!validName(name)) return fail(res, 400, "invalid-name");
-  const phone = cleanPhone(req.body.phone);
-  if (!phone) return fail(res, 400, "invalid-phone");
+  /* the mobile number is optional, but required for WhatsApp reminders */
+  const remind = req.body.remind === true, rawPhone = String(req.body.phone == null ? "" : req.body.phone).trim(), phone = rawPhone ? cleanPhone(rawPhone) : null;
+  if ((rawPhone || remind) && !phone) return fail(res, 400, "invalid-phone");
   if (req.body.consent !== true) return fail(res, 400, "consent");
   // a taken address answers before the (slow) hash, so a flood of sign-ups for one address cannot burn CPU
   if ((await pool.query("SELECT 1 FROM users WHERE email=$1", [email])).rows[0]) return fail(res, 409, "email-already-in-use");
   const id = crypto.randomUUID(), hash = await PW.hash(pw, 11);
-  try { await pool.query("INSERT INTO users(id,email,pass_hash,name,phone) VALUES($1,$2,$3,$4,$5)", [id, email, hash, name, phone]); }
+  try { await pool.query("INSERT INTO users(id,email,pass_hash,name,phone,remind) VALUES($1,$2,$3,$4,$5,$6)", [id, email, hash, name, phone, remind]); }
   catch (e) { if (e.code === "23505") return fail(res, 409, "email-already-in-use"); throw e; }
   if (isAdminEmail(email)) console.log(`admin account claimed: ${email}`);
   await createSession(req, res, id);

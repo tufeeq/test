@@ -1206,3 +1206,29 @@ body.exam-open:has(#exam .rs) #toast{bottom:calc(20px + env(safe-area-inset-bott
 .post-test textarea{inline-size:100%;border-radius:10px;border:1.5px solid var(--line);padding:8px;font:inherit;background:var(--surface);color:var(--ink)}
 .trial-card{display:grid;gap:10px;border:2px solid var(--edge);box-shadow:var(--pop);background:linear-gradient(135deg,var(--pri-soft),var(--pink-soft))}
 .trial-card .row{gap:8px;flex-wrap:wrap}
+
+/* ---------- identity v2: one visual language ----------
+   Every content card speaks like the hero and the tab bar: an ink edge and a hard offset shadow. Secondary surfaces
+   (options, inputs, chips) keep their quiet borders so the cards stay the loudest thing on the page. */
+.top{background:var(--surface);backdrop-filter:none;border-bottom:2px solid var(--edge)}
+.top .icon-btn,#lang-btn{border:2px solid var(--edge);box-shadow:2px 2px 0 var(--edge);background:var(--surface);color:var(--ink)}
+.top .icon-btn:active,#lang-btn:active{transform:translate(2px,2px);box-shadow:none}
+#lang-btn{font-family:var(--f-head);font-weight:800}
+.brand b{white-space:nowrap}
+@media (max-width:400px){.brand b{max-inline-size:none;font-size:.9rem;white-space:nowrap}.top-in{gap:6px}#lang-btn{padding-inline:8px;font-size:.82rem}}
+.card,.mcard,.lcard,.rcard,.pcard,.kpi,.fd-card,.excard,.rule,.first-steps li,.journey li,.mtile{border:2px solid var(--edge);box-shadow:4px 4px 0 var(--edge)}
+.card .card,.card .kpi,.card .mtile,.card .rule,.card .excard{box-shadow:none;border-width:1.5px}
+.pcard.locked.dark{box-shadow:none;border:2px dashed var(--line)}
+a.card:active,a.pcard:active,a.lcard:active,button.pcard:active{transform:translate(2px,2px);box-shadow:2px 2px 0 var(--edge)}
+/* numbered steps: a filled badge, not an outline */
+.first-steps .fs-n{background:var(--butter);color:var(--note-ink);border:2px solid var(--edge);box-shadow:2px 2px 0 var(--edge);inline-size:40px;block-size:40px;font-size:1.1rem}
+.first-steps li:nth-child(2) .fs-n{background:var(--n1)} .first-steps li:nth-child(3) .fs-n{background:var(--n3)}
+.first-steps li div span{color:var(--ink2)}
+/* the quiet "soft" button had no edge and read as disabled */
+.btn.soft{border:2px solid var(--edge);box-shadow:2px 2px 0 var(--edge);background:var(--pri-soft);color:var(--ink)}
+/* footer: centred, airy, links without underlines */
+footer{border-top:2px solid var(--edge);background:var(--surface);text-align:center;font-size:.85rem;line-height:2.1;padding-block:22px 26px}
+footer a{text-decoration:none;font-weight:700;color:var(--pri)}
+footer a:hover{text-decoration:underline}
+footer a,footer a.mail-link,footer a.foot-home{text-decoration:none}
+#foot a,#foot .foot-home,#foot .mail-link{text-decoration:none;color:var(--pri)} #foot a:hover{text-decoration:underline}

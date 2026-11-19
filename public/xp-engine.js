@@ -38,11 +38,25 @@ function arrow(p,x1,y1,x2,y2,cls='s-pri',bend=-40){ const mx=(x1+x2)/2, my=Math.
   const ang=Math.atan2(y2-my,x2-mx), h=12; const hp=el('path',{d:`M${x2-h*Math.cos(ang-0.5)} ${y2-h*Math.sin(ang-0.5)} L${x2} ${y2} L${x2-h*Math.cos(ang+0.5)} ${y2-h*Math.sin(ang+0.5)}`,class:cls},p); return {pa,hp}; }
 function tlDone(t){ return new Promise(r=>{ if(!t||t.totalProgress()>=1){ r(); return; } t.eventCallback('onComplete',r); }); }
 
+/* a line laid out word by word (atoms): each word is its own <text> with one script and one direction, placed by measuring,
+   so no browser has to reorder mixed Arabic words, Arabic-Indic numbers and symbols inside one SVG text (WebKit draws such
+   lines with missing or overlapping glyphs). Lines that start with U+202D read left to right; all others right to left */
+function atomText(p,{x,y,s,cls,text,w=800}){ let str=String(text); const ltr=str[0]==='\u202D'||LG==='en'; str=str.replace(/[\u202A-\u202E\u200E\u200F]/g,'');
+  const g=el('g',{},p), toks=str.split(/\s+/).filter(Boolean);
+  /* a number or symbol token in a right-to-left line is drawn left to right, so its brackets and punctuation are mirrored
+     and moved to where a right-to-left reader expects them: (١٧ → ١٧) , ٧) → (٧ , ٤: → :٤ , ٣(٨ → ٨)٣ */
+  const MIR={'(':')',')':'(','[':']',']':'['}, flip=k=>k.split(/([()[\]:،؟!])/).filter(Boolean).reverse().map(c=>MIR[c]||c).join('');
+  const ts=toks.map(k=>{ const ar=/[\u0621-\u064A]/.test(k); const t=txt(g,{x,y,s,cls,text:ar||ltr?k:flip(k),w,anchor:'middle',dir:ar?undefined:'ltr'}); if(!ar){ t.setAttribute('unicode-bidi','bidi-override'); t.style.unicodeBidi='bidi-override'; t.style.direction='ltr'; } return t; });
+  const lay=()=>{ let ws; try{ ws=ts.map(t=>t.getComputedTextLength()); }catch(e){ return; } if(!ws.some(v=>v>0)) return; const gap=s*.3, tot=ws.reduce((a,b)=>a+b,0)+gap*(ts.length-1);
+    let c=ltr?x-tot/2:x+tot/2; ts.forEach((t,i)=>{ const cx=ltr?c+ws[i]/2:c-ws[i]/2; t.setAttribute('x',cx.toFixed(1)); c=ltr?c+ws[i]+gap:c-ws[i]-gap; }); };
+  lay(); if(document.fonts&&document.fonts.ready) document.fonts.ready.then(lay); requestAnimationFrame(lay); g._lay=lay; return g; }
 /* ---------- declarative items ---------- */
 const POP=new Set(['note','box','circle','check','cross','poly','pie','dot']);
 function draw(stage,spec){
   const T=spec.type, g=el('g',{},stage); let o={g,type:T,spec};
-  if(T==='note'){ const n=note(g,spec); o.label=n._t; }
+  if(T==='note'&&spec.atoms){ const n=note(g,{...spec,text:''}); n._t.remove(); o.label=atomText(n,{x:spec.x,y:spec.y+(spec.size||28)*0.36,s:spec.size||28,cls:spec.cls||'t-note',text:spec.text}); }
+  else if(T==='note'){ const n=note(g,spec); o.label=n._t; }
+  else if(T==='text'&&spec.atoms){ o.label=atomText(g,{x:spec.x,y:spec.y,s:spec.s||26,cls:spec.cls||'t-ink',text:spec.text,w:spec.w||800}); }
   else if(T==='text'||T==='eq'){ o.label=txt(g,{x:spec.x,y:spec.y,s:spec.s||26,cls:spec.cls||(T==='eq'?'t-ink':'t-ink'),text:spec.text,w:spec.w||800,anchor:spec.anchor||'middle',dir:T==='eq'?'ltr':(spec.dir||undefined),font:spec.hand?'var(--f-hand)':undefined}); if(spec.hand) o.label.setAttribute('class','t-hand'); }
   else if(T==='box'){ el('rect',{x:spec.x,y:spec.y,width:spec.w,height:spec.h,rx:spec.rx??10,class:'f-'+(spec.c||'surface'),stroke:spec.stroke===false?'none':'var(--edge)','stroke-width':spec.sw||2},g); if(spec.text!=null) o.label=txt(g,{x:spec.x+spec.w/2,y:spec.y+spec.h/2+(spec.s||22)*0.36,s:spec.s||22,cls:spec.cls||'t-ink',text:spec.text,dir:spec.ltr?'ltr':undefined}); }
   else if(T==='circle'){ el('circle',{cx:spec.cx,cy:spec.cy,r:spec.r,class:spec.c?'f-'+spec.c:'',fill:spec.c?undefined:'none',stroke:spec.stroke===false?'none':'var(--edge)','stroke-width':spec.sw||2.5},g); if(spec.text!=null) o.label=txt(g,{x:spec.cx,y:spec.cy+(spec.s||20)*0.36,s:spec.s||20,cls:spec.cls||'t-ink',text:spec.text}); }

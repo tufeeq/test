@@ -13,8 +13,8 @@ const LY=[92,150,208,266], NC=['n0','n1','n2','n3'];
 function line(s,y){ let sz=32, cls=null;
   for(;;){ const c=s[0]; if(c==='!'){ cls='t-pri'; s=s.slice(1); } else if(c==='~'){ cls='t-ink2'; sz=23; s=s.slice(1); } else if(c==='^'){ sz=38; s=s.slice(1); } else break; }
   if(s[0]==='@') s=LTR(s.slice(1));
-  const it={type:'text',dir:'rtl',x:320,y,s:sz,text:s}; if(cls) it.cls=cls; return it; }
-function noteIt(t,y,i){ return {type:'note',x:320,y,w:Math.min(600,Math.max(220,t.length*12+70)),h:52,c:NC[i%4],text:t,size:21,rot:i%2?-1.2:1.2}; }
+  const it={type:'text',atoms:true,x:320,y,s:sz,text:s}; if(cls) it.cls=cls; return it; }
+function noteIt(t,y,i){ return {type:'note',atoms:true,x:320,y,w:Math.min(600,Math.max(220,t.length*12+70)),h:52,c:NC[i%4],text:t,size:21,rot:i%2?-1.2:1.2}; }
 /* a scene from [title, [[say, lines[], note?], …]]; lines stack down the board and the board clears when it is full */
 function scene([t,beats],slots=LY){ const items={}, out=[]; let slot=0, on=[], k=0, nk=0;
   beats.forEach(([say,lines=[],note])=>{ const b={say,show:[]};

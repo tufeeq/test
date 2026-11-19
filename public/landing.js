@@ -457,8 +457,9 @@ try { var _rf = new URLSearchParams(location.search).get('ref'); if (_rf && /^[A
   function initTour() {
     var v = $('#how-v'), a = $('#how-a'), b = $('#how-play'), fig = $('#how-vid'); if (!v || !a || !b) return;
     var lang = function () { return LANG === 'en' ? 'en' : 'ar'; }, cur = null, on = false;
-    var poster = function () { v.poster = '/video/tour2-' + lang() + '.jpg'; };
-    var load = function () { var l = lang(); if (cur === l) return; cur = l; v.preload = 'auto'; a.preload = 'auto'; v.src = '/video/tour2-' + l + '.mp4'; a.src = '/audio/intro-' + l + '.mp3'; poster(); };
+    var VID = { ar: 'tour3-ar', en: 'tour2-en' }, AUD = { ar: 'intro3-ar', en: 'intro-en' }; /* new names when a take changes: both files are cached for a week */
+    var poster = function () { v.poster = '/video/' + VID[lang()] + '.jpg'; };
+    var load = function () { var l = lang(); if (cur === l) return; cur = l; v.preload = 'auto'; a.preload = 'auto'; v.src = '/video/' + VID[l] + '.mp4'; a.src = '/audio/' + AUD[l] + '.mp3'; poster(); };
     /* the narration is the clock: the picture follows it, and only jumps when it drifts by more than a third of a second */
     var follow = function () { if (on && !a.paused && Math.abs(v.currentTime - a.currentTime) > 0.35) { try { v.currentTime = a.currentTime; } catch (e) {} } };
     /* both start inside the tap itself (iOS Safari only lets sound start from a direct user gesture) */

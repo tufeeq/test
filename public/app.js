@@ -242,7 +242,16 @@ const GENS = {
   pctChange(){ const p=pick([10,20,25,50]); const old=20*R(2,15); const up=rnd()<.6; const nw=old*(100+(up?p:-p))/100;
     const wrong=Math.round(Math.abs(nw-old)/nw*1000)/10;
     return {s:'stats',q:bi(`${up?'ارتفع':'انخفض'} عدد زوار معرض من ${old} إلى ${nw}. ما نسبة ${up?'الزيادة':'الانخفاض'}؟`,`Visitors to an exhibition went ${up?'up':'down'} from ${old} to ${nw}. What is the percent ${up?'increase':'decrease'}?`),o:mkOpts(p,[wrong,p+5,p/2,p*2],x=>N(x)+'%'),e:bi(`⟦${Math.abs(nw-old)} ÷ ${old} × 100 = ${p}%⟧ (نقسم على القيمة القديمة)`,`⟦${Math.abs(nw-old)} ÷ ${old} × 100 = ${p}%⟧ (divide by the old value)`)}; },
-  compare(){ const t=R(0,2); let qa,qe,a,A,B,ex;
+  compare(){ const t=R(0,3); let qa,qe,a,A,B,ex;
+    /* a quarter of the generated comparisons depend on an unknown, so "cannot be determined" is a real answer */
+    if(t===3){ const v=R(0,2), k=R(2,6);
+      if(v===0){ qa=`ن عدد صحيح موجب<br>القيمة الأولى: ⟦ن^2⟧<br>القيمة الثانية: ⟦${k}ن⟧`; qe=`n is a positive integer<br>Quantity A: ⟦n^2⟧<br>Quantity B: ⟦${k}n⟧`;
+        ex=[`عند ⟦ن = 1⟧ الثانية أكبر، وعند ⟦ن = ${k}⟧ متساويتان، وعند ⟦ن = ${k+1}⟧ الأولى أكبر؛ فلا يمكن التحديد.`,`At ⟦n = 1⟧ B is larger, at ⟦n = ${k}⟧ they are equal, at ⟦n = ${k+1}⟧ A is larger, so it cannot be determined.`]; }
+      else if(v===1){ const S2=k*4; qa=`أ ، ب عددان صحيحان موجبان، ⟦أ + ب = ${S2}⟧<br>القيمة الأولى: أ<br>القيمة الثانية: ب`; qe=`a and b are positive integers, ⟦a + b = ${S2}⟧<br>Quantity A: a<br>Quantity B: b`;
+        ex=[`قد تكون ⟦أ = ${S2-1}⟧ و⟦ب = 1⟧ أو العكس، أو ⟦أ = ب = ${S2/2}⟧؛ فلا يمكن التحديد.`,`a could be ${S2-1} and b 1, or the reverse, or both ${S2/2}, so it cannot be determined.`]; }
+      else { const m=k*2; qa=`س عدد بين ⟦0⟧ و⟦${m}⟧<br>القيمة الأولى: ⟦س⟧<br>القيمة الثانية: ⟦${k}⟧`; qe=`x is a number between ⟦0⟧ and ⟦${m}⟧<br>Quantity A: ⟦x⟧<br>Quantity B: ⟦${k}⟧`;
+        ex=[`س قد تكون أقل من ${k} أو أكبر منها أو تساويها؛ فلا يمكن التحديد.`,`x may be below, above or equal to ${k}, so it cannot be determined.`]; }
+      return {s:'comparison',cmp:1,q:bi(qa,qe),a:3,e:bi(ex[0],ex[1])}; }
     if(t===0){ let x=R(2,5),y=R(2,5); while(y===x) y=R(2,5); A=x**y; B=y**x;
       qa=`القيمة الأولى: ⟦${x}^${y}⟧<br>القيمة الثانية: ⟦${y}^${x}⟧`; qe=`Quantity A: ⟦${x}^${y}⟧<br>Quantity B: ⟦${y}^${x}⟧`; ex=[`⟦${x}^${y} = ${A}⟧ ، ⟦${y}^${x} = ${B}⟧`,`⟦${x}^${y} = ${A}⟧, ⟦${y}^${x} = ${B}⟧`]; }
     else if(t===1){ const n1=pick([2,3,4,5,6,7,8]),d1=n1+R(1,4),n2=pick([2,3,4,5,6,7,8]),d2=n2+R(1,4); A=n1/d1; B=n2/d2;
@@ -1466,6 +1475,7 @@ FDL('s-cmp','st','comparison','numline',
 
 /* ============ Foundation track, verbal part: 13 lessons (AR + EN), each with its own bank of original questions ============ */
 /* a verbal lesson's drill draws from its own bank in the student's language (lesson.vb[lang]); every item also joins the main verbal bank */
+const FDVB=new Set(); /* foundation drill items, kept out of timed sections and model tests */
 function FDV(id,u,sk,ill,ar,en,vb){ FD.push({id,u,sk,ill,ar,en,g:[],vb,fig:null}); }
 const vAn=(q,o,e)=>({s:'analogy',q,o,a:0,e});
 const vCo=(q,o,e)=>({s:'completion',q,o,a:0,e});
@@ -1793,36 +1803,36 @@ FDV('v-cx1','vcx','context','context',
   ['The sun rose, darkening the surroundings as people began their day. Words: rose, darkening, surroundings, began',['The anchors: "the sun rose" and "people began their day."','"darkening" contradicts sunrise; it should be "lighting up."'],'darkening']],
  traps:['Choosing an unusual or difficult word because it looks wrong, even though its meaning fits.','Judging from half the sentence before reaching the anchor.','Looking for a grammar or spelling mistake instead of an error in meaning.']},
 {ar:[
- vCx('حرص الطالب على المراجعة اليومية، فاستعد للاختبار متأخرًا.',['حرص','اليومية','فاستعد','متأخرًا'],3,'الصحيح «مبكرًا»؛ المراجعة اليومية تعني استعدادًا مبكرًا.'),
+ vCx('استعد الطالب للاختبار متأخرًا لأنه حرص على المراجعة اليومية.',['استعد','متأخرًا','حرص','اليومية'],1,'الصحيح «مبكرًا»؛ المراجعة اليومية تعني استعدادًا مبكرًا.'),
  vCx('يُعدّ الماء ضروريًا للحياة، حتى إن الإنسان يستطيع العيش دونه شهورًا.',['ضروريًا','للحياة','يستطيع','شهورًا'],3,'الصحيح «أيامًا»؛ ضرورة الماء تعني أن الإنسان لا يصبر عليه طويلًا.'),
  vCx('اشتهر حاتم الطائي بالبخل حتى صار مضرب المثل في الكرم.',['اشتهر','بالبخل','مضرب','الكرم'],1,'الصحيح «بالجود»؛ حاتم مضرب المثل في الكرم.'),
- vCx('لما اشتد الحر في الصيف أقبل الناس على المشروبات الساخنة.',['اشتد','الصيف','أقبل','الساخنة'],3,'الصحيح «الباردة».'),
+ vCx('أقبل الناس على المشروبات الساخنة لما اشتد الحر في الصيف.',['أقبل','الساخنة','اشتد','الصيف'],1,'الصحيح «الباردة».'),
  vCx('يساعد التشجير على تلطيف الجو وزيادة التلوث في المدن.',['التشجير','تلطيف','وزيادة','المدن'],2,'الصحيح «وتقليل».'),
  vCx('تميّز شرح المعلم بالغموض، حتى أثنى الطلاب على وضوحه وسهولته.',['تميّز','بالغموض','أثنى','وضوحه'],1,'الصحيح «بالوضوح»؛ الثناء على وضوحه وسهولته مرساة المعنى.'),
  vCx('نجح رجال الدفاع المدني في السيطرة على الحريق بعد ساعات من الجهد، فازداد اشتعاله.',['نجح','السيطرة','الجهد','فازداد'],3,'الصحيح «فخمد»؛ السيطرة على الحريق تعني خموده.'),
  vCx('يحمل المسافر الحكيم زادًا كافيًا، تحسبًا لطول الطريق وقصره.',['الحكيم','كافيًا','تحسبًا','وقصره'],3,'الصحيح «ومشقته»؛ التحسب يكون لطول الطريق ومشقته لا لقصره.'),
  vCx('تنخفض درجة غليان الماء كلما ارتفعنا عن سطح البحر، لذلك يستغرق الطهي على الجبال وقتًا أقصر.',['تنخفض','ارتفعنا','الطهي','أقصر'],3,'الصحيح «أطول»؛ الماء يغلي عند حرارة أقل فيحتاج الطعام وقتًا أطول لينضج.'),
  vCx('يُكثر الطالب المتفوق من طرح الأسئلة، لأنه يزهد في المعرفة.',['المتفوق','طرح','لأنه','يزهد'],3,'الصحيح «يحرص على»؛ كثرة الأسئلة دليل حرص على المعرفة.'),
- vCx('يتحمّل الجمل العطش طويلًا، ولهذا يُعدّ أنسب الحيوانات للعيش في المناطق المطيرة.',['يتحمّل','العطش','أنسب','المطيرة'],3,'الصحيح «الصحراوية».'),
+ vCx('يُعدّ الجمل أنسب الحيوانات للعيش في المناطق المطيرة، لأنه يتحمّل العطش طويلًا.',['أنسب','المطيرة','يتحمّل','العطش'],1,'الصحيح «الصحراوية».'),
  vCx('أشرقت الشمس فأظلمت الأرجاء وبدأ الناس يومهم.',['أشرقت','فأظلمت','الأرجاء','يومهم'],1,'الصحيح «فأضاءت».'),
- vCx('من يُحسن إدارة وقته ينجز أعماله في موعدها، فيكثر قلقه.',['يُحسن','ينجز','موعدها','فيكثر'],3,'الصحيح «فيقلّ».'),
+ vCx('يكثر قلق من يُحسن إدارة وقته، لأنه ينجز أعماله في موعدها.',['يكثر','يُحسن','ينجز','موعدها'],0,'الصحيح «يقلّ».'),
  vCx('نُقل المصاب إلى المستشفى على وجه السرعة، لأن حالته كانت مستقرة.',['المصاب','السرعة','حالته','مستقرة'],3,'الصحيح «حرجة»؛ النقل السريع مرساة المعنى.'),
  vCx('بنى المهندسون السد لحجز مياه الأمطار وتبديدها في موسم الجفاف.',['السد','لحجز','الأمطار','وتبديدها'],3,'الصحيح «وتوزيعها»؛ التبديد يناقض الحجز والحاجة في موسم الجفاف.'),
  vCx('يغلي الماء عند درجة الصفر المئوية تحت الضغط الجوي المعتاد، فيتحول إلى بخار.',['يغلي','الصفر','المعتاد','بخار'],1,'الصحيح «المئة»؛ «فيتحول إلى بخار» تؤكد أن الحديث عن الغليان.')],
 en:[
- vCx('The student kept up a daily review, so he got ready for the exam late.',['kept','daily','ready','late'],3,'It should be "early"; a daily review means getting ready early.'),
+ vCx('The student got ready for the exam late because he kept up a daily review.',['ready','late','kept','daily'],1,'It should be "early"; a daily review means getting ready early.'),
  vCx('Water is so essential to life that a person can survive for months without drinking it.',['essential','survive','months','drinking'],2,'It should be "days"; water being essential means a person cannot last long without it.'),
  vCx('Hatim al-Tai was famous for his stinginess and became a byword for generosity.',['famous','stinginess','byword','generosity'],1,'It should be "generosity" or "kindness"; Hatim is the byword for generosity.'),
- vCx('When the summer heat grew intense, people turned to hot drinks.',['summer','intense','turned','hot'],3,'It should be "cold."'),
+ vCx('People turned to hot drinks when the summer heat grew intense.',['turned','hot','summer','intense'],1,'It should be "cold."'),
  vCx('Planting trees helps cool the air and increase pollution in cities.',['Planting','cool','increase','cities'],2,'It should be "reduce."'),
  vCx('The teacher\'s explanation was known for its vagueness, and students praised its clarity and simplicity.',['known','vagueness','praised','clarity'],1,'It should be "clarity" or "precision"; praise for its clarity is the anchor.'),
  vCx('The firefighters brought the fire under control after hours of effort, so it spread even faster.',['brought','hours','effort','spread'],3,'It should be "died down"; bringing a fire under control means it dies down.'),
  vCx('A wise traveler carries enough food, preparing for the length and shortness of the road.',['wise','enough','preparing','shortness'],3,'It should be "hardship"; one prepares for a long, hard road, not a short one.'),
  vCx('Water boils at a lower temperature at high altitude, so cooking in the mountains takes less time.',['lower','altitude','cooking','less'],3,'It should be "more"; water boils at a lower temperature, so food takes longer to cook.'),
  vCx('An excellent student asks many questions because he is indifferent to knowledge.',['excellent','asks','because','indifferent'],3,'It should be "eager for"; asking many questions shows eagerness to learn.'),
- vCx('The camel can endure thirst for a long time, which makes it the best animal for life in rainy regions.',['endure','thirst','best','rainy'],3,'It should be "desert."'),
+ vCx('The camel is the best animal for life in rainy regions, because it can endure thirst for a long time.',['best','rainy','endure','thirst'],1,'It should be "desert."'),
  vCx('The sun rose, darkening the surroundings as people began their day.',['rose','darkening','surroundings','began'],1,'It should be "lighting up."'),
- vCx('Someone who manages time well finishes tasks on schedule, so his anxiety grows.',['manages','finishes','schedule','grows'],3,'It should be "shrinks."'),
+ vCx('Anxiety grows in someone who manages time well, because he finishes tasks on schedule.',['grows','manages','finishes','schedule'],0,'It should be "shrinks."'),
  vCx('The injured man was rushed to hospital because his condition was stable.',['injured','rushed','condition','stable'],3,'It should be "critical"; being rushed is the anchor.'),
  vCx('Engineers built the dam to hold rainwater and waste it in the dry season.',['built','hold','rainwater','waste'],3,'It should be "distribute"; wasting contradicts holding water for the dry season.'),
  vCx('Water boils at zero degrees Celsius at normal pressure, turning into steam.',['boils','zero','normal','steam'],1,'It should be "one hundred"; "turning into steam" confirms the sentence is about boiling.')]});
@@ -1847,35 +1857,35 @@ FDV('v-cx2','vcx','context','context',
  vCx('يحتاج النبات إلى ضوء الشمس ليصنع غذاءه، لذلك يذبل إذا وُضع في مكان مُشمس طويلًا.',['ضوء','غذاءه','يذبل','مُشمس'],3,'الصحيح «مظلم».'),
  vCx('الأمانة من صفات المؤمن، فهو يخون من ائتمنه ولا يغدر بأحد.',['الأمانة','المؤمن','يخون','يغدر'],2,'الصحيح «يصون»؛ الأمانة وعدم الغدر يخالفان الخيانة.'),
  vCx('يتجنب الرياضيون التمارين المنتظمة حفاظًا على لياقتهم.',['يتجنب','المنتظمة','حفاظًا','لياقتهم'],0,'الصحيح «يلتزم»؛ الحفاظ على اللياقة يكون بالتمرين.'),
- vCx('تحفظ الثلاجة الأطعمة من التلف بخفض درجة حرارتها، فتُسرّع نمو البكتيريا.',['تحفظ','التلف','بخفض','فتُسرّع'],3,'الصحيح «فتُبطئ».'),
- vCx('الصبر مفتاح الفرج، ومن صبر على الشدائد خسر مراده.',['الصبر','الفرج','صبر','خسر'],3,'الصحيح «نال».'),
+ vCx('تُسرّع الثلاجة نمو البكتيريا بخفض درجة حرارة الأطعمة، فتحفظها من التلف.',['تُسرّع','بخفض','فتحفظها','التلف'],0,'الصحيح «تُبطئ».'),
+ vCx('يخسر مراده من يصبر على الشدائد، فالصبر مفتاح الفرج.',['يخسر','يصبر','الصبر','الفرج'],0,'الصحيح «ينال».'),
  vCx('الشخص المتواضع يتكبر على الناس ويعاملهم بلين.',['المتواضع','يتكبر','الناس','بلين'],1,'الصحيح «يتودد»؛ التكبر ضد التواضع واللين.'),
  vCx('يقلل التدريب المنتظم من الأخطاء، ولذلك يرتكب المتدرب أخطاء أكثر كلما طالت ممارسته.',['يقلل','المنتظم','أكثر','ممارسته'],2,'الصحيح «أقل».'),
  vCx('يضيء القمر ليلًا لأنه يعكس ضوء الشمس، فهو جرم مضيء بذاته.',['يضيء','يعكس','مضيء','بذاته'],2,'الصحيح «معتم»؛ القمر يعكس ضوء غيره.'),
  vCx('تتصف الصحراء بقلة الأمطار وكثافة الغطاء النباتي.',['تتصف','بقلة','وكثافة','النباتي'],2,'الصحيح «وندرة».'),
- vCx('يضع البائع البضاعة في كفة الميزان ليقيس طولها.',['البائع','كفة','الميزان','طولها'],3,'الصحيح «وزنها».'),
+ vCx('يقيس البائع طول البضاعة بوضعها في كفة الميزان.',['يقيس','طول','كفة','الميزان'],1,'الصحيح «وزن».'),
  vCx('سافر الحجاج إلى مكة المكرمة في شهر رمضان لأداء فريضة الحج.',['الحجاج','مكة','رمضان','الحج'],2,'الصحيح «ذي الحجة».'),
  vCx('تأخر القطار عن موعده، فوصل الركاب قبل الوقت المحدد.',['تأخر','موعده','قبل','المحدد'],2,'الصحيح «بعد».'),
  vCx('من شروط الصحة العامة النوم الكافي والإكثار من الوجبات السريعة.',['شروط','الكافي','والإكثار','السريعة'],2,'الصحيح «والتقليل».'),
- vCx('يُكرَّم المتفوقون في نهاية العام تشجيعًا لهم على التقصير.',['يُكرَّم','المتفوقون','تشجيعًا','التقصير'],3,'الصحيح «الاجتهاد».'),
- vCx('تسير الحافلة ببطء شديد بسبب الزحام، فتصل دائمًا قبل غيرها.',['تسير','ببطء','فتصل','قبل'],3,'الصحيح «بعد»؛ البطء والزحام متوافقان.')],
+ vCx('يُعاقَب المتفوقون في نهاية العام تشجيعًا لهم على الاجتهاد.',['يُعاقَب','المتفوقون','تشجيعًا','الاجتهاد'],0,'الصحيح «يُكرَّم».'),
+ vCx('تصل الحافلة دائمًا قبل غيرها، لأنها تسير ببطء شديد بسبب الزحام.',['تصل','قبل','تسير','ببطء'],1,'الصحيح «بعد»؛ البطء والزحام متوافقان.')],
 en:[
  vCx('The larger the population, the lower the demand for housing.',['larger','population','lower','housing'],2,'It should be "higher"; the relationship is direct.'),
  vCx('Plants need sunlight to make food, so they wilt when kept in a sunny place for long.',['sunlight','food','wilt','sunny'],3,'It should be "dark."'),
  vCx('Honesty is a mark of the faithful: he betrays those who trust him and deceives no one.',['Honesty','faithful','betrays','deceives'],2,'It should be "protects"; honesty and deceiving no one clash with betrayal.'),
  vCx('Athletes avoid regular training to maintain their fitness.',['avoid','regular','maintain','fitness'],0,'It should be "stick to"; fitness is maintained by training.'),
- vCx('A refrigerator keeps food from spoiling by lowering its temperature, which speeds up bacterial growth.',['keeps','spoiling','lowering','speeds'],3,'It should be "slows."'),
- vCx('Patience is the key to relief, and those who endure hardship lose what they seek.',['Patience','relief','endure','lose'],3,'It should be "gain."'),
+ vCx('A refrigerator speeds up bacterial growth by lowering the temperature of food, which keeps it from spoiling.',['speeds','lowering','keeps','spoiling'],0,'It should be "slows."'),
+ vCx('Those who endure hardship lose what they seek, for patience is the key to relief.',['endure','lose','patience','relief'],1,'It should be "gain."'),
  vCx('A humble person looks down on others and treats them gently.',['humble','looks down on','others','gently'],1,'It should be "respects"; looking down on others contradicts humility and gentleness.'),
  vCx('Regular practice reduces errors, so a trainee makes more mistakes the longer he practices.',['Regular','reduces','more','practices'],2,'It should be "fewer."'),
  vCx('The moon shines at night because it reflects sunlight; it is a self-luminous body.',['shines','reflects','sunlight','self-luminous'],3,'It should be "non-luminous"; the moon reflects light from another body.'),
  vCx('Deserts are known for little rainfall and dense vegetation.',['known','little','dense','vegetation'],2,'It should be "sparse."'),
- vCx('The seller placed the goods on the scale pan to measure their length.',['seller','goods','scale','length'],3,'It should be "weight."'),
+ vCx('The seller measured the length of the goods by placing them on the scale pan.',['measured','length','placing','scale'],1,'It should be "weight."'),
  vCx('Pilgrims traveled to Makkah in Ramadan to perform the Hajj.',['Pilgrims','Makkah','Ramadan','Hajj'],2,'It should be "Dhu al-Hijjah."'),
  vCx('The train was delayed, so the passengers arrived before the scheduled time.',['delayed','passengers','before','scheduled'],2,'It should be "after."'),
  vCx('Good health requires enough sleep and plenty of fast food.',['requires','enough','plenty','fast'],2,'It should be "little."'),
- vCx('Top students are honored at the end of the year to encourage their negligence.',['Top','honored','encourage','negligence'],3,'It should be "diligence."'),
- vCx('Because of the traffic, the bus moves very slowly and always arrives before the others.',['traffic','slowly','always','before'],3,'It should be "after"; slowness and traffic agree.')]});
+ vCx('Top students are punished at the end of the year to encourage their diligence.',['Top','punished','encourage','diligence'],1,'It should be "honored."'),
+ vCx('The bus always arrives before the others, because it moves very slowly in the traffic.',['always','before','slowly','traffic'],1,'It should be "after"; slowness and traffic agree.')]});
 
 /* ---- unit: odd word out ---- */
 FDV('v-od1','vod','odd','odd',
@@ -2189,7 +2199,219 @@ en:[
  vRe('V15','The specialists\' attitude toward saving early is that they:',['encourage it','warn against it','are not interested in it','consider it impossible'],'They believe the habit is built at exactly this age.')]});
 
 /* every verbal lesson's items also join the main verbal bank, so practice, sections and mock tests draw on them */
-FD.filter(l=>l.vb).forEach(l=>{ VB_AR.push(...l.vb.ar); VB_EN.push(...l.vb.en); });
+FD.filter(l=>l.vb).forEach(l=>{ VB_AR.push(...l.vb.ar); VB_EN.push(...l.vb.en); l.vb.ar.concat(l.vb.en).forEach(x=>FDVB.add(x)); });
+
+
+/* ---- main-bank expansion for timed sections and model tests: 12 longer passages per language (L1–L12), new context and odd items ---- */
+Object.assign(PASSAGES.ar,{
+ L1:'يعتقد كثير من الناس أنهم قادرون على أداء عدة مهام في وقت واحد بكفاءة، كأن يذاكر الطالب وهو يتابع الرسائل على هاتفه. غير أن أبحاث علم النفس المعرفي تشير إلى أن الدماغ لا يؤدي مهمتين تحتاجان إلى انتباه في اللحظة نفسها، بل ينتقل بينهما بسرعة. وكل انتقال يكلّف جزءًا من الوقت والتركيز، إذ يحتاج الذهن إلى لحظات ليستعيد ما كان يفعله قبل أن ينقطع. وتتراكم هذه اللحظات خلال ساعة المذاكرة، فيخرج الطالب منها وقد قرأ أقل وفهم أقل مما يظن. ويزيد الأمر سوءًا أن الشخص المشتت لا يشعر بانخفاض أدائه، بل قد يظن أنه أنجز أكثر لأنه كان مشغولًا طوال الوقت. ولهذا ينصح المختصون بتقسيم وقت المذاكرة إلى فترات قصيرة مركزة، يُبعد فيها الهاتف تمامًا، تعقبها استراحات قصيرة يُسمح فيها بما كان ممنوعًا. فالتركيز في رأيهم ليس موهبة يولد بها الإنسان، بل عادة تُبنى بالتدريب.',
+ L2:'تسعى مدن كثيرة حول العالم إلى أن تصبح مدنًا ذكية، تستخدم أجهزة الاستشعار والبيانات لتحسين حياة سكانها. فإشارات المرور في هذه المدن لا تعمل بتوقيت ثابت، بل تتغير بحسب كثافة السيارات في كل اتجاه، وأعمدة الإنارة تخفت حين تخلو الشوارع وتشتد حين يمر الناس، وحاويات النفايات ترسل إشعارًا حين تمتلئ فلا تمر الشاحنات إلا عند الحاجة. وتَعِد هذه الحلول بتوفير الطاقة والوقت وتقليل التلوث. لكن المدينة الذكية تطرح أسئلة لا تقل أهمية عن مزاياها؛ فالبيانات التي تجمعها عن حركة الناس قد تكشف تفاصيل من حياتهم الخاصة إذا لم تُحمَ جيدًا، والاعتماد الكبير على الأنظمة الرقمية يجعل المدينة عرضة للتعطل إذا تعرضت لهجوم إلكتروني. ولذلك يرى المخططون أن ذكاء المدينة لا يقاس بعدد الأجهزة فيها، بل بقدرتها على خدمة سكانها مع حماية خصوصيتهم وضمان استمرار الخدمات في كل الظروف.',
+ L3:'تقع واحة الأحساء في شرق المملكة، وتُعد من أكبر الواحات الطبيعية في العالم. وقد قامت حياة الواحة منذ القدم على عيون الماء العذب التي كانت تتدفق من باطن الأرض، فتسقي ملايين النخيل والمزارع المحيطة بها. وحول هذه العيون نشأت القرى والأسواق، وتعلّم الأهالي تنظيم توزيع الماء بين المزارع بدقة تمنع النزاع وتحفظ حق كل مزارع. ومع مرور الزمن وزيادة السحب من المياه الجوفية، جفّ كثير من العيون، فاتجه الناس إلى الآبار الحديثة وقنوات الري المنظمة. وفي عام ٢٠١٨ أُدرجت الأحساء في قائمة التراث العالمي، تقديرًا لتفاعل الإنسان مع بيئته فيها على مدى قرون. ولا تزال الواحة حتى اليوم شاهدة على أن الماء، حين يُدار بحكمة، قادر على أن يصنع حضارة في قلب الصحراء.',
+ L4:'يظن بعض الطلاب أن الضوضاء الخفيفة لا تؤثر في مذاكرتهم، بل إن بعضهم يفضّل الدراسة في المقاهي المزدحمة. وتُظهر الدراسات أن تأثير الصوت يختلف باختلاف نوعه ونوع المهمة. فالضجيج المتصل الذي لا يحمل معنى، كصوت المكيف أو المطر، قد لا يضر كثيرًا، بل قد يساعد بعض الناس على عزل الأصوات المزعجة الأخرى. أما الكلام المفهوم، كحديث الجالسين حولك أو أغنية بلغة تعرفها، فيشتت الانتباه أكثر، لأن الدماغ يحاول تلقائيًا فهم ما يسمعه. ويشتد هذا الأثر في المهام اللغوية كقراءة النصوص وحفظ المفردات، ويقل في المهام الآلية كترتيب الأوراق. وخلاصة ذلك أن الطالب الذي يذاكر القراءة والفهم يحتاج إلى مكان أهدأ من الطالب الذي يراجع جداول أو ينسخ ملخصات.',
+ L5:'حين افتُتح قطار الحرمين السريع تغيّر شكل الرحلة بين مكة المكرمة والمدينة المنورة؛ فالمسافة التي كانت تستغرق ساعات طويلة بالسيارة صار يمكن قطعها في نحو ساعتين ونصف. ولم يكن المشروع سهلًا، إذ امتد مساره قرابة أربعمئة وخمسين كيلومترًا عبر بيئة صحراوية تهب فيها الرمال وترتفع فيها الحرارة، فاحتاج المهندسون إلى حلول خاصة لحماية القضبان من زحف الرمال وتبريد الأنظمة. وتكمن أهمية القطار في أنه يخفف الزحام على الطرق في مواسم الحج والعمرة، حين يتنقل ملايين الزوار بين المدينتين في أيام محدودة، كما يقلل الحوادث وانبعاثات السيارات. ويرى المختصون أن نجاح المشروع لا يقاس بسرعة القطار وحدها، بل بقدرته على العمل بانتظام في أشد أيام السنة ازدحامًا.',
+ L6:'تقدّم البحار جزءًا كبيرًا من غذاء البشر، لكن الصيد الجائر يهدد كثيرًا من أنواع الأسماك. ويحدث الصيد الجائر حين تُصاد الأسماك أسرع مما تستطيع أن تتكاثر، فتتناقص أعدادها عامًا بعد عام حتى ينهار مخزونها. ومن أخطر صوره صيد الأسماك الصغيرة قبل أن تبلغ سن التكاثر، واستخدام شباك واسعة تجرف قاع البحر وما عليه من شعاب وكائنات لا يحتاجها الصياد. ولمواجهة ذلك تلجأ الدول إلى تحديد مواسم يُمنع فيها الصيد، وتحديد أحجام دنيا للأسماك المسموح بصيدها، وإنشاء محميات بحرية. وقد يرى الصياد في هذه القيود خسارة عاجلة، لكنها في الحقيقة تحفظ مصدر رزقه في المستقبل؛ فالبحر الذي يُستنزف اليوم لن يعطي شيئًا غدًا.',
+ L7:'نستعمل اليوم الأرقام من الصفر إلى التسعة دون أن نفكر في رحلتها الطويلة. فقد نشأ هذا النظام في الهند، ثم انتقل إلى العالم الإسلامي، حيث ألّف الخوارزمي في القرن التاسع الميلادي كتابًا يشرح طريقة الحساب به. وتُرجم الكتاب لاحقًا إلى اللاتينية، فعرفت أوروبا هذه الأرقام باسم الأرقام العربية. وتكمن عبقرية هذا النظام في أمرين: الأول أن قيمة الرقم تتغير بحسب منزلته، فالرقم ثلاثة في خانة الآحاد غيره في خانة المئات، والثاني وجود الصفر الذي يحفظ المنزلة الفارغة. وبفضل ذلك صارت العمليات الحسابية الكبيرة ممكنة بالقلم والورقة، بعد أن كانت الأنظمة القديمة تحتاج إلى رموز كثيرة وأدوات خاصة. ومن الطريف أن الأرقام التي تُكتب في المشرق العربي اليوم تختلف في أشكالها عن تلك التي انتشرت في أوروبا، مع أن أصلهما واحد.',
+ L8:'تُعد طاقة الرياح من أسرع مصادر الطاقة المتجددة نموًا في العالم. وتعمل التوربينات بفكرة بسيطة: تدير الرياح الشفرات الضخمة، فتدير بدورها مولدًا يحوّل الحركة إلى كهرباء. وتمتاز هذه الطاقة بأنها لا تُخرج غازات ملوِّثة أثناء التشغيل، وبأن مصدرها لا ينفد. غير أن لها تحديات؛ فالرياح لا تهب بالقوة نفسها طوال الوقت، فيتغير إنتاج الكهرباء من ساعة إلى أخرى، مما يتطلب وسائل لتخزين الطاقة أو مصادر أخرى تعوّض النقص. كما أن اختيار مواقع التوربينات يحتاج إلى دراسة، لأنها تتطلب رياحًا منتظمة ومساحات واسعة، وقد تؤثر في مسارات الطيور المهاجرة. ولهذا تتجه الدول إلى الجمع بين الرياح والشمس وغيرهما، حتى يسد كل مصدر نقص الآخر.',
+ L9:'لم يعد العلماء ينظرون إلى الجراثيم على أنها عدو يجب القضاء عليه دائمًا. ففي أمعاء الإنسان تعيش تريليونات من البكتيريا النافعة التي تساعده على هضم بعض الأطعمة، وتصنع له فيتامينات، وتنافس الجراثيم الضارة على المكان والغذاء فتحد من انتشارها. ويؤثر نوع الطعام في هذه البكتيريا؛ فالأطعمة الغنية بالألياف كالخضراوات والبقوليات تغذي الأنواع النافعة، بينما يقلل الإفراط في السكريات من تنوعها. ويحذّر الأطباء من الاستعمال العشوائي للمضادات الحيوية، لأنها لا تفرّق بين البكتيريا الضارة والنافعة، فتقتل الاثنتين معًا. ولا يعني ذلك ترك المضادات الحيوية، فهي أنقذت ملايين الأرواح، بل يعني أن تُستعمل حين يصفها الطبيب فقط، وبالجرعة والمدة المحددتين.',
+ L10:'كانت المتاحف قديمًا أماكن هادئة تُعرض فيها القطع خلف الزجاج، ويقرأ الزائر لوحة صغيرة بجانب كل قطعة ثم يمضي. أما اليوم فقد تغيّر دور المتحف؛ إذ صار كثير من المتاحف يقدّم تجارب تفاعلية، فيلمس الزائر نسخًا من القطع، ويستمع إلى قصصها، ويشاهد مقاطع تعيد بناء الماضي أمامه. ويرى المؤيدون أن هذا التحول جذب فئات جديدة، خصوصًا الأطفال والشباب، الذين لم يكونوا يجدون في المتاحف التقليدية ما يشدهم. في حين يخشى آخرون أن تطغى الشاشات والمؤثرات على القطعة الأصلية نفسها، فيخرج الزائر وقد تذكّر العرض ونسي التاريخ. ويبدو أن المتحف الناجح هو الذي يستعمل التقنية ليقرّب الزائر من القطعة، لا ليصرفه عنها.',
+ L11:'يبدو الجسر المعلّق للناظر خفيفًا رشيقًا، لكنه في الحقيقة يحمل أوزانًا هائلة. وتقوم فكرته على كابلين رئيسيين ضخمين يمتدان بين برجين عاليين، وتتدلى منهما كابلات رأسية تحمل الطريق. فحين تمر السيارات ينتقل وزنها إلى الكابلات الرأسية، ثم إلى الكابلين الرئيسيين، ثم إلى البرجين، ومنهما إلى الأرض، كما تثبَّت أطراف الكابلات في كتل خرسانية ضخمة على ضفتي النهر. وقد تعلّم المهندسون من حوادث سابقة أن الرياح أخطر على هذه الجسور من الأوزان؛ فقد انهار جسر شهير في القرن الماضي لأن الرياح جعلته يتأرجح حتى تحطم. ومنذ ذلك الحين صارت نماذج الجسور تُختبر في أنفاق الرياح قبل بنائها، وصار تصميم الطريق نفسه يراعي مرور الهواء من خلاله.',
+ L12:'يواجه كثير من المناطق الجافة خطر التصحر، أي تحوّل الأراضي الصالحة للزراعة والرعي إلى أراضٍ قاحلة. ولا يحدث التصحر بسبب قلة الأمطار وحدها، بل يسهم فيه الإنسان أيضًا بالرعي الجائر الذي يقتلع الغطاء النباتي، وقطع الأشجار للحطب، والزراعة التي تستنزف التربة دون أن تمنحها وقتًا لتتجدد. فإذا زال الغطاء النباتي صارت التربة مكشوفة، فتحملها الرياح وتجرفها السيول. ولمكافحة التصحر تُطلق مبادرات لزراعة ملايين الأشجار، وتنظيم الرعي، وحماية المحميات الطبيعية. ويؤكد المختصون أن نجاح التشجير لا يقاس بعدد الشتلات المزروعة، بل بعدد الأشجار التي تبقى حية بعد سنوات، ولذلك يُفضَّل اختيار نباتات محلية تتحمل الجفاف وتلائم بيئة المنطقة.'
+});
+Object.assign(PASSAGES.en,{
+ L1:'Many people believe they can perform several tasks at once efficiently, such as a student studying while following messages on his phone. However, research in cognitive psychology indicates that the brain does not perform two attention-demanding tasks at the same moment; instead, it switches between them quickly. Each switch costs some time and focus, since the mind needs a few moments to recover what it was doing before it was interrupted. These moments add up over an hour of study, so the student leaves having read less and understood less than he thinks. Worse still, a distracted person does not notice the drop in his performance; he may even believe he achieved more because he was busy the whole time. For this reason, specialists advise dividing study time into short, focused periods with the phone kept completely away, followed by short breaks in which what was forbidden is allowed. Focus, in their view, is not a talent people are born with but a habit built through practice.',
+ L2:'Many cities around the world are trying to become smart cities that use sensors and data to improve their residents\' lives. Traffic lights in these cities do not run on fixed timings; they change according to the number of cars in each direction. Street lamps dim when the streets are empty and brighten when people pass, and rubbish bins send an alert when they are full, so trucks come only when needed. These solutions promise to save energy and time and to reduce pollution. But the smart city raises questions as important as its benefits: the data it collects about people\'s movements may reveal details of their private lives if it is not well protected, and heavy reliance on digital systems leaves the city open to breakdown if it suffers a cyberattack. Planners therefore believe that a city\'s intelligence is measured not by the number of devices in it but by its ability to serve its residents while protecting their privacy and keeping services running in all conditions.',
+ L3:'Al-Ahsa Oasis lies in the east of Saudi Arabia and is one of the largest natural oases in the world. Since ancient times, life in the oasis has depended on freshwater springs that flowed from underground, watering millions of palm trees and the farms around them. Villages and markets grew up around these springs, and the people learned to organize the sharing of water between farms precisely, preventing disputes and protecting each farmer\'s share. Over time, as more groundwater was drawn, many springs dried up, so people turned to modern wells and organized irrigation channels. In 2018, Al-Ahsa was added to the World Heritage List in recognition of the interaction between people and their environment there over centuries. The oasis still stands as evidence that water, when managed wisely, can build a civilization in the heart of the desert.',
+ L4:'Some students think that light noise does not affect their studying, and some even prefer to study in crowded cafés. Studies show that the effect of sound depends on its type and on the kind of task. Continuous noise that carries no meaning, such as an air conditioner or rain, may do little harm and may even help some people block out other annoying sounds. Understandable speech, however, such as the conversation of people around you or a song in a language you know, is more distracting, because the brain automatically tries to understand what it hears. This effect is strongest in language tasks such as reading texts and memorizing vocabulary, and weaker in mechanical tasks such as sorting papers. In short, a student studying reading comprehension needs a quieter place than one reviewing tables or copying summaries.',
+ L5:'When the Haramain High-Speed Railway opened, it changed the journey between Makkah and Madinah: a distance that used to take many hours by car could now be covered in about two and a half hours. The project was not easy. Its route stretches about 450 kilometres through a desert environment with blowing sand and high temperatures, so engineers needed special solutions to protect the rails from drifting sand and to cool the systems. The train matters because it eases congestion on the roads during the Hajj and Umrah seasons, when millions of visitors travel between the two cities in a limited number of days, and it also reduces accidents and car emissions. Specialists believe the project\'s success is measured not by the train\'s speed alone but by its ability to run reliably on the busiest days of the year.',
+ L6:'The seas provide a large share of humanity\'s food, but overfishing threatens many species of fish. Overfishing happens when fish are caught faster than they can reproduce, so their numbers fall year after year until the stock collapses. Among its most harmful forms are catching young fish before they reach breeding age and using wide nets that scrape the seabed along with the reefs and creatures the fisherman does not need. To counter this, countries set seasons in which fishing is banned, minimum sizes for the fish that may be caught, and marine reserves. A fisherman may see these limits as an immediate loss, but in reality they protect his livelihood in the future: a sea that is drained today will give nothing tomorrow.',
+ L7:'Today we use the digits from zero to nine without thinking about their long journey. This system began in India and then moved to the Islamic world, where al-Khwarizmi wrote a book in the ninth century explaining how to calculate with it. The book was later translated into Latin, and Europe came to know these digits as Arabic numerals. The genius of the system lies in two things: first, the value of a digit changes with its place, so a three in the units column differs from a three in the hundreds column; second, there is a zero that holds an empty place. Thanks to this, large calculations became possible with pen and paper, whereas older systems needed many symbols and special tools. Interestingly, the digits written in the Arab East today look different from those that spread in Europe, even though they share the same origin.',
+ L8:'Wind power is one of the fastest-growing renewable energy sources in the world. Turbines work on a simple idea: the wind turns huge blades, which in turn drive a generator that converts motion into electricity. This energy produces no polluting gases while running, and its source never runs out. It does, however, face challenges. The wind does not blow with the same strength all the time, so electricity output changes from hour to hour, which requires ways of storing energy or other sources to make up the shortfall. Choosing turbine sites also needs study, because turbines require steady winds and large areas and may affect the routes of migrating birds. That is why countries are combining wind, sun and other sources, so that each fills the gaps of the others.',
+ L9:'Scientists no longer see germs as an enemy that must always be destroyed. Trillions of helpful bacteria live in the human gut, helping to digest some foods, making vitamins and competing with harmful germs for space and food, which limits their spread. The type of food we eat affects these bacteria: fibre-rich foods such as vegetables and legumes feed the helpful kinds, while too much sugar reduces their variety. Doctors warn against the careless use of antibiotics, because they do not distinguish between harmful and helpful bacteria and kill both together. This does not mean abandoning antibiotics, which have saved millions of lives; it means using them only when a doctor prescribes them, at the set dose and for the set length of time.',
+ L10:'Museums used to be quiet places where objects were displayed behind glass, and visitors read a small label beside each one before moving on. Today the museum\'s role has changed: many museums offer interactive experiences in which visitors touch replicas, listen to the objects\' stories and watch clips that rebuild the past before their eyes. Supporters believe this shift has attracted new audiences, especially children and young people, who found little to hold them in traditional museums. Others fear that screens and effects will overshadow the original object itself, so that visitors leave remembering the show and forgetting the history. It seems the successful museum is one that uses technology to bring visitors closer to the object, not to draw them away from it.',
+ L11:'A suspension bridge looks light and graceful, but it actually carries enormous loads. It is built around two huge main cables stretched between two tall towers, with vertical cables hanging from them to hold up the road. When cars pass, their weight moves to the vertical cables, then to the main cables, then to the towers and from them into the ground, while the ends of the cables are anchored in massive concrete blocks on both banks. Engineers learned from earlier accidents that wind is more dangerous to these bridges than weight: a famous bridge collapsed in the last century because the wind made it sway until it broke apart. Since then, bridge models have been tested in wind tunnels before construction, and the design of the deck itself allows air to pass through it.',
+ L12:'Many dry regions face the threat of desertification, the turning of land fit for farming and grazing into barren land. Desertification is not caused by low rainfall alone; people contribute to it through overgrazing, which strips away plant cover, cutting trees for firewood, and farming that exhausts the soil without giving it time to recover. Once the plant cover is gone, the soil is exposed, and the wind carries it off and floods wash it away. To fight desertification, initiatives plant millions of trees, regulate grazing and protect nature reserves. Specialists stress that the success of tree planting is measured not by the number of seedlings planted but by the number of trees still alive years later, which is why local plants that tolerate drought and suit the region\'s environment are preferred.'
+});
+VB_AR.push(
+ vRe('L1','الفكرة الرئيسة للنص:',['أداء مهام متعددة معًا يضعف المذاكرة، والتركيز عادة تُبنى','الهاتف ضروري أثناء المذاكرة','الدماغ يؤدي مهمتين معًا بكفاءة','الاستراحات تضيّع الوقت'],'النص يبين كلفة التنقل بين المهام وينتهي بأن التركيز عادة تُبنى.'),
+ vRe('L1','بحسب النص، ما الذي يحدث فعلًا حين يؤدي الشخص مهمتين معًا؟',['ينتقل الدماغ بينهما بسرعة','يؤديهما الدماغ في اللحظة نفسها','يتوقف عن إحداهما تمامًا','يزداد تركيزه'],'«بل ينتقل بينهما بسرعة».'),
+ vRe('L1','نستنتج من النص أن شعور الطالب المشتت بالإنجاز:',['قد يكون شعورًا مضللًا','دليل على تفوقه','يعني أنه فهم أكثر','لا علاقة له بالانشغال'],'المشتت يظن أنه أنجز أكثر لأنه كان مشغولًا، وهو في الحقيقة أنجز أقل.'),
+ vRe('L1','معنى «تتراكم» في النص:',['تزداد شيئًا فوق شيء','تختفي','تتساوى','تنقسم'],'اللحظات الضائعة تجتمع وتزداد خلال الساعة.'),
+ vRe('L1','موقف المختصين من التركيز:',['مهارة يمكن تنميتها بالتدريب','موهبة فطرية لا تتغير','أمر لا يمكن قياسه','يعتمد على الهاتف'],'«ليس موهبة... بل عادة تُبنى بالتدريب».'),
+ vRe('L2','الفكرة الرئيسة للنص:',['مزايا المدن الذكية والتحديات التي تطرحها','طريقة عمل إشارات المرور','أنواع النفايات في المدن','تاريخ الإنارة العامة'],'يعرض النص المزايا ثم الأسئلة المهمة، ثم معيار الذكاء الحقيقي.'),
+ vRe('L2','من أمثلة المدينة الذكية في النص:',['حاويات تُرسل إشعارًا حين تمتلئ','قطارات بلا سائق','مبانٍ تُبنى بالروبوتات','مدارس بلا معلمين'],'ذُكرت الحاويات صراحة.'),
+ vRe('L2','من مخاطر المدينة الذكية التي ذكرها النص:',['كشف خصوصية السكان إذا لم تُحمَ البيانات','زيادة التلوث','ارتفاع أسعار الوقود','قلة إشارات المرور'],'«قد تكشف تفاصيل من حياتهم الخاصة».'),
+ vRe('L2','بحسب المخططين، يُقاس ذكاء المدينة بـ:',['قدرتها على خدمة سكانها مع حماية خصوصيتهم','عدد الأجهزة فيها','عدد سكانها','سرعة الإنترنت فيها'],'نص صريح في الجملة الأخيرة.'),
+ vRe('L2','أسلوب النص:',['متوازن يعرض المزايا والمخاوف','دعائي يمدح الفكرة دون تحفظ','رافض للتقنية','قصصي'],'يعرض المزايا ثم المخاوف ثم الخلاصة.'),
+ vRe('L3','أنسب عنوان للنص:',['الأحساء: ماءٌ صنع حضارة في الصحراء','الآبار الحديثة','قائمة التراث العالمي','زراعة النخيل في العالم'],'العنوان يجمع الواحة والماء والحضارة.'),
+ vRe('L3','لماذا نظّم أهالي الأحساء توزيع الماء بدقة؟',['لمنع النزاع وحفظ حق كل مزارع','لبيع الماء','لتقليل عدد النخيل','لأن العيون كانت مالحة'],'«بدقة تمنع النزاع وتحفظ حق كل مزارع».'),
+ vRe('L3','سبب جفاف كثير من العيون بحسب النص:',['زيادة السحب من المياه الجوفية','قلة النخيل','بناء الأسواق','إدراج الواحة في التراث العالمي'],'«مع... زيادة السحب من المياه الجوفية، جفّ كثير من العيون».'),
+ vRe('L3','أُدرجت الأحساء في قائمة التراث العالمي تقديرًا لـ:',['تفاعل الإنسان مع بيئته فيها','كثرة آبارها الحديثة','حجم أسواقها','ارتفاع درجات الحرارة فيها'],'نص صريح.'),
+ vRe('L3','نستنتج من الجملة الأخيرة أن:',['حسن إدارة الموارد أساس لقيام الحضارة','الصحراء لا تصلح للحياة','الماء يكفي وحده دون تنظيم','الواحات تختفي دائمًا'],'«الماء، حين يُدار بحكمة، قادر على أن يصنع حضارة».'),
+ vRe('L4','الفكرة الرئيسة للنص:',['أثر الصوت في المذاكرة يختلف باختلاف نوعه ونوع المهمة','المقاهي أفضل أماكن المذاكرة','كل الأصوات مفيدة للتركيز','الأغاني تحسن الحفظ'],'هذه الجملة المحورية في النص.'),
+ vRe('L4','أي الأصوات أكثر تشتيتًا بحسب النص؟',['الكلام المفهوم','صوت المطر','صوت المكيف','الضجيج المتصل'],'لأن الدماغ يحاول فهم ما يسمعه.'),
+ vRe('L4','يشتد أثر الكلام المسموع في:',['المهام اللغوية كالقراءة وحفظ المفردات','ترتيب الأوراق','نسخ الملخصات','المهام الآلية كلها'],'نص صريح.'),
+ vRe('L4','نستنتج من النص أن طالبًا يراجع جدولًا للضرب:',['قد يتحمل ضوضاء أكثر من طالب يقرأ نصًا','يحتاج صمتًا تامًا','لا يتأثر بأي صوت إطلاقًا','يجب أن يستمع إلى أغنية'],'المهام الآلية أقل تأثرًا، فيتحمل صاحبها ضوضاء أكثر.'),
+ vRe('L4','الضمير في «يسمعه» يعود إلى:',['الدماغ','الطالب الجالس','المكيف','النص'],'«لأن الدماغ يحاول تلقائيًا فهم ما يسمعه».'),
+ vRe('L5','الفكرة الرئيسة للنص:',['قطار الحرمين: تحدياته وأهميته في خدمة الزوار','تاريخ مكة المكرمة','أنواع القطارات في العالم','أسباب الحوادث المرورية'],'النص يجمع التغيير والتحديات والأهمية.'),
+ vRe('L5','من تحديات بناء القطار المذكورة:',['زحف الرمال وارتفاع الحرارة','قلة العمال','نقص المال','كثرة الأنهار'],'نص صريح.'),
+ vRe('L5','تظهر أهمية القطار أكثر:',['في مواسم الحج والعمرة','في فصل الشتاء فقط','ليلًا','في أيام العطل الأسبوعية'],'حين يتنقل ملايين الزوار في أيام محدودة.'),
+ vRe('L5','بحسب المختصين يقاس نجاح المشروع بـ:',['انتظام عمله في أشد الأيام ازدحامًا','سرعة القطار وحدها','عدد محطاته','لون عرباته'],'نص صريح في الجملة الأخيرة.'),
+ vRe('L5','معنى «تكمن» في النص:',['تقع وتتمثل','تختفي','تتأخر','تنتهي'],'تكمن الأهمية: تتمثل.'),
+ vRe('L6','الفكرة الرئيسة للنص:',['الصيد الجائر خطر، وتنظيم الصيد يحفظ الرزق في المستقبل','الأسماك مصدر الغذاء الوحيد','الشباك الواسعة أفضل أدوات الصيد','البحار لا تنفد'],'النص يعرّف الخطر ثم الحلول ثم الخلاصة.'),
+ vRe('L6','يحدث الصيد الجائر حين:',['تُصاد الأسماك أسرع من قدرتها على التكاثر','يُمنع الصيد في مواسم معينة','تُصاد الأسماك الكبيرة فقط','تُنشأ المحميات'],'تعريف صريح.'),
+ vRe('L6','لم يذكر النص من وسائل مواجهة الصيد الجائر:',['تربية الأسماك في المنازل','تحديد مواسم يُمنع فيها الصيد','تحديد أحجام دنيا للأسماك','إنشاء محميات بحرية'],'لم يرد ذكر التربية في المنازل.'),
+ vRe('L6','العلاقة بين «خسارة عاجلة» و«تحفظ مصدر رزقه في المستقبل»:',['استدراك يصحح فهمًا شائعًا','سبب ونتيجة','تمثيل','ترادف'],'«لكنها في الحقيقة...» تصحح نظرة الصياد.'),
+ vRe('L6','معنى «يُستنزف» في الجملة الأخيرة:',['تُستهلك موارده حتى تنفد','يُنظَّف','يُحمى','يُوسَّع'],'البحر المستنزف لا يعطي شيئًا غدًا.'),
+ vRe('L7','الفكرة الرئيسة للنص:',['رحلة الأرقام إلى العالم وسر قوة نظامها','حياة الخوارزمي','الترجمة إلى اللاتينية','أشكال الحروف العربية'],'النص يتتبع الرحلة ثم يشرح العبقرية.'),
+ vRe('L7','من أين نشأ نظام الأرقام بحسب النص؟',['الهند','أوروبا','مصر','اليونان'],'«نشأ هذا النظام في الهند».'),
+ vRe('L7','عبقرية النظام تكمن في:',['قيمة المنزلة ووجود الصفر','كثرة الرموز','الحاجة إلى أدوات خاصة','شكل الأرقام'],'الأمران المذكوران صراحة.'),
+ vRe('L7','لماذا سُميت الأرقام في أوروبا «الأرقام العربية»؟',['لأنها وصلت إليها عن طريق كتاب عربي مترجم','لأنها نشأت في الجزيرة العربية','لأن العرب اخترعوا الصفر وحده','لأنها تُكتب من اليمين'],'انتقلت عبر كتاب الخوارزمي المترجم إلى اللاتينية.'),
+ vRe('L7','نستنتج من الجملة الأخيرة أن:',['اختلاف شكل الرقم لا يعني اختلاف أصله','الأرقام الأوروبية أقدم','أرقام المشرق لا علاقة لها بالهند','الأرقام لم تتغير أشكالها أبدًا'],'«مع أن أصلهما واحد».'),
+ vRe('L8','الفكرة الرئيسة للنص:',['مزايا طاقة الرياح وتحدياتها وطريقة التغلب عليها','طريقة صناعة الشفرات','هجرة الطيور','أسعار الكهرباء'],'النص يعرض المزايا والتحديات والحل.'),
+ vRe('L8','من مزايا طاقة الرياح المذكورة:',['لا تُخرج غازات ملوثة أثناء التشغيل','تعمل بالقوة نفسها دائمًا','لا تحتاج إلى مساحات','لا تحتاج إلى دراسة لمواقعها'],'نص صريح.'),
+ vRe('L8','لماذا تحتاج طاقة الرياح إلى وسائل تخزين؟',['لأن قوة الرياح تتغير فيتغير الإنتاج','لأنها تنفد','لأنها ملوِّثة','لأن التوربينات صغيرة'],'«فيتغير إنتاج الكهرباء من ساعة إلى أخرى».'),
+ vRe('L8','الضمير في «الآخر» في الجملة الأخيرة يعود إلى:',['مصدر طاقة آخر','الطائر','التوربين','البلد'],'كل مصدر يسد نقص المصدر الآخر.'),
+ vRe('L8','نستنتج من النص أن الاعتماد على مصدر طاقة واحد:',['قد يسبب نقصًا في الكهرباء','هو الحل الأمثل','لا يؤثر في الإنتاج','يلغي الحاجة إلى التخطيط'],'لذلك تجمع الدول بين المصادر.'),
+ vRe('L9','الفكرة الرئيسة للنص:',['البكتيريا النافعة مهمة، ويجب استعمال المضادات الحيوية بحكمة','كل الجراثيم ضارة','السكريات مفيدة للأمعاء','المضادات الحيوية لا فائدة منها'],'النص يغيّر النظرة إلى الجراثيم ثم يوجه إلى الاستعمال الصحيح.'),
+ vRe('L9','من فوائد البكتيريا النافعة المذكورة:',['صنع بعض الفيتامينات','تنظيف الأسنان','خفض الحرارة','تقوية العظام مباشرة'],'«وتصنع له فيتامينات».'),
+ vRe('L9','لماذا يحذّر الأطباء من الاستعمال العشوائي للمضادات الحيوية؟',['لأنها تقتل البكتيريا النافعة والضارة معًا','لأنها غالية','لأنها تزيد السكريات','لأنها لا تقتل أي بكتيريا'],'نص صريح.'),
+ vRe('L9','موقف الكاتب من المضادات الحيوية:',['يقدّر فائدتها ويدعو إلى استعمالها عند الحاجة فقط','يدعو إلى تركها تمامًا','يدعو إلى الإكثار منها','لا يهتم بها'],'«لا يعني ذلك ترك المضادات... بل أن تُستعمل حين يصفها الطبيب».'),
+ vRe('L9','معنى «تنافس» في النص:',['تزاحم على الشيء نفسه','تساعد','تتحد مع','تهرب من'],'تنافس الجراثيم الضارة على المكان والغذاء.'),
+ vRe('L10','الفكرة الرئيسة للنص:',['تحوّل دور المتاحف بين التفاعل والخوف من طغيان العرض','تاريخ المتاحف القديمة','طريقة صنع النسخ','أسعار تذاكر المتاحف'],'النص يعرض التحول وآراء المؤيدين والمتخوفين.'),
+ vRe('L10','يرى المؤيدون أن التحول التفاعلي:',['جذب فئات جديدة كالأطفال والشباب','أبعد الزوار عن المتاحف','قلل عدد القطع','رفع الأسعار'],'نص صريح.'),
+ vRe('L10','يخشى المعارضون أن:',['تطغى الشاشات على القطعة الأصلية','تُغلق المتاحف','يقل عدد الشاشات','تُسرق القطع'],'نص صريح.'),
+ vRe('L10','العلاقة بين رأي المؤيدين ورأي المتخوفين:',['تعارض','سبب ونتيجة','تمثيل','ترادف'],'«في حين يخشى آخرون...» تفيد التعارض.'),
+ vRe('L10','نستنتج من الجملة الأخيرة أن الكاتب:',['يقبل التقنية بشرط أن تخدم القطعة','يرفض التقنية رفضًا تامًا','يفضّل الشاشات على القطع','لا يرى فرقًا بين العرض والتاريخ'],'التقنية مقبولة إذا قرّبت الزائر من القطعة.'),
+ vRe('L11','الفكرة الرئيسة للنص:',['طريقة حمل الجسر المعلّق للأوزان وخطر الرياح عليه','تاريخ الأنهار','أنواع السيارات','طريقة صنع الخرسانة'],'النص يشرح نقل الوزن ثم خطر الرياح.'),
+ vRe('L11','ترتيب انتقال وزن السيارات في الجسر:',['الكابلات الرأسية، ثم الرئيسية، ثم البرجان، ثم الأرض','البرجان، ثم الكابلات، ثم الطريق','الأرض، ثم البرجان، ثم الكابلات','الكتل الخرسانية، ثم السيارات'],'نص صريح.'),
+ vRe('L11','تعلّم المهندسون من الحوادث السابقة أن:',['الرياح أخطر على هذه الجسور من الأوزان','الأوزان أخطر من الرياح','الأبراج لا ضرورة لها','الخرسانة لا تتحمل الماء'],'نص صريح.'),
+ vRe('L11','لماذا تُختبر نماذج الجسور في أنفاق الرياح؟',['لتجنب تأرجحها وانهيارها بفعل الرياح','لقياس سرعة السيارات','لاختبار ألوانها','لتقليل كلفتها'],'بعد انهيار جسر بسبب تأرجحه في الرياح.'),
+ vRe('L11','معنى «رشيقًا» في النص:',['خفيفًا متناسقًا','ثقيلًا','قديمًا','مكسورًا'],'السياق: يبدو خفيفًا رشيقًا.'),
+ vRe('L12','الفكرة الرئيسة للنص:',['أسباب التصحر وطرق مكافحته ومعيار نجاحها','فوائد الرعي','أنواع الأشجار','قلة الأمطار وحدها'],'النص يعرّف التصحر وأسبابه وطرق مكافحته.'),
+ vRe('L12','بحسب النص، التصحر سببه:',['قلة الأمطار مع ممارسات بشرية خاطئة','قلة الأمطار وحدها','كثرة الأشجار','الرياح فقط'],'«لا يحدث التصحر بسبب قلة الأمطار وحدها، بل يسهم فيه الإنسان».'),
+ vRe('L12','ماذا يحدث للتربة إذا زال الغطاء النباتي؟',['تنكشف فتحملها الرياح وتجرفها السيول','تزداد خصوبة','تتحول إلى مياه','لا يتغير شيء'],'نص صريح.'),
+ vRe('L12','يقاس نجاح التشجير بحسب المختصين بـ:',['عدد الأشجار التي تبقى حية بعد سنوات','عدد الشتلات المزروعة','سرعة الزراعة','نوع الأدوات المستعملة'],'نص صريح.'),
+ vRe('L12','لماذا تُفضَّل النباتات المحلية؟',['لأنها تتحمل الجفاف وتلائم البيئة','لأنها أرخص دائمًا','لأنها أسرع نموًا في كل مكان','لأنها لا تحتاج إلى ماء إطلاقًا'],'نص صريح في الجملة الأخيرة.')
+);
+VB_EN.push(
+ vRe('L1','The main idea of the passage is that:',['multitasking weakens studying, and focus is a habit that can be built','a phone is necessary while studying','the brain performs two tasks at once efficiently','breaks waste time'],'The passage shows the cost of switching and ends by calling focus a habit.'),
+ vRe('L1','According to the passage, what actually happens when a person does two tasks at once?',['the brain switches between them quickly','the brain performs both at the same moment','he stops one of them completely','his focus increases'],'"it switches between them quickly."'),
+ vRe('L1','We can infer that a distracted student\'s sense of achievement:',['may be misleading','proves he is excellent','means he understood more','has nothing to do with being busy'],'He thinks he did more because he was busy, but he actually did less.'),
+ vRe('L1','"add up" in the passage means:',['accumulate','disappear','balance out','divide'],'The lost moments pile up over the hour.'),
+ vRe('L1','The specialists\' view of focus is that it is:',['a skill that can be developed through practice','an inborn talent that never changes','impossible to measure','dependent on the phone'],'"not a talent... but a habit built through practice."'),
+ vRe('L2','The main idea of the passage is:',['the benefits of smart cities and the challenges they raise','how traffic lights work','types of urban waste','the history of street lighting'],'It presents the benefits, then the important questions, then the real measure of intelligence.'),
+ vRe('L2','An example of a smart city in the passage is:',['bins that send an alert when they are full','driverless trains','buildings built by robots','schools without teachers'],'The bins are mentioned explicitly.'),
+ vRe('L2','One risk of smart cities the passage mentions is:',['exposing residents\' privacy if data is not protected','more pollution','higher fuel prices','fewer traffic lights'],'"may reveal details of their private lives."'),
+ vRe('L2','According to planners, a city\'s intelligence is measured by:',['its ability to serve residents while protecting their privacy','the number of devices in it','its population','its internet speed'],'Stated directly in the last sentence.'),
+ vRe('L2','The style of the passage is:',['balanced, presenting benefits and concerns','promotional, praising the idea without reservation','opposed to technology','narrative'],'It presents benefits, then concerns, then a conclusion.'),
+ vRe('L3','The best title for the passage is:',['Al-Ahsa: Water That Built a Civilization in the Desert','Modern Wells','The World Heritage List','Palm Farming Worldwide'],'The title combines the oasis, water and civilization.'),
+ vRe('L3','Why did the people of Al-Ahsa share water precisely?',['to prevent disputes and protect each farmer\'s share','to sell the water','to reduce the number of palms','because the springs were salty'],'"preventing disputes and protecting each farmer\'s share."'),
+ vRe('L3','According to the passage, many springs dried up because:',['more groundwater was drawn','there were fewer palms','markets were built','the oasis joined the heritage list'],'"as more groundwater was drawn, many springs dried up."'),
+ vRe('L3','Al-Ahsa was added to the World Heritage List in recognition of:',['the interaction between people and their environment','its many modern wells','the size of its markets','its high temperatures'],'Stated directly.'),
+ vRe('L3','The last sentence suggests that:',['good resource management is a foundation of civilization','the desert cannot support life','water alone is enough without organization','oases always disappear'],'"water, when managed wisely, can build a civilization."'),
+ vRe('L4','The main idea of the passage is that:',['the effect of sound on studying depends on its type and the task','cafés are the best places to study','all sounds help focus','songs improve memorization'],'This is the central sentence of the passage.'),
+ vRe('L4','Which sounds are most distracting according to the passage?',['understandable speech','rain','an air conditioner','continuous noise'],'Because the brain tries to understand what it hears.'),
+ vRe('L4','The effect of heard speech is strongest in:',['language tasks such as reading and memorizing vocabulary','sorting papers','copying summaries','all mechanical tasks'],'Stated directly.'),
+ vRe('L4','We can infer that a student reviewing a multiplication table:',['may tolerate more noise than a student reading a text','needs total silence','is never affected by any sound','should listen to a song'],'Mechanical tasks are less affected.'),
+ vRe('L4','In "tries to understand what it hears," "it" refers to:',['the brain','the student nearby','the air conditioner','the passage'],'"the brain automatically tries to understand what it hears."'),
+ vRe('L5','The main idea of the passage is:',['the Haramain railway: its challenges and its value to visitors','the history of Makkah','types of trains worldwide','causes of road accidents'],'The passage combines the change, the challenges and the value.'),
+ vRe('L5','One challenge of building the railway mentioned is:',['drifting sand and high temperatures','a shortage of workers','lack of money','too many rivers'],'Stated directly.'),
+ vRe('L5','The railway matters most:',['during the Hajj and Umrah seasons','only in winter','at night','on weekends'],'When millions travel in a limited number of days.'),
+ vRe('L5','According to specialists, the project\'s success is measured by:',['running reliably on the busiest days','the train\'s speed alone','the number of stations','the colour of the carriages'],'Stated directly in the last sentence.'),
+ vRe('L5','"eases" in the passage means:',['reduces','increases','causes','ignores'],'The train eases congestion: it reduces it.'),
+ vRe('L6','The main idea of the passage is that:',['overfishing is a danger, and regulating fishing protects future livelihoods','fish are the only food source','wide nets are the best tools','the seas never run out'],'It defines the danger, then the solutions, then the conclusion.'),
+ vRe('L6','Overfishing happens when:',['fish are caught faster than they can reproduce','fishing is banned in some seasons','only large fish are caught','reserves are created'],'An explicit definition.'),
+ vRe('L6','Which measure is NOT mentioned in the passage?',['raising fish at home','fishing bans in some seasons','minimum fish sizes','marine reserves'],'Raising fish at home is not mentioned.'),
+ vRe('L6','How does "an immediate loss" relate to "protect his livelihood in the future"?',['a contrast correcting a common view','cause and effect','an example','a synonym'],'"but in reality..." corrects the fisherman\'s view.'),
+ vRe('L6','"drained" in the last sentence means:',['used up until nothing is left','cleaned','protected','widened'],'A drained sea gives nothing tomorrow.'),
+ vRe('L7','The main idea of the passage is:',['how the digits travelled the world and why their system is powerful','the life of al-Khwarizmi','translation into Latin','the shapes of Arabic letters'],'It follows the journey, then explains the genius.'),
+ vRe('L7','Where did the number system begin according to the passage?',['India','Europe','Egypt','Greece'],'"This system began in India."'),
+ vRe('L7','The system\'s genius lies in:',['place value and the zero','many symbols','special tools','the shapes of the digits'],'The two points stated explicitly.'),
+ vRe('L7','Why were the digits called "Arabic numerals" in Europe?',['they reached Europe through a translated Arabic book','they began in Arabia','the Arabs invented only the zero','they are written right to left'],'They came through al-Khwarizmi\'s book translated into Latin.'),
+ vRe('L7','The last sentence suggests that:',['a different shape does not mean a different origin','European digits are older','Eastern digits have no link to India','digit shapes never changed'],'"even though they share the same origin."'),
+ vRe('L8','The main idea of the passage is:',['wind power\'s benefits, its challenges and how they are overcome','how blades are made','bird migration','electricity prices'],'It presents the benefits, the challenges and the solution.'),
+ vRe('L8','One benefit of wind power mentioned is that it:',['produces no polluting gases while running','always runs at the same strength','needs no land','needs no site studies'],'Stated directly.'),
+ vRe('L8','Why does wind power need storage?',['wind strength varies, so output varies','it runs out','it pollutes','turbines are small'],'"electricity output changes from hour to hour."'),
+ vRe('L8','In "each fills the gaps of the others," "the others" refers to:',['other energy sources','birds','turbines','countries'],'Each source fills the gaps of the other sources.'),
+ vRe('L8','We can infer that relying on a single energy source:',['may cause electricity shortages','is the ideal solution','does not affect output','removes the need for planning'],'That is why countries combine sources.'),
+ vRe('L9','The main idea of the passage is that:',['helpful bacteria matter, and antibiotics should be used wisely','all germs are harmful','sugar is good for the gut','antibiotics are useless'],'It changes the view of germs, then guides correct use.'),
+ vRe('L9','One benefit of helpful bacteria mentioned is:',['making some vitamins','cleaning teeth','lowering fever','directly strengthening bones'],'"making vitamins."'),
+ vRe('L9','Why do doctors warn against careless antibiotic use?',['antibiotics kill helpful and harmful bacteria together','they are expensive','they increase sugar','they kill no bacteria'],'Stated directly.'),
+ vRe('L9','The author\'s attitude toward antibiotics is that he:',['values them and urges using them only when needed','calls for abandoning them','calls for using more of them','is not interested in them'],'"This does not mean abandoning antibiotics... it means using them only when a doctor prescribes them."'),
+ vRe('L9','"competing" in the passage means:',['struggling for the same thing','helping','joining','escaping'],'They compete with harmful germs for space and food.'),
+ vRe('L10','The main idea of the passage is:',['how museums\' role changed, between interaction and fear of the show taking over','the history of old museums','how replicas are made','museum ticket prices'],'It presents the shift and the views of supporters and critics.'),
+ vRe('L10','Supporters believe the interactive shift has:',['attracted new audiences such as children and young people','driven visitors away','reduced the number of objects','raised prices'],'Stated directly.'),
+ vRe('L10','Critics fear that:',['screens will overshadow the original object','museums will close','there will be fewer screens','objects will be stolen'],'Stated directly.'),
+ vRe('L10','How do the supporters\' and critics\' views relate?',['contrast','cause and effect','example','synonym'],'"Others fear..." introduces a contrast.'),
+ vRe('L10','The last sentence suggests that the author:',['accepts technology if it serves the object','rejects technology completely','prefers screens to objects','sees no difference between the show and the history'],'Technology is acceptable if it brings visitors closer to the object.'),
+ vRe('L11','The main idea of the passage is:',['how a suspension bridge carries loads and why wind threatens it','the history of rivers','types of cars','how concrete is made'],'It explains load transfer and then the danger of wind.'),
+ vRe('L11','The order in which the weight of cars travels is:',['vertical cables, main cables, towers, ground','towers, cables, road','ground, towers, cables','concrete blocks, cars'],'Stated directly.'),
+ vRe('L11','Engineers learned from earlier accidents that:',['wind is more dangerous to these bridges than weight','weight is more dangerous than wind','towers are unnecessary','concrete cannot withstand water'],'Stated directly.'),
+ vRe('L11','Why are bridge models tested in wind tunnels?',['to prevent swaying and collapse caused by wind','to measure car speeds','to test their colours','to cut their cost'],'After a bridge collapsed from swaying in the wind.'),
+ vRe('L11','"graceful" in the passage means:',['elegant and well-proportioned','heavy','old','broken'],'Context: it looks light and graceful.'),
+ vRe('L12','The main idea of the passage is:',['the causes of desertification, how to fight it and how to judge success','the benefits of grazing','types of trees','low rainfall alone'],'It defines desertification, its causes and how to fight it.'),
+ vRe('L12','According to the passage, desertification is caused by:',['low rainfall together with harmful human practices','low rainfall alone','too many trees','wind only'],'"not caused by low rainfall alone; people contribute to it."'),
+ vRe('L12','What happens to the soil when plant cover disappears?',['it is exposed, blown away by wind and washed away by floods','it becomes more fertile','it turns into water','nothing changes'],'Stated directly.'),
+ vRe('L12','Specialists say tree planting succeeds when measured by:',['the number of trees still alive years later','the number of seedlings planted','planting speed','the tools used'],'Stated directly.'),
+ vRe('L12','Why are local plants preferred?',['they tolerate drought and suit the environment','they are always cheaper','they grow fastest everywhere','they need no water at all'],'Stated directly in the last sentence.')
+);
+/* new contextual-error items (error position spread across the four words) and subtler odd-word items */
+VB_AR.push(
+ vCx('اشتهر الطبيب بدقته، فكان يتسرع في تشخيص مرضاه.',['اشتهر','بدقته','يتسرع','مرضاه'],2,'الصحيح «يتأنى»؛ الدقة تقتضي التأني.'),
+ vCx('ازدهرت التجارة في المدينة حين قلّت الطرق الآمنة إليها.',['ازدهرت','التجارة','قلّت','الآمنة'],2,'الصحيح «كثرت»؛ الازدهار يرتبط بكثرة الطرق الآمنة.'),
+ vCx('أهمل اللاعب تدريباته طوال الموسم، فحقق أفضل أداء في مسيرته.',['أهمل','تدريباته','الموسم','أفضل'],0,'الصحيح «واظب على».'),
+ vCx('يُنصح المسافر بشرب الماء بكثرة في الطقس الحار لتجنب الارتواء.',['يُنصح','بكثرة','الحار','الارتواء'],3,'الصحيح «الجفاف».'),
+ vCx('خفّض المتجر أسعاره، فقلّ إقبال الزبائن عليه.',['خفّض','أسعاره','فقلّ','الزبائن'],2,'الصحيح «فزاد».'),
+ vCx('اختار الكاتب كلماته بعناية، فجاءت عبارته غامضة ومفهومة للجميع.',['اختار','بعناية','غامضة','للجميع'],2,'الصحيح «واضحة».'),
+ vCx('تزداد الحاجة إلى المظلات في الأيام الجافة.',['تزداد','الحاجة','المظلات','الجافة'],3,'الصحيح «الماطرة».'),
+ vCx('تأخر القطار عن موعده، فوصل الركاب مبكرين إلى أعمالهم.',['تأخر','موعده','مبكرين','أعمالهم'],2,'الصحيح «متأخرين».'),
+ vCx('يتميز الصقر بحدة بصره، فيرى فريسته من مسافة قريبة جدًا.',['يتميز','بحدة','فريسته','قريبة'],3,'الصحيح «بعيدة».'),
+ vCx('يستهلك المصباح الموفّر طاقة أكبر من المصباح العادي.',['يستهلك','الموفّر','أكبر','العادي'],2,'الصحيح «أقل».'),
+ vCx('كان الجو هادئًا في المكتبة، فلم يستطع الطلاب التركيز.',['هادئًا','المكتبة','يستطع','التركيز'],0,'الصحيح «صاخبًا».'),
+ vCx('لأن النبتة تحتاج إلى الماء، قلّل المزارع ريّها في الصيف.',['تحتاج','الماء','قلّل','الصيف'],2,'الصحيح «زاد».'),
+ vCx('نجح الفريق لأن أعضاءه تفرقوا وعمل كل منهم وحده.',['نجح','أعضاءه','تفرقوا','وحده'],2,'الصحيح «تعاونوا».'),
+ vCx('الكتاب المفيد صديق مخلص يُضيع وقتك.',['المفيد','صديق','مخلص','يُضيع'],3,'الصحيح «يُثري».'),
+ vCx('ارتفعت حرارة المريض، فوضعت أمه على جبينه كمادات دافئة لتخفيضها.',['ارتفعت','جبينه','دافئة','لتخفيضها'],2,'الصحيح «باردة».'),
+ vCx('يقوي النوم الكافي الذاكرة ويُضعف القدرة على التعلم.',['يقوي','الكافي','الذاكرة','يُضعف'],3,'الصحيح «يعزز».'),
+ vCx('أُغلق الطريق بسبب الصيانة، فوصلنا عبر الطريق المعتاد.',['أُغلق','الصيانة','وصلنا','المعتاد'],3,'الصحيح «البديل».'),
+ vCx('الجبان يقتحم المخاطر دون تردد.',['الجبان','يقتحم','المخاطر','تردد'],0,'الصحيح «الشجاع».'),
+ vOdA(['مِبضع','مِشرط','مِقص','مِحراث'],3,'البقية أدوات قطع، والمحراث أداة لحرث الأرض.'),
+ vOdA(['يناير','مارس','مايو','الأحد'],3,'البقية شهور، والأحد يوم.'),
+ vOdA(['الكيلوغرام','الطن','الغرام','اللتر'],3,'البقية وحدات كتلة، واللتر وحدة حجم.'),
+ vOdA(['المثلث','المربع','المخمس','المكعب'],3,'البقية أشكال مستوية، والمكعب مجسم.'),
+ vOdA(['الإيجاز','الاختصار','التلخيص','الإسهاب'],3,'البقية تقليل للكلام، والإسهاب إطالة.'),
+ vOdA(['الرئة','القلب','الكلية','العظم'],3,'البقية أعضاء داخلية، والعظم نسيج هيكلي.'),
+ vOdA(['الزئبق','الحديد','النحاس','الأكسجين'],3,'البقية عناصر فلزية، والأكسجين لافلز.'),
+ vOdA(['الصدق','الأمانة','الوفاء','الكسل'],3,'البقية فضائل، والكسل صفة مذمومة.')
+);
+VB_EN.push(
+ vCx('The doctor was known for his precision, so he rushed his diagnoses.',['known','precision','rushed','diagnoses'],2,'It should be "took care over"; precision requires care.'),
+ vCx('Trade in the city flourished when safe routes to it became fewer.',['Trade','flourished','safe','fewer'],3,'It should be "more numerous."'),
+ vCx('The player neglected his training all season, so he gave the best performance of his career.',['neglected','training','season','best'],0,'It should be "kept up."'),
+ vCx('Travellers are advised to drink plenty of water in hot weather to avoid hydration.',['advised','plenty','hot','hydration'],3,'It should be "dehydration."'),
+ vCx('The shop cut its prices, so fewer customers came.',['cut','prices','fewer','customers'],2,'It should be "more."'),
+ vCx('The writer chose his words carefully, so his sentence was vague and clear to everyone.',['chose','carefully','vague','everyone'],2,'It should be "plain."'),
+ vCx('The need for umbrellas grows on dry days.',['need','umbrellas','grows','dry'],3,'It should be "rainy."'),
+ vCx('The train was late, so the passengers reached work early.',['train','late','reached','early'],3,'It should be "late."'),
+ vCx('The falcon has sharp eyesight, so it sees its prey from very close up.',['falcon','sharp','prey','close'],3,'It should be "far away."'),
+ vCx('An energy-saving bulb uses more power than an ordinary bulb.',['energy-saving','uses','more','ordinary'],2,'It should be "less."'),
+ vCx('The library was quiet, so the students could not concentrate.',['library','quiet','students','concentrate'],1,'It should be "noisy."'),
+ vCx('Because the plant needs water, the farmer watered it less in summer.',['plant','needs','less','summer'],2,'It should be "more."'),
+ vCx('The team succeeded because its members split up and each worked alone.',['succeeded','members','split','alone'],2,'It should be "worked together."'),
+ vCx('A useful book is a loyal friend that wastes your time.',['useful','loyal','friend','wastes'],3,'It should be "enriches."'),
+ vCx('The patient\'s fever rose, so his mother put warm compresses on his forehead to lower it.',['fever','rose','warm','lower'],2,'It should be "cold."'),
+ vCx('Enough sleep strengthens memory and weakens the ability to learn.',['Enough','strengthens','memory','weakens'],3,'It should be "boosts."'),
+ vCx('The road was closed for repairs, so we arrived by the usual road.',['closed','repairs','arrived','usual'],3,'It should be "alternative."'),
+ vCx('A coward faces danger without hesitation.',['coward','faces','danger','hesitation'],0,'It should be "brave person."'),
+ vOdE(['scalpel','razor','scissors','plough'],3,'The others are cutting tools; a plough turns soil.'),
+ vOdE(['January','March','May','Sunday'],3,'The others are months; Sunday is a day.'),
+ vOdE(['kilogram','tonne','gram','litre'],3,'The others measure mass; a litre measures volume.'),
+ vOdE(['triangle','square','pentagon','cube'],3,'The others are flat shapes; a cube is a solid.'),
+ vOdE(['brevity','conciseness','summary','verbosity'],3,'The others mean saying less; verbosity means saying more.'),
+ vOdE(['lung','heart','kidney','bone'],3,'The others are internal organs; bone is skeletal tissue.'),
+ vOdE(['mercury','iron','copper','oxygen'],3,'The others are metals; oxygen is a non-metal.'),
+ vOdE(['honesty','trustworthiness','loyalty','laziness'],3,'The others are virtues; laziness is a fault.')
+);
 
 /* ============ Verbal bank expansion (AR + EN) ============ */
 Object.assign(PASSAGES.ar,{
@@ -2783,7 +3005,17 @@ Object.assign(GENS,{
       ['القيمة الأولى: ⟦س + 3⟧<br>القيمة الثانية: ⟦س + 5⟧','Quantity A: ⟦x + 3⟧<br>Quantity B: ⟦x + 5⟧',1,'مهما كانت س، الثانية أكبر بـ 2.','Whatever x is, B is 2 more.'],
       ['القيمة الأولى: ⟦2س⟧<br>القيمة الثانية: ⟦س⟧','Quantity A: ⟦2x⟧<br>Quantity B: ⟦x⟧',3,'موجب: الأولى أكبر. سالب: الثانية أكبر. صفر: متساويتان.','Positive: A. Negative: B. Zero: equal.'],
       ['⟦س > 0⟧ ، ⟦ص > 0⟧ ، ⟦س + ص = 10⟧<br>القيمة الأولى: ⟦س⟧<br>القيمة الثانية: ⟦ص⟧','⟦x > 0⟧, ⟦y > 0⟧, ⟦x + y = 10⟧<br>Quantity A: ⟦x⟧<br>Quantity B: ⟦y⟧',3,'قد تكون ⟦س = 7 ، ص = 3⟧ أو العكس.','It could be ⟦x = 7, y = 3⟧ or the reverse.'],
-      ['القيمة الأولى: ⟦(س + 1)^2⟧<br>القيمة الثانية: ⟦س^2 + 2س + 1⟧','Quantity A: ⟦(x + 1)^2⟧<br>Quantity B: ⟦x^2 + 2x + 1⟧',2,'مفكوك مربع مجموع.','The expansion of a squared sum.']];
+      ['القيمة الأولى: ⟦(س + 1)^2⟧<br>القيمة الثانية: ⟦س^2 + 2س + 1⟧','Quantity A: ⟦(x + 1)^2⟧<br>Quantity B: ⟦x^2 + 2x + 1⟧',2,'مفكوك مربع مجموع.','The expansion of a squared sum.'],
+      ['⟦س > ص > 0⟧<br>القيمة الأولى: ⟦1/س⟧<br>القيمة الثانية: ⟦1/ص⟧','⟦x > y > 0⟧<br>Quantity A: ⟦1/x⟧<br>Quantity B: ⟦1/y⟧',1,'كلما كبر المقام صغر الكسر.','The larger the denominator, the smaller the fraction.'],
+      ['س عدد فردي<br>القيمة الأولى: باقي قسمة ⟦س⟧ على 2<br>القيمة الثانية: ⟦1⟧','x is odd<br>Quantity A: the remainder of ⟦x ÷ 2⟧<br>Quantity B: ⟦1⟧',2,'باقي قسمة أي عدد فردي على 2 يساوي 1.','Any odd number leaves remainder 1 when divided by 2.'],
+      ['القيمة الأولى: ⟦س^2⟧<br>القيمة الثانية: ⟦س^3⟧','Quantity A: ⟦x^2⟧<br>Quantity B: ⟦x^3⟧',3,'عند ⟦س = 2⟧ الثانية أكبر، وعند ⟦س = −1⟧ الأولى أكبر، وعند ⟦س = 1⟧ متساويتان.','At ⟦x = 2⟧ B is larger, at ⟦x = −1⟧ A is larger, at ⟦x = 1⟧ they are equal.'],
+      ['⟦س < 0⟧<br>القيمة الأولى: ⟦س^3⟧<br>القيمة الثانية: ⟦0⟧','⟦x < 0⟧<br>Quantity A: ⟦x^3⟧<br>Quantity B: ⟦0⟧',1,'مكعب العدد السالب سالب.','The cube of a negative number is negative.'],
+      ['مستطيل محيطه ⟦20⟧<br>القيمة الأولى: طوله<br>القيمة الثانية: عرضه','A rectangle has perimeter ⟦20⟧<br>Quantity A: its length<br>Quantity B: its width',3,'المحيط يحدد مجموع الطول والعرض (10) لا قيمتيهما.','The perimeter fixes length + width (10), not each one.'],
+      ['مربع محيطه ⟦20⟧<br>القيمة الأولى: طول ضلعه<br>القيمة الثانية: ⟦5⟧','A square has perimeter ⟦20⟧<br>Quantity A: its side<br>Quantity B: ⟦5⟧',2,'ضلع المربع = المحيط ÷ 4 = 5.','Side = perimeter ÷ 4 = 5.'],
+      ['متوسط ثلاثة أعداد ⟦10⟧<br>القيمة الأولى: أكبرها<br>القيمة الثانية: ⟦10⟧','Three numbers average ⟦10⟧<br>Quantity A: the largest<br>Quantity B: ⟦10⟧',3,'قد تكون الأعداد كلها 10 فتتساوى القيمتان، أو 5 و10 و15 فتكون الأولى أكبر.','They could all be 10 (equal) or 5, 10, 15 (A larger).'],
+      ['⟦س + ص = 10⟧ ، ⟦س − ص = 2⟧<br>القيمة الأولى: ⟦س⟧<br>القيمة الثانية: ⟦ص⟧','⟦x + y = 10⟧, ⟦x − y = 2⟧<br>Quantity A: ⟦x⟧<br>Quantity B: ⟦y⟧',0,'بالجمع: ⟦2س = 12⟧ إذن ⟦س = 6⟧ و⟦ص = 4⟧.','Adding: ⟦2x = 12⟧, so ⟦x = 6⟧ and ⟦y = 4⟧.'],
+      ['زاويتان متكاملتان<br>القيمة الأولى: الأولى منهما<br>القيمة الثانية: ⟦90°⟧','Two angles are supplementary<br>Quantity A: the first angle<br>Quantity B: ⟦90°⟧',3,'مجموعهما 180°، وقد تكون الأولى أقل من 90° أو أكبر أو تساويها.','They sum to 180°; the first may be below, above or equal to 90°.'],
+      ['القيمة الأولى: ⟦√(16 + 9)⟧<br>القيمة الثانية: ⟦√16 + √9⟧','Quantity A: ⟦√(16 + 9)⟧<br>Quantity B: ⟦√16 + √9⟧',1,'⟦√25 = 5⟧ بينما ⟦4 + 3 = 7⟧.','⟦√25 = 5⟧ while ⟦4 + 3 = 7⟧.']];
     const t=pick(T); return {s:'comparison',cmp:1,q:bi(t[0],t[1]),a:t[2],e:bi(t[3],t[4])}; }
 });
 GEN_BY_SKILL.arith.push('percentOf','workers','lcm');
@@ -3720,10 +3952,10 @@ const optH=o=>M(String(o).startsWith('⟦')?o:esc(o));
 
 /* ============ MODEL ============ */
 const W=()=>S.track==='sci'?{V:.55,Q:.45}:{V:.75,Q:.25};
-function areaAcc(area,list){ const r=list.filter(x=>SKILLS[x.s]?.area===area).slice(-80); return r.length?r.filter(x=>x.ok).length/r.length:null; }
+function areaAcc(area,list){ const r=list.filter(x=>!x.src&&SKILLS[x.s]?.area===area).slice(-80); return r.length?r.filter(x=>x.ok).length/r.length:null; }
 function estimate(list=S.recent){ const v=areaAcc('V',list),q=areaAcc('Q',list); if(v==null&&q==null) return null; const w=W(); return Math.round(100*(w.V*(v??q)+w.Q*(q??v))); }
 function skillInfo(s,recent=S.recent){
-  const r=recent.filter(x=>x.s===s).slice(-20); const n=r.length; if(!n) return {s,n:0,acc:null,time:null,level:0};
+  const r=recent.filter(x=>x.s===s&&!x.src).slice(-20); const n=r.length; if(!n) return {s,n:0,acc:null,time:null,level:0};
   const acc=r.filter(x=>x.ok).length/n, time=r.reduce((a,x)=>a+(x.t||0),0)/n, T0=TARGET_T[s];
   let level=2; if(n<5||acc<.7) level=1; else if(n>=20&&acc>=.95&&time<=T0) level=4; else if(n>=10&&acc>=.85&&time<=T0*1.25) level=3;
   return {s,n,acc,time,level};
@@ -3734,7 +3966,7 @@ const isMock=a=>a.kind==='mock'||a.kind==='model';
 function capMistakes(){ if(S.mistakes.length<=300) return; const open=S.mistakes.filter(m=>(m.box||0)<4), closed=S.mistakes.filter(m=>(m.box||0)>=4); S.mistakes=closed.slice(-Math.max(0,300-open.length)).concat(open.slice(-300)); }
 /* open mistakes (box<4); closed ones stay as tombstones so another device cannot bring them back */
 const openMistakes=(lang=S.lang)=>S.mistakes.filter(m=>m.lang===lang&&(m.box||0)<4);
-function dueList(lang=S.lang){ const d=todayStr(), open=openMistakes(lang); if(!PRO()) return open.slice(-(+FREE.mistakesMax||0)); /* free: last N, no spacing */ return open.filter(m=>(m.due||d)<=d); }
+function dueList(lang=S.lang){ const d=todayStr(), open=openMistakes(lang); const due=open.filter(m=>(m.due||d)<=d); return PRO()?due:due.slice(-(+FREE.mistakesMax||0)); /* free: spacing kept, count capped */ }
 function readiness(recent=S.recent,attempts=S.attempts){
   const lv=ALL_SKILLS.map(s=>skillInfo(s,recent).level); const lvl=lv.reduce((a,b)=>a+b,0)/(4*lv.length);
   const mocks=attempts.filter(a=>isMock(a)&&a.est!=null).slice(-3); const mk=mocks.length?mocks.reduce((a,x)=>a+x.est,0)/(3*100):0;
@@ -3852,8 +4084,9 @@ const VGEN={analogy:[genAnalogy,.6],odd:[genOdd,.7],completion:[genProverb,.3]};
 let ROT=null; const _ord={};
 function stableOrder(key,arr){ if(!_ord[key]){ let h=0; for(const c of key) h=(h*31+c.charCodeAt(0))|0; const r=mulberry(h); const a=arr.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(r()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } _ord[key]=a; } return _ord[key]; }
 function rotTake(key,pool,n,per){ const o=stableOrder(key,pool); ROT.c[key]=ROT.c[key]||0; const start=(ROT.k*per)%o.length; const out=[]; for(let i=0;i<n;i++) out.push(o[(start+ROT.c[key]+i)%o.length]); ROT.c[key]+=n; return out; }
+let NOFD=false;
 function takeVerbal(skill,n,lang,used){
-  const pool=bank(lang).filter(x=>x.s===skill); const out=[];
+  const pool=bank(lang).filter(x=>x.s===skill&&!(NOFD&&FDVB.has(x))); const out=[];
   const g=VGEN[skill]; const nGen=g?Math.round(n*g[1]):0;
   for(let i=0;i<nGen;i++) out.push(g[0](lang));
   if(ROT) return shuffle(out.concat(rotTake(lang+skill,pool,n-nGen,(n-nGen)*ROT.vs)));
@@ -3862,7 +4095,7 @@ function takeVerbal(skill,n,lang,used){
   return shuffle(out);
 }
 function takeReading(np,lang,used){
-  const b=bank(lang).filter(x=>x.s==='reading'); let keys;
+  const b=bank(lang).filter(x=>x.s==='reading'&&!(NOFD&&FDVB.has(x))); let keys;
   if(ROT) keys=rotTake(lang+'P',[...new Set(b.map(x=>x.p))],np,np*ROT.vs);
   else { keys=shuffle([...new Set(b.map(x=>x.p))]); keys.sort((a,c)=>(used.has('P:'+a)?1:0)-(used.has('P:'+c)?1:0)); keys=keys.slice(0,np); }
   const out=[]; keys.forEach(k=>{ used.add('P:'+k); b.filter(x=>x.p===k).forEach(x=>out.push(x)); }); return out;
@@ -3874,7 +4107,7 @@ function takeQuant(skill,n,used){
   while(out.length<n) out.push(GENS[pick(GEN_BY_SKILL[skill])]());
   return shuffle(out);
 }
-/* the official guide: five sections of 24 questions (120 in 2 h 5 min); verbal is about 55% of the science version and 75% of the theoretical one */
+/* the official guide: five sections of 24 questions (120 in 2 h 5 min). The 55/45 (science) and 75/25 (theoretical) figures are the score weights used by W(); the section order follows the paper form */
 const mockOrder=()=>S.track==='sci'?['V','Q','V','Q','V']:['V','V','Q','V','V'];
 function modelSections(k,lang){
   const ord=mockOrder();
@@ -3885,16 +4118,19 @@ function buildSkill(skill,n,lang,used=new Set()){
   let raws; if(SKILLS[skill].area==='V') raws= skill==='reading'? shuffle(takeReading(Math.ceil(n/4)+1,lang,used)).slice(0,n) : takeVerbal(skill,n,lang,used); else raws=takeQuant(skill,n,used);
   return raws.map(r=>materialize(r,lang));
 }
-function verbalSection(lang,used){ const rd=takeReading(2,lang,used); let qs=[]; [['analogy',6],['completion',4],['context',4],['odd',2]].forEach(([s,n])=>qs=qs.concat(takeVerbal(s,n,lang,used)));
+function verbalSection(lang,used){ NOFD=true; try{ return verbalSection0(lang,used); } finally { NOFD=false; } }
+function verbalSection0(lang,used){ const rd=takeReading(2,lang,used); let qs=[]; [['analogy',6],['completion',4],['context',4],['odd',2]].forEach(([s,n])=>qs=qs.concat(takeVerbal(s,n,lang,used)));
   let gap=24-qs.length-rd.length; while(gap>0){ qs.push(gap%2?genAnalogy(lang):genProverb(lang)); gap--; }
   return shuffle(qs).concat(rd).map(r=>materialize(r,lang)); }
-function quantSection(lang,used){ const mix=S.track==='sci'?[['arith',9],['algebra',2],['geometry',5],['stats',4],['comparison',4]]:[['arith',10],['geometry',6],['stats',4],['comparison',4]]; let qs=[]; mix.forEach(([s,n])=>qs=qs.concat(takeQuant(s,n,used))); return shuffle(qs).map(r=>materialize(r,lang)); }
+function quantSection(lang,used){ const mix=S.track==='sci'?[['arith',7],['algebra',4],['geometry',5],['stats',4],['comparison',4]]:[['arith',8],['algebra',2],['geometry',6],['stats',4],['comparison',4]]; let qs=[]; mix.forEach(([s,n])=>qs=qs.concat(takeQuant(s,n,used))); return shuffle(qs).map(r=>materialize(r,lang)); }
 /* diagnostic: 2 questions in each of the 10 skills (quant first, then verbal; reading = 2 questions on one passage) */
 function diagSet(lang){ const u=new Set(); let q=[]; Q_SKILLS.forEach(sk=>q=q.concat(takeQuant(sk,2,u))); let v=[]; V_SKILLS.filter(sk=>sk!=='reading').forEach(sk=>v=v.concat(takeVerbal(sk,2,lang,u)));
   const rd=takeReading(1,lang,u).slice(0,2); return shuffle(q).map(r=>materialize(r,lang)).concat(shuffle(v).concat(rd).map(r=>materialize(r,lang))); }
+/* a re-served mistake comes back with its options in a new order, so the student recalls the reasoning, not the letter */
+function reserve(m){ const q={...m,rep:1}; if(!q.cmp&&q.s!=='context'&&Array.isArray(q.opts)){ const c=q.opts[q.ans]; q.opts=shuffle(q.opts.slice()); q.ans=q.opts.indexOf(c); } return q; }
 function sessionPlan(lang=S.lang){ const due=dueList(lang).slice(0,8); const weak=rankSkills().slice(0,2).map(x=>x.s); return {due,weak,nWeak:10,nMix:25-due.length-10}; }
 function sessionSet(lang){
-  const p=sessionPlan(lang), used=new Set(); let qs=p.due.map(m=>({...m}));
+  const p=sessionPlan(lang), used=new Set(); let qs=p.due.map(reserve);
   /* a due review and a fresh copy of the same bank question must not both appear: mark the sources of the due items as used */
   { const dk=new Set(qs.map(m=>m.key)); const rawKey=r=>{ const q=typeof r.q==='object'?r.q[lang]:r.q, o=r.cmp?COMPARE_OPTS[lang][r.a]:(r.o||[])[r.a??0]; return q+'|'+(o&&typeof o==='object'?o[lang]:o)+'|'+(r.p||''); };
     if(dk.size) [...bank(lang),...QB].forEach(r=>{ if(dk.has(rawKey(r))){ used.add(r); if(r.p) used.add('P:'+r.p); } }); }
@@ -3929,7 +4165,7 @@ function startTest(kind,o={}){
   else if(kind==='fd'){ const l=fdLesson(o.id); if(!l) return; if(!fdOpen(o.id)){ hitLimit('skill'); return; } mode='learn'; title=`${l[lang].t}`; sections=[sec(title,fdQuestions(o.id,lang),15)]; o.k=o.id; }
   else if(kind==='skill'){ mode='learn'; title=SKILLS[o.skill][lang]; sections=[sec(title,buildSkill(o.skill,10,lang,used),15)]; }
   else if(kind==='session'){ mode='learn'; title=t('sessionTitle'); let qs=sessionSet(lang); const left=dailyLeft(); if(qs.length>left) qs=qs.slice(0,left); sections=[sec(title,qs,Math.max(5,Math.round(qs.length*1.3)))]; }
-  else if(kind==='review'){ const d=dueList(lang).slice(0,Math.min(20,dailyLeft())); if(!d.length){ toast(t('noDue')); return; } mode='learn'; title=t('pReview'); sections=[sec(title,d.map(m=>({...m})),Math.max(5,d.length*1.5))]; }
+  else if(kind==='review'){ const d=dueList(lang).slice(0,Math.min(20,dailyLeft())); if(!d.length){ toast(t('noDue')); return; } mode='learn'; title=t('pReview'); sections=[sec(title,d.map(reserve),Math.max(5,d.length*1.5))]; }
   vpage('exam-'+kind); vstep('test_start');
   X={kind,title,mode,sections,si:0,qi:0,lang,task:o.task||null,skill:o.skill||null,mk:o.k,qStart:Date.now(),tickAt:Date.now(),confirm:null,showMap:false};
   try{ document.activeElement?.blur?.(); }catch(e){}
@@ -3964,10 +4200,10 @@ function finishTest(){
   const bySkill={};
   all.forEach(({q,your,time})=>{
     const ok=your===q.ans, st=S.stats[q.s]||(S.stats[q.s]={c:0,t:0,time:0}); st.t++; st.time+=time; if(ok) st.c++;
-    S.recent.push({s:q.s,ok,t:Math.round(time),d}); const b=bySkill[q.s]||(bySkill[q.s]={c:0,t:0}); b.t++; if(ok) b.c++;
+    S.recent.push(Object.assign({s:q.s,ok,t:Math.round(time),d},X.kind==='fd'?{src:'fd'}:q.rep?{src:'rep'}:null)); const b=bySkill[q.s]||(bySkill[q.s]={c:0,t:0}); b.t++; if(ok) b.c++;
     const key=q.key||qKey(q); q.key=key; const m=S.mistakes.find(x=>x.key===key), now=Date.now();
     if(ok&&m&&(m.box||0)<4){ if((m.due||d)<=d){ m.box=(m.box||0)+1; m.at=now; if(m.box>=4) delete m.due; /* closed: kept as a tombstone */ else m.due=addDays(d,INT[m.box]); } }
-    else if(!ok){ if(m){ m.box=0; m.due=addDays(d,1); m.at=now; } else S.mistakes.push({key,s:q.s,area:q.area,q:q.q,passage:q.passage,pkey:q.pkey,opts:q.opts,ans:q.ans,exp:q.exp,cmp:q.cmp,lang:X.lang,box:0,due:addDays(d,1),at:now}); }
+    else if(!ok&&!(your==null&&X.mode==='exam')){ if(m){ m.box=0; m.due=addDays(d,1); m.at=now; } else S.mistakes.push({key,s:q.s,area:q.area,q:q.q,passage:q.passage,pkey:q.pkey,opts:q.opts,ans:q.ans,exp:q.exp,cmp:q.cmp,lang:X.lang,box:0,due:addDays(d,1),at:now}); }
   });
   if(S.recent.length>1500) S.recent=S.recent.slice(-1500); capMistakes();
   const correct=all.filter(x=>x.your===x.q.ans).length, skipped=all.filter(x=>x.your==null).length;
@@ -3976,6 +4212,7 @@ function finishTest(){
   S.attempts.push(att); if(S.attempts.length>300) S.attempts=S.attempts.slice(-300);
   if(!S.days.includes(d)) S.days.push(d); if(X.kind==='session'&&!S.sessionDays.includes(d)) S.sessionDays.push(d);
   if(X.task) S.done[X.task]=true;
+  { const pt=S.planTask, sk=X.kind==='skill'?X.skill:X.kind==='fd'?(fdLesson(X.mk)||{}).sk:null; if(pt&&sk&&(pt.skill===sk||(SK_FDU[pt.skill]||[]).includes((fdLesson(X.mk)||{}).u))){ S.done[pt.id]=true; delete S.planTask; } }
   if(X.kind==='session'||X.kind==='review') addDaily(all.filter(x=>x.your!=null).length);
   if(X.kind==='diag'&&!S.diag){ const sk={}; for(const [k,b] of Object.entries(bySkill)) sk[k]={c:b.c,t:b.t}; S.diag={date:d,pct:att.pct,skills:sk}; }
   if(X.kind==='fd'&&X.mk){ const m=S.fd[X.mk]||{}; m.last=att.pct; m.best=Math.max(m.best||0,att.pct); m.date=d; S.fd[X.mk]=m; }
@@ -4166,13 +4403,14 @@ function daysLeft(){ return S.examDate? Math.ceil((new Date(S.examDate+'T08:00')
 /* week boundaries fall on the student's local midnight (planStart is a local calendar day) */
 function currentWeek(){ const d=daysBetween(S.planStart,todayStr()); return Math.max(0,Math.min(planWeeks()-1,Math.floor(Math.max(0,d)/7))); }
 function buildPlan(){
-  const n=planWeeks(), weeks=[]; const phaseOf=i=>{ if(i===n-1) return 3; const f=(i+.5)/n; return f<Math.max(.3,2/n)?0:f<.55?1:f<.8?2:3; };
+  const n=planWeeks(), weeks=[], dl=daysLeft(), sprint=dl!=null&&dl<=14; const phaseOf=i=>{ if(i===n-1) return 3; if(sprint) return 2; /* two weeks or less: mocks and review, no foundation phase */ const f=(i+.5)/n; return f<Math.max(.3,2/n)?0:f<.55?1:f<.8?2:3; };
   const vO=['analogy','completion','reading','context','odd'], qO=S.track==='sci'?['arith','algebra','geometry','comparison','stats']:['arith','geometry','comparison','stats','algebra'];
-  const found=[]; for(let k=0;k<5;k++){ found.push(vO[k]); found.push(qO[k]); }
+  /* the plan follows the student: skills flagged for the foundation first, then the weakest, then the usual order */
+  const order=[...needFound().map(i=>i.s),...(S.attempts.length?rankSkills().map(i=>i.s):[])]; const found=[...new Set([...order,...[0,1,2,3,4].flatMap(k=>[vO[k],qO[k]])])];
   const fw=[...Array(n).keys()].filter(i=>phaseOf(i)===0).length||1, per=Math.ceil(10/fw); let fi=0;
   for(let i=0;i<n;i++){ const ph=phaseOf(i), tasks=[]; const add=(type,x={})=>tasks.push({id:`w${i}-${tasks.length}`,type,wk:i,...x});
     add('sessions');
-    if(i===0) add('diag');
+    if(i===0&&!diagTaken()) add('diag');
     if(ph===0){ let sk=found.slice(fi,fi+per); fi+=per; if(!sk.length) sk=found.slice(0,2); sk.forEach(s=>add('skill',{skill:s})); }
     if(ph===1){ add('verbal'); add('quant'); rankSkills().slice(0,2).forEach(x=>add('skill',{skill:x.s})); }
     if(ph===2){ add('verbal'); add('quant'); add('mock'); }
@@ -4187,7 +4425,7 @@ function taskLabel(tk){ const s=tk.skill?SKILLS[tk.skill][S.lang]:''; const ar=S
 function runTask(tk){
   if(tk.type==='text'){ S.done[tk.id]=!S.done[tk.id]; save(); return renderRoute(); }
   if(tk.type==='sessions') return startTest('session');
-  if(tk.type==='skill'){ S.done[tk.id]=true; save(); location.hash='#lesson-'+tk.skill; return; }
+  if(tk.type==='skill'){ S.planTask={id:tk.id,skill:tk.skill}; save(); const f=needFound().some(i=>i.s===tk.skill)&&fdNextFor(tk.skill); location.hash=f?'#fl-'+f.id:'#lesson-'+tk.skill; return; } /* done when a drill on that skill is finished, not on click */
   startTest(tk.type,{task:tk.id});
 }
 function taskItem(tk){ const d=taskDone(tk);
@@ -4199,7 +4437,10 @@ const SK_FDU={analogy:['van'],completion:['vco'],context:['vcx'],odd:['vod'],rea
 const fdDone=id=>(((S.fd||{})[id]||{}).best||0)>=80;
 const fdNextFor=s=>FD.find(l=>SK_FDU[s].includes(l.u)&&!fdDone(l.id));
 /* a skill needs its foundation when it has enough answers and accuracy under 70% */
-const needFound=()=>rankSkills().filter(i=>i.n>=5&&i.acc<.7&&fdNextFor(i.s));
+const diagWeak=s=>{ const b=S.diag&&S.diag.skills&&S.diag.skills[s]; return !!(b&&b.t&&b.c/b.t<.7); };
+const fdAnyDone=s=>FD.some(l=>SK_FDU[s].includes(l.u)&&fdDone(l.id));
+/* five live answers decide; before that, a weak diagnostic result does, until one foundation lesson of that skill is passed */
+const needFound=()=>rankSkills().filter(i=>(i.n>=5?i.acc<.7:diagWeak(i.s)&&!fdAnyDone(i.s))&&fdNextFor(i.s));
 function journeyStage(){ if(!S.attempts.length||needFound().length) return 0; return ALL_SKILLS.every(s=>skillInfo(s).level>=3)||readiness()>=60?2:1; }
 function nextStep(){ const st=journeyStage(), w=st===0?needFound()[0]:null;
   if(w) return {st,kind:'found',s:w.s,l:fdNextFor(w.s)};

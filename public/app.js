@@ -4584,6 +4584,33 @@ Reference explanation: ${st(x.q.exp)}`;
 }
 
 /* ============ UI PIECES ============ */
+/* identity v2 icons: progress tiles, the Learn tabs and the foundation units */
+const KI={
+  target:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1" class="f"/></svg>',
+  check:'<svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M8.5 12.3l2.4 2.4 4.8-5"/></svg>',
+  aim:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7.5"/><path d="M12 2.5v4M12 17.5v4M2.5 12h4M17.5 12h4"/></svg>',
+  clock:'<svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.6 1.8M9.5 2.8h5"/></svg>',
+  flame:'<svg viewBox="0 0 24 24"><path d="M12 21c-3.9 0-6.5-2.7-6.5-6.2 0-3.9 3.3-5.6 3.8-9.8 2.6 1.6 3.4 3.9 3.2 6 1-.5 1.8-1.6 2.1-2.9 1.9 1.6 3.9 4 3.9 6.9 0 3.4-2.7 6-6.5 6z"/></svg>',
+  found:'<svg viewBox="0 0 24 24"><path d="M3.5 20.5h17M5.5 20.5v-5h4v-4h4v-4h5v13"/></svg>',
+  lessons:'<svg viewBox="0 0 24 24"><path d="M12 6.5c-2-1.6-4.6-2-7.5-1.5v13c2.9-.5 5.5-.1 7.5 1.5 2-1.6 4.6-2 7.5-1.5V5c-2.9-.5-5.5-.1-7.5 1.5zM12 6.5v13"/></svg>',
+  cards:'<svg viewBox="0 0 24 24"><rect x="3.5" y="7" width="13" height="13" rx="2.5"/><path d="M8 4h10a2.5 2.5 0 012.5 2.5V16"/></svg>',
+  vocab:'<svg viewBox="0 0 24 24"><path d="M4 19l4.5-13h1L14 19M5.7 14.5h7.6M16 9.5h4.5M16 13.5h4.5M16 17.5h3"/></svg>',
+  tech:'<svg viewBox="0 0 24 24"><path d="M9 18.5h6M10 21.5h4M12 2.5a6.5 6.5 0 00-3.8 11.8c.6.5 1 1.2 1 2V16.5h5.6V16.3c0-.8.4-1.5 1-2A6.5 6.5 0 0012 2.5z"/></svg>',
+  patterns:'<svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 0113.7-5.6L20 8.7M20 3.5v5.2h-5.2M20 12a8 8 0 01-13.7 5.6L4 15.3M4 20.5v-5.2h5.2"/></svg>',
+  res:'<svg viewBox="0 0 24 24"><path d="M10 14a4.5 4.5 0 006.4 0l3-3a4.5 4.5 0 00-6.4-6.4l-1.2 1.2M14 10a4.5 4.5 0 00-6.4 0l-3 3a4.5 4.5 0 006.4 6.4l1.2-1.2"/></svg>',
+  num:'<svg viewBox="0 0 24 24"><path d="M9.5 3.5l-2 17M16.5 3.5l-2 17M4.5 8.5h16M3.5 15.5h16"/></svg>',
+  ar:'<svg viewBox="0 0 24 24"><rect x="4.5" y="2.5" width="15" height="19" rx="3"/><path d="M8 7h8M8.5 12.5h1M12 12.5h0M15.5 12.5h0M8.5 16.5h1M12 16.5h0M15.5 16.5h0"/></svg>',
+  al:'<svg viewBox="0 0 24 24"><path d="M4 7.5l7 9M11 7.5l-7 9M14.5 9.5c.6-1.3 1.6-2 2.9-2 1.6 0 2.6 1 2.6 2.4 0 2.6-4.9 3.6-5.6 6.6h5.8"/></svg>',
+  geo:'<svg viewBox="0 0 24 24"><path d="M3.5 20.5l7-13 7 13z"/><circle cx="17.5" cy="7" r="3.5"/></svg>',
+  st:'<svg viewBox="0 0 24 24"><path d="M3.5 20.5h17M6.5 20.5v-6M11 20.5V9M15.5 20.5v-8M20 20.5V5"/></svg>',
+  van:'<svg viewBox="0 0 24 24"><circle cx="6.5" cy="12" r="3.5"/><circle cx="17.5" cy="12" r="3.5"/><path d="M10 12h4M12.5 10l1.8 2-1.8 2"/></svg>',
+  vco:'<svg viewBox="0 0 24 24"><path d="M3.5 7h17M3.5 12h5M15.5 12h5M3.5 17h12"/><rect x="9.5" y="10" width="5" height="4" rx="1" stroke-dasharray="2 1.6"/></svg>',
+  vcx:'<svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5l5 5M8 10.5h5"/></svg>',
+  vod:'<svg viewBox="0 0 24 24"><circle cx="6.5" cy="7" r="2.8"/><circle cx="17.5" cy="7" r="2.8"/><circle cx="6.5" cy="17.5" r="2.8"/><rect x="14.7" y="14.7" width="5.6" height="5.6" rx="1"/></svg>',
+  vre:'<svg viewBox="0 0 24 24"><path d="M4.5 4.5h10l5 5v10h-15zM14.5 4.5v5h5M8 13h8M8 16.5h5"/></svg>',
+  chev:'<svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>',
+  play:'<svg viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z" fill="currentColor" stroke="none"/></svg>'
+};
 const ICON={
   today:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1.2" class="f"/></svg>',
   learn:'<svg viewBox="0 0 24 24"><path d="M4 5.5C6.5 4 9.5 4 12 5.5v14c-2.5-1.5-5.5-1.5-8 0z"/><path d="M20 5.5C17.5 4 14.5 4 12 5.5v14c2.5-1.5 5.5-1.5 8 0z"/></svg>',
@@ -4609,7 +4636,7 @@ for(const k in ICON) ICON[k]=ICON[k].replace('<svg ','<svg aria-hidden="true" fo
 const lt=s=>S.lang==='ar'&&!/[\u0600-\u06FF]/.test(String(s||''))?' lang="en" dir="ltr"':'';
 function ring(v,suf='',size=140,label=''){
   const r=42, c=2*Math.PI*r, val=v==null?0:Math.max(0,Math.min(100,v));
-  return `<svg class="ring" viewBox="0 0 100 100" style="inline-size:${size}px" role="img" aria-label="${label} ${v??'—'}"><circle cx="50" cy="50" r="${r}" class="r-track"/>${v!=null&&val>0?`<circle cx="50" cy="50" r="${r}" class="r-val" stroke-dasharray="${(c*val/100).toFixed(1)} ${c.toFixed(1)}" transform="rotate(-90 50 50)"/>`:''}<text x="50" y="${label?52:57}" text-anchor="middle" class="r-txt">${v==null?'—':numL(v)+suf}</text>${label?`<text x="50" y="68" text-anchor="middle" class="r-lab">${label}</text>`:''}</svg>`;
+  return `<svg class="ring" viewBox="0 0 100 100" style="inline-size:${size}px" role="img" aria-label="${label} ${v??'—'}"><circle cx="50" cy="50" r="${r}" class="r-track"/>${v!=null&&val>0?`<circle cx="50" cy="50" r="${r}" class="r-val" stroke-dasharray="${(c*val/100).toFixed(1)} ${c.toFixed(1)}" transform="rotate(-90 50 50)"/>`:''}<text x="50" y="${label?52:57}" text-anchor="middle" class="r-txt" direction="ltr" style="unicode-bidi:plaintext;font-size:${(v!=null&&String(v).length+(suf?1:0)>=3)?19:22}px">${v==null?'—':(suf==='%'&&S.lang==='ar'?'٪'+numL(v):numL(v)+suf)}</text>${label?`<text x="50" y="68" text-anchor="middle" class="r-lab">${label}</text>`:''}</svg>`;
 }
 const lvlOf=acc=>acc>=.85?'good':acc>=.65?'warn':'bad';
 function barRow(label,acc,meta){
@@ -4769,7 +4796,7 @@ function forYou(){ if(!S.attempts.length) return ''; const w=rankSkills()[0]; if
   const pi=PATTERNS.findIndex(p=>p.sk===s); if(pi>=0&&pi<techN(PATTERNS.length)) it.push(['#learn-patterns',L(bi('نمط متكرر','Recurring pattern')),L(PATTERNS[pi].t)]);
   return `<section class="foryou"><div class="block-head"><h2>${L(bi('لك الآن','For you now'))}</h2><span class="muted small">${L(bi(`أضعف مهارة عندك الآن: ${sk}`,`Your weakest skill right now: ${sk}`))}</span></div><div class="fy-row">${it.map(([h,k,tt])=>`<a class="fy-card" href="${h}"><span class="eyebrow">${k}</span><b>${esc(tt)}</b></a>`).join('')}</div></section>`; }
 function pageLearn(tab='lessons'){
-  const tabs=`<nav class="tabs">${Object.entries(t('tabs')).map(([k,v])=>`<a href="#learn-${k}" class="${tab===k?'on':''}">${v}</a>`).join('')}</nav>`;
+  const tabs=`<nav class="tabs ltabs">${Object.entries(t('tabs')).map(([k,v])=>`<a href="#learn-${k}" class="${tab===k?'on':''}" ${tab===k?'aria-current="page"':''}><span class="ti" aria-hidden="true">${KI[k]||KI.res}</span>${v}</a>`).join('')}</nav>`;
   let body='';
   if(tab==='lessons'){ const card=s=>{ const i=skillInfo(s), l=LESSONS[s][S.lang], c=FLASH.find(f=>f.sk===s); return `<a class="lcard" href="#lesson-${s}"><div class="lc-ill">${ILL[c.ill]()}</div><div class="lc-top"><h3>${SKILLS[s][S.lang]}</h3>${pips(i.level)}</div><p>${M(esc(l.concept[0]))}</p><div class="lc-f"><span class="muted small">${t('levels')[i.level]}${xpList(s).length+lockedXp(s).length?` · <span class="lc-xp">▶ ${numL(xpList(s).length+lockedXp(s).length)} ${t('xpShort')}</span>`:''}</span><span class="lc-go">${t('lessonsOpen')}</span></div></a>`; };
     body=`<a class="card fd-promo" href="#learn-found"><div><h2>${t('fdPromoT')}</h2><p>${t('fdPromoD')}</p></div><span class="btn soft sm">${t('fdPromoGo')}</span></a><h2 class="sec-h hl">${t('verbal')}</h2><div class="lgrid">${V_SKILLS.map(card).join('')}</div><h2 class="sec-h hl">${t('quant')}</h2><div class="lgrid">${Q_SKILLS.map(card).join('')}</div>`; }
@@ -4822,9 +4849,20 @@ function xpSection(s){ const xs=xpList(s), lk=lockedXp(s); if(!xs.length&&!lk.le
 const fdNum=id=>FD.findIndex(l=>l.id===id);
 const fdOpen=id=>PRO()||fdNum(id)<FD_FREE||id==='v-an1'; /* the first five quantitative lessons and the first verbal lesson are free */
 function fdStat(id){ const m=(S.fd||{})[id]; return m?`<span class="fd-st ${m.best>=80?'ok':''}">${t('fdBest')}: <b class="num">${numL(m.best)}%</b></span>`:`<span class="fd-st muted">${t('fdNot')}</span>`; }
-function foundView(){ const done=FD.filter(l=>(S.fd||{})[l.id]).length;
-  return `<p class="lead">${t('fdIntro')}</p><div class="vstats"><span><b class="num">${numL(done)}</b> / ${numL(FD.length)} ${t('fdDoneN')}</span></div>${PRO()?'':`<p class="small muted">${t('fdFreeNote')}</p>`}`
-   +FDU.map(([u,nm])=>`${u==='num'||u==='van'?`<h2 class="fd-part">${t(u==='num'?'quant':'verbal')}</h2>`:''}<h2 class="sec-h hl">${L(nm)}</h2><div class="fd-grid">${FD.filter(l=>l.u===u).map(l=>{ const i=fdNum(l.id), c=l[S.lang]; return `<a class="fd-card" href="#fl-${l.id}"><span class="fd-n num">${numL(i+1)}</span><div class="fd-b"><h3>${esc(c.t)}</h3><p>${M(esc(c.d))}</p>${fdStat(l.id)}</div></a>`; }).join('')}</div>`).join(''); }
+/* the foundation track: a summary card with the next lesson, the two sections one at a time, and each unit as a
+   folding card with its icon, its progress and its lessons as compact rows */
+let FDSEC=null;
+function foundView(){ const done=FD.filter(l=>fdDone(l.id)).length, nx=FD.find(l=>!fdDone(l.id));
+  const VU=new Set(['van','vco','vcx','vod','vre']); const sec=FDSEC||(nx&&VU.has(nx.u)?'v':'q');
+  const pct=Math.round(100*done/FD.length);
+  const head=`<section class="fd-hero"><div class="fdh-ring">${ring(pct,'%',92)}</div><div class="fdh-b"><span class="eyebrow">${t('fdTitle')}</span><h2>${L(bi(`${numL(done)} من ${numL(FD.length)} درسًا`,`${done} of ${FD.length} lessons`))}</h2>${nx?`<p>${L(bi('التالي','Next'))}: <b>${esc(nx[S.lang].t)}</b></p><a class="btn primary sm" href="#fl-${nx.id}">${KI.play}${done?L(bi('تابع','Continue')):L(bi('ابدأ من الدرس الأول','Start with lesson one'))}</a>`:`<p>${L(bi('أنهيت مسار التأسيس كله.','You finished the whole foundation track.'))}</p>`}</div></section>
+  ${PRO()?'':`<p class="small muted fd-note">${t('fdFreeNote')}</p>`}
+  <div class="seg fd-seg" role="group" aria-label="${t('fdTitle')}"><button class="${sec==='q'?'on':''}" data-fdsec="q" aria-pressed="${sec==='q'}">${t('quant')}</button><button class="${sec==='v'?'on':''}" data-fdsec="v" aria-pressed="${sec==='v'}">${t('verbal')}</button></div>`;
+  const units=FDU.filter(([u])=>sec==='v'?VU.has(u):!VU.has(u)).map(([u,nm],k)=>{ const ls=FD.filter(l=>l.u===u), d=ls.filter(l=>fdDone(l.id)).length, open=nx&&nx.u===u;
+    const rows=ls.map(l=>{ const i=fdNum(l.id), c=l[S.lang], ok=fdDone(l.id), cur=nx&&nx.id===l.id, lock=!fdOpen(l.id);
+      return `<a class="fd-row ${ok?'ok':''} ${cur?'cur':''}" href="#fl-${l.id}"><span class="fr-n num">${ok?ICON.check:numL(i+1)}</span><span class="fr-b"><b>${esc(c.t)}</b><small>${M(esc(c.d))}</small></span>${lock?`<span class="fr-lock">${LOCKSVG}</span>`:cur?`<span class="fr-go">${L(bi('التالي','Next'))}</span>`:`<span class="fr-ch">${KI.chev}</span>`}</a>`; }).join('');
+    return `<details class="fd-unit u${k%5}" ${open?'open':''}><summary><span class="fu-ic" aria-hidden="true">${KI[u]}</span><span class="fu-t"><b>${L(nm)}</b><span class="fu-bar"><i style="inline-size:${Math.round(100*d/ls.length)}%"></i></span></span><span class="fu-c num">${numL(d)}/${numL(ls.length)}</span></summary><div class="fu-list">${rows}</div></details>`; }).join('');
+  return head+`<div class="fd-units">${units}</div>`; }
 /* the lesson's narrated explainer (key fd-<id>): playable when its bundle is loaded, otherwise shown locked */
 /* top: the playable explainer opens the lesson (watch, then read, then practise); bottom: the locked card for those without it */
 function fdXp(id,top){ const k=(S.lang==='en'?'en-fd-':'fd-')+id, L=XPOK()&&XP.get?XP.get(k):null;
@@ -4924,7 +4962,7 @@ function pagePractice(){
 function pageProgress(){
   const real=S.attempts.length>0, D={recent:S.recent,attempts:S.attempts,causes:S.causes};
   const est=estimate(D.recent), rd=real?readiness(D.recent,D.attempts):null; const n=D.recent.length, c=D.recent.filter(x=>x.ok).length, tm=n?Math.round(D.recent.reduce((a,x)=>a+(x.t||0),0)/n):null;
-  const streak=calcStreak(); const kpi=(l,v,sub='')=>`<div class="kpi"><span class="kl">${l}</span><b class="kv num">${v}</b>${sub?`<span class="ks">${sub}</span>`:''}</div>`;
+  const streak=calcStreak(); const kpi=(l,v,sub='',ic='',tone='')=>`<div class="kpi ${tone}">${ic?`<span class="ki" aria-hidden="true">${KI[ic]}</span>`:''}<span class="kl">${l}</span><b class="kv num">${v}</b>${sub?`<span class="ks">${sub}</span>`:''}</div>`;
   const checks=readyChecks(D.recent,D.attempts); const info=ALL_SKILLS.map(s=>skillInfo(s,D.recent));
   const cz=D.causes, ctot=Object.values(cz).reduce((a,b)=>a+b,0), pro=PRO();
   const lkpi=l=>`<button type="button" class="kpi kpi-locked" data-lock="analytics"><span class="kl">${l}</span><b class="kv">${LOCKSVG}</b><span class="ks">${t('ben').analytics}</span></button>`;
@@ -4936,8 +4974,8 @@ function pageProgress(){
   ${CLOUD_BUILD&&!pro&&reportReady()?`<div class="demo rep-line"><span>${t('reportLink')}</span><a class="btn primary sm" href="#report">${t('reportOpen')}</a></div>`:''}
   <div class="kpis">
     <div class="kpi big">${ring(rd,'%',104)}<div><span class="kl">${t('kReady')}</span><span class="ks">${numL(checks.filter(Boolean).length)}/${numL(4)} ${S.lang==='ar'?'معايير متحققة':'criteria met'}</span></div></div>
-    ${pro?kpi(t('kEst'),est==null?'—':numL(est),est!=null?`${t('gap')}: ${numL(Math.max(0,S.target-est))}`:''):lkpi(t('kEst'))}
-    ${kpi(t('kSolved'),numL(n))}${kpi(t('kAcc'),n?numL(Math.round(100*c/n))+'%':'—')}${pro?kpi(t('kTime'),tm!=null?numL(tm)+t('sec'):'—'):lkpi(t('kTime'))}${kpi(t('kStreak'),numL(streak))}
+    ${pro?kpi(t('kEst'),est==null?'—':numL(est),est!=null?`${t('gap')}: ${numL(Math.max(0,S.target-est))}`:'','target','t-pri'):lkpi(t('kEst'))}
+    ${kpi(t('kSolved'),numL(n),'','check','t-sky')}${kpi(t('kAcc'),n?(S.lang==='ar'?'٪'+numL(Math.round(100*c/n)):Math.round(100*c/n)+'%'):'—','','aim','t-pink')}${pro?kpi(t('kTime'),tm!=null?numL(tm)+t('sec'):'—','','clock','t-sun'):lkpi(t('kTime'))}${kpi(t('kStreak'),numL(streak),'','flame','t-sun')}
   </div>
   <p class="note small">${t('estNote')}</p>
   <div class="dgrid">
@@ -5302,6 +5340,7 @@ function bindMain(){
   on('#vcard',()=>{ if(!VC.flip){ VC.flip=true; renderRoute(); showBtns(); } });
   on('#fc-card',()=>{ FCV.flip=!FCV.flip; renderRoute(); if(FCV.flip) showBtns(); }); on('#fc-know',()=>cardAct(true)); on('#fc-again',()=>cardAct(false));
   m.querySelectorAll('[data-deck]').forEach(b=>b.onclick=()=>{ FCV.deck=b.dataset.deck; FCV.flip=false; renderRoute(); });
+  m.querySelectorAll('[data-fdsec]').forEach(b=>b.onclick=()=>{ FDSEC=b.dataset.fdsec; renderRoute(); });
   m.querySelectorAll('[data-model]').forEach(b=>b.onclick=()=>startTest('model',{k:+b.dataset.model}));
   m.querySelectorAll('[data-rs]').forEach(b=>b.onclick=()=>startTest('rs',{k:+b.dataset.rs}));
   m.querySelectorAll('[data-fd]').forEach(b=>b.onclick=()=>startTest('fd',{id:b.dataset.fd}));

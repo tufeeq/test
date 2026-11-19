@@ -4331,7 +4331,7 @@ function renderResult(el){
         ${x.q.passage?`<details class="rev-p"><summary>${tt.passage}</summary><p>${esc(x.q.passage)}</p></details>`:''}
         <div class="rev-stem">${x.q.cmp?`<div class="eyebrow">${COMPARE_INTRO[X.lang]}</div>`:''}${stem(x.q.q)}</div>
         <ul class="rev-opts">${x.q.opts.map((o,k)=>`<li class="${k===x.q.ans?'right':''} ${k===x.your&&!ok?'yours':''}"><span class="bub">${L4[k]}</span><span>${optH(o)}</span>${k===x.q.ans?`<em>${tt.rightAns}</em>`:''}${k===x.your&&!ok?`<em>${tt.yourAns}</em>`:''}</li>`).join('')}</ul>
-        <p class="rev-exp"><strong>${tt.explain}:</strong> ${M(esc(x.q.exp))}</p>
+        <p class="rev-exp"><strong>${tt.explain}:</strong> ${M(esc(x.q.exp))}</p>${x.your!==x.q.ans?fdLink(x.q.s):''}
         ${!ok&&m&&PRO()?`<div class="cause"><span class="small muted">${tt.causeQ}</span><div class="chips">${Object.entries(tt.causes).map(([k,v])=>`<button class="cchip ${m.cause===k?'on':''}" data-i="${x.i}" data-c="${k}">${v}</button>`).join('')}</div></div>`:''}
         ${sampleFn?`<div class="ai-slot"><button class="btn ghost sm ai-btn" data-i="${x.i}">${ICON.spark} ${tt.askAI}</button><div class="ai-out" id="ai-${x.i}"></div></div>`:''}
       </article>`; }).join('')||`<p class="muted">${tt.none}</p>`}</div>`}
@@ -4340,6 +4340,7 @@ function renderResult(el){
   const rx=el.querySelector('#rs-xp'); if(rx) rx.onclick=()=>{ const k=rx.dataset.k; quitTest(); XP_BACK=k; track('xp_start',k); XP.open(k); };
   { const g=el.querySelector('#rs-go-rev'); if(g) g.onclick=()=>{ r.filter='wrong'; renderResult(el); el.querySelector('.rs-rev-head')?.scrollIntoView({behavior:SMOOTH(),block:'start'}); }; }
   { const sv=el.querySelector('#rs-save'); if(sv) sv.onclick=()=>{ AC.tab='signup'; AC.gate=true; AC.gateSave=true; openAcct(); }; }
+  el.querySelectorAll('[data-fdl]').forEach(x=>x.onclick=()=>quitTest());
   el.querySelector('#rs-close').onclick=quitTest; const rt=el.querySelector('#rs-retake'); if(rt) rt.onclick=()=>{ const k=X.mk, kd=X.kind; quitTest(); startTest(kd==='rs'?'rs':'model',{k}); };
   el.querySelectorAll('.seg button').forEach(b=>b.onclick=()=>{ r.filter=b.dataset.f; renderResult(el); });
   el.querySelectorAll('.ai-btn').forEach(b=>b.onclick=()=>explainAI(r.all[+b.dataset.i],+b.dataset.i,b));
@@ -4776,6 +4777,8 @@ function trialCard(){ const C=window.CLOUD, n=+(C&&C.config&&C.config.trialDays)
     <div class="row"><button class="btn primary" id="tr-go">${L(bi('ابدأ التجربة','Start the trial'))}</button><button class="btn ghost sm" id="tr-x">${L(bi('لاحقًا','Later'))}</button></div></section>`; }
 function bindTrial(m){ const g=m.querySelector('#tr-go'); if(g) g.onclick=async()=>{ g.disabled=true; try{ await CLOUD.startTrial(); S.trialAsked=1; save(); toast(L(bi('بدأت تجربتك. كل المزايا مفتوحة الآن.','Your trial has started. Everything is open now.'))); renderRoute(); }catch(e){ S.trialAsked=1; save(); toast(L(bi('التجربة متاحة مرة واحدة لكل حساب.','The trial is available once per account.'))); renderRoute(); } };
   const x=m.querySelector('#tr-x'); if(x) x.onclick=()=>{ S.trialAsked=1; save(); renderRoute(); }; }
+/* after a wrong answer: the foundation lesson that rebuilds this skill */
+function fdLink(sk){ if(!SK_FDU[sk]) return ''; const l=fdNextFor(sk)||FD.find(x=>SK_FDU[sk].includes(x.u)); if(!l) return ''; return `<p class="small fd-link"><a href="#fl-${l.id}" data-fdl>${L(bi('راجع درس التأسيس','Review the foundation lesson'))}: ${esc(l[S.lang].t)}</a></p>`; }
 function postTestCard(){ const d=daysLeft(); if(d==null||d>0||!S.examDate) return ''; if((S.real||[]).some(r=>r.date===S.examDate)) return '';
   return `<section class="card post-test"><div class="eyebrow">${L(bi('بعد الاختبار','After the test'))}</div><h2>${L(bi('كيف كان اختبارك؟','How did your test go?'))}</h2>
   <p class="muted">${L(bi('أدخل درجتك لنعرف أثر التحضير، ونبني خطة المحاولة التالية إن أردت إعادة الاختبار.','Enter your score so we can see what the preparation did, and build a plan for your next attempt if you want to retake.'))}</p>

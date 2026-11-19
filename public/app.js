@@ -3584,7 +3584,9 @@ function foundView(){ const done=FD.filter(l=>(S.fd||{})[l.id]).length;
   return `<p class="lead">${t('fdIntro')}</p><div class="vstats"><span><b class="num">${numL(done)}</b> / ${numL(FD.length)} ${t('fdDoneN')}</span></div>${PRO()?'':`<p class="small muted">${t('fdFreeNote')}</p>`}`
    +FDU.map(([u,nm])=>`<h2 class="sec-h hl">${L(nm)}</h2><div class="fd-grid">${FD.filter(l=>l.u===u).map(l=>{ const i=fdNum(l.id), c=l[S.lang]; return `<a class="fd-card" href="#fl-${l.id}"><span class="fd-n num">${numL(i+1)}</span><div class="fd-b"><h3>${esc(c.t)}</h3><p>${M(esc(c.d))}</p>${fdStat(l.id)}</div></a>`; }).join('')}</div>`).join(''); }
 /* the lesson's narrated explainer (key fd-<id>): playable when its bundle is loaded, otherwise shown locked */
-function fdXp(id){ const k=(S.lang==='en'?'en-fd-':'fd-')+id, L=XPOK()&&XP.get?XP.get(k):null;
+/* top: the playable explainer opens the lesson (watch, then read, then practise); bottom: the locked card for those without it */
+function fdXp(id,top){ const k=(S.lang==='en'?'en-fd-':'fd-')+id, L=XPOK()&&XP.get?XP.get(k):null;
+  if(!!L!==!!top) return '';
   const play='<svg viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z" fill="currentColor" stroke="none"/></svg>', done=(S.xp||{})[k];
   if(L) return `<section class="card xp-sec"><div class="xp-sec-h"><h2>${t('fdXpT')}</h2></div><div class="xpl"><button class="xpc" data-xp="${k}"><span class="xpn"><span class="pl">${play}</span><span>${t('xpN')}</span><span class="xpm">${esc(L.min||'')}</span>${done?`<span class="dn">✓ ${t('xpDone')}</span>`:''}</span><b>${esc(L.title)}</b><small>${t('fdXpD')}</small></button></div></section>`;
   if(PRO()) return '';
@@ -3597,10 +3599,11 @@ function pageFound(id){ const i=fdNum(id); if(i<0) return pageLearn('found'); co
   return `<header class="page-h lesson-h"><div><a class="back" href="#learn-found">${t('fdTitle')}</a><div class="eyebrow">${t('fdLesson')} ${numL(i+1)} ${t('fdOf')} ${numL(FD.length)} · ${unit}</div><h1><span class="hl">${esc(c.t)}</span></h1></div><div class="lh-ill">${ILL[l.ill]()}</div></header>
   <div class="fd-lesson">
     <section class="card">${c.intro.map(p=>`<p>${M(esc(p))}</p>`).join('')}</section>
+    ${fdXp(id,true)}
     <section><h2 class="h2s">${t('fdRules')}</h2><div class="rules">${c.rules.map(x=>`<div class="rule">${M(esc(x))}</div>`).join('')}</div></section>
     <section><h2 class="h2s">${t('fdEx')}</h2><div class="fd-exs">${c.ex.map((e,k)=>`<article class="card fd-ex"><div class="eyebrow">${t('fdExN')} ${numL(k+1)}</div>${fig(e[3])}<p class="fd-q">${M(esc(e[0]))}</p><ol class="nsteps">${e[1].map(s=>`<li><span>${M(esc(s))}</span></li>`).join('')}</ol><p class="fd-a"><b>${t('answer')}:</b> ${M(esc(e[2]))}</p></article>`).join('')}</div></section>
     <section class="card warn-card"><h2>${t('traps')}</h2><ul class="bul">${c.traps.map(x=>`<li>${M(esc(x))}</li>`).join('')}</ul></section>
-    ${fdXp(id)}
+    ${fdXp(id,false)}
     <section class="card accent-card fd-drill"><div><h2>${t('fdDrill')}</h2><p class="small">${t('fdDrillD')}</p>${fdStat(id)}</div><button class="btn primary" data-fd="${id}">${fdOpen(id)?'':LOCKSVG}${t('fdGo')}</button></section>
     ${cards.length?`<section><h2 class="h2s">${t('fdCards')}</h2><div class="notes small-notes">${cards.map(card).join('')}</div></section>`:''}
     <nav class="fd-nav">${prev?`<a class="btn ghost" href="#fl-${prev.id}">${ar?'→':'←'} ${esc(prev[S.lang].t)}</a>`:'<span></span>'}${next?`<a class="btn soft" href="#fl-${next.id}">${esc(next[S.lang].t)} ${ar?'←':'→'}</a>`:''}</nav>

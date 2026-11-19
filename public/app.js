@@ -4060,7 +4060,7 @@ function progressFacts(){
   const xpDone=Object.keys(S.xp||{}).filter(k=>xpLang(k)===S.lang).length, more=lockedXpCount();
   let best=null; if(S.diag&&S.diag.skills) for(const [s,b] of Object.entries(S.diag.skills)){ if(!b.t||!SKILLS[s]) continue; const i=skillInfo(s); if(i.n<5||i.acc==null) continue; const a=Math.round(100*b.c/b.t), c=Math.round(100*i.acc); if(c>a&&(!best||c-a>best.c-best.a)) best={s,a,c}; }
   return {xpDone,more,best,days:(S.days||[]).length}; }
-function ctxMsg(k){ const f=progressFacts(), out=[];
+function ctxMsg(k){ const f=progressFacts(), out=[]; { const d=daysLeft(); if(d!=null&&d>0) out.push(L(bi(`باقي ${numL(d)} ${d<=10?'أيام':'يومًا'} على اختبارك، والاشتراك يغطيك حتى يومه.`,`${d} days to your test; a subscription covers you until the day.`))); }
   if(k==='daily') out.push(t('ctxDaily')(numL(FREE.dailyQuestions)));
   if(f.xpDone) out.push(t('ctxXp')(numL(f.xpDone)));
   if(f.best) out.push(t('ctxAcc')(SKILLS[f.best.s][S.lang],numL(f.best.a),numL(f.best.c)));
@@ -4234,7 +4234,7 @@ function finishTest(){
   const est=['diag','mock','model','verbal','quant'].includes(X.kind)?estimate(all.map(x=>({s:x.q.s,ok:x.your===x.q.ans}))):null;
   const att={id:Date.now().toString(36),date:d,kind:X.kind,skill:X.skill,mk:X.kind==='model'||X.kind==='rs'?X.mk+1:undefined,correct,total:all.length,pct:Math.round(100*correct/Math.max(1,all.length)),est,time:Math.round(all.reduce((a,x)=>a+x.time,0))};
   S.attempts.push(att); if(S.attempts.length>300) S.attempts=S.attempts.slice(-300);
-  if(!S.days.includes(d)) S.days.push(d); if(X.kind==='session'&&!S.sessionDays.includes(d)) S.sessionDays.push(d);
+  if(!S.days.includes(d)){ S.days.push(d); const st=calcStreak(); if([3,7,14,30,60].includes(st)) setTimeout(()=>toast(L(bi(`🔥 ${numL(st)} ${st<=10?'أيام متتالية':'يومًا متتاليًا'}! استمر.`,`🔥 ${st} days in a row! Keep going.`))),1600); } if(X.kind==='session'&&!S.sessionDays.includes(d)) S.sessionDays.push(d);
   if(X.task) S.done[X.task]=true;
   { const pt=S.planTask, sk=X.kind==='skill'?X.skill:X.kind==='fd'?(fdLesson(X.mk)||{}).sk:null; if(pt&&sk&&(pt.skill===sk||(SK_FDU[pt.skill]||[]).includes((fdLesson(X.mk)||{}).u))){ S.done[pt.id]=true; delete S.planTask; } }
   if(X.kind==='session'||X.kind==='review') addDaily(all.filter(x=>x.your!=null).length);
@@ -4409,14 +4409,14 @@ const SMOOTH=()=>{ try{ return matchMedia('(prefers-reduced-motion: reduce)').ma
 let toastT; function toast(m){ const el=$('#toast'); el.textContent=m; el.hidden=false; clearTimeout(toastT); toastT=setTimeout(()=>el.hidden=true,2600); }
 function settingsForm(id){
   return `<form class="settings-form" id="${id}">
-    <label>${t('examDate')}<input type="date" id="${id}-date" value="${S.examDate}" ${PRO()?'':'disabled'}></label>
+    <label>${t('examDate')}<input type="date" id="${id}-date" value="${S.examDate}"></label>
     <label>${t('track')}<select id="${id}-track"><option value="sci" ${S.track==='sci'?'selected':''}>${t('sci')}</option><option value="lit" ${S.track==='lit'?'selected':''}>${t('lit')}</option></select></label>
     <label>${t('targetScore')}<input type="number" id="${id}-target" min="60" max="100" value="${S.target}" ${PRO()?'':'disabled'}></label>
     <label>${t('weeks')}<select id="${id}-weeks" ${S.examDate||!PRO()?'disabled':''}>${[4,6,8,10,12].map(w=>`<option ${S.weeks===w?'selected':''}>${w}</option>`).join('')}</select></label>
     <button class="btn primary" type="submit">${t('save')}</button>${PRO()?'':lockLine('custom')}</form>`;
 }
 function bindSettings(id){ const f=document.getElementById(id); if(!f) return; f.onsubmit=e=>{ e.preventDefault();
-  const pro=PRO(); const nd=pro?$(`#${id}-date`).value:S.examDate; if(nd!==S.examDate){ S.examDate=nd; S.planStart=todayStr(); S.done={}; }
+  const pro=PRO(); const nd=$(`#${id}-date`).value; if(nd!==S.examDate){ S.examDate=nd; S.planStart=todayStr(); S.done={}; }
   S.track=$(`#${id}-track`).value; if(pro) S.target=Math.max(60,Math.min(100,+$(`#${id}-target`).value||100));
   const wk=pro?+$(`#${id}-weeks`).value:S.weeks; if(!S.examDate&&wk!==S.weeks){ S.weeks=wk; S.done={}; S.planStart=todayStr(); }
   save(); renderRoute(); toast(t('saved')); }; }
@@ -4505,7 +4505,7 @@ function pageToday(){
   <section class="today-top">
     <div class="tt-main"><div class="eyebrow">${t('greetN')(numL(S.target))}</div><h1 class="tt-h">${L(bi('خطتك لليوم','Your plan for today'))}</h1>
       <div class="hero-meta">
-        ${dl!=null?(dl<0?`<a class="pill warn" href="#plan">${L(bi('مضى موعد اختبارك؟ حدّث الموعد','Test date passed? Update it'))}</a>`:`<span class="pill"><b class="num">${numL(Math.max(0,dl))}</b> ${t('daysLeft')}</span>`):PRO()?`<a class="pill link" href="#plan">${t('setDate')}</a>`:`<button class="pill link pill-lock" data-lock="custom" aria-label="${t('setDate')} · ${t('lockT')}">${t('setDate')} ${LOCKSVG}</button>`}
+        ${dl!=null?(dl<0?`<a class="pill warn" href="#plan">${L(bi('مضى موعد اختبارك؟ حدّث الموعد','Test date passed? Update it'))}</a>`:`<span class="pill"><b class="num">${numL(Math.max(0,dl))}</b> ${t('daysLeft')}</span>`):`<a class="pill link" href="#plan">${t('setDate')}</a>`}
         <span class="pill">${t('estScore')} <b class="num">${est==null?'—':numL(est)}</b>${est==null?'':provT}</span>
         <span class="pill streak">${ICON.flame} ${streak>0?`${t('kStreak')} <b class="num">${numL(streak)}</b>`:L(bi('ابدأ سلسلتك اليوم','Start your streak today'))}</span>
         <a class="pill link" href="#plan" aria-label="${t('settings')}">${ICON.gear}</a>
@@ -4525,7 +4525,7 @@ function pageToday(){
     </div>
     ${dl2<=0?`<button class="btn primary xl" data-lock="daily">${LOCKSVG} ${t('unlock')}</button>`:`<button class="btn primary xl" data-start="session">${t('startSession')}</button>`}
   </section>`}
-  ${installCard()}
+  ${extraCard()}
   ${hasLive()?`<div class="demo"><span>${L(bi('لديك اختبار محفوظ لم يكتمل.','You have a saved test in progress.'))}</span><button class="btn primary sm" data-resume>${L(bi('أكمل الاختبار','Continue the test'))}</button></div>`:''}
   ${journeyBar(ns.st)}
   ${CLOUD_BUILD&&!acct()&&hasData?`<div class="demo"><span>${t('saveStrip')}</span><button class="btn primary sm" data-acct data-tab="signup">${t('saveStripBtn')}</button></div>`:''}
@@ -4749,9 +4749,58 @@ function pageProgress(){
       </div>
 `}
       <div class="row"><button class="btn danger-ghost sm" id="bk-reset">${t('reset')}</button></div><div id="bk-confirm"></div></section>
-  </div>`;
+  </div>${shareCard()}`;
 }
-function calcStreak(){ const set=new Set(S.days); let n=0, d=todayStr(); if(!set.has(d)) d=addDays(d,-1); while(set.has(d)){ n++; d=addDays(d,-1); } return n; }
+/* share your progress, and invite a friend: 7 bonus days for each of you when the friend first subscribes */
+let REF=null;
+function shareCard(){ const real=S.attempts.length>0, d=S.diag, est=estimate(), u=window.CLOUD&&CLOUD.user;
+  return `<section class="card share-card"><h2>${L(bi('شارك وادعُ صديقك','Share and invite a friend'))}</h2>
+    ${real?`<p>${L(bi('أرسل تقدمك لأهلك أو أصدقائك: من أين بدأت وأين وصلت.','Send your progress to family or friends: where you started and where you are now.'))}</p><button class="btn ghost sm" id="sh-prog">${L(bi('شارك تقدمي','Share my progress'))}</button>`:''}
+    ${u?`<p>${L(bi('ادعُ صديقًا برابطك: إذا اشترك، يحصل كل منكما على ٧ أيام إضافية.','Invite a friend with your link: when they subscribe, you both get 7 extra days.'))}</p>${REF?`<p class="ref-l"><bdi dir="ltr">${esc(location.origin+'/?ref='+REF.code)}</bdi></p><p class="small muted">${L(bi(`انضم برابطك ${numL(REF.joined)}، واشترك ${numL(REF.subscribed)}.`,`Joined with your link: ${REF.joined}; subscribed: ${REF.subscribed}.`))}</p><button class="btn primary sm" id="sh-ref">${L(bi('شارك رابط الدعوة','Share the invitation'))}</button>`:`<button class="btn primary sm" id="ref-get">${L(bi('اعرض رابط دعوتك','Show your invitation link'))}</button>`}`:''}
+  </section>`; }
+async function shareOrCopy(text,url){ try{ if(navigator.share){ await navigator.share({text,url}); return; } }catch(e){ if(e&&e.name==='AbortError') return; } try{ await navigator.clipboard.writeText(text+' '+url); toast(L(bi('نُسخ، والصقه حيث تريد.','Copied; paste it wherever you like.'))); }catch(e){ toast(url); } }
+function bindShare(m){ const pg=m.querySelector('#sh-prog'); if(pg) pg.onclick=()=>{ const d=S.diag, est=estimate(), url=location.origin+(REF?'/?ref='+REF.code:'');
+    const txt=L(bi(`أتحضّر لاختبار القدرات في أكاديمية القدرات${d?`: بدأت بالتشخيص بنسبة ${numL(d.pct)}٪`:''}${est!=null?`، ودرجتي التقديرية الآن ${numL(est)}`:''}، وأنهيت ${numL(S.days.length)} ${S.days.length<=10?'أيام':'يومًا'} من التدريب.`,`I'm preparing for the GAT with GAT Academy${d?`: I started at ${d.pct}% on the diagnostic`:''}${est!=null?`, my estimated score is now ${est}`:''}, after ${S.days.length} days of practice.`));
+    shareOrCopy(txt,url); };
+  const g=m.querySelector('#ref-get'); if(g) g.onclick=async()=>{ try{ const r=await fetch('/api/ref',{credentials:'same-origin'}); REF=await r.json(); renderRoute(); }catch(e){ toast(tc?tc('saveFail'):'…'); } };
+  const sr=m.querySelector('#sh-ref'); if(sr) sr.onclick=()=>shareOrCopy(L(bi('أتحضّر لاختبار القدرات في أكاديمية القدرات، جرّب الاختبار التشخيصي المجاني من رابطي:','I\'m preparing for the GAT with GAT Academy. Try the free diagnostic with my link:')),location.origin+'/?ref='+REF.code); }
+/* streak protection: two "freeze" days for everyone (one more each week for subscribers, up to three). A single missed day is covered automatically. */
+/* after the real test: the student's actual score, whether a retake is planned (with a new date), and an optional quote published only with consent */
+/* the taste of everything after the diagnostic (signed in, never subscribed, trial turned on by the admin) */
+/* Today shows at most one extra card, by priority, so the page stays calm */
+const dateAskCard=()=>!S.examDate&&diagTaken()?`<form class="demo date-ask" id="dt-ask"><label for="dt-in">${L(bi('متى اختبارك؟ نعدّ لك الأيام ونرتّب خطتك عليها.','When is your test? We count the days and fit your plan to them.'))}</label><span class="row"><input type="date" id="dt-in" min="${todayStr()}" required><button class="btn primary sm" type="submit">${t('save')}</button></span></form>`:'';
+const extraCard=()=>postTestCard()||trialCard()||dateAskCard()||installCard();
+function trialCard(){ const C=window.CLOUD, n=+(C&&C.config&&C.config.trialDays)||0; if(!n||!C.user||PRO()||!diagTaken()||S.trialAsked) return '';
+  return `<section class="card trial-card"><div><div class="eyebrow">${L(bi('هدية بعد التشخيص','A gift after your diagnostic'))}</div><h2>${L(bi(`جرّب كل شيء ${numL(n)} ${n<=10?'أيام':'يومًا'} مجانًا`,`Try everything free for ${n} days`))}</h2>
+    <p class="muted">${L(bi('المحاكاة الكاملة، والنماذج الثلاثون، والأقسام المتكررة الستون، وتدريبات التأسيس كلها، وتحليل أخطائك. بلا بطاقة دفع، وتعود إلى المجاني تلقائيًا.','Full mocks, the 30 model tests, all 60 recurring sections, every foundation drill and your mistake analysis. No card needed; you return to the free plan automatically.'))}</p></div>
+    <div class="row"><button class="btn primary" id="tr-go">${L(bi('ابدأ التجربة','Start the trial'))}</button><button class="btn ghost sm" id="tr-x">${L(bi('لاحقًا','Later'))}</button></div></section>`; }
+function bindTrial(m){ const g=m.querySelector('#tr-go'); if(g) g.onclick=async()=>{ g.disabled=true; try{ await CLOUD.startTrial(); S.trialAsked=1; save(); toast(L(bi('بدأت تجربتك. كل المزايا مفتوحة الآن.','Your trial has started. Everything is open now.'))); renderRoute(); }catch(e){ S.trialAsked=1; save(); toast(L(bi('التجربة متاحة مرة واحدة لكل حساب.','The trial is available once per account.'))); renderRoute(); } };
+  const x=m.querySelector('#tr-x'); if(x) x.onclick=()=>{ S.trialAsked=1; save(); renderRoute(); }; }
+function postTestCard(){ const d=daysLeft(); if(d==null||d>0||!S.examDate) return ''; if((S.real||[]).some(r=>r.date===S.examDate)) return '';
+  return `<section class="card post-test"><div class="eyebrow">${L(bi('بعد الاختبار','After the test'))}</div><h2>${L(bi('كيف كان اختبارك؟','How did your test go?'))}</h2>
+  <p class="muted">${L(bi('أدخل درجتك لنعرف أثر التحضير، ونبني خطة المحاولة التالية إن أردت إعادة الاختبار.','Enter your score so we can see what the preparation did, and build a plan for your next attempt if you want to retake.'))}</p>
+  <form id="pt-f" class="acct-form" novalidate>
+    <label>${L(bi('درجتك (من ١٠٠)','Your score (out of 100)'))}<input type="number" id="pt-s" min="0" max="100" required inputmode="numeric" dir="ltr"></label>
+    <label>${L(bi('أي محاولة كانت؟','Which attempt was it?'))}<select id="pt-a">${[1,2,3,4,5].map(n=>`<option value="${n}">${numL(n)}</option>`).join('')}</select></label>
+    <label class="chkl"><input type="checkbox" id="pt-r"> <span>${L(bi('سأعيد الاختبار لأرفع درجتي','I will retake the test to raise my score'))}</span></label>
+    <label id="pt-dl" hidden>${L(bi('موعد المحاولة القادمة','Date of your next attempt'))}<input type="date" id="pt-d" min="${todayStr()}"></label>
+    <details><summary>${L(bi('شارك تجربتك (اختياري)','Share your experience (optional)'))}</summary>
+      <label>${L(bi('كلمة عن تحضيرك','A few words about your preparation'))}<textarea id="pt-q" maxlength="400" rows="3"></textarea></label>
+      <label>${L(bi('مدينتك','Your city'))}<input type="text" id="pt-c" maxlength="40"></label>
+      <label class="chkl"><input type="checkbox" id="pt-ok"> <span>${L(bi('أوافق على نشر رأيي مع اسمي الأول ومدينتي','I agree to publishing my words with my first name and city'))}</span></label></details>
+    <button class="btn primary" type="submit">${t('save')}</button></form></section>`; }
+function bindPostTest(m){ const f=m.querySelector('#pt-f'); if(!f) return; const r=f.querySelector('#pt-r'); r.onchange=()=>{ f.querySelector('#pt-dl').hidden=!r.checked; };
+  f.onsubmit=async e=>{ e.preventDefault(); const sc=Math.round(+f.querySelector('#pt-s').value); if(!(sc>=0&&sc<=100)||f.querySelector('#pt-s').value===''){ toast(L(bi('أدخل درجة من ٠ إلى ١٠٠.','Enter a score from 0 to 100.'))); return; }
+    const rec={date:S.examDate,score:sc,attempt:+f.querySelector('#pt-a').value,retake:r.checked}; S.real=(S.real||[]).concat(rec);
+    const body={...rec,examDate:S.examDate,quote:f.querySelector('#pt-q').value,city:f.querySelector('#pt-c').value,consent:f.querySelector('#pt-ok').checked};
+    const nd=f.querySelector('#pt-d').value; if(r.checked&&nd){ S.examDate=nd; S.planStart=todayStr(); S.done={}; }
+    save(); try{ if(window.CLOUD&&CLOUD.user) await fetch('/api/results',{method:'POST',headers:{'Content-Type':'application/json','X-Masar':'1'},credentials:'same-origin',body:JSON.stringify(body)}); }catch(e2){}
+    toast(r.checked?L(bi('حُفظت درجتك، وخطتك الآن للمحاولة القادمة.','Score saved; your plan now targets the next attempt.')):L(bi('حُفظت درجتك. بالتوفيق في مرحلتك القادمة!','Score saved. Good luck with what comes next!'))); renderRoute(); }; }
+function streakGuard(){ if(!Array.isArray(S.days)||!S.days.length) return; if(S.freezes==null) S.freezes=2; S.frozen=S.frozen||[];
+  const wk=Math.floor(Date.now()/(7*864e5)); if(PRO()&&S.frzWeek!==wk){ S.frzWeek=wk; S.freezes=Math.min(3,S.freezes+1); }
+  const t0=todayStr(), y=addDays(t0,-1), y2=addDays(t0,-2), has=d=>S.days.includes(d)||S.frozen.includes(d);
+  if(!has(y)&&has(y2)&&S.freezes>0){ S.frozen.push(y); S.frozen=S.frozen.slice(-30); S.freezes--; save(); setTimeout(()=>toast(L(bi(`حمينا سلسلتك بيوم حماية، وبقي لك ${numL(S.freezes)}.`,`We used a streak freeze to keep your streak; ${S.freezes} left.`))),1200); } }
+function calcStreak(){ const set=new Set([...(S.days||[]),...(S.frozen||[])]); let n=0, d=todayStr(); if(!set.has(d)) d=addDays(d,-1); while(set.has(d)){ n++; d=addDays(d,-1); } return n; }
 function recos(D,info){
   const ar=S.lang==='ar', out=[], pro=PRO();
   const due=dueList().length; if(due) out.push({lv:'warn',h:ar?`${numL(due)} مراجعة مستحقة`:`${due} reviews due`,p:ar?'المراجعة في موعدها تمنع تكرار الخطأ نفسه يوم الاختبار.':'Reviewing on time keeps the same mistake from showing up on test day.',act:'data-start="review"'});
@@ -4799,7 +4848,7 @@ function plansOf(){ return (CFG()?.plans||[]).filter(p=>p&&p.id); }
 function curPlan(){ const ps=plansOf(); if(!ps.length) return null; return ps.find(p=>p.id===UP.plan)||ps.find(p=>p.best)||ps[0]; }
 function planCards(sel){ const ps=plansOf(); if(!ps.length) return `<p class="muted small">${t('plansLoading')}</p>`;
   return `<div class="up-plans" role="radiogroup" aria-label="${t('upTitle')}">${ps.map(p=>{ const on=sel&&sel.id===p.id, per=p.days>=60?Math.round(p.price/(p.days/30)):null;
-    return `<button type="button" class="up-plan ${on?'on':''} ${p.best?'best':''}" role="radio" aria-checked="${on}" data-plan="${esc(p.id)}">${p.best?`<span class="up-best">${t('bestValue')}</span>`:''}<b class="up-pn">${esc(p[S.lang]||p.en||p.id)}</b><span class="up-price"><b class="num">${money(p.price)}</b> ${CURR()}</span><span class="up-days">${t('perDays')(numL(p.days))}${per?` · ${t('perMonth')(money(per),CURR())}`:''}</span></button>`; }).join('')}</div>`; }
+    return `<button type="button" class="up-plan ${on?'on':''} ${p.best?'best':''}" role="radio" aria-checked="${on}" data-plan="${esc(p.id)}">${p.best?`<span class="up-best">${t('bestValue')}</span>`:''}<b class="up-pn">${esc(p[S.lang]||p.en||p.id)}</b><span class="up-price">${p.was?`<s class="num up-was">${money(p.was)}</s> `:''}<b class="num">${money(p.price)}</b> ${CURR()}${p.was?` <span class="chip up-off">${L(bi('خصم','save'))} ${numL(Math.round(100*(1-p.price/p.was)))}%</span>`:''}</span>${p.was&&p.ends?`<span class="up-days">${L(bi('العرض حتى','Offer until'))} ${dateLong(p.ends)}</span>`:''}<span class="up-days">${t('perDays')(numL(p.days))}${per?` · ${t('perMonth')(money(per),CURR())}`:''}</span></button>`; }).join('')}</div>`; }
 function compareTable(){ const F=FREE, fx=(F.xp||[]).filter(k=>xpLang(k)===S.lang).length, all=xpAllKeys().filter(k=>xpLang(k)===S.lang).length, pct=x=>numL(Math.round((+x||0)*100))+'%';
   const rows=t('cmpRows')({xp:numL(fx),xpAll:numL(all),daily:numL(F.dailyQuestions),cards:pct(F.cardsFrac),weeks:numL(F.planWeeks),weeksN:+F.planWeeks,mist:numL(F.mistakesMax),tech:pct(F.techFrac)});
   const cell=v=>v===true?`<span class="cmp-y" role="img" aria-label="${t('included')}">${ICON.check}</span>`:v===false?`<span class="cmp-n" role="img" aria-label="${t('notIncluded')}">${LOCKSVG}</span>`:esc(v);
@@ -5008,7 +5057,7 @@ function bindMain(){
   m.querySelectorAll('[data-acct]').forEach(b=>b.onclick=()=>{ if(b.dataset.tab) AC.tab=b.dataset.tab; openAcct(); });
   m.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>document.getElementById(b.dataset.go)?.scrollIntoView({behavior:SMOOTH()}));
   m.querySelectorAll('[data-start]').forEach(b=>b.onclick=()=>startTest(b.dataset.start,{skill:b.dataset.skill}));
-  m.querySelectorAll('[data-resume]').forEach(b=>b.onclick=()=>checkLive()); bindInstall(m);
+  m.querySelectorAll('[data-resume]').forEach(b=>b.onclick=()=>checkLive()); bindInstall(m); bindPostTest(m); bindShare(m); bindTrial(m); { const f=m.querySelector('#dt-ask'); if(f) f.onsubmit=e=>{ e.preventDefault(); const v=m.querySelector('#dt-in').value; if(!v) return; S.examDate=v; S.planStart=todayStr(); S.done={}; save(); renderRoute(); toast(L(bi('حُفظ موعد اختبارك.','Test date saved.'))); }; }
   m.querySelectorAll('[data-xp]').forEach(b=>b.onclick=()=>{ XP_BACK=b.dataset.xp; track('xp_start',b.dataset.xp); XP.open(b.dataset.xp); });
   m.querySelectorAll('[data-lock]').forEach(b=>b.onclick=e=>{ e.preventDefault(); e.stopPropagation(); if(b.dataset.lock==='report') openUpgrade('report'); else hitLimit(b.dataset.lock); });
   m.querySelectorAll('details[data-fold]').forEach(d=>d.ontoggle=()=>{ FOLD[d.dataset.fold]=d.open; });
@@ -5336,7 +5385,8 @@ function installCard(){ if(standalone()||S.instHide||!diagTaken()||!(INSTALL||is
   return `<div class="demo inst"><span>${L(bi('ثبّت أكاديمية القدرات على شاشتك الرئيسية، وافتحها بلمسة كتطبيق.','Add GAT Academy to your home screen and open it with one tap, like an app.'))}</span><span class="row"><button class="btn primary sm" id="inst-go">${L(bi('ثبّت','Install'))}</button><button class="btn ghost sm" id="inst-x">${L(bi('لاحقًا','Later'))}</button></span></div>`; }
 function bindInstall(m){ const g=m.querySelector('#inst-go'); if(g) g.onclick=async()=>{ if(INSTALL){ INSTALL.prompt(); try{ await INSTALL.userChoice; }catch(e){} INSTALL=null; renderRoute(); } else toast(L(bi('في سفاري: اضغط زر المشاركة ثم «إضافة إلى الشاشة الرئيسية».','In Safari: tap Share, then “Add to Home Screen”.'))); };
   const x=m.querySelector('#inst-x'); if(x) x.onclick=()=>{ S.instHide=1; save(); renderRoute(); }; }
-renderRoute(); initAI(); checkLive();
+try{ const rf=new URLSearchParams(location.search).get('ref'); if(rf&&/^[A-Z0-9]{6}$/.test(rf)) localStorage.setItem('gat_ref',rf); }catch(e){}
+streakGuard(); renderRoute(); initAI(); checkLive();
 /* after the first screen: the web fonts, then (once the page has loaded) the explainer player in order; then hook it up and redraw */
 { const fo=()=>{ const f=$('#fonts-l'); if(f) f.media='all'; }; if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',fo); else fo(); }
 

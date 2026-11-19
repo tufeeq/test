@@ -28,7 +28,8 @@ const DEFAULTS = {
     diagnostic: true         // the one free test
   },
   banner: { on: false, ar: "", en: "", tone: "info" },
-  trialReportDays: 14
+  trialReportDays: 14,
+  trialDays: 3            // free full access after the diagnostic, once per account (0 = off)
 };
 
 module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin, isAdminEmail, limited, cleanName }) {
@@ -116,8 +117,9 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
     return CFG;
   }
   const publicCfg = c => ({
-    plans: c.plans.filter(p => p.active).map(({ id, ar, en, days, price, best, buy }) => ({ id, ar, en, days, price, best: !!best, buy: buy || null })),
-    currency: c.currency, refund: c.refund, free: c.free, banner: c.banner, trialReportDays: c.trialReportDays,
+    /* the price before the discount is shown only while the offer runs (no end date, or an end date not yet passed) */
+    plans: c.plans.filter(p => p.active).map(({ id, ar, en, days, price, best, buy, was, ends }) => { const live = was && was > price && (!ends || ends >= new Date().toISOString().slice(0, 10)); return { id, ar, en, days, price, best: !!best, buy: buy || null, ...(live ? { was, ends: ends || null } : {}) }; }),
+    currency: c.currency, refund: c.refund, free: c.free, banner: c.banner, trialReportDays: c.trialReportDays, trialDays: c.trialDays,
     payments: !!PROVIDER(), provider: PROVIDER(),
     social: require("./oauth").enabled()
   });
@@ -155,6 +157,13 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
       [userId, extra.planId || null, source, start, end, extra.paymentId || null, extra.note || null, extra.by || null]);
     return end;
   }
+  // first paid activation of an invited student: 7 bonus days for the student and 7 for the friend who invited them (once)
+  async function rewardReferral(db, userId) {
+    const u = (await db.query("UPDATE users SET ref_rewarded=true WHERE id=$1 AND referred_by IS NOT NULL AND NOT ref_rewarded RETURNING referred_by", [userId])).rows[0];
+    if (!u) return;
+    await grant(userId, 7, "referral", { note: "invited by a friend" }, db);
+    if ((await db.query("SELECT 1 FROM users WHERE id=$1", [u.referred_by])).rows[0]) await grant(u.referred_by, 7, "referral", { note: "a friend subscribed" }, db);
+  }
   // revoke the subscription(s) bought with one payment; later stacked periods move up so the student keeps them without a gap
   async function revokePayment(db, paymentId, userId) {
     if (userId) await lockUser(db, userId);
@@ -189,6 +198,15 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
   let pver = { src: null, v: "" };
   const verOfPrem = b => { if (pver.src !== b.premium) pver = { src: b.premium, v: require("crypto").createHash("sha1").update(b.premium).digest("hex").slice(0, 10) }; return pver.v; };
   app.get("/api/xp/premium.js", needUser, needPro, wrap(async (req, res) => { const b = await bundles(); res.set({ "Cache-Control": req.query.v && req.query.v === verOfPrem(b) ? "private, max-age=31536000, immutable" : "private, no-store" }).type("application/javascript").send(b.premium); }));
+  /* a taste of everything: full access for trialDays after the diagnostic, once per account, never after any subscription */
+  app.post("/api/trial", needUser, wrap(async (req, res) => {
+    const c = await loadCfg(); if (!c.trialDays) return fail(res, 400, "no-trial");
+    const r = await tx(async db => { await lockUser(db, req.user.id);
+      if ((await db.query("SELECT 1 FROM subscriptions WHERE user_id=$1 LIMIT 1", [req.user.id])).rows[0]) return { error: "used" };
+      return { until: await grant(req.user.id, c.trialDays, "trial", { note: "trial after the diagnostic" }, db) }; });
+    if (r.error) return fail(res, 409, "trial-used");
+    res.json({ until: r.until, plan: await planOf(req.user) });
+  }));
   app.get("/api/xp/keys", wrap(async (req, res) => { const b = await bundles(); res.json({ ...b.keys, pv: verOfPrem(b) }); }));
   // premium narration clips: which clip ids belong to premium explainers (computed from tracks.json)
   async function premiumClipIds() {
@@ -360,7 +378,7 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
       if (!p) return false;
       let days = p.days;
       if (!days) { const cfg = await loadCfg(); const plan = cfg.plans.find(x => x.id === p.plan_id); days = plan ? plan.days : 30; }
-      if (p.user_id) await grant(p.user_id, days, source, { planId: p.plan_id, paymentId: p.id }, c); // account deleted meanwhile: keep the record only
+      if (p.user_id) { await grant(p.user_id, days, source, { planId: p.plan_id, paymentId: p.id }, c); if (Number(p.amount) > 0) await rewardReferral(c, p.user_id); } // account deleted meanwhile: keep the record only
       if (p.coupon) await c.query("UPDATE coupons SET used=used+1 WHERE code=$1", [p.coupon]);
       return true;
     });
@@ -409,7 +427,8 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
       const cfg = await loadCfg();
       await c.query("INSERT INTO payments(id,user_id,email,plan_id,amount,currency,coupon,status,paid_at,days) VALUES($1,$2,$3,$4,0,$5,$6,'paid',now(),$7)", [pid, req.user.id, req.user.email, i.plan.id, cfg.currency, code, i.plan.days]);
       await c.query("UPDATE coupons SET used=used+1 WHERE code=$1", [code]);
-      return { plan: i.plan, until: await grant(req.user.id, i.plan.days, "coupon", { planId: i.plan.id, paymentId: pid }, c) };
+      const until = await grant(req.user.id, i.plan.days, "coupon", { planId: i.plan.id, paymentId: pid }, c); await rewardReferral(c, req.user.id); /* activation codes are sold in the store */
+      return { plan: i.plan, until: await c.query("SELECT max(ends_at) e FROM subscriptions WHERE user_id=$1 AND revoked_at IS NULL", [req.user.id]).then(r => r.rows[0].e || until) };
     });
     if (r.error) return fail(res, 400, r.error);
     if (!r.mine) await pool.query("INSERT INTO events(user_id,type,k) VALUES($1,'redeem',$2)", [req.user.id, r.plan.id]).catch(() => {});
@@ -602,6 +621,14 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
     audit(req, "export_reminders", null, { n: rows.length });
     res.set({ "Content-Type": "text/csv; charset=utf-8", "Content-Disposition": `attachment; filename="gat-academy-reminders-${day(new Date())}.csv"` }).send("\ufeff" + "name,phone,email,exam_date,days_left,streak,last_active\n" + rows.join("\n"));
   });
+  /* real test scores the students entered; quotes only where they agreed to publication */
+  A("get", "/results.csv", async (req, res) => {
+    const r = await pool.query(`SELECT r.created_at,u.name,u.email,r.exam_date,r.score,r.attempt,r.retake,r.consent,r.city,r.quote FROM test_results r LEFT JOIN users u ON u.id=r.user_id ORDER BY r.created_at DESC`);
+    const esc = v => { let s = v == null ? "" : String(v instanceof Date ? v.toISOString() : v); if (typeof v === "string" && /^[=+\-@\t\r]/.test(s)) s = "'" + s; return /[",\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
+    const rows = r.rows.map(x => [x.created_at, x.name, x.email, x.exam_date ? String(x.exam_date instanceof Date ? x.exam_date.toISOString() : x.exam_date).slice(0, 10) : "", x.score, x.attempt, x.retake, x.consent, x.city, x.consent ? x.quote : ""].map(esc).join(","));
+    audit(req, "export_results", null, { n: rows.length });
+    res.set({ "Content-Type": "text/csv; charset=utf-8", "Content-Disposition": `attachment; filename="gat-academy-results-${day(new Date())}.csv"` }).send("\ufeff" + "entered_at,name,email,exam_date,score,attempt,retake,consent,city,quote\n" + rows.join("\n"));
+  });
   A("get", "/users.csv", async (req, res) => {
     const r = await pool.query(`SELECT u.email,u.name,u.created_at,p.track,p.target,p.exam_date,p.summary,p.updated_at,
       (SELECT max(ends_at) FROM subscriptions WHERE user_id=u.id AND revoked_at IS NULL AND ends_at>now()) pro_until FROM users u LEFT JOIN progress p ON p.user_id=u.id ORDER BY u.created_at`);
@@ -769,7 +796,7 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
       refund: { ...old.refund, ...pick(v.refund, ["on", "days"]) },
       free: { ...old.free, ...pick(v.free, Object.keys(DEFAULTS.free)) },
       banner: { ...old.banner, ...pick(v.banner, ["on", "ar", "en", "tone"]) },
-      trialReportDays: v.trialReportDays !== undefined ? v.trialReportDays : old.trialReportDays };
+      trialReportDays: v.trialReportDays !== undefined ? v.trialReportDays : old.trialReportDays, trialDays: v.trialDays !== undefined ? v.trialDays : old.trialDays };
     // validate
     const ids = new Set();
     if (!Array.isArray(c.plans) || !c.plans.length || c.plans.length > 12 || c.plans.some(p => !obj(p) || !/^[\w-]{1,20}$/.test(p.id || "") || ids.has(p.id) || !ids.add(p.id) ||
@@ -777,7 +804,8 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
     // buy: optional https link to this plan in an external store (e.g. the Zid product page); when set, the plans page
     // sends students there to pay instead of to the payment gateway, and the store delivers an activation code
     if (c.plans.some(p => p.buy != null && p.buy !== "" && !buyOk(p.buy))) return fail(res, 400, "bad-buy");
-    c.plans = c.plans.map(p => ({ id: p.id, ar: String(p.ar || "").slice(0, 60), en: String(p.en || "").slice(0, 60), days: Math.round(Number(p.days)), price: money(p.price), active: p.active !== false, best: !!p.best, buy: buyOk(p.buy) ? String(p.buy).trim() : null }));
+    c.plans = c.plans.map(p => ({ id: p.id, ar: String(p.ar || "").slice(0, 60), en: String(p.en || "").slice(0, 60), days: Math.round(Number(p.days)), price: money(p.price), active: p.active !== false, best: !!p.best, buy: buyOk(p.buy) ? String(p.buy).trim() : null,
+      was: Number(p.was) > Number(p.price) && Number(p.was) <= 100000 ? money(p.was) : null, ends: /^\d{4}-\d{2}-\d{2}$/.test(String(p.ends || "")) ? String(p.ends) : null }));
     if (!c.plans.some(p => p.active)) return fail(res, 400, "bad-plans");
     const f = c.free; f.dailyQuestions = Math.max(0, Math.min(500, Math.round(Number(f.dailyQuestions) || 0)));
     ["cardsFrac", "techFrac"].forEach(k => { f[k] = Math.max(0, Math.min(1, Number(f[k]) || 0)); });
@@ -787,6 +815,7 @@ module.exports = function commerce(app, { pool, wrap, fail, needUser, needAdmin,
     c.banner = { on: !!c.banner.on, ar: String(c.banner.ar || "").slice(0, 200), en: String(c.banner.en || "").slice(0, 200), tone: ["info", "promo", "warn"].includes(c.banner.tone) ? c.banner.tone : "info" };
     c.refund = { on: !!c.refund.on, days: Math.max(0, Math.min(60, Math.round(Number(c.refund.days) || 0))) };
     c.trialReportDays = Math.max(1, Math.min(60, Math.round(Number(c.trialReportDays) || 14)));
+    c.trialDays = Math.max(0, Math.min(14, Math.round(Number(c.trialDays) || 0)));
     await pool.query("INSERT INTO settings(key,value,updated_at) VALUES('config',$1,now()) ON CONFLICT (key) DO UPDATE SET value=$1, updated_at=now()", [c]);
     await loadCfg(true); pcache.at = 0;
     audit(req, "settings", null, { changed: cfgDiff(old, c) }); res.json({ config: c });

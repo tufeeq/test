@@ -68,6 +68,11 @@ async function migrate() {
     ALTER TABLE users ADD COLUMN IF NOT EXISTS name TEXT;
     ALTER TABLE users ADD COLUMN IF NOT EXISTS phone TEXT;
     ALTER TABLE users ADD COLUMN IF NOT EXISTS remind BOOLEAN NOT NULL DEFAULT false;
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS ref_code TEXT UNIQUE;
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS referred_by TEXT;
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS ref_rewarded BOOLEAN NOT NULL DEFAULT false;
+    CREATE TABLE IF NOT EXISTS test_results (id BIGSERIAL PRIMARY KEY, user_id TEXT REFERENCES users(id) ON DELETE CASCADE, exam_date DATE, score INT NOT NULL, attempt INT,
+      retake BOOLEAN, quote TEXT, city TEXT, consent BOOLEAN NOT NULL DEFAULT false, created_at TIMESTAMPTZ NOT NULL DEFAULT now());
   `);
   await C.migrate();
   await O.migrate();
@@ -256,6 +261,26 @@ app.get("/api/me", wrap(async (req, res) => {
 }));
 
 /* WhatsApp reminders: turned on or off from the account panel; on needs a valid mobile number */
+/* the student's real test score, entered after the test; a quote is published only with explicit consent (first name and city) */
+/* the student's own invitation code (created on first use) */
+app.get("/api/ref", needUser, wrap(async (req, res) => {
+  let code = ((await pool.query("SELECT ref_code FROM users WHERE id=$1", [req.user.id])).rows[0] || {}).ref_code;
+  for (let i = 0; !code && i < 5; i++) {
+    const c = Array.from(crypto.randomBytes(6), b => "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"[b % 32]).join("");
+    try { const r = await pool.query("UPDATE users SET ref_code=$1 WHERE id=$2 AND ref_code IS NULL RETURNING ref_code", [c, req.user.id]); code = (r.rows[0] || {}).ref_code || ((await pool.query("SELECT ref_code FROM users WHERE id=$1", [req.user.id])).rows[0] || {}).ref_code; } catch (e) { if (e.code !== "23505") throw e; }
+  }
+  const n = (await pool.query("SELECT count(*)::int n, count(*) FILTER (WHERE ref_rewarded)::int paid FROM users WHERE referred_by=$1", [req.user.id])).rows[0];
+  res.json({ code, joined: n.n, subscribed: n.paid });
+}));
+app.post("/api/results", needUser, wrap(async (req, res) => {
+  if (limited("res:" + req.user.id, 10, 86400e3)) return fail(res, 429, "too-many-requests");
+  const b = req.body || {}, score = Math.round(Number(b.score)), attempt = Math.round(Number(b.attempt)) || null;
+  if (!(score >= 0 && score <= 100)) return fail(res, 400, "bad-score");
+  const d = /^\d{4}-\d{2}-\d{2}$/.test(String(b.examDate || "")) ? b.examDate : null;
+  const quote = String(b.quote || "").replace(/\s+/g, " ").trim().slice(0, 400) || null, city = String(b.city || "").replace(/\s+/g, " ").trim().slice(0, 40) || null;
+  await pool.query("INSERT INTO test_results(user_id,exam_date,score,attempt,retake,quote,city,consent) VALUES($1,$2,$3,$4,$5,$6,$7,$8)", [req.user.id, d, score, attempt && attempt >= 1 && attempt <= 5 ? attempt : null, b.retake === true, quote, city, b.consent === true && !!quote]);
+  res.json({ ok: true });
+}));
 app.post("/api/remind", needUser, wrap(async (req, res) => {
   const remind = req.body.remind === true, raw = String(req.body.phone == null ? "" : req.body.phone).trim(), phone = raw ? cleanPhone(raw) : null;
   if ((raw || (remind && !req.user.phone)) && !phone) return fail(res, 400, "invalid-phone");
@@ -297,7 +322,9 @@ app.post("/api/signup", wrap(async (req, res) => {
   // a taken address answers before the (slow) hash, so a flood of sign-ups for one address cannot burn CPU
   if ((await pool.query("SELECT 1 FROM users WHERE email=$1", [email])).rows[0]) return fail(res, 409, "email-already-in-use");
   const id = crypto.randomUUID(), hash = await PW.hash(pw, 11);
-  try { await pool.query("INSERT INTO users(id,email,pass_hash,name,phone,remind) VALUES($1,$2,$3,$4,$5,$6)", [id, email, hash, name, phone, remind]); }
+  /* invited by a friend's link: remember who, so both get their bonus days when this student first subscribes */
+  const refBy = /^[A-Z0-9]{6}$/.test(String(req.body.ref || "")) ? ((await pool.query("SELECT id FROM users WHERE ref_code=$1", [String(req.body.ref)])).rows[0] || {}).id || null : null;
+  try { await pool.query("INSERT INTO users(id,email,pass_hash,name,phone,remind,referred_by) VALUES($1,$2,$3,$4,$5,$6,$7)", [id, email, hash, name, phone, remind, refBy]); }
   catch (e) { if (e.code === "23505") return fail(res, 409, "email-already-in-use"); throw e; }
   if (isAdminEmail(email)) console.log(`admin account claimed: ${email}`);
   await createSession(req, res, id);

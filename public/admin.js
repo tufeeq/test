@@ -594,7 +594,7 @@ async function vFunnel(tok) {
 async function vStudents(tok) {
   const st = S.st;
   MAIN.innerHTML = ph("الطلاب", "Students", "الطلاب", "Students", "ابحث وصفِّ وافتح ملف أي طالب لإدارة اشتراكه وحسابه.", "Search, filter and open any student to manage their plan and account.",
-    `<a class="btn ghost sm" href="/api/admin/users.csv" download id="b-csv">${ic("download")}${_("تصدير CSV", "Export CSV")}</a>` + `<a class="btn ghost sm" href="/api/admin/reminders.csv" download>${ic("download")}${_("قائمة التذكير (واتساب)", "Reminder list (WhatsApp)")}</a>` + refreshBtn()) + `
+    `<a class="btn ghost sm" href="/api/admin/users.csv" download id="b-csv">${ic("download")}${_("تصدير CSV", "Export CSV")}</a>` + `<a class="btn ghost sm" href="/api/admin/reminders.csv" download>${ic("download")}${_("قائمة التذكير (واتساب)", "Reminder list (WhatsApp)")}</a>` + `<a class="btn ghost sm" href="/api/admin/results.csv" download>${ic("download")}${_("الدرجات الحقيقية والآراء", "Real scores and quotes")}</a>` + refreshBtn()) + `
   <section class="card">
     <div class="toolbar">
       <label class="search"><span class="sr">${_("بحث", "Search")}</span>${ic("search")}<input type="search" id="st-q" value="${esc(st.q)}" placeholder="${_("ابحث بالاسم أو البريد", "Search by name or email")}" dir="auto" autocomplete="off"></label>
@@ -1038,10 +1038,10 @@ function validate(c) {
 }
 function normalize(c) {
   const o = clone(c);
-  o.plans = o.plans.map(p => ({ id: String(p.id).trim(), ar: String(p.ar || "").trim(), en: String(p.en || "").trim(), days: Math.round(num(p.days)), price: num(p.price), active: p.active !== false, best: !!p.best, buy: String(p.buy || "").trim() || null }));
+  o.plans = o.plans.map(p => ({ id: String(p.id).trim(), ar: String(p.ar || "").trim(), en: String(p.en || "").trim(), days: Math.round(num(p.days)), price: num(p.price), active: p.active !== false, best: !!p.best, buy: String(p.buy || "").trim() || null, was: num(p.was) > num(p.price) ? num(p.was) : null, ends: /^\d{4}-\d{2}-\d{2}$/.test(String(p.ends || "")) ? String(p.ends) : null }));
   ["dailyQuestions", "planWeeks", "mistakesMax"].forEach(k => { o.free[k] = Math.round(num(o.free[k])); });
   ["cardsFrac", "techFrac"].forEach(k => { o.free[k] = Math.round(num(o.free[k]) * 1000) / 1000; });
-  o.refund = { on: !!o.refund.on, days: Math.round(num(o.refund.days)) }; o.trialReportDays = Math.round(num(o.trialReportDays));
+  o.refund = { on: !!o.refund.on, days: Math.round(num(o.refund.days)) }; o.trialReportDays = Math.round(num(o.trialReportDays)); o.trialDays = Math.round(num(o.trialDays || 0));
   o.banner = { on: !!o.banner.on, ar: String(o.banner.ar || "").trim(), en: String(o.banner.en || "").trim(), tone: o.banner.tone };
   return o;
 }
@@ -1068,13 +1068,15 @@ function renderSettings() {
     `<button class="btn primary sm" type="button" id="s-save2" ${S.dirty ? "" : "disabled"}>${ic("check")}${_("حفظ", "Save")}</button>`) + `
   ${nErr ? `<div class="alert err" role="alert">${ic("alert")}<div><b>${_(`يوجد ${fmtN(nErr)} حقل يحتاج تصحيحًا`, `${nErr} field(s) need fixing`)}</b>${_("صحّح الحقول المظللة بالأحمر ثم احفظ.", "Fix the fields outlined in red, then save.")}</div></div>` : ""}
   <section class="card"><div class="card-h"><h2>${_("الباقات المدفوعة", "Paid plans")}</h2><div class="sec-acts">${rst("plans")}</div></div>
-    <div class="tbl plans-ed"><table><thead><tr><th scope="col">${_("المعرّف", "ID")}</th><th scope="col">${_("الاسم بالعربية", "Arabic name")}</th><th scope="col">${_("الاسم بالإنجليزية", "English name")}</th><th scope="col">${_("الأيام", "Days")}</th><th scope="col">${_("السعر", "Price")} (${esc(c.currency || "SAR")})</th><th scope="col">${_("مفعّلة", "Active")}</th><th scope="col">${_("الأفضل قيمة", "Best value")}</th><th scope="col"><span class="sr">${_("حذف", "Remove")}</span></th></tr></thead><tbody>
+    <div class="tbl plans-ed"><table><thead><tr><th scope="col">${_("المعرّف", "ID")}</th><th scope="col">${_("الاسم بالعربية", "Arabic name")}</th><th scope="col">${_("الاسم بالإنجليزية", "English name")}</th><th scope="col">${_("الأيام", "Days")}</th><th scope="col">${_("السعر", "Price")} (${esc(c.currency || "SAR")})</th><th scope="col">${_("قبل الخصم", "Was")}</th><th scope="col">${_("ينتهي العرض", "Offer ends")}</th><th scope="col">${_("مفعّلة", "Active")}</th><th scope="col">${_("الأفضل قيمة", "Best value")}</th><th scope="col"><span class="sr">${_("حذف", "Remove")}</span></th></tr></thead><tbody>
     ${c.plans.map((p, i) => `<tr>
       <td data-l="${_("المعرّف", "ID")}"><input type="text" data-p="plans.${i}.id" value="${esc(p.id)}" dir="ltr" maxlength="20" style="inline-size:90px" ${inv(`plans.${i}.id`)} aria-label="${_("المعرّف", "ID")}">${err(`plans.${i}.id`)}</td>
       <td data-l="${_("الاسم بالعربية", "Arabic name")}"><input type="text" data-p="plans.${i}.ar" value="${esc(p.ar)}" dir="rtl" maxlength="60" ${inv(`plans.${i}.ar`)} aria-label="${_("الاسم بالعربية", "Arabic name")}">${err(`plans.${i}.ar`)}</td>
       <td data-l="${_("الاسم بالإنجليزية", "English name")}"><input type="text" data-p="plans.${i}.en" value="${esc(p.en)}" dir="ltr" maxlength="60" ${inv(`plans.${i}.en`)} aria-label="${_("الاسم بالإنجليزية", "English name")}">${err(`plans.${i}.en`)}</td>
       <td data-l="${_("الأيام", "Days")}"><input type="number" data-p="plans.${i}.days" data-num value="${esc(p.days)}" min="1" step="1" ${inv(`plans.${i}.days`)} aria-label="${_("الأيام", "Days")}">${err(`plans.${i}.days`)}</td>
       <td data-l="${_("السعر", "Price")}"><input type="number" data-p="plans.${i}.price" data-num value="${esc(p.price)}" min="1" step="0.01" ${inv(`plans.${i}.price`)} aria-label="${_("السعر", "Price")}">${err(`plans.${i}.price`)}</td>
+      <td data-l="${_("قبل الخصم", "Was")}"><input type="number" data-p="plans.${i}.was" data-num value="${esc(p.was || "")}" min="0" step="0.01" aria-label="${_("السعر قبل الخصم (اختياري)", "Price before discount (optional)")}"></td>
+      <td data-l="${_("ينتهي العرض", "Offer ends")}"><input type="date" data-p="plans.${i}.ends" value="${esc(p.ends || "")}" dir="ltr" aria-label="${_("تاريخ نهاية العرض (اختياري)", "Offer end date (optional)")}"></td>
       <td class="c" data-l="${_("مفعّلة", "Active")}"><input type="checkbox" class="tg" data-p="plans.${i}.active" data-bool ${p.active !== false ? "checked" : ""} aria-label="${_("مفعّلة", "Active")}"></td>
       <td class="c" data-l="${_("الأفضل قيمة", "Best value")}"><input type="checkbox" class="tg" data-best="${i}" ${p.best ? "checked" : ""} aria-label="${_("الأفضل قيمة", "Best value")}"></td>
       <td class="rm"><button class="btn danger-ghost xs icon" type="button" data-rm="${i}" aria-label="${_("حذف الباقة", "Remove plan")}" ${c.plans.length < 2 ? "disabled" : ""}>${ic("trash")}</button></td></tr>`).join("")}
@@ -1106,6 +1108,7 @@ function renderSettings() {
       <div class="fgrid">
         <label class="fld">${_("مدة الاسترداد (أيام)", "Refund window (days)")}<input type="number" data-p="refund.days" data-num min="0" max="60" step="1" value="${esc(c.refund.days)}" ${inv("refund.days")}>${err("refund.days")}</label>
         <label class="fld">${_("تقرير التجربة بعد (أيام)", "Trial report after (days)")}<input type="number" data-p="trialReportDays" data-num min="1" max="60" step="1" value="${esc(c.trialReportDays)}" ${inv("trialReportDays")}>${err("trialReportDays")}</label>
+        <label class="fld">${_("تجربة كاملة بعد التشخيص (أيام، ٠ = متوقفة)", "Full trial after the diagnostic (days, 0 = off)")}<input type="number" data-p="trialDays" data-num min="0" max="14" step="1" value="${esc(c.trialDays ?? 3)}"></label>
       </div>
       <p class="small muted" id="rf-prev"></p></section>
     <section class="card"><div class="card-h"><h2>${_("شريط الإعلان", "Announcement banner")}</h2><div class="sec-acts">${rst("banner")}</div></div>
@@ -1184,6 +1187,7 @@ const AUD = {
   coupon_batch_off: ["ticket", "", (m, t) => _("أوقف دفعة أكواد تفعيل", "Disabled an activation-code batch")],
   settings: ["gear", "", m => _("حدّث الإعدادات", "Updated the settings") + (m.changed && !m.changed.length ? _(" (بلا تغيير)", " (no change)") : ""), m => (m.changed || []).join("  ·  ")],
   export_users: ["download", "sky", m => _(`صدّر قائمة الطلاب (${fmtN(m.n)})`, `Exported the student list (${m.n})`)],
+  export_results: ["download", "sky", m => _(`صدّر الدرجات الحقيقية (${fmtN(m.n)})`, `Exported real scores (${m.n})`)],
   export_reminders: ["download", "sky", m => _(`صدّر قائمة التذكير (${fmtN(m.n)})`, `Exported the reminder list (${m.n})`)]
 };
 async function vAudit(tok) {

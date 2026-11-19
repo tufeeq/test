@@ -1,3 +1,5 @@
+/* an invitation link (?ref=CODE) is remembered on this device until sign-up */
+try { var _rf = new URLSearchParams(location.search).get('ref'); if (_rf && /^[A-Z0-9]{6}$/.test(_rf)) localStorage.setItem('gat_ref', _rf); } catch (e) {}
 /* GAT Academy (أكاديمية القدرات) marketing page.
    The top part runs immediately in <head> (old app links, theme, language) so nothing flashes;
    the rest runs after the DOM is parsed: translations, live prices from /api/config, the explainer demo. */
@@ -82,7 +84,7 @@
     heroH: 'The GAT isn’t luck.<br>It’s <span class="lp-mark">ten skills' + SCRIB + '</span>, mastered.',
     heroLead: 'A short diagnostic finds your level in every skill, then a daily plan takes you to test day: animated, narrated explainers, fresh practice and model tests in the computer-based format.', heroCta: 'Take the free diagnostic',
     watch: 'Watch an explainer', proofAria: 'What you get',
-    p1b: '33', p1: 'narrated explainers per language', p2b: '30', p2: 'model tests', p3b: '10', p3: 'skills measured and tracked',
+    p1b: '63', p1: 'narrated explainers per language', p2b: '30', p2: 'model tests', p3b: '43', p3: 'foundation lessons from zero', p4b: '60', p4: 'recurring sections in the computer-based format',
     heroMicro: 'The diagnostic is free: 20 questions in about 15 minutes, no sign-up, no card',
     artMap: 'Mastery map', artSample: 'Illustration', verbal: 'Verbal', quant: 'Quantitative',
     sk_analogy: 'Verbal Analogy', sk_completion: 'Sentence Completion', sk_context: 'Contextual Error', sk_odd: 'Odd Word Out', sk_reading: 'Reading Comprehension',
@@ -97,7 +99,7 @@
     xm_analogy: '4 min', xm_ar_order: '3 min', xm_ge_angles: '3 min', xm_co_signals: '4 min',
     noJsDemo: 'The interactive demo needs JavaScript enabled in your browser.',
     playAria: 'Play the explainer', playL: 'Play the explainer', pickAria: 'Choose an explainer',
-    pickNote: 'GAT Academy has 33 explainers in each language, covering all ten skills.',
+    pickNote: 'GAT Academy has 63 explainers in each language, covering all ten skills.',
     dA3: 'a tool for', dA_l: 'pen', dA_r: 'writing', dA4: 'scalpel : surgery',
     dO1: '3 + 4 × 2', dO2: 'Multiply first: 4 × 2 = 8', dO3: '3 + 8 = 11',
     dG1: '110°', dS1: 'It was cold, ____ the sun was out.', dS2: 'but', dS3: 'signals the unexpected',
@@ -108,8 +110,11 @@
     s4h: 'Practice and model tests', s4p: 'Fresh practice questions, then model tests in the test format: 5 sections × 24 questions × 25 minutes.',
     s5h: 'Track your progress', s5p: 'A mastery map and an estimated score, plus a mistake box that brings back every question you missed until you master it.',
     featEyebrow: 'Everything in one place', featH: 'A complete kit, not just a question bank',
+    noLeak: '<b>No leaked question dumps, no memorizing.</b> The real test\'s patterns with original questions whose numbers change every time, because the test measures understanding, not memory.',
+    fFdH: 'The foundation track: 43 lessons from zero', fFdP: '30 quantitative and 13 verbal lessons in order, each with rules, worked examples, common traps and a 10-question drill. The diagnostic tells you where to start.',
+    fRsH: '60 recurring sections', fRsP: 'Short sections built like real computer-based test sections, to practice the patterns that keep coming back, with original questions, not leaks.',
     featP: 'Learn the idea, practice it, test yourself under real exam conditions, and always know where you stand.',
-    f1h: '33 animated explainers per language', f1p: 'Narrated in Arabic and in English. They pause so you can try it yourself, with a short quiz after.',
+    f1h: '63 animated explainers per language', f1p: 'Narrated in Arabic and in English. They pause so you can try it yourself, with a short quiz after.',
     f2h: '30 model tests', f2p: 'In the test format: 5 sections × 24 questions, 25 minutes per section, with a real timer.',
     f3h: 'Fresh practice questions', f3p: 'New questions with changing numbers and wording, so you practice the idea instead of memorizing answers.',
     f4h: 'Illustrated flashcards', f4p: 'Cards that sum up each rule with a drawing. Flip and review them in minutes.',
@@ -143,14 +148,14 @@
     fl4: 'A selection of flashcards and vocabulary from every skill', fl5: 'The first 2 weeks of the daily plan', fl6: 'A mistake box that keeps your last 15 mistakes',
     fl7: 'A selection of techniques and patterns', fl8: 'The mastery map, plus 2 skills in detail',
     freeCta: 'Start free', proH: 'Full access', proD: 'Everything in Free with no limits, plus everything you need to reach your target score:',
-    pl1: 'All 33 explainers in each language', pl2: 'The 30 model tests, section tests and full timed mocks',
+    pl0: 'The full foundation track: 43 lessons with their drills, and 60 recurring sections', pl1: 'All 63 explainers in each language', pl2: 'The 30 model tests, section tests and full timed mocks',
     pl3: 'Unlimited daily practice, plus targeted practice on a skill or pattern you choose', pl4: 'All flashcards, vocabulary, techniques and patterns',
     pl5: 'The full plan up to your test date, with your own test date and target score', pl6: 'Smart spaced repetition for mistakes and cards, and the cause of every mistake',
     pl7: 'Estimated score and time analysis per skill', pl8: 'Review any past attempt question by question',
     priceLoading: 'Current prices show here, and in the app.', seePlans: 'See plans in the app',
     payLine: '', // from PAY below
     cmpH: 'Compare the plans in detail', payAria: 'Accepted payment methods', mada: 'mada', cmpAria: 'Plan comparison', cmpFeat: 'Feature', cmpFree: 'Free', cmpPro: 'Full access',
-    c1: 'Diagnostic test', c2: 'Animated, narrated explainers', c2f: '8 per language', c2p: '33 per language',
+    c1: 'Diagnostic test', c2: 'Animated, narrated explainers', c2f: '8 per language', c2p: '63 per language',
     c3: 'Practice questions', c3f: '10 a day', c3p: 'Unlimited', c4: 'Targeted practice on a skill or pattern',
     c5: 'The 30 model tests', c6: 'Section tests and full timed mocks', c7: 'Review past attempts question by question',
     c8: 'Flashcards and vocabulary', c8f: 'A selection', c9: 'Techniques and recurring patterns', c9f: 'A selection', all: 'All',
@@ -168,7 +173,7 @@
     q2: 'Is the free plan really free forever?',
     a2: '<p>Yes. The free plan is permanent: there’s no trial that runs out, and you don’t need a card to sign up. It includes the diagnostic test, selected explainers, daily practice questions, the first two weeks of your plan and more. Everything in it works fully, and subscriber features stay visible with their name and benefit, so you can decide for yourself.</p>',
     q3: 'What do I get when I subscribe?',
-    a3: '<p>Everything: all 33 explainers in each language, the 30 model tests, section tests and full timed mocks, unlimited and targeted practice, all flashcards, vocabulary and techniques, the full plan up to your test date, spaced repetition and mistake-cause analysis, the estimated score, and review of any past attempt. A subscription ends when its period ends; it does not renew automatically.</p>',
+    a3: '<p>Everything: all 63 explainers in each language, the 30 model tests, section tests and full timed mocks, unlimited and targeted practice, all flashcards, vocabulary and techniques, the full plan up to your test date, spaced repetition and mistake-cause analysis, the estimated score, and review of any past attempt. A subscription ends when its period ends; it does not renew automatically.</p>',
     q4: 'Which payment methods can I use?',
     a4: '', // from PAY below
     q5: 'Can I get a refund?',
@@ -200,7 +205,7 @@
   var META = {
     ar: { title: null, desc: null },
     en: { title: 'GAT Academy | Prepare for the General Aptitude Test with a daily plan and narrated explainers',
-          desc: 'Prepare for the Saudi General Aptitude Test (GAT / Qudurat) with a diagnostic, a daily plan up to your test date, 33 narrated explainers, 30 model tests in the computer-based format and a mistake box with spaced review. In Arabic and English, with a free plan that never expires.' }
+          desc: 'Prepare for the Saudi General Aptitude Test (GAT / Qudurat) with a diagnostic, a daily plan up to your test date, 63 narrated explainers, 30 model tests in the computer-based format and a mistake box with spaced review. In Arabic and English, with a free plan that never expires.' }
   };
 
   /* ---------- the rest needs the DOM ---------- */
@@ -284,6 +289,7 @@
       return '<div class="lp-opt' + (p.best ? ' best' : '') + '">' +
         (p.best ? '<span class="lp-best">' + T('الأفضل قيمة', 'Best value') + '</span>' : '') +
         '<h4>' + name + '</h4>' +
+        (p.was ? '<p class="lp-was"><s>' + money(p.was) + ' ' + cur(CFG.currency) + '</s> <b>' + T('خصم ', 'Save ') + Math.round(100 * (1 - price / p.was)) + '%</b>' + (p.ends ? ' · ' + T('حتى ', 'until ') + esc(p.ends) : '') + '</p>' : '') +
         '<p class="lp-price"><b>' + money(price) + '</b><span>' + cur(CFG.currency) + (d ? ' · ' + days(d) : '') + '</span></p>' +
         '<p class="lp-per">' + (per ? T('≈ ' + money(per) + ' ر.س في اليوم', '≈ ' + money(per) + ' ' + (CFG.currency || 'SAR') + ' a day') : '') + '</p>' +
         '<a class="btn ' + (p.best ? 'primary' : 'ghost') + ' block" href="' + href + '#upgrade?plan=' + encodeURIComponent(p.id) + '">' + T('اشترك', 'Subscribe') + '</a>' +

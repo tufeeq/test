@@ -1192,3 +1192,16 @@ body.exam-open:has(#exam .rs) #toast{bottom:calc(20px + env(safe-area-inset-bott
 .journey li.j1.on .jn{background:var(--pri);color:#fff}
 .journey li.j2.on .jn{background:var(--pink);color:#fff}
 .journey li.j0.on{border-color:#1D1838}
+.up-was{opacity:.6;font-size:.85em}
+.up-off{font-size:.72rem;background:var(--pink-soft);color:var(--pink-t, #A3165A)}
+.date-ask label{font-weight:700}
+.date-ask input[type=date]{min-block-size:40px;border-radius:10px;border:1.5px solid var(--line);padding:4px 8px;background:var(--surface);color:var(--ink)}
+.demo.inst .row,.date-ask .row{gap:6px;flex-wrap:wrap}
+.share-card{display:grid;gap:8px;margin-block-start:14px}
+.share-card .btn{justify-self:start}
+.ref-l{font-family:var(--f-mono);background:var(--surface2);padding:8px 10px;border-radius:10px;overflow-wrap:anywhere;margin:0}
+.post-test{display:grid;gap:8px}
+.post-test details{margin-block:4px}
+.post-test textarea{inline-size:100%;border-radius:10px;border:1.5px solid var(--line);padding:8px;font:inherit;background:var(--surface);color:var(--ink)}
+.trial-card{display:grid;gap:10px;border:2px solid var(--edge);box-shadow:var(--pop);background:linear-gradient(135deg,var(--pri-soft),var(--pink-soft))}
+.trial-card .row{gap:8px;flex-wrap:wrap}

@@ -496,7 +496,7 @@ app.post("/api/admin/users/:id/reset-password", needAdmin, wrap(async (req, res)
 const ORIGIN = "https://" + (CANONICAL_HOST || "gat.academy");
 app.get("/robots.txt", (req, res) => {
   res.type("text/plain").set("Cache-Control", "public, max-age=86400")
-    .send(`User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /admin.html\nDisallow: /api/\nDisallow: /auth/\n\nSitemap: ${ORIGIN}/sitemap.xml\n`);
+    .send(`User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /admin.html\nDisallow: /api/\nDisallow: /auth/\nDisallow: /social/\n\nSitemap: ${ORIGIN}/sitemap.xml\n`);
 });
 app.get("/sitemap.xml", (req, res) => {
   const alt = (ar, en) => `<xhtml:link rel="alternate" hreflang="ar" href="${ar}"/><xhtml:link rel="alternate" hreflang="en" href="${en}"/><xhtml:link rel="alternate" hreflang="x-default" href="${ar}"/>`;
